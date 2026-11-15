@@ -1,0 +1,86 @@
+name: CarleCool — make and review Reel
+on:
+  schedule:
+    # Daily 10:15 UTC, delayed starts possible. Always REVIEW, never auto-publish.
+    - cron: '15 10 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'dry-run = render only; review = create approval issue + Gmail mail'
+        type: choice
+        required: true
+        default: dry-run
+        options:
+          - dry-run
+          - review
+concurrency:
+  group: carlecool-daily-reel
+  cancel-in-progress: false
+permissions:
+  contents: read
+  actions: read
+  issues: write
+jobs:
+  reel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    # Public repos expose Actions artifacts. Never process private original songs there.
+    if: github.event.repository.private == true
+    env:
+      COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+      SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
+      SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
+      SC_ALLOW_OFFICIAL_DOWNLOADS: ${{ vars.SC_ALLOW_OFFICIAL_DOWNLOADS }}
+      AUDIO_S3_BUCKET: ${{ vars.AUDIO_S3_BUCKET }}
+      STOCK_S3_BUCKET: ${{ vars.STOCK_S3_BUCKET }}
+      AUDIO_S3_PREFIX: ${{ vars.AUDIO_S3_PREFIX }}
+      S3_ENDPOINT_URL: ${{ vars.S3_ENDPOINT_URL }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install media tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          pip install -r requirements.txt
+      - id: approval_gate
+        name: Avoid making a new proposal while another review is open
+        env:
+          MODE: ${{ github.event_name == 'schedule' && 'review' || inputs.mode }}
+        run: |
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          OPEN=$(gh issue list --repo "$GITHUB_REPOSITORY" --label carlecool-review --state open --limit 20 --json number --jq 'length')
+          if [[ "$OPEN" -gt 0 ]]; then
+            echo 'pending=true' >> "$GITHUB_OUTPUT"
+            echo 'An earlier review is open; no new Reel produced.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'pending=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Render Reel (no Instagram calls)
+        if: steps.approval_gate.outputs.pending == 'false'
+        run: python -m carlecool.main --mode preview
+      - name: Stage only the original Reel and review metadata
+        if: steps.approval_gate.outputs.pending == 'false'
+        run: |
+          mkdir -p review_bundle/output
+          cp output/carlecool_*.mp4 output/reel_metadata.json review_bundle/output/
+      - name: Upload original Reel and metadata for exact approval
+        if: steps.approval_gate.outputs.pending == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: carlecool-reel-${{ github.run_id }}
+          path: review_bundle/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Create review issue and send Gmail proposal
+        if: steps.approval_gate.outputs.pending == 'false' && steps.approval_gate.outputs.mode == 'review'
+        run: python -m carlecool.review

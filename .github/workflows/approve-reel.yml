@@ -1,0 +1,75 @@
+name: CarleCool — approve or reject Reel
+on:
+  issue_comment:
+    types: [created]
+concurrency:
+  group: carlecool-publish
+  cancel-in-progress: false
+permissions:
+  actions: read
+  contents: write
+  issues: write
+jobs:
+  publish:
+    # Requires owner comment, exact command, issue label, and a private repository.
+    if: >-
+      github.event.repository.private == true &&
+      github.event.issue.pull_request == null &&
+      github.event.comment.user.login == github.repository_owner &&
+      github.event.comment.body == '/publish' &&
+      contains(github.event.issue.labels.*.name, 'carlecool-review')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      IG_USER_ID: ${{ secrets.IG_USER_ID }}
+      IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      PUBLISH_ENABLED: ${{ secrets.PUBLISH_ENABLED }}
+      COVERR_PUBLISH_PERMISSION_CONFIRMED: ${{ secrets.COVERR_PUBLISH_PERMISSION_CONFIRMED }}
+      GITHUB_REPOSITORY_PRIVATE: 'true'
+      REVIEW_ISSUE: ${{ github.event.issue.number }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      - name: Git journal identity
+        run: |
+          git config user.name 'CarleCool Automation'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - name: Resolve immutable reviewed run
+        id: source
+        run: |
+          RUN_ID=$(python -m carlecool.approve --issue "$REVIEW_ISSUE" --inspect)
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+      - name: Download exact approved media artifact
+        env:
+          RUN_ID: ${{ steps.source.outputs.run_id }}
+        run: |
+          mkdir -p approval_artifact
+          gh run download "$RUN_ID" -R "$GITHUB_REPOSITORY" -n "carlecool-reel-$RUN_ID" -D approval_artifact
+      - name: Publish the SHA-256 verified media (fail closed)
+        env:
+          RUN_ID: ${{ steps.source.outputs.run_id }}
+        run: python -m carlecool.approve --issue "$REVIEW_ISSUE" --run "$RUN_ID"
+  reject:
+    if: >-
+      github.event.issue.pull_request == null &&
+      github.event.comment.user.login == github.repository_owner &&
+      github.event.comment.body == '/reject' &&
+      contains(github.event.issue.labels.*.name, 'carlecool-review')
+    runs-on: ubuntu-24.04
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REVIEW_ISSUE: ${{ github.event.issue.number }}
+    steps:
+      - run: gh issue close "$REVIEW_ISSUE" -R "$GITHUB_REPOSITORY" --comment '❌ Reel verworfen, keine Veröffentlichung.'

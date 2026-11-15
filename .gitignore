@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+.pytest_cache/
+*.pyc
+output/
+.cache/
+assets/audio/*
+!assets/audio/.gitkeep
+assets/stock/*
+!assets/stock/.gitkeep
+!assets/stock/manifest.json

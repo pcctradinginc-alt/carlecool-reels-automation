@@ -1,0 +1,33 @@
+name: Quality checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          pip install -r requirements.txt pytest pyyaml
+      - name: Unit tests and parse all workflows
+        run: |
+          python -m pytest -q
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+          for path in sorted(Path('.github/workflows').glob('*.yml')):
+              with open(path) as f: yaml.safe_load(f)
+              print('YAML parsed:', path)
+          PY
+      - name: Offline FFmpeg dry run (test music + test footage, never publish)
+        run: python scripts/offline_smoke.py
