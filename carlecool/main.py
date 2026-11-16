@@ -1,11 +1,9 @@
-"""CLI for daily previews and gated, idempotent live publishing."""
+"""Preview-only CLI. Publication requires separate owner-approved Gmail workflow."""
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
 import hashlib
 import json
-import os
 from pathlib import Path
 import sys
 
@@ -13,11 +11,10 @@ from .analysis import analyze_audio
 from .aesthetic import editorial_brief
 from .audio import locate_original
 from .config import Settings
-from .instagram import Instagram
 from .keywords import select_keywords
 from .render import render_reel
 from .soundcloud import fetch_tracks
-from .state import commit_state, load_state, pick_track, save_state
+from .state import load_state, pick_track
 from .video import download_video, gather_videos, fetch_owned_stock
 
 
@@ -31,6 +28,8 @@ def caption_for(track, videos) -> str:
 
 
 def process(publish: bool) -> None:
+    if publish:
+        raise RuntimeError("Direct publication is disabled; use the human-approved Gmail workflow")
     config = Settings()
     config.validate()
     state = load_state()
@@ -61,16 +60,6 @@ def process(publish: bool) -> None:
             print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}: {exc}")
     if not paths:
         raise RuntimeError("No licensed clips available; add assets/stock and manifest.json as fallback")
-    if publish:
-        raise RuntimeError("Direct publishing is disabled: use the human-approved email workflow")
-        if not config.publish_enabled:
-            raise RuntimeError("Live publishing disabled. Set PUBLISH_ENABLED=true as a GitHub secret.")
-        if len(set(v.id for v in selected)) < 5:
-            raise RuntimeError("Need >=5 distinct cleared clips to publish; quality gate failed")
-        if any(v.source == "coverr" for v in selected) and not config.coverr_permission_confirmed:
-            raise RuntimeError("Coverr attribution/usage terms are not approved for this Instagram workflow")
-        if not (config.ig_user_id and config.ig_access_token):
-            raise RuntimeError("IG_USER_ID / IG_ACCESS_TOKEN are missing")
     out = output_dir / f"carlecool_{track.id}.mp4"
     details = render_reel(audio, paths, features, out, config.reel_seconds)
     metadata = {
@@ -83,35 +72,7 @@ def process(publish: bool) -> None:
     }
     (output_dir / "reel_metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Rendered preview: {out} ({details['scenes']} beat-aligned scenes)")
-    if not publish:
-        print("Preview mode: no Instagram API call, no state change")
-        return
-
-    # Reserve the operation *and push* BEFORE calling the external posting API.
-    # If a subsequent Meta call/connection fails ambiguously, future runs will STOP.
-    if os.getenv("GITHUB_ACTIONS") != "true":
-        raise RuntimeError("Live publishing must run in GitHub Actions for durable journal protection")
-    timestamp = datetime.now(timezone.utc).isoformat()
-    state["pending"] = {"track_id": track.id, "at": timestamp, "sha256": metadata["sha256"]}
-    save_state(state)
-    commit_state(f"journal: reserve Reel for {track.id}")
-
-    ig = Instagram(config.ig_user_id, config.ig_access_token, config.graph_version)
-    # Do not retry creation blindly; duplicate remote uploads could be ambiguous.
-    container_id = ig.create_and_upload(out, caption_for(track, selected))
-    state["pending"]["container_id"] = container_id
-    save_state(state)
-    commit_state(f"journal: Instagram container {container_id}")
-    media_id = ig.finish(container_id)
-    state["published"].append({
-        "track_id": track.id, "at": timestamp, "video_ids": [v.id for v in selected],
-        "instagram_media_id": media_id, "instagram_container_id": container_id,
-        "sha256": metadata["sha256"],
-    })
-    state["pending"] = None
-    save_state(state)
-    commit_state(f"journal: Reel published {media_id}")
-    print(f"Published Instagram Reel media id: {media_id}")
+    print("Preview mode: no Instagram API call, no state change")
 
 
 def main():
