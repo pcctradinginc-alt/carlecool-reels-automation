@@ -88,8 +88,8 @@ def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8,
         return []
     session = session or requests.Session()
     seen = set()
-    found = []
-    for query in (keywords if keywords is not None else select_keywords(mood)):
+    per_lane = []
+    for query in (keywords if keywords is not None else select_keywords(mood))[:3]:
         r = session.get(
             "https://api.coverr.co/videos",
             headers={"x-api-key": key},
@@ -99,6 +99,7 @@ def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8,
         if r.status_code == 429:
             raise RuntimeError("Coverr 429: rate limit hit; try cached licensed assets or later schedule")
         r.raise_for_status()
+        lane = []
         for item in r.json().get("hits", []):
             vid = str(item.get("id", ""))
             if not vid or vid in seen or vid in recent:
@@ -107,11 +108,19 @@ def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8,
             video_url = (item.get("urls") or {}).get("mp4_download") or (item.get("urls") or {}).get("mp4")
             if not video_url:
                 continue
-            found.append(Video(vid, "coverr", url=video_url, title=item.get("title", ""),
-                               views=int(item.get("views") or 0), vertical=bool(item.get("is_vertical"))))
-        if len(found) >= wanted:
-            break
-    return sorted(found, key=lambda x: (x.vertical, x.views), reverse=True)[:wanted]
+            lane.append(Video(vid, "coverr", url=video_url, title=item.get("title", ""),
+                              views=int(item.get("views") or 0), vertical=bool(item.get("is_vertical"))))
+        per_lane.append(sorted(lane, key=lambda x: (x.vertical, x.views), reverse=True))
+    found = []
+    while len(found) < wanted and any(per_lane):
+        next_lanes = []
+        for lane in per_lane:
+            if lane and len(found) < wanted:
+                found.append(lane.pop(0))
+            if lane:
+                next_lanes.append(lane)
+        per_lane = next_lanes
+    return found[:wanted]
 
 
 def fallback_videos(recent: set[str]) -> list[Video]:

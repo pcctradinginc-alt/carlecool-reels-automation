@@ -10,6 +10,7 @@ from pathlib import Path
 import sys
 
 from .analysis import analyze_audio
+from .aesthetic import editorial_brief
 from .audio import locate_original
 from .config import Settings
 from .instagram import Instagram
@@ -76,6 +77,7 @@ def process(publish: bool) -> None:
         "features": vars(features), "video_ids": [v.id for v in selected],
         "footage_sources": [{"id": v.id, "provider": v.source, "title": v.title} for v in selected],
         "caption": caption_for(track, selected), "search_keywords": keywords,
+        "visual_direction": editorial_brief(features.mood, features.energy, features.bpm),
         "output": str(out), "sha256": hashlib.sha256(out.read_bytes()).hexdigest(), **details,
     }
     (output_dir / "reel_metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")

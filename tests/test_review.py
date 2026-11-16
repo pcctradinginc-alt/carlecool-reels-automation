@@ -5,18 +5,21 @@ from pathlib import Path
 import pytest
 
 from carlecool.approve import verify_artifact
-from carlecool.keywords import VIDEO_KEYWORDS, select_keywords
+from carlecool.keywords import VIDEO_KEYWORDS, VISUAL_LANES, select_keywords
 from carlecool.review import encode_issue_data, decode_issue_data, send_review_email
 
 
 def test_keywords_cover_every_requested_cluster():
-    assert len(VIDEO_KEYWORDS) == 40
+    assert len(VIDEO_KEYWORDS) == 60
     for fragment in ['skateboarding', 'graffiti', 'gen z', 'alleyway', 'night drive', 'vhs']:
         assert any(fragment in x for x in VIDEO_KEYWORDS)
     queries = select_keywords('nightdrive', .91, 143, seed='123')
     assert len(queries) == 3 and len(set(queries)) == 3
     assert set(queries).issubset(set(VIDEO_KEYWORDS))
     assert queries == select_keywords('nightdrive', .91, 143, seed='123')
+    assert queries[0] in VISUAL_LANES['action']
+    assert queries[1] in VISUAL_LANES['stillness']
+    assert queries[2] in VISUAL_LANES['nostalgia']
 
 
 def test_approval_payload_and_tamper_protection(tmp_path):

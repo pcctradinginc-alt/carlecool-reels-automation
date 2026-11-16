@@ -48,7 +48,7 @@ def test_coverr_one_query_and_priority():
     ]}
     result = search_coverr("fakekey", "nightdrive", set(), session=session, wanted=2)
     assert [x.id for x in result] == ["a", "b"]
-    assert session.get.call_count == 1
+    assert session.get.call_count == 3  # three contrasting visual lanes
 
 
 def test_caption_credit_present():

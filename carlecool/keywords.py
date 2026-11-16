@@ -22,35 +22,36 @@ VIDEO_KEYWORDS = [
     "fpv drone city night", "90s camcorder aesthetic street",
     "vhs glitch retro neon", "rain on window night city",
     "vinyl record spinning close up", "liquid chrome 3d abstract loop",
+    "minimalist white room natural wood sunlight", "empty california coastline warm sunrise",
+    "malibu beach empty cinematic wide shot", "meditation artist floor natural light",
+    "pacific highway vintage car golden hour", "palm tree sunset silhouette super 8 film",
+    "1960s americana roadside motel vintage", "vintage red convertible california desert",
+    "fisheye low angle skateboard white sky", "90s california skatepark fisheye film",
+    "y2k digital camera direct flash friends", "early 2000s camcorder skate street",
+    "sony cybershot flash night party", "silver laptop wired earphones aesthetic",
+    "reel to reel analog tape machine studio", "brushed silver product minimalist white",
+    "vhs crt television static scanlines", "retro film grain coastal highway",
+    "empty white architectural room shadows", "neon purple blue urban night reflections",
 ]
 
-MOOD_GROUPS = {
-    "nightdrive": ["night drive city lights bokeh", "urban alleyway neon rain",
-                   "skateboarding night city", "tunnel speed light trails",
-                   "subway train window night blur", "motorcycle night city neon",
-                   "bmx rider night street", "fpv drone city night",
-                   "skater neon lights urban", "car drifting smoke night"],
-    "calm": ["rain on window night city", "rooftop city skyline night",
-             "streetlamp fog night aesthetic", "vinyl record spinning close up",
-             "urban rooftop hangout sunset", "skatepark sunset silhouette",
-             "90s camcorder aesthetic street", "vintage thrift store aesthetic"],
-    "cinematic": ["graffiti artist spraying wall night", "urban mural neon light reflection",
-                  "friends walking city night neon", "brutalist concrete architecture night",
-                  "analog film camera flash party", "night skate downtown empty street",
-                  "gen z streetwear fashion night", "liquid chrome 3d abstract loop"],
+VISUAL_LANES = {
+ "stillness": ["minimalist white room natural wood sunlight", "empty california coastline warm sunrise", "malibu beach empty cinematic wide shot", "meditation artist floor natural light", "empty white architectural room shadows"],
+ "action": ["fisheye low angle skateboard white sky", "90s california skatepark fisheye film", "skateboarder street trick slow motion", "skateboarding night city", "skateboarder jumping stairs"],
+ "nostalgia": ["palm tree sunset silhouette super 8 film", "y2k digital camera direct flash friends", "early 2000s camcorder skate street", "sony cybershot flash night party", "1960s americana roadside motel vintage", "retro film grain coastal highway"],
+ "night": ["neon purple blue urban night reflections", "night drive city lights bokeh", "subway train window night blur", "urban alleyway neon rain", "late night convenience store neon"],
 }
 
 
 def select_keywords(mood: str, energy: float = 0.5, bpm: float = 120, *, seed: str = "", limit: int = 3) -> list[str]:
-    """Three deterministic diverse queries; no randomness or uncontrolled API fanout."""
-    if limit < 1:
-        return []
-    group = list(MOOD_GROUPS.get(mood, MOOD_GROUPS["cinematic"]))
-    if energy >= .65 or bpm >= 135:
-        fast = ["skateboarder jumping stairs", "car drifting smoke night", "tunnel speed light trails",
-                "skateboarder street trick slow motion"]
-        group = fast + [x for x in group if x not in fast]
-    # Rotate per track so music with the same mood does not always use the same queries.
-    import hashlib
-    offset = int(hashlib.sha256(seed.encode()).hexdigest()[:8], 16) % len(group) if seed else 0
-    return (group[offset:] + group[:offset])[:limit]
+ """Deterministic contrast: stillness versus kinetic action versus analogue nostalgia."""
+ if limit < 1:
+  return []
+ import hashlib
+ fast = energy >= .65 or bpm >= 135
+ lanes = (["action", "stillness", "nostalgia"] if fast else ["stillness", "nostalgia", "action"] if mood == "calm" else ["night", "stillness", "nostalgia"])
+ result = []
+ for lane in lanes:
+  choices = VISUAL_LANES[lane]
+  index = int.from_bytes(hashlib.sha256(f"{seed}:{mood}:{lane}".encode()).digest()[:4], "big") % len(choices)
+  result.append(choices[index])
+ return result[:min(3, limit)]
