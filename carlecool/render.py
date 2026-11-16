@@ -63,6 +63,16 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         "-af", f"afade=t=in:st=0:d=0.2,afade=t=out:st={length-0.5}:d=0.5",
         "-movflags", "+faststart", "-shortest", str(output),
     ])
-    if output.stat().st_size > 950_000_000:
-        raise RuntimeError("Output exceeds safe Instagram upload size")
+    # Public GitHub Actions cannot store originals. Deliver exact original as a
+    # Gmail attachment; preserve 1080x1920 but keep MIME/base64 below Gmail limits.
+    from .mailstore import MAX_ATTACHMENT_BYTES
+    if output.stat().st_size > MAX_ATTACHMENT_BYTES:
+        compressed = output.with_name("compressed_original.mp4")
+        _run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(output),
+              "-map", "0:v:0", "-map", "0:a:0", "-c:v", "libx264", "-preset", "veryfast",
+              "-b:v", "2500k", "-maxrate", "2900k", "-bufsize", "5800k", "-pix_fmt", "yuv420p",
+              "-c:a", "copy", "-movflags", "+faststart", str(compressed)])
+        os.replace(compressed, output)
+    if output.stat().st_size > MAX_ATTACHMENT_BYTES:
+        raise RuntimeError("Reel exceeds safe Gmail attachment limit after compression")
     return {"duration": probe_duration(output), "scenes": len(files), "resolution": f"{width}x{height}"}

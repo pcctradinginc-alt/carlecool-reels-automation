@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import argparse
 from email.message import EmailMessage
+from email.utils import make_msgid
+from .mailstore import MAX_ATTACHMENT_BYTES
 import json
 import os
 from pathlib import Path
@@ -58,49 +60,61 @@ def make_preview(video: Path, destination: Path) -> Path | None:
     return destination if destination.stat().st_size <= 10_000_000 else None
 
 
-def send_review_email(issue_url: str, metadata: dict, preview_path: Path | None = None) -> bool:
+def send_review_email(issue_url: str, metadata: dict, original_path: Path | None = None,
+                      *, message_id: str | None = None, run_id: int | None = None) -> bool:
+    """Send exact hashed original + metadata privately; never upload a GitHub artifact."""
     sender = os.getenv('GMAIL_ADDRESS', '').strip()
     password = os.getenv('GMAIL_APP_PASSWORD', '').replace(' ', '')
     recipient = os.getenv('REVIEW_EMAIL', '').strip()
     if not all([sender, password, recipient]):
         print('Review email not sent: configure GMAIL_ADDRESS, GMAIL_APP_PASSWORD, REVIEW_EMAIL secrets.')
         return False
+    if not original_path or not original_path.is_file() or not message_id or run_id is None:
+        raise RuntimeError('Private review email requires original MP4, Message-ID and run ID')
+    import hashlib
+    video_bytes = original_path.read_bytes()
+    if len(video_bytes) > MAX_ATTACHMENT_BYTES:
+        raise RuntimeError('Gmail attachment is too large; cannot safely deliver original Reel')
+    if hashlib.sha256(video_bytes).hexdigest() != metadata.get('sha256'):
+        raise RuntimeError('Original video differs from approved review metadata')
     msg = EmailMessage()
     msg['From'] = sender
     msg['To'] = recipient
+    msg['Message-ID'] = message_id
+    msg['X-CarleCool-Run-ID'] = str(run_id)
+    msg['X-CarleCool-SHA256'] = metadata['sha256']
     msg['Subject'] = f"CarleCool | Reel zur Freigabe: {metadata['title']}"
+    instructions = (f"GitHub-Freigabe: {issue_url}\nSchreibe als Eigentümer exakt /publish oder /reject."
+                    if issue_url else "Nur Testvorschau: Es gibt keinen Freigabelink. Es wird nichts veröffentlicht.")
     msg.set_content(f"""CarleCool – Neuer Reel-Vorschlag
 
 Song: {metadata['title']}
 Dauer: {metadata.get('duration', '30')} Sekunden
 SoundCloud: {metadata.get('permalink', '')}
-Videostil: {', '.join(metadata.get('search_keywords', []))}
+Suchbegriffe: {', '.join(metadata.get('search_keywords', []))}
+Bildsprache: {metadata.get('visual_direction', {}).get('name', 'Analog-Digital Nostalgia × Corecore × Zen Minimalism')}
+Schnitt: {metadata.get('visual_direction', {}).get('edit_plan', 'Stillness ↔ Action')}
 
-REEL ANSCHAUEN: Kleinere Videovorschau im Anhang, sofern enthalten.
-Original herunterladen: {issue_url} (dort ist der Link zum GitHub-Actions-Artefakt)
+Das ORIGINAL-REEL liegt ausschließlich dieser privaten E-Mail bei.
+{instructions}
 
-VERÖFFENTLICHEN:
-{issue_url}
-GitHub öffnen, anmelden und im Kommentar exakt /publish eingeben.
-Dieser bewusste zweite Schritt verhindert unbeabsichtigte Posts durch Mail-Linkscanner.
-
-VERWERFEN: Auf derselben Seite /reject kommentieren.
-
-Es wird exakt die geprüfte Original-MP4 aus dem GitHub-Artefakt veröffentlicht,
-solange es verfügbar ist (standardmäßig 7 Tage). Eine bloße Linköffnung postet nichts.
+Kein Mail-Link allein veröffentlicht ein Video. Nur der GitHub-Eigentümer kann die
+Freigabe auslösen; dann wird exakt dieser E-Mail-Anhang per SHA-256 geprüft.
 
 Caption-Vorschlag:
-{metadata.get('caption','')}
+{metadata.get('caption', '')}
 """)
-    if preview_path and preview_path.is_file() and preview_path.stat().st_size <= 10_000_000:
-        msg.add_attachment(preview_path.read_bytes(), maintype='video', subtype='mp4', filename='CarleCool-Vorschau.mp4')
+    msg.add_attachment(video_bytes, maintype='video', subtype='mp4', filename='CarleCool-Original.mp4')
+    meta_bytes = json.dumps(metadata, ensure_ascii=False, sort_keys=True).encode('utf-8')
+    msg.add_attachment(meta_bytes, maintype='application', subtype='json', filename='reel_metadata.json')
     with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=40) as smtp:
         smtp.login(sender, password)
         smtp.send_message(msg)
     return True
 
 
-def create_review(metadata: dict, *, run_id: int, token: str, repo: str, session=None) -> dict:
+def create_review(metadata: dict, *, run_id: int, token: str, repo: str,
+                  mail_message_id: str | None = None, session=None) -> dict:
     if not metadata.get('sha256') or not metadata.get('track_id'):
         raise ValueError('Render metadata incomplete')
     if run_id <= 0:
@@ -108,7 +122,8 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str, session
     # The GitHub issue is the single persistent awaiting-review record.
     payload = {'run_id': run_id, 'sha256': metadata['sha256'], 'track_id': metadata['track_id'],
                'video_ids': metadata['video_ids'], 'footage_sources': metadata['footage_sources'],
-               'caption': metadata['caption'], 'created_from': 'daily-review'}
+               'caption': metadata['caption'], 'created_from': 'daily-review',
+               'mail_message_id': mail_message_id or make_msgid(domain='carlecool.invalid')}
     name = 'carlecool-review'
     try:
         github_request('POST', 'labels', json_body={'name': name, 'color': '1f6feb',
@@ -117,17 +132,17 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str, session
     except requests.HTTPError as e:
         if e.response is None or e.response.status_code != 422:
             raise
-    artifacts_url = f'https://github.com/{repo}/actions/runs/{run_id}'
+    artifacts_url = None  # Public-repository artifacts are intentionally disabled
     body = (f"## CarleCool – Reel zum Freigeben\n\n"
             f"**Track:** {metadata['title']}\n\n"
-            f"**Vorschau/Original:** [Workflow-Artefakt öffnen]({artifacts_url})\n\n"
+            "**Privates Original:** Gmail-Anhang, nicht bei GitHub gespeichert.\n\n"
             f"**Caption:**\n\n{metadata['caption']}\n\n"
             "**Freigabe:** Schreibe als Repository-Eigentümer den exakten Kommentar `/publish`. "
-            "Die Datei wird aus dem Artefakt dieses Workflow-Laufs geholt und per SHA-256 geprüft. "
+            "Das exakte Original wird aus Gmail Sent abgerufen und per SHA-256 geprüft. "
             "Eine Linköffnung allein veröffentlicht nichts.\n\n"
             "**Verwerfen:** `/reject` kommentieren.\n\n"
-            "**Achtung:** Das Artefakt läuft nach 7 Tagen ab. "
-            "Nicht dieselbe Ausgabe blind erneut veröffentlichen.\n\n" + encode_issue_data(payload))
+            "**Achtung:** Die Originaldatei bleibt nur in deinem privaten Gmail-Postfach. "
+            "Lösche die gesendete E-Mail erst nach Freigabe/Verwerfen.\n\n" + encode_issue_data(payload))
     return github_request('POST', 'issues', json_body={'title': f"🎬 Freigabe: {metadata['title']}",
                          'body': body, 'labels': [name]},
                           token=token, repo=repo, session=session)
@@ -136,19 +151,34 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str, session
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--metadata', default='output/reel_metadata.json')
+    parser.add_argument('--dry-run-email', action='store_true', help='Send private test preview, no approval issue')
     args = parser.parse_args()
     metadata = json.loads(Path(args.metadata).read_text(encoding='utf-8'))
-    issue = create_review(metadata, run_id=int(os.environ['GITHUB_RUN_ID']),
-                          token=os.environ['GH_TOKEN'], repo=os.environ['GITHUB_REPOSITORY'])
-    print('Review issue created:', issue['html_url'])
-    video = Path(metadata['output'])
-    preview = None
-    if video.is_file():
+    original = Path(metadata['output'])
+    run_id = int(os.environ['GITHUB_RUN_ID'])
+    message_id = make_msgid(domain='carlecool.invalid')
+    if args.dry_run_email:
+        if not send_review_email('', metadata, original, message_id=message_id, run_id=run_id):
+            raise RuntimeError('Gmail configuration is missing; no preview was sent')
+        print('Private dry-run email sent; no approval issue, no Instagram call')
+        return
+    issue = create_review(metadata, run_id=run_id,
+                          token=os.environ['GH_TOKEN'], repo=os.environ['GITHUB_REPOSITORY'],
+                          mail_message_id=message_id)
+    try:
+        if not send_review_email(issue['html_url'], metadata, original,
+                                 message_id=message_id, run_id=run_id):
+            raise RuntimeError('Gmail configuration is missing; no preview was sent')
+    except Exception:
+        # Fail closed; don't leave an unservable approval issue if delivery fails.
         try:
-            preview = make_preview(video, Path('output/mail_preview.mp4'))
-        except (subprocess.CalledProcessError, OSError) as e:
-            print(f'Could not make optional small mail attachment: {e}')
-    send_review_email(issue['html_url'], metadata, preview)
+            github_request('PATCH', f"issues/{issue['number']}",
+                           json_body={'state': 'closed'}, token=os.environ['GH_TOKEN'],
+                           repo=os.environ['GITHUB_REPOSITORY'])
+        except Exception as cleanup_error:
+            print('Warning: review issue cleanup failed:', type(cleanup_error).__name__)
+        raise
+    print('Private review email delivered; approval issue:', issue['html_url'])
 
 
 if __name__ == '__main__':
