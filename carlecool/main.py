@@ -62,6 +62,7 @@ def process(publish: bool) -> None:
     if not paths:
         raise RuntimeError("No licensed clips available; add assets/stock and manifest.json as fallback")
     if publish:
+        raise RuntimeError("Direct publishing is disabled: use the human-approved email workflow")
         if not config.publish_enabled:
             raise RuntimeError("Live publishing disabled. Set PUBLISH_ENABLED=true as a GitHub secret.")
         if len(set(v.id for v in selected)) < 5:

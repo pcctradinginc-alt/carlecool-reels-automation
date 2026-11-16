@@ -24,8 +24,6 @@ jobs:
   reel:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
-    # Public repos expose Actions artifacts. Never process private original songs there.
-    if: github.event.repository.private == true
     env:
       COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
       SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
@@ -68,19 +66,13 @@ jobs:
       - name: Render Reel (no Instagram calls)
         if: steps.approval_gate.outputs.pending == 'false'
         run: python -m carlecool.main --mode preview
-      - name: Stage only the original Reel and review metadata
+      - name: Email exact original privately (no public artifacts)
         if: steps.approval_gate.outputs.pending == 'false'
+        env:
+          MODE: ${{ steps.approval_gate.outputs.mode }}
         run: |
-          mkdir -p review_bundle/output
-          cp output/carlecool_*.mp4 output/reel_metadata.json review_bundle/output/
-      - name: Upload original Reel and metadata for exact approval
-        if: steps.approval_gate.outputs.pending == 'false'
-        uses: actions/upload-artifact@v4
-        with:
-          name: carlecool-reel-${{ github.run_id }}
-          path: review_bundle/
-          retention-days: 7
-          if-no-files-found: error
-      - name: Create review issue and send Gmail proposal
-        if: steps.approval_gate.outputs.pending == 'false' && steps.approval_gate.outputs.mode == 'review'
-        run: python -m carlecool.review
+          if [[ "$MODE" == "review" ]]; then
+            python -m carlecool.review
+          else
+            python -m carlecool.review --dry-run-email
+          fi

@@ -11,6 +11,7 @@ from pathlib import Path
 from .config import Settings
 from .instagram import Instagram
 from .review import decode_issue_data, github_request
+from .mailstore import fetch_reel_from_sent
 from .state import load_state, save_state, commit_state
 
 
@@ -39,8 +40,6 @@ def verify_artifact(issue: dict, metadata: dict, video: Path, *, run_id: int) ->
 
 
 def publish(issue_number: int, run_id: int, directory: Path):
-    if os.environ.get('GITHUB_REPOSITORY_PRIVATE') != 'true':
-        raise RuntimeError('Publishing requires a private repository')
     if os.environ.get('GITHUB_ACTIONS') != 'true':
         raise RuntimeError('Publishing is only available through audited GitHub Actions')
     settings = Settings()
@@ -95,6 +94,7 @@ def main():
     parser.add_argument('--run', type=int)
     parser.add_argument('--directory', default='approval_artifact')
     parser.add_argument('--inspect', action='store_true', help='Print immutable source run id')
+    parser.add_argument('--fetch', action='store_true', help='Retrieve exact approved Gmail original')
     args = parser.parse_args()
     if args.inspect:
         issue = github_request('GET', f'issues/{args.issue}')
@@ -102,6 +102,16 @@ def main():
             raise ValueError('No active, labeled review issue')
         data = decode_issue_data(issue.get('body', ''))
         print(data['run_id'])
+        return
+    if args.fetch:
+        issue = github_request('GET', f'issues/{args.issue}')
+        if issue.get('state') != 'open' or 'carlecool-review' not in [x.get('name') for x in issue.get('labels', [])]:
+            raise ValueError('No active, labeled CarleCool approval issue')
+        approval = decode_issue_data(issue.get('body', ''))
+        if args.run != approval['run_id']:
+            raise ValueError('Approved run ID differs from Gmail retrieval request')
+        fetch_reel_from_sent(approval, Path(args.directory))
+        print('Exact approved Gmail Reel restored locally; SHA-256 verified')
         return
     if not args.run:
         parser.error('--run is required unless --inspect')
