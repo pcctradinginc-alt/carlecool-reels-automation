@@ -16,7 +16,7 @@ class Settings:
     sc_client_secret: str = os.getenv("SOUNDCLOUD_CLIENT_SECRET", "")
     ig_user_id: str = os.getenv("IG_USER_ID", "")
     ig_access_token: str = os.getenv("IG_ACCESS_TOKEN", "")
-    graph_version: str = os.getenv("GRAPH_API_VERSION", "v24.0")
+    graph_version: str = os.getenv("GRAPH_API_VERSION", "v27.0")
     publish_enabled: bool = flag("PUBLISH_ENABLED")
     coverr_permission_confirmed: bool = flag("COVERR_PUBLISH_PERMISSION_CONFIRMED")
 

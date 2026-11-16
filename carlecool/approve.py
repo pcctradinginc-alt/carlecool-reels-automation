@@ -47,8 +47,8 @@ def publish(issue_number: int, run_id: int, directory: Path):
     settings.validate()
     if not settings.publish_enabled:
         raise RuntimeError('PUBLISH_ENABLED secret is not true; approval alone cannot post')
-    if not (settings.ig_access_token and settings.ig_user_id):
-        raise RuntimeError('Instagram credentials are missing')
+    if not settings.ig_access_token:
+        raise RuntimeError('IG_ACCESS_TOKEN is missing')
     issue = github_request('GET', f'issues/{issue_number}')
     metadata = json.loads((directory / 'output/reel_metadata.json').read_text(encoding='utf-8'))
     video = directory / metadata['output']
@@ -63,12 +63,14 @@ def publish(issue_number: int, run_id: int, directory: Path):
         raise RuntimeError('Track or reel was already published; no duplicate post')
     if len(set(approval['video_ids'])) < 5:
         raise RuntimeError('Require 5 unique licensed clips for automatic posting')
+    # Verify assigned Instagram asset before recording a pending publication.
+    client = Instagram(settings.ig_user_id, settings.ig_access_token, settings.graph_version)
+    client.verify_access()
     timestamp = datetime.now(timezone.utc).isoformat()
     state['pending'] = {'track_id': approval['track_id'], 'at': timestamp,
                         'sha256': approval['sha256'], 'issue_number': issue_number}
     save_state(state)
     commit_state(f'journal: reserve human approved reel {issue_number}')
-    client = Instagram(settings.ig_user_id, settings.ig_access_token, settings.graph_version)
     container_id = client.create_and_upload(video, approval['caption'])
     state['pending']['container_id'] = container_id
     save_state(state)

@@ -86,7 +86,9 @@ def test_meta_container_flow_mocked(tmp_path):
     upload = MagicMock()
     upload.json.return_value = {"success": True}
     upload.raise_for_status.return_value = None
-    mock.request.return_value = creation
+    identity = MagicMock()
+    identity.json.return_value = {"data": [{"id": "1001", "username": "test"}]}
+    mock.request.side_effect = [identity, creation]
     mock.post.return_value = upload
     path = tmp_path / "clip.mp4"
     path.write_bytes(b"fake_mp4_for_mock")
@@ -100,7 +102,9 @@ def test_no_unconfirmed_meta_upload(tmp_path):
     mock = MagicMock()
     creation = MagicMock()
     creation.json.return_value = {"id": "12345", "uri": "https://attacker.example.net/upload"}
-    mock.request.return_value = creation
+    identity = MagicMock()
+    identity.json.return_value = {"data": [{"id": "123", "username": "test"}]}
+    mock.request.side_effect = [identity, creation]
     path = tmp_path / "clip.mp4"
     path.write_bytes(b"fake")
     with pytest.raises(ValueError, match="upload host"):

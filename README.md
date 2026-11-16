@@ -21,7 +21,7 @@ Go to **Settings → Secrets and variables → Actions**.
 | `GMAIL_ADDRESS` | Sending Gmail address |
 | `GMAIL_APP_PASSWORD` | Google app password for Gmail SMTP (requires eligible Google account and 2-step verification; do not use your normal Gmail password) |
 | `REVIEW_EMAIL` | Destination Gmail address for the Reel suggestion; can be same address |
-| `IG_USER_ID`, `IG_ACCESS_TOKEN` | Instagram professional account ID and official Meta long-lived publishing token |
+| `IG_USER_ID` (optional), `IG_ACCESS_TOKEN` | Instagram account ID (optional with one assigned account), Unified Login system user token |
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | Only if using private S3/R2 storage for *your own* audio or owned stock clips |
 | `PUBLISH_ENABLED` | Only set to `true` after end-to-end preview, rights and Meta checks |
 | `COVERR_PUBLISH_PERMISSION_CONFIRMED` | Only set to `true` **after** confirming your actual Free API attribution method with Coverr |
@@ -44,7 +44,13 @@ GitHub → **Actions → CarleCool — make and review Reel → Run workflow** �
 
 If there are no original tracks, no SoundCloud API credentials, or no stock clips, the run **fails safely** and reports exactly what's missing. It never fabricates a song or posts anything.
 
-## 4. Enable the Gmail review
+## 4. Test Instagram token without publishing
+
+Open **Actions → CarleCool — Instagram connection check → Run workflow**. The check uses only a GET request to `/me/assigned_instagram_accounts` to discover the account assigned to your Unified Login token. It does not upload or publish any Reel. If several Instagram accounts are assigned, set the intended numerical `IG_USER_ID` explicitly. Keep `PUBLISH_ENABLED` absent/false.
+
+The new Meta Unified Login requires a business portfolio, but no Facebook Page. A SUAT is not interchangeable with older tokens; if the check fails, verify the correct token type and the approved Instagram permissions.
+
+## 5. Enable the Gmail review
 
 Once the dry-run is good, run `review` or let the daily scheduled workflow run at 10:15 UTC (11:15 Berlin winter / 12:15 summer, approximate). It creates a GitHub **Issue** labelled `carlecool-review` and sends you a Gmail with:
 
@@ -92,4 +98,4 @@ The smoke test synthesizes a tone and visual test pattern, renders a shortened 2
 - [SoundCloud API](https://developers.soundcloud.com/docs/api/guide)
 - [Coverr videos API](https://api.coverr.co/docs/videos/)
 - [Coverr API key usage](https://coverr.co/api/docs/auth/)
-- [Meta Instagram content publishing](https://developers.facebook.com/docs/instagram-platform/content-publishing/)
+- [Meta Instagram Unified Login](https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-unified-login/)
