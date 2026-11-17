@@ -48,6 +48,14 @@ Go to **Settings → Secrets and variables → Actions**.
 
 **You still need original music files for rendering.** SoundCloud Pro access is *not* a blanket license or technical ability to rip the stream as MP3. Use a legitimate official downloadable track or upload your own masters to a private storage bucket. Coverr Free requires attribution (potentially a clickable logo according to the plan). The included caption credit may **not** satisfy this condition; get express confirmation before enabling publishing.
 
+## Automatic original-song selection from SoundCloud RSS (2026-11-17)
+
+CarleCool's **official public podcast RSS feed has audio enclosures for all 20 of its newest public tracks**, even though direct original-file downloads are disabled. The pipeline now matches the selected SoundCloud numeric track ID to the RSS item's GUID, validates the signed/published `<enclosure>` and HTTPS SoundCloud CDN host, downloads the **artist-published RSS audio** only into the temporary GitHub runner, probes that it is decodable, and removes it with runner cleanup. **No manual MP3 uploads, Mac runtime, GitHub media artifacts or stream-ripping.** Audio is the published podcast-encoded file, not necessarily the lossless original master.
+
+The code defaults to `SC_USE_RSS_AUDIO=true` for the published public RSS feed; you may set repository variable `SC_USE_RSS_AUDIO=false` to disable this route. Do not enable public downloads of original masters for this feature.
+
+A dedicated [RSS audio smoke workflow](.github/workflows/rss-audio-smoke.yml) verifies the **actual downloaded audio** separately from mocked unit tests. Do not enable scheduled Reel production until that workflow and the real Gmail Reel delivery complete successfully. Instagram posting remains approval-only and disabled until rights and credentials are verified.
+
 ## SoundCloud artist authorization (new)
 
 SoundCloud OAuth 2.1 (PKCE) supports a separate **read-only owner identity and track-metadata probe**. See [docs/soundcloud-owner-oauth.md](docs/soundcloud-owner-oauth.md) for the one-time Mac sign-in. The local helper encrypts rotating access/refresh tokens into a public-safe ciphertext file; the decryption key remains a GitHub Secret. After setup, a scheduled owner-check keeps credentials refreshed. **Neither that probe nor existing app credentials prove SoundCloud permits automated original-audio download** while public downloads are disabled. No stream ripping is implemented.
