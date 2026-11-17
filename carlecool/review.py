@@ -6,6 +6,7 @@ An email link NEVER performs a side effect. The repository owner must post the e
 from __future__ import annotations
 
 import argparse
+from html import escape as html_escape
 from email.message import EmailMessage
 from email.utils import make_msgid
 from .mailstore import MAX_ATTACHMENT_BYTES
@@ -84,8 +85,11 @@ def send_review_email(issue_url: str, metadata: dict, original_path: Path | None
     msg['X-CarleCool-Run-ID'] = str(run_id)
     msg['X-CarleCool-SHA256'] = metadata['sha256']
     msg['Subject'] = f"CarleCool | Reel zur Freigabe: {metadata['title']}"
-    instructions = (f"GitHub-Freigabe: {issue_url}\nSchreibe als Eigentümer exakt /publish oder /reject."
-                    if issue_url else "Nur Testvorschau: Es gibt keinen Freigabelink. Es wird nichts veröffentlicht.")
+    instructions = (f"Direkt zur Freigabe und Überarbeitung: {issue_url}\n"
+                    "Als Eigentümer auf GitHub kommentieren: /approve oder /publish zur Freigabe, "
+                    "/reject zum Verwerfen, /revise mehr natur, weniger skate für neue Version. "
+                    "Ein Klick auf den Link allein veröffentlicht nichts."
+                    if issue_url else "Testvorschau ohne Freigabe-Issue: kein Instagram-Post.")
     msg.set_content(f"""CarleCool – Neuer Reel-Vorschlag
 
 Song: {metadata['title']}
@@ -94,6 +98,10 @@ SoundCloud: {metadata.get('permalink', '')}
 Suchbegriffe: {', '.join(metadata.get('search_keywords', []))}
 Bildsprache: {metadata.get('visual_direction', {}).get('name', 'Analog-Digital Nostalgia × Corecore × Zen Minimalism')}
 Schnitt: {metadata.get('visual_direction', {}).get('edit_plan', 'Stillness ↔ Action')}
+Stilprofil: {metadata.get('creative_profile', {}).get('preset', 'rubin_analog_lana_skate')}
+Schnittgeschwindigkeit: {metadata.get('creative_profile', {}).get('pace', 'medium')}
+Analog-Look: {metadata.get('creative_profile', {}).get('analog', 65)}%
+Gewichtung: {metadata.get('creative_profile', {}).get('weights', {})}
 
 Das ORIGINAL-REEL liegt ausschließlich dieser privaten E-Mail bei.
 {instructions}
@@ -104,6 +112,22 @@ Freigabe auslösen; dann wird exakt dieser E-Mail-Anhang per SHA-256 geprüft.
 Caption-Vorschlag:
 {metadata.get('caption', '')}
 """)
+    # The issue URL is a clickable email link. It NEVER posts without an
+    # authenticated owner comment and the separate publish-enabled gate.
+    if issue_url:
+        safe_link = html_escape(issue_url, quote=True)
+        safe_title = html_escape(str(metadata['title']))
+        msg.add_alternative(
+            f'<html><body style="font-family:Arial,sans-serif;max-width:640px">'
+            f'<h2>CarleCool – {safe_title}</h2>'
+            f'<p>Das Originalvideo liegt als privater MP4-Anhang bei.</p>'
+            f'<p><a href="{safe_link}" style="background:#181818;color:white;padding:14px 22px;'
+            f'border-radius:8px;text-decoration:none">Freigabe &amp; Überarbeitung öffnen</a></p>'
+            f'<p>Der Link öffnet nur das GitHub-Issue. Ein Kommentar <b>/approve</b> '
+            f'(oder <b>/publish</b>) ist zur Freigabe nötig; die Instagram-Sperre gilt weiter.</p>'
+            f'<p>Eine neue Version anfordern: <code>/revise mehr natur, weniger skate</code></p>'
+            f'<p>Verwerfen: <code>/reject</code></p>'
+            f'</body></html>', subtype='html')
     msg.add_attachment(video_bytes, maintype='video', subtype='mp4', filename='CarleCool-Original.mp4')
     meta_bytes = json.dumps(metadata, ensure_ascii=False, sort_keys=True).encode('utf-8')
     msg.add_attachment(meta_bytes, maintype='application', subtype='json', filename='reel_metadata.json')
@@ -123,7 +147,9 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str,
     payload = {'run_id': run_id, 'sha256': metadata['sha256'], 'track_id': metadata['track_id'],
                'video_ids': metadata['video_ids'], 'footage_sources': metadata['footage_sources'],
                'caption': metadata['caption'], 'created_from': 'daily-review',
-               'mail_message_id': mail_message_id or make_msgid(domain='carlecool.invalid')}
+               'mail_message_id': mail_message_id or make_msgid(domain='carlecool.invalid'),
+               'creative_profile': metadata.get('creative_profile'),
+               'revision_number': metadata.get('creative_profile', {}).get('revision', 0)}
     name = 'carlecool-review'
     try:
         github_request('POST', 'labels', json_body={'name': name, 'color': '1f6feb',
@@ -132,14 +158,22 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str,
     except requests.HTTPError as e:
         if e.response is None or e.response.status_code != 422:
             raise
-    artifacts_url = None  # Public-repository artifacts are intentionally disabled
     body = (f"## CarleCool – Reel zum Freigeben\n\n"
             f"**Track:** {metadata['title']}\n\n"
             "**Privates Original:** Gmail-Anhang, nicht bei GitHub gespeichert.\n\n"
             f"**Caption:**\n\n{metadata['caption']}\n\n"
-            "**Freigabe:** Schreibe als Repository-Eigentümer den exakten Kommentar `/publish`. "
+            f"**Creative Profile:** `{metadata.get('creative_profile', {}).get('preset', 'default')}` "
+            f"· Tempo `{metadata.get('creative_profile', {}).get('pace', 'medium')}` "
+            f"· Analog `{metadata.get('creative_profile', {}).get('analog', 65)}%`\n\n"
+            "**Freigabe:** Schreibe als Repository-Eigentümer den exakten Kommentar `/approve` "
+            "(alternativ `/publish`). Die Instagram-Veröffentlichung bleibt zusätzlich gesperrt, "
+            "solange `PUBLISH_ENABLED` nicht bewusst aktiviert wurde. "
             "Das exakte Original wird aus Gmail Sent abgerufen und per SHA-256 geprüft. "
             "Eine Linköffnung allein veröffentlicht nichts.\n\n"
+            "**Überarbeiten:** `/revise mehr natur, weniger skate` oder z.B. "
+            "`/revise preset_rubin_lana`, `/revise more_mpc`, "
+            "`/revise slower_cuts`, `/revise more_americana`. "
+            "Der neue Entwurf erhält einen eigenen Prüfwert und eine neue Freigabe.\n\n"
             "**Verwerfen:** `/reject` kommentieren.\n\n"
             "**Achtung:** Die Originaldatei bleibt nur in deinem privaten Gmail-Postfach. "
             "Lösche die gesendete E-Mail erst nach Freigabe/Verwerfen.\n\n" + encode_issue_data(payload))

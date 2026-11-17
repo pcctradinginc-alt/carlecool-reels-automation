@@ -11,11 +11,11 @@ permissions:
   issues: write
 jobs:
   publish:
-    # Requires owner comment, exact command, issue label, and a private repository.
+    # Requires the authenticated owner, exact command, approved issue and publish gate.
     if: >-
       github.event.issue.pull_request == null &&
       github.event.comment.user.login == github.repository_owner &&
-      github.event.comment.body == '/publish' &&
+      (github.event.comment.body == '/publish' || github.event.comment.body == '/approve') &&
       contains(github.event.issue.labels.*.name, 'carlecool-review')
     runs-on: ubuntu-24.04
     timeout-minutes: 30
