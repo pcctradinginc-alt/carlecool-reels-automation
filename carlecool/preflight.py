@@ -95,6 +95,8 @@ def gmail() -> Check:
     return Check("Gmail", "PASS", "SMTP login and IMAP Sent-folder access work; no message sent")
 
 def audio_readiness() -> Check:
+    if os.getenv("GMAIL_ADDRESS") and os.getenv("GMAIL_APP_PASSWORD"):
+        return Check("Original audio", "WARN", "private Gmail master-audio retrieval configured; actual files unverified")
     if os.getenv("AUDIO_S3_BUCKET") and os.getenv("AWS_ACCESS_KEY_ID") and os.getenv("AWS_SECRET_ACCESS_KEY"):
         return Check("Original audio", "WARN", "private S3 configured; actual track files not yet checked")
     if os.getenv("SC_ALLOW_OFFICIAL_DOWNLOADS", "").lower() in ("true", "1", "yes"):

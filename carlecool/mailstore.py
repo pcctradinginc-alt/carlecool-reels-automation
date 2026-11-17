@@ -97,3 +97,69 @@ def fetch_reel_from_sent(approval: dict, target: Path, *, connection=None) -> tu
     reel.write_bytes(video_bytes)
     (target / 'output/reel_metadata.json').write_text(json.dumps(metadata, ensure_ascii=False), encoding='utf-8')
     return metadata, reel
+
+
+
+def fetch_owned_audio_from_sent(track_id: str, destination: Path, *, connection=None) -> Path:
+    """Get an owner's manually emailed song master from the private Gmail Sent mailbox.
+
+    Owner sends an email to themself with exact subject CARLECOOL_AUDIO_<track_id>
+    and exactly one attachment named <track_id>.mp3/.wav/.flac/.m4a.
+    Credentials stay in GitHub Secrets and file bytes never enter GitHub artifacts.
+    """
+    if not re.fullmatch(r"[0-9]{1,22}", str(track_id)):
+        raise ValueError("SoundCloud track ID must be numeric")
+    address = os.getenv("GMAIL_ADDRESS", "").strip()
+    password = os.getenv("GMAIL_APP_PASSWORD", "").replace(" ", "")
+    if not address or not password:
+        raise FileNotFoundError("Gmail credentials are missing for private master audio")
+    own = connection is None
+    if own:
+        connection = imaplib.IMAP4_SSL("imap.gmail.com", 993, timeout=45)
+    try:
+        if own:
+            connection.login(address, password)
+        typ, _ = connection.select(_sent_mailbox(connection), readonly=True)
+        if typ != "OK":
+            raise RuntimeError("Cannot access Gmail Sent mailbox for audio masters")
+        subject = f"CARLECOOL_AUDIO_{track_id}"
+        typ, ids = connection.search(None, "X-GM-RAW", f'"subject:{subject}"')
+        if typ != "OK":
+            raise RuntimeError("Gmail search failed")
+        matching = (ids[0].split() if ids else [])
+        if not matching:
+            raise FileNotFoundError("No matching private audio master email in Gmail Sent")
+        # Reject ambiguous email matches rather than using an unintended old master.
+        if len(matching) != 1:
+            raise RuntimeError("Multiple master emails found; keep one exact original per track")
+        typ, items = connection.fetch(matching[0], "(RFC822)")
+        if typ != "OK" or not items:
+            raise RuntimeError("Gmail master message fetch failed")
+        raw = next((item[1] for item in items if isinstance(item, tuple)
+                    and isinstance(item[1], bytes)), None)
+        if raw is None:
+            raise RuntimeError("Gmail master email has no message content")
+    finally:
+        if own:
+            try:
+                connection.logout()
+            except Exception:
+                pass
+    message = BytesParser(policy=policy.default).parsebytes(raw)
+    if str(message["Subject"] or "").strip() != subject:
+        raise ValueError("Gmail master subject does not match SoundCloud track ID")
+    if parseaddr(str(message["From"] or ""))[1].lower() != address.lower():
+        raise ValueError("Gmail master was not sent from the configured owner account")
+    if address.lower() not in [a.strip().lower() for _, a in __import__("email.utils", fromlist=["getaddresses"]).getaddresses(message.get_all("To", []))]:
+        raise ValueError("Gmail master must have been sent to the owner's own Gmail address")
+    allowed = {f"{track_id}.{ext}" for ext in ("mp3", "wav", "flac", "m4a")}
+    parts = [a for a in message.iter_attachments()
+             if (a.get_filename() or "").lower() in allowed]
+    if len(parts) != 1:
+        raise RuntimeError("Expected one exact SoundCloud-ID-named audio attachment")
+    data = parts[0].get_payload(decode=True)
+    if not data or len(data) > 23_000_000 or len(data) < 4096:
+        raise RuntimeError("Original audio attachment missing, suspicious, or too large (max 23 MB)")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(data)
+    return destination

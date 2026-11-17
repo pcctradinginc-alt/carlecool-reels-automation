@@ -17,6 +17,14 @@ def locate_original(track: Track, destination: Path) -> Path:
     if local:
         return local
     bucket = os.getenv("AUDIO_S3_BUCKET", "").strip()
+    if not bucket and os.getenv("GMAIL_ADDRESS") and os.getenv("GMAIL_APP_PASSWORD"):
+        # Owner-controlled Gmail master inbox is free and private; never scrape
+        # SoundCloud streams or use GitHub artifacts for copyrighted music.
+        from .mailstore import fetch_owned_audio_from_sent
+        try:
+            return fetch_owned_audio_from_sent(track.id, destination)
+        except FileNotFoundError:
+            pass
     if not bucket and os.getenv("SC_ALLOW_OFFICIAL_DOWNLOADS", "").lower() in ("true", "1", "yes") and track.downloadable:
         # Only use the official download-enabled resource on the public track we own.
         client_id = os.getenv("SOUNDCLOUD_CLIENT_ID", "")
@@ -45,7 +53,7 @@ def locate_original(track: Track, destination: Path) -> Path:
     if not bucket:
         raise FileNotFoundError(
             f"Missing original audio for {track.title!r} (track ID {track.id}). "
-            f"Upload assets/audio/{track.id}.mp3 or configure a private S3/R2 audio bucket."
+            f"Send an email FROM your configured Gmail account TO itself, subject CARLECOOL_AUDIO_{track.id}, attach a file named {track.id}.mp3 (or .wav/.flac/.m4a); or use a private S3/R2 bucket."
         )
     import boto3
     prefix = os.getenv("AUDIO_S3_PREFIX", "carlecool/audio/").strip("/")
