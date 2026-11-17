@@ -122,9 +122,17 @@ def _coverr_search_phrase(editorial_phrase: str) -> str:
     term = editorial_phrase.lower()
     if "skate" in term or "bmx" in term:
         return "skateboarding"
+    if any(x in term for x in ("mpc", "sampler", "console", "synth", "cassette", "vinyl",
+                                "guitar", "notebook", "keyboard", "recording studio",
+                                "drum machine", "turntable", "music")):
+        return "music"
+    if any(x in term for x in ("forest", "tree", "river", "water", "wind", "earth")):
+        return "nature"
+    if any(x in term for x in ("highway", "driving", "road", "car interior", "motel", "diner")):
+        return "road"
     if any(x in term for x in ("coast", "malibu", "beach", "ocean", "meditation", "white room", "driftwood")):
         return "beach"
-    if any(x in term for x in ("sunset", "palm", "retro", "vintage", "y2k", "super 8", "digicam", "cybershot", "1960")):
+    if any(x in term for x in ("sunset", "palm", "retro", "vintage", "y2k", "super 8", "digicam", "cybershot", "1960", "americana", "hollywood")):
         return "sunset"
     if any(x in term for x in ("urban", "night", "neon", "city", "street", "rooftop")):
         return "city"

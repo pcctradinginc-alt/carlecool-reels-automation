@@ -21,7 +21,8 @@ def probe_duration(path: Path) -> float:
     return float(json.loads(p.stdout)["format"]["duration"])
 
 
-def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output: Path, length=30) -> dict:
+def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output: Path,
+                length=30, *, pace="medium", analog=65) -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -31,7 +32,31 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     height = int(os.getenv('REEL_HEIGHT', '1920'))
     if (width, height) not in ((1080, 1920), (270, 480)):
         raise ValueError('Only 1080x1920 production or 270x480 offline test rendering permitted')
-    intervals = beat_cut_lengths(features.bpm, length)
+    if pace not in ("slow", "medium", "fast") or type(analog) is not int or not 0 <= analog <= 100:
+        raise ValueError("Invalid creative editing controls")
+    if pace == "medium":
+        intervals = beat_cut_lengths(features.bpm, length)
+    else:
+        beats = 12 if pace == "slow" else 4
+        interval = min(9.0, max(1.6, beats * 60 / max(65, features.bpm)))
+        intervals = []
+        remaining = float(length)
+        while remaining > .01:
+            step = min(interval, remaining)
+            if remaining - step < 1.0:
+                step = remaining
+            intervals.append(round(step, 3))
+            remaining -= step
+    # Quiet, desaturated analogue texture. No false retro footage claim.
+    level = analog / 100.0
+    saturation = 1.0 - 0.33 * level
+    contrast = 1.0 - 0.09 * level
+    grain = int(round(7 * level))
+    base = (f"scale={width}:{height}:force_original_aspect_ratio=increase,"
+            f"crop={width}:{height},setsar=1,fps=30,"
+            f"eq=saturation={saturation:.3f}:contrast={contrast:.3f}:gamma=1.015,"
+            "format=yuv420p")
+    filters = base + (f",noise=alls={grain}:allf=u" if grain else "")
     files = []
     for index, seconds in enumerate(intervals):
         source = videos[index % len(videos)]
@@ -43,7 +68,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         _run([
             "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
             "-stream_loop", "-1", "-i", str(source), "-t", f"{seconds:.3f}",
-            "-vf", f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},setsar=1,fps=30,format=yuv420p",
+            "-vf", filters,
             "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "22",
             "-g", "60", "-video_track_timescale", "30000", str(part),
         ])
@@ -75,4 +100,5 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         os.replace(compressed, output)
     if output.stat().st_size > MAX_ATTACHMENT_BYTES:
         raise RuntimeError("Reel exceeds safe Gmail attachment limit after compression")
-    return {"duration": probe_duration(output), "scenes": len(files), "resolution": f"{width}x{height}"}
+    return {"duration": probe_duration(output), "scenes": len(files),
+            "resolution": f"{width}x{height}", "pace": pace, "analog": analog}

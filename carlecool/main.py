@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import hashlib
 import json
 from pathlib import Path
@@ -9,6 +10,7 @@ import sys
 
 from .analysis import analyze_audio
 from .aesthetic import editorial_brief
+from .creative import load_profile, choose_shots, validate_profile
 from .audio import locate_original
 from .config import Settings
 from .keywords import select_keywords
@@ -31,7 +33,7 @@ def caption_for(track, videos) -> str:
     return caption + "\n#CarleCool #ElectronicMusic #NewMusic #Reels"
 
 
-def process(publish: bool) -> None:
+def process(publish: bool, *, track_id: str | None = None, creative_profile: dict | None = None) -> None:
     if publish:
         raise RuntimeError("Direct publication is disabled; use the human-approved Gmail workflow")
     config = Settings()
@@ -40,15 +42,24 @@ def process(publish: bool) -> None:
     tracks = fetch_tracks(config)
     if not tracks:
         raise RuntimeError("No public SoundCloud tracks found")
-    track = pick_track(tracks, state, config.cooldown_days)
+    if track_id is not None:
+        track = next((t for t in tracks if t.id == str(track_id)), None)
+        if track is None:
+            raise ValueError('Revision track no longer appears in latest 20 SoundCloud uploads')
+    else:
+        track = pick_track(tracks, state, config.cooldown_days)
+    profile = validate_profile(creative_profile) if creative_profile is not None else load_profile()
     print(f"Selected track: {track.title} (SoundCloud ID {track.id})")
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
     audio = locate_original(track, output_dir / "original.mp3")
     features = analyze_audio(str(audio), config.reel_seconds, track.genre)
+    if profile["music"] == "beginning":
+        features = replace(features, excerpt_start=0.0)
     print(f"Estimated musical features: BPM={features.bpm}, mood={features.mood}, energy={features.energy}")
     recent = {video_id for record in state.get("published", [])[-20:] for video_id in record.get("video_ids", [])}
-    keywords = select_keywords(features.mood, features.energy, features.bpm, seed=track.id)
+    keywords = choose_shots(profile, track_id=track.id, mood=features.mood,
+                            energy=features.energy, limit=3)
     print(f"Video search phrases: {keywords}")
     candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=9, keywords=keywords)
     selected = []
@@ -67,13 +78,15 @@ def process(publish: bool) -> None:
     if not paths:
         raise RuntimeError("No licensed clips available; add assets/stock and manifest.json as fallback")
     out = output_dir / f"carlecool_{track.id}.mp4"
-    details = render_reel(audio, paths, features, out, config.reel_seconds)
+    details = render_reel(audio, paths, features, out, config.reel_seconds,
+                          pace=profile["pace"], analog=profile["analog"])
     metadata = {
         "track_id": track.id, "title": track.title, "permalink": track.permalink_url,
         "features": vars(features), "video_ids": [v.id for v in selected],
         "footage_sources": [{"id": v.id, "provider": v.source, "title": v.title} for v in selected],
         "caption": caption_for(track, selected), "search_keywords": keywords,
         "visual_direction": editorial_brief(features.mood, features.energy, features.bpm),
+        "creative_profile": profile,
         "output": str(out), "sha256": hashlib.sha256(out.read_bytes()).hexdigest(), **details,
     }
     (output_dir / "reel_metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")

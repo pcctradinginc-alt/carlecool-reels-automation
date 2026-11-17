@@ -1,6 +1,8 @@
 """Editorial style brief for licensed stock, not a generative-video model."""
-STYLE_NAME = "Analog-Digital Nostalgia × Corecore × Zen Minimalism"
-EDIT_PLAN = "Malibu stillness -> California skate fisheye -> Y2K analog flash -> purple/blue neon; beat-led contrast"
+STYLE_NAME = "CarleCool — Rubin / Analog Studio / Americana Melancholy / 90s Skate"
+EDIT_PLAN = ("Still backlit nature and real tactile textures -> MPC-style sampler / vinyl / "
+             "recording work -> faded California highway, motel and palm silhouettes -> "
+             "restrained 90s skate contrast. Warm desaturated Super 8; little neon or glamour.")
 
 
 def editorial_brief(mood, energy, bpm):
