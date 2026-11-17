@@ -58,7 +58,8 @@ def _client():
 def probe(client=None) -> bool:
     """Discover public API without spending scarce video-generation quota."""
     client = client or _client()
-    data = client.view_api(print_info=False)
+    # gradio_client 2.x returns None unless return_format="dict" is explicit.
+    data = client.view_api(print_info=False, return_format="dict")
     # API names are public. Report only their names (not endpoint descriptions).
     serialized = json.dumps(data, ensure_ascii=True, default=str)
     print("Public Gradio API layout:", str(type(data).__name__))
