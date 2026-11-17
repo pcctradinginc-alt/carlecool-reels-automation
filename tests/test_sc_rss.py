@@ -26,3 +26,22 @@ def test_rss_inspection_never_downloads_audio():
     import carlecool.sc_rss as module
     source = inspect.getsource(module)
     assert "requests.get" not in source and "download_url" not in source
+
+
+
+def test_find_specific_rss_enclosure(monkeypatch):
+    import carlecool.sc_rss as rss
+    monkeypatch.setattr(rss, "_safe_audio_url", lambda url: None)
+    assert rss.matching_rss_audio_url(RSS, "100").endswith("/stream/100.mp3")
+    with pytest.raises(FileNotFoundError):
+        rss.matching_rss_audio_url(RSS, "700")
+
+
+def test_private_urls_and_unsafe_ids_are_rejected():
+    import carlecool.sc_rss as rss
+    with pytest.raises(ValueError):
+        rss._safe_audio_url("https://127.0.0.1/track.mp3")
+    with pytest.raises(ValueError):
+        rss._safe_audio_url("https://evil.example/track.mp3")
+    with pytest.raises(ValueError):
+        rss.matching_rss_audio_url(RSS, "../../secret")

@@ -17,6 +17,15 @@ def locate_original(track: Track, destination: Path) -> Path:
     if local:
         return local
     bucket = os.getenv("AUDIO_S3_BUCKET", "").strip()
+    if not bucket and os.getenv("SC_USE_RSS_AUDIO", "true").strip().lower() in ("true", "1", "yes"):
+        if not track.uploader_id:
+            raise RuntimeError("SoundCloud RSS requires a verified uploader ID from the API")
+        from .sc_rss import download_owned_rss_audio
+        try:
+            return download_owned_rss_audio(track.id, track.uploader_id, destination)
+        except FileNotFoundError:
+            # Only missing/disabled RSS entries fall back to private owned storage.
+            pass
     if not bucket and os.getenv("GMAIL_ADDRESS") and os.getenv("GMAIL_APP_PASSWORD"):
         # Owner-controlled Gmail master inbox is free and private; never scrape
         # SoundCloud streams or use GitHub artifacts for copyrighted music.
