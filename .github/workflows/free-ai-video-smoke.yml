@@ -1,0 +1,37 @@
+name: CarleCool — free LTX AI-video real smoke (no public media)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/free-ai-video-smoke.yml'
+permissions:
+  contents: read
+concurrency:
+  group: carlecool-zero-cost-ai-video-smoke
+  cancel-in-progress: false
+jobs:
+  real-short-clip:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      PUBLISH_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install ZeroGPU client and FFprobe
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          pip install 'gradio_client>=1.13,<3'
+      - name: Probe and attempt one genuine 2s LTX video
+        run: python -m carlecool.ai_video --generate
+      - name: Document no media kept in GitHub
+        if: always()
+        run: |
+          echo "AI provider is experimental and never connected to publishing." >> "$GITHUB_STEP_SUMMARY"
+          echo "Only a live PASS in the prior step proves actual video generation." >> "$GITHUB_STEP_SUMMARY"
