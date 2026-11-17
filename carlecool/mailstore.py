@@ -70,7 +70,10 @@ def fetch_reel_from_sent(approval: dict, target: Path, *, connection=None) -> tu
         raise ValueError('Gmail message identity or sender mismatch')
     if msg.get('X-CarleCool-Run-ID') != str(approval['run_id']):
         raise ValueError('Approval run identity differs from Gmail message')
-    if msg.get('X-CarleCool-SHA256') != approval['sha256']:
+    # Email parsers may preserve whitespace from folded long custom headers.
+    # Remove folding whitespace only; never relax the 64-character digest check.
+    header_sha = re.sub(r'\s+', '', str(msg.get('X-CarleCool-SHA256', '')))
+    if not re.fullmatch(r'[0-9a-f]{64}', header_sha) or header_sha != approval['sha256']:
         raise ValueError('Approval SHA differs from Gmail message')
     attachments = [part for part in msg.iter_attachments()]
     videos = [part for part in attachments if part.get_filename() == 'CarleCool-Original.mp4']
