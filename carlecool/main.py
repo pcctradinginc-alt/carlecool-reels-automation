@@ -23,7 +23,7 @@ def caption_for(track, videos) -> str:
     if track.permalink_url:
         caption += f"🎶 Full track: {track.permalink_url}\n"
     if any(v.source == "coverr" for v in videos):
-        caption += "🎬 Footage: https://coverr.co\n"
+        caption += "🎬 Footage by Coverr: https://coverr.co\n"
         creators = dict.fromkeys((v.creator_name, v.creator_url) for v in videos
                                  if v.source == "coverr" and v.creator_name and v.creator_url)
         for name, url in creators:
