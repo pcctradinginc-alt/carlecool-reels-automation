@@ -66,8 +66,14 @@ def test_ai_unavailable_fails_cleanly_without_leaving_partial_media(tmp_path):
     assert not dest.exists()
 
 
-def test_default_daily_pipeline_never_calls_experimental_ai():
+def test_daily_pipeline_ai_is_strictly_opt_in():
+    from carlecool.creative import load_profile, default_profile, apply_commands
     content = Path(".github/workflows/daily-reel.yml").read_text()
-    assert "CARLECOOL_AI_VIDEO: 'one'" not in content
+    assert load_profile()["ai_video"] is False
+    assert default_profile()["ai_video"] is False
+    assert "CARLECOOL_AI_VIDEO: 'one'" in content
+    assert apply_commands(load_profile(), ["ai_video"])["ai_video"] is True
+    assert apply_commands(apply_commands(load_profile(), ["ai_video"]),
+                          ["coverr_only"])["ai_video"] is False
     assert "upload-artifact" not in Path(
         ".github/workflows/free-ai-video-smoke.yml").read_text()

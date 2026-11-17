@@ -5,6 +5,7 @@ import argparse
 from dataclasses import replace
 import hashlib
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -26,7 +27,7 @@ def caption_for(track, videos) -> str:
     if track.permalink_url:
         caption += f"🎶 Full track: {track.permalink_url}\n"
     if any(v.source == "ai" for v in videos):
-        caption += "✨ Enthält KI-generierte Filmszenen (LTX-2.3)\\n"
+        caption += "✨ Enthält KI-generierte Filmszenen (LTX-2.3)\n"
     if any(v.source == "coverr" for v in videos):
         caption += "🎬 Footage by Coverr: https://coverr.co\n"
         creators = dict.fromkeys((v.creator_name, v.creator_url) for v in videos
@@ -69,7 +70,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     paths = []
     # Explicit experimental mode only: daily production stays on proven Coverr.
     # A single 2-second AI clip may be blended into a manual preview.
-    if __import__("os").getenv("CARLECOOL_AI_VIDEO", "off") == "one":
+    if profile["ai_video"] and os.getenv("CARLECOOL_AI_VIDEO", "off") == "one":
         try:
             from .ai_video import generate_one
             ai_path = generate_one(keywords[0], output_dir / "ai_experiment.mp4")

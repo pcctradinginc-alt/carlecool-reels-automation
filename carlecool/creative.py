@@ -91,6 +91,8 @@ TEXT_ALIASES = {
     "ruhiger": "slower_cuts", "langsamere schnitte": "slower_cuts",
     "schnellere schnitte": "faster_cuts", "mehr dynamik": "faster_cuts",
     "erste 30 sekunden": "first_30_seconds",
+    "ki-video": "ai_video", "ki video": "ai_video",
+    "mehr ki": "ai_video", "ohne ki": "coverr_only",
 }
 
 
@@ -100,7 +102,7 @@ def default_profile() -> dict:
         "weights": dict(DEFAULT_WEIGHTS),
         "pace": "medium", "analog": 65, "music": "automatic",
         "revision": 0,
-        "avoid_faces": False,
+        "avoid_faces": False, "ai_video": False,
         "creative_version": 2,
     }
 
@@ -132,12 +134,15 @@ def validate_profile(profile: dict) -> dict:
         raise ValueError("Revision count is invalid")
     if type(profile.get("avoid_faces")) is not bool:
         raise ValueError("Avoid-faces flag must be a boolean")
+    if type(profile.get("ai_video", False)) is not bool:
+        raise ValueError("AI-video flag must be a boolean")
     raw = profile.get("weights")
     if not isinstance(raw, dict) or set(raw) != set(LANES) or any(
         type(raw[k]) is not int or raw[k] < 0 or raw[k] > 100 for k in LANES
     ):
         raise ValueError("Invalid creative lane weights")
     result = dict(profile)
+    result["ai_video"] = profile.get("ai_video", False)
     result["weights"] = _normalize(raw)
     return result
 
@@ -163,6 +168,8 @@ def apply_commands(profile: dict, commands: list[str]) -> dict:
                 out["analog"] = min(100, out["analog"] + 15)
             if name == "no_faces":
                 out["avoid_faces"] = True
+        elif name in ("ai_video", "coverr_only"):
+            out["ai_video"] = name == "ai_video"
         elif name in ("slower_cuts", "faster_cuts"):
             out["pace"] = "slow" if name == "slower_cuts" else "fast"
         elif name == "first_30_seconds":
@@ -182,7 +189,7 @@ def interpret_revision(comment: str) -> list[str]:
         raise ValueError("Revision instructions must be 1..500 characters on one line")
     pieces = [p.strip() for p in raw.replace(",", " ").split()]
     if len(pieces) == 1 and (pieces[0] in DELTA or pieces[0] in
-                              ("slower_cuts", "faster_cuts", "first_30_seconds")
+                              ("slower_cuts", "faster_cuts", "first_30_seconds", "ai_video", "coverr_only")
                               or pieces[0].startswith("preset_") and pieces[0][7:] in PRESETS):
         return pieces
     found = []

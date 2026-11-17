@@ -24,6 +24,8 @@ jobs:
       SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
       SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
       COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      CARLECOOL_AI_VIDEO: 'one'
       GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
@@ -44,5 +46,6 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
           pip install -r requirements.txt
+          pip install 'gradio_client>=1.13,<3'
       - name: Create new private preview and new approval link
         run: python -m carlecool.revise

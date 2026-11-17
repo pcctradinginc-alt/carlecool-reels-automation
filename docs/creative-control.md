@@ -46,3 +46,9 @@ The text interpreter recognizes a deliberately small vocabulary of supported Ger
 7. Email exact MP4 with a direct clickable review Issue link. The manual approval gate is unchanged.
 
 See [visual-direction.md](visual-direction.md) for complete creative language, color references and negative rules. User feedback changes future query weights, but CarleCool does not train a neural model on ratings. No promise of exact object detection, visual continuity or free cloud AI-generated video.
+
+## Optional genuine AI-generated scenes (free HF ZeroGPU experiment)
+
+The official Lightricks LTX-2.3 Space has generated and validated an **actual two-second clip** from GitHub Actions with no paid inference. Use `/revise ai_video` or `/revise mehr ki` on an existing GitHub approval Issue to regenerate its song's Reel with **at most one actual AI video clip** and Coverr footage for the rest. Style feedback remembers AI preferences for future proposals. Use `/revise coverr_only` to disable future AI clips. The current repository default remains **off** until the owner expressly opts in via a revision; the installed Gradio API adapter calls no paid endpoint. If the free quota is exhausted or the Space fails, the original Coverr footage pipeline takes over automatically.
+
+AI media are temporary, transmitted only via the private Gmail preview and never put in public GitHub artifacts. The external provider receives only the public-safe art-direction prompt, not songs or videos. AI-inclusive Instagram publication requires the additional, independently controlled `AI_VIDEO_PUBLISH_LICENSE_CONFIRMED=true` GitHub Secret plus pre-existing human approval and Coverr rights clearance. The model's license and terms must be reviewed before activating it.

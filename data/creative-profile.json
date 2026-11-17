@@ -13,5 +13,6 @@
   "analog": 65,
   "music": "automatic",
   "revision": 0,
-  "avoid_faces": false
+  "avoid_faces": false,
+  "ai_video": false
 }

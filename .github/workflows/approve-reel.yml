@@ -27,6 +27,7 @@ jobs:
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       PUBLISH_ENABLED: ${{ secrets.PUBLISH_ENABLED }}
       COVERR_PUBLISH_PERMISSION_CONFIRMED: ${{ secrets.COVERR_PUBLISH_PERMISSION_CONFIRMED }}
+      AI_VIDEO_PUBLISH_LICENSE_CONFIRMED: ${{ secrets.AI_VIDEO_PUBLISH_LICENSE_CONFIRMED }}
       REVIEW_ISSUE: ${{ github.event.issue.number }}
     steps:
       - uses: actions/checkout@v4
