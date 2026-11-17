@@ -12,6 +12,7 @@ from .analysis import analyze_audio
 from .aesthetic import editorial_brief
 from .creative import load_profile, choose_shots, validate_profile
 from .audio import locate_original
+from .video import Video
 from .config import Settings
 from .keywords import select_keywords
 from .render import render_reel
@@ -24,6 +25,8 @@ def caption_for(track, videos) -> str:
     caption = f"🎧 {track.title}\n"
     if track.permalink_url:
         caption += f"🎶 Full track: {track.permalink_url}\n"
+    if any(v.source == "ai" for v in videos):
+        caption += "✨ Enthält KI-generierte Filmszenen (LTX-2.3)\\n"
     if any(v.source == "coverr" for v in videos):
         caption += "🎬 Footage by Coverr: https://coverr.co\n"
         creators = dict.fromkeys((v.creator_name, v.creator_url) for v in videos
@@ -64,6 +67,20 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=9, keywords=keywords)
     selected = []
     paths = []
+    # Explicit experimental mode only: daily production stays on proven Coverr.
+    # A single 2-second AI clip may be blended into a manual preview.
+    if __import__("os").getenv("CARLECOOL_AI_VIDEO", "off") == "one":
+        try:
+            from .ai_video import generate_one
+            ai_path = generate_one(keywords[0], output_dir / "ai_experiment.mp4")
+            selected.append(Video(id="hf-ltx23-" + track.id, source="ai",
+                                  title="LTX 2.3 original AI footage", path=str(ai_path)))
+            paths.append(ai_path)
+            print("Experimental AI footage ready: 1 scene; no audio uploaded to HF.")
+        except Exception as exc:
+            # Missing free quota / unavailable external Space must not block Reels.
+            print("Experimental AI footage unavailable, Coverr fallback: "
+                  + type(exc).__name__)
     for video in candidates:
         try:
             path = fetch_owned_stock(video, output_dir / f"stock_{len(paths):02d}.mp4") if video.source == "owned" else download_video(video.url, output_dir / f"stock_{len(paths):02d}.mp4")

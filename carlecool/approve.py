@@ -54,6 +54,11 @@ def publish(issue_number: int, run_id: int, directory: Path):
     approval = verify_artifact(issue, metadata, video, run_id=run_id)
     if any(x.get('provider') == 'coverr' for x in approval['footage_sources']) and not settings.coverr_permission_confirmed:
         raise RuntimeError('Coverr free-tier attribution is not cleared for this publish method')
+    # AI video still requires explicit license review and cannot be silently
+    # published even if the existing Instagram gate is enabled.
+    if (any(x.get('provider') == 'ai' for x in approval['footage_sources'])
+            and os.getenv('AI_VIDEO_PUBLISH_LICENSE_CONFIRMED') != 'true'):
+        raise RuntimeError('AI-video distribution rights have not been confirmed')
     state = load_state()
     if state.get('pending'):
         raise RuntimeError('Unresolved pending publication must be reconciled manually')

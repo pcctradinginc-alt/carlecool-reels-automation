@@ -10,6 +10,36 @@ Use **public repository + standard Ubuntu runners** so GitHub Actions compute is
 
 **Visibility is an account-level GitHub Setting:** Settings → General → Danger Zone → Change repository visibility → Public, **only after** verifying historical commits, Issues, Actions logs and artifacts have no private data. Change visibility yourself; this script will not disclose media as artifacts. Secrets stay in GitHub Actions, but metadata, code, issue titles and logs are public. No automatic publication until `PUBLISH_ENABLED=true` and Coverr commercial clearance are explicitly provided.
 
+## Free ZeroGPU AI-video experiment — explicitly opt-in only
+
+A prototype for **real 2-second text-to-video** scenes from the official
+[Lightricks/LTX-2-3 Space](https://huggingface.co/spaces/Lightricks/LTX-2-3)
+is at [carlecool/ai_video.py](carlecool/ai_video.py). It uses the
+[Hugging Face ZeroGPU free quota](https://huggingface.co/docs/hub/spaces-api-endpoints),
+never paid inference or paid fallback, and sends only a public-safe English
+aesthetic prompt. The code first verifies that the Gradio API is reachable and
+then requests **exactly one** low-resolution 2-second test clip. The
+[isolated live smoke workflow](.github/workflows/free-ai-video-smoke.yml)
+does not send an email, create a public video artifact or publish to Instagram.
+It explicitly fails if generation does not actually work.
+
+A manually invoked Reel can use `CARLECOOL_AI_VIDEO=one` after installing
+`gradio_client`; it will mix at most **one** AI shot with Coverr and fall back
+to Coverr upon quota exhaustion or Space errors. **Scheduled daily Reels stay on
+Coverr by default** until the real test passes and the artist chooses to enable
+experimental AI scenes. For publishing any AI-inclusive Reel, an additional
+`AI_VIDEO_PUBLISH_LICENSE_CONFIRMED=true` gate is required on top of the
+existing owner and Instagram gates. Generated media are stored only on the
+ephemeral runner and sent through the private-review pipeline.
+
+Important limits: Anonymous ZeroGPU requests currently get 2 minutes of
+shared GPU time daily; free Hugging Face accounts get 5 minutes (requires a
+Hugging Face access token configured as GitHub Secret `HF_TOKEN` to use the
+account quota). The remote Space may be paused, queued or unavailable, and its
+Gradio API can change without notice. Neither the 2-second trial nor future
+daily generation is guaranteed. Model and hosting licenses need to be checked
+before commercial publication.
+
 ## Creative Control v2 — preset, style feedback, safer review
 
 The default "Rubin / Analog / Lana-Americana / 90s Skate" mix is now a **real configuration** at [data/creative-profile.json](data/creative-profile.json), not just a descriptive prompt. It controls three weighted Coverr searches, shot pacing, desaturation and grain, and optional use of a song's first 30 seconds. See [full presets and supported controls](docs/creative-control.md) and [master visual direction](docs/visual-direction.md).
