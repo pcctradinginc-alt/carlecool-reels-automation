@@ -1,5 +1,5 @@
 name: CarleCool — free LTX AI-video real smoke (no public media)
-# Recheck 2026-11-17 with owner-provided GitHub HF_TOKEN secret; no paid inference.
+# Retry authenticated free LTX smoke with corrected Gradio 2.x token keyword; no paid inference.
 on:
   workflow_dispatch:
   push:
