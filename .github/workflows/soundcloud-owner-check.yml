@@ -1,6 +1,8 @@
 name: CarleCool — SoundCloud owner OAuth check (read-only)
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '45 9 * * *'
 permissions:
   contents: write
 concurrency:
@@ -8,6 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   probe:
+    if: github.event_name == 'workflow_dispatch' || vars.SC_OWNER_OAUTH_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     env:

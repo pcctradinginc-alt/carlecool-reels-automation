@@ -60,7 +60,10 @@ def main():
     subprocess.run(["git", "-C", str(root), "commit", "-m",
                     "auth: initialize encrypted SoundCloud owner session"], check=True)
     subprocess.run(["git", "-C", str(root), "push", "origin", "HEAD:main"], check=True)
-    print("Encrypted owner token activated. Run the read-only SoundCloud owner check in GitHub Actions.")
+    subprocess.run(["gh", "variable", "set", "SC_OWNER_OAUTH_ENABLED",
+                    "--repo", REPO, "--body", "true"], check=True)
+    print("Encrypted owner session activated; daily read-only owner-check enabled.")
+    print("No track audio access or Instagram posting enabled.")
 
 
 if __name__ == "__main__":

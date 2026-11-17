@@ -22,6 +22,9 @@ permissions:
   issues: write
 jobs:
   reel:
+    # Schedule only with a confirmed, rights-cleared original-audio source.
+    # Manual dry-run still works for diagnostics before enabling production.
+    if: github.event_name == 'workflow_dispatch' || vars.CARLECOOL_AUDIO_READY == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:

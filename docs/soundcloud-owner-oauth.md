@@ -13,11 +13,13 @@ The new owner-check workflow **only reads `/me`, `/resolve`, `/tracks/{urn}`** a
 3. **Locally**, provide `SOUNDCLOUD_CLIENT_ID`, `SOUNDCLOUD_CLIENT_SECRET`, and `SOUNDCLOUD_REDIRECT_URI` to the script via your shell or private environment file, not in ChatGPT and not in Git.
 4. From the repository root run `python -m scripts.connect_soundcloud_owner`. Sign in to the actual CarleCool account in the opened browser, approve access, and paste the resulting **full redirected URL into the terminal only**. Never paste OAuth authorization codes or returned URLs into a public issue/chat.
 5. When prompted, type `yes` to save the **encryption key in GitHub Secrets** as `SC_OWNER_FERNET_KEY` and push only `data/soundcloud-owner.enc` (ciphertext) on `main`. Your access and refresh tokens are never committed in plaintext.
-6. Open **GitHub Actions → CarleCool — SoundCloud owner OAuth check (read-only) → Run workflow**. The job checks that `/me` is the CarleCool profile and inspects a maximum of five newest tracks. It produces no posts and sends no email.
+6. The setup also enables the `SC_OWNER_OAUTH_ENABLED` repository variable. Open **GitHub Actions → CarleCool — SoundCloud owner OAuth check (read-only) → Run workflow**. The job checks that `/me` is the CarleCool profile and inspects a maximum of five newest tracks. It produces no posts and sends no email. The same read-only account probe runs daily at 09:45 UTC, with token refresh before the API check when necessary.
 
 ### Unattended token renewal
 
 SoundCloud access tokens last approximately an hour and its refresh tokens are **single-use**. The owner-check workflow refreshes only when needed, **encrypts and commits the replacement refresh token before any later API call**. For continuous daily execution, the eventual audio-enabled workflow must share the same token-rotation lock and have permission to update `data/soundcloud-owner.enc`. A failed GitHub push after a refresh can leave a consumed refresh token: fail closed and reconnect manually; do not retry the old token indefinitely.
+
+**Daily publishing remains disabled:** The Reel schedule only runs if repository variable `CARLECOOL_AUDIO_READY=true` has been set **after** confirming a lawful audio source. Owner OAuth proof alone does not turn this flag on.
 
 **Public repo security:** Only the ciphertext is public. The Fernet key is available to trusted main-branch workflows as a GitHub Secret. Treat changes to the workflow/code as security-sensitive; avoid running unreviewed pull-request code with secrets. If access should be revoked, revoke the app in SoundCloud and remove the secret and encrypted file.
 
