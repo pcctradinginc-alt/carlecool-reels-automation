@@ -126,6 +126,8 @@ def _coverr_search_phrase(editorial_phrase: str) -> str:
                                 "guitar", "notebook", "keyboard", "recording studio",
                                 "drum machine", "turntable", "music")):
         return "music"
+    if "sunset" in term or "golden hour" in term or "palm" in term:
+        return "sunset"
     if any(x in term for x in ("forest", "tree", "river", "water", "wind", "earth")):
         return "nature"
     if any(x in term for x in ("highway", "driving", "road", "car interior", "motel", "diner")):
