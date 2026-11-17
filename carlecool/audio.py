@@ -17,9 +17,8 @@ def locate_original(track: Track, destination: Path) -> Path:
     if local:
         return local
     bucket = os.getenv("AUDIO_S3_BUCKET", "").strip()
-    if not bucket and os.getenv("SC_USE_RSS_AUDIO", "true").strip().lower() in ("true", "1", "yes"):
-        if not track.uploader_id:
-            raise RuntimeError("SoundCloud RSS requires a verified uploader ID from the API")
+    if (not bucket and track.uploader_id
+            and os.getenv("SC_USE_RSS_AUDIO", "true").strip().lower() in ("true", "1", "yes")):
         from .sc_rss import download_owned_rss_audio
         try:
             return download_owned_rss_audio(track.id, track.uploader_id, destination)
