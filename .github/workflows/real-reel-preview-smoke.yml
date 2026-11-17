@@ -1,0 +1,40 @@
+name: CarleCool — one-time real Reel preview end-to-end (no publishing)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/real-reel-preview-smoke.yml'
+permissions:
+  contents: read
+concurrency:
+  group: carlecool-full-preview-smoke
+  cancel-in-progress: false
+jobs:
+  preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
+      SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
+      COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+      GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+      SC_USE_RSS_AUDIO: 'true'
+      PUBLISH_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install FFmpeg and dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          pip install -r requirements.txt
+      - name: Render from artist-published SoundCloud RSS plus licensed Coverr footage
+        run: python -m carlecool.main --mode preview
+      - name: Send exactly one private Gmail video preview (no issue or Instagram)
+        run: python -m carlecool.review --dry-run-email
