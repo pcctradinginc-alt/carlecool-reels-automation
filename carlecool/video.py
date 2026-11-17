@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import ipaddress
 import json
 import os
+import re
 from pathlib import Path
 import socket
 from urllib.parse import urlparse
@@ -22,6 +23,8 @@ class Video:
     s3_key: str | None = None
     views: int = 0
     vertical: bool = False
+    creator_name: str = ""
+    creator_url: str = ""
 
 
 from .keywords import select_keywords
@@ -82,6 +85,38 @@ def download_video(url: str, destination: Path, session=None, max_bytes=180_000_
     raise RuntimeError("Too many video redirects")
 
 
+def _coverr_creator_metadata(item: dict) -> tuple[str, str]:
+    """Use contributor credit only when explicitly provided by Coverr."""
+    creator = item.get("creator") or item.get("contributor") or item.get("author") or item.get("user")
+    if not isinstance(creator, dict):
+        return "", ""
+    name = str(creator.get("name") or creator.get("display_name")
+               or creator.get("full_name") or "").strip()
+    url = str(creator.get("profile_url") or creator.get("url") or "").strip()
+    if not name:
+        return "", ""
+    parsed = urlparse(url)
+    if (parsed.scheme != "https" or parsed.hostname not in ("coverr.co", "www.coverr.co")
+            or parsed.username or parsed.password or parsed.port not in (None, 443)):
+        return "", ""
+    return name[:100], url
+
+
+def record_coverr_download(video_id: str, api_key: str, *, session=None):
+    """Report selected clip to Coverr stats; never transmit signed media URLs."""
+    if not re.fullmatch(r"[A-Za-z0-9_-]{3,80}", video_id):
+        raise ValueError("Unsafe Coverr video ID")
+    if not api_key:
+        raise RuntimeError("Coverr API key missing for download tracking")
+    session = session or requests.Session()
+    response = session.patch(
+        f"https://api.coverr.co/videos/{video_id}/stats/downloads",
+        headers={"x-api-key": api_key}, timeout=20)
+    response.raise_for_status()
+    if response.status_code != 204:
+        raise RuntimeError("Coverr download stats endpoint did not acknowledge selection")
+
+
 def _coverr_search_phrase(editorial_phrase: str) -> str:
     """Map a detailed art-direction shot to Coverr's short search vocabulary."""
     term = editorial_phrase.lower()
@@ -119,12 +154,18 @@ def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8,
             vid = str(item.get("id", ""))
             if not vid or vid in seen or vid in recent:
                 continue
+            if any(item.get(field) is True for field in
+                   ("is_premium", "premium", "is_sponsored", "sponsored", "is_watermarked")):
+                continue
             seen.add(vid)
             video_url = (item.get("urls") or {}).get("mp4_download") or (item.get("urls") or {}).get("mp4")
             if not video_url:
                 continue
+            creator_name, creator_url = _coverr_creator_metadata(item)
             lane.append(Video(vid, "coverr", url=video_url, title=item.get("title", ""),
-                              views=int(item.get("views") or 0), vertical=bool(item.get("is_vertical"))))
+                              views=int(item.get("views") or 0),
+                              vertical=bool(item.get("is_vertical")),
+                              creator_name=creator_name, creator_url=creator_url))
         per_lane.append(sorted(lane, key=lambda x: (x.vertical, x.views), reverse=True))
     found = []
     while len(found) < wanted and any(per_lane):
@@ -158,7 +199,7 @@ def gather_videos(key: str, mood: str, recent: set[str], wanted=8, *, keywords=N
     try:
         selected = search_coverr(key, mood, recent, wanted=wanted, keywords=keywords)
     except (requests.RequestException, RuntimeError, ValueError) as exc:
-        print(f"Coverr unavailable; using licensed local fallback: {type(exc).__name__}: {exc}")
+        print(f"Coverr unavailable; using licensed local fallback: {type(exc).__name__}")
         selected = []
     # Keep fallback candidates even if Coverr returns enough metadata but signed downloads fail.
     return selected + fallback_videos(recent)

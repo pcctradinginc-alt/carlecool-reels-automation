@@ -15,7 +15,7 @@ from .keywords import select_keywords
 from .render import render_reel
 from .soundcloud import fetch_tracks
 from .state import load_state, pick_track
-from .video import download_video, gather_videos, fetch_owned_stock
+from .video import download_video, gather_videos, fetch_owned_stock, record_coverr_download
 
 
 def caption_for(track, videos) -> str:
@@ -23,7 +23,11 @@ def caption_for(track, videos) -> str:
     if track.permalink_url:
         caption += f"🎶 Full track: {track.permalink_url}\n"
     if any(v.source == "coverr" for v in videos):
-        caption += "🎬 Footage via Coverr · https://coverr.co (clip credits in production log)\n"
+        caption += "🎬 Footage: https://coverr.co\n"
+        creators = dict.fromkeys((v.creator_name, v.creator_url) for v in videos
+                                 if v.source == "coverr" and v.creator_name and v.creator_url)
+        for name, url in creators:
+            caption += f"Video by {name} on Coverr: {url}\n"
     return caption + "\n#CarleCool #ElectronicMusic #NewMusic #Reels"
 
 
@@ -52,12 +56,14 @@ def process(publish: bool) -> None:
     for video in candidates:
         try:
             path = fetch_owned_stock(video, output_dir / f"stock_{len(paths):02d}.mp4") if video.source == "owned" else download_video(video.url, output_dir / f"stock_{len(paths):02d}.mp4")
+            if video.source == "coverr":
+                record_coverr_download(video.id, config.coverr_key)
             selected.append(video)
             paths.append(path)
             if len(paths) >= 8:
                 break
         except Exception as exc:
-            print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}: {exc}")
+            print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}")
     if not paths:
         raise RuntimeError("No licensed clips available; add assets/stock and manifest.json as fallback")
     out = output_dir / f"carlecool_{track.id}.mp4"
