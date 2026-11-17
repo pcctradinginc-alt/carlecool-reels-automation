@@ -28,7 +28,9 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
           pip install 'gradio_client>=1.13,<3'
-      - name: Probe and attempt one genuine 2s LTX video
+      - name: Inspect public Gradio API without using GPU quota
+        run: python -m carlecool.ai_video --probe
+      - name: Attempt one genuine 2s LTX video
         run: python -m carlecool.ai_video --generate
       - name: Document no media kept in GitHub
         if: always()
