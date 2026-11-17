@@ -1,0 +1,48 @@
+name: CarleCool — revise reviewed Reel
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  issues: write
+  contents: write
+concurrency:
+  group: carlecool-daily-reel
+  cancel-in-progress: false
+jobs:
+  revise:
+    if: >-
+      github.event.issue.pull_request == null &&
+      github.event.comment.user.login == github.repository_owner &&
+      startsWith(github.event.comment.body, '/revise ') &&
+      contains(github.event.issue.labels.*.name, 'carlecool-review')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REVIEW_ISSUE: ${{ github.event.issue.number }}
+      REVISE_COMMAND: ${{ github.event.comment.body }}
+      SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
+      SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
+      COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+      GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+      SC_USE_RSS_AUDIO: 'true'
+      PUBLISH_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install media tools and dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          pip install -r requirements.txt
+      - name: Create new private preview and new approval link
+        run: python -m carlecool.revise
