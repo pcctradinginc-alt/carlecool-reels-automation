@@ -10,6 +10,14 @@ Use **public repository + standard Ubuntu runners** so GitHub Actions compute is
 
 **Visibility is an account-level GitHub Setting:** Settings → General → Danger Zone → Change repository visibility → Public, **only after** verifying historical commits, Issues, Actions logs and artifacts have no private data. Change visibility yourself; this script will not disclose media as artifacts. Secrets stay in GitHub Actions, but metadata, code, issue titles and logs are public. No automatic publication until `PUBLISH_ENABLED=true` and Coverr commercial clearance are explicitly provided.
 
+## Creative Control v2 — preset, style feedback, safer review
+
+The default "Rubin / Analog / Lana-Americana / 90s Skate" mix is now a **real configuration** at [data/creative-profile.json](data/creative-profile.json), not just a descriptive prompt. It controls three weighted Coverr searches, shot pacing, desaturation and grain, and optional use of a song's first 30 seconds. See [full presets and supported controls](docs/creative-control.md) and [master visual direction](docs/visual-direction.md).
+
+A **review-mode** email contains the original MP4 and a **direct clickable approval Issue URL**; owner comments `/revise mehr natur, weniger skate`, `/revise more_mpc`, `/revise preset_rubin_lana`, `/revise slower_cuts` or `/revise more_super8` make a *new* private MP4 and a *new* approval Issue. Previous approval is disabled; successful style feedback updates the repository's public, nonsecret creative-profile weights for future Reels. Only owner comments are accepted. Plain-text requests are interpreted with a limited rule set, not generative AI. `/approve` or `/publish` still require separate Instagram enablement and rights clearance.
+
+**Important:** The first old `dry-run` test emails have no approval link because they never created an Issue. For a preview *with a link*, use the `review` mode or the special one-time review test workflow. Opening a review link alone NEVER posts to Instagram.
+
 ## CarleCool visual identity
 
 See [docs/visual-direction.md](docs/visual-direction.md) for the master English prompt and the Apple-clean / Malibu-Zen / raw 1990s skate / Y2K digicam / Americana / corecore visual design. The code searches 60 curated phrases using a three-lane stillness/action/nostalgia mix instead of only popular urban footage. Actual AI-generated clips, full creative overlays or image-recognition scoring are not included.
@@ -46,7 +54,7 @@ Go to **Settings → Secrets and variables → Actions**.
 | `STOCK_S3_BUCKET` | Optional private licensed-stock backup clips |
 | `S3_ENDPOINT_URL` | Optional S3-compatible R2 endpoint |
 
-**You still need original music files for rendering.** SoundCloud Pro access is *not* a blanket license or technical ability to rip the stream as MP3. Use a legitimate official downloadable track or upload your own masters to a private storage bucket. Coverr Free requires attribution (potentially a clickable logo according to the plan). The included caption credit may **not** satisfy this condition; get express confirmation before enabling publishing.
+**Audio is already available** from the artist-published SoundCloud RSS enclosures without manual uploads. This is the publicly distributed podcast encoding, not the lossless original master. No stream ripping is implemented. Coverr Free requires attribution (potentially a clickable logo according to the plan). The included caption credit may **not** satisfy this condition; get express confirmation before enabling publishing.
 
 ## Automatic original-song selection from SoundCloud RSS (2026-11-17)
 
@@ -68,7 +76,7 @@ Every day at **10:15 UTC** GitHub Actions selects an eligible track, retrieves i
 
 SoundCloud OAuth 2.1 (PKCE) supports a separate **read-only owner identity and track-metadata probe**. See [docs/soundcloud-owner-oauth.md](docs/soundcloud-owner-oauth.md) for the one-time Mac sign-in. The local helper encrypts rotating access/refresh tokens into a public-safe ciphertext file; the decryption key remains a GitHub Secret. After setup, a scheduled owner-check keeps credentials refreshed. **Neither that probe nor existing app credentials prove SoundCloud permits automated original-audio download** while public downloads are disabled. No stream ripping is implemented.
 
-To prevent repeated failing scheduled Reels before the original audio source is established, the 10:15 UTC Reel schedule is gated by repository variable `CARLECOOL_AUDIO_READY=true`. This flag is intentionally **not enabled by the owner OAuth setup**. Manual `dry-run` diagnostics are still available. The Instagram publish gate remains unchanged.
+The official SoundCloud RSS route is verified with real song audio, so the daily proposal schedule runs without the old audio-ready gate. The OAuth owner probe is **optional and not required** for this already functioning RSS route. Instagram remains independently gated and disabled.
 
 ## Free original music without publishing masters on GitHub
 
@@ -108,8 +116,8 @@ A review depends on the original email remaining in the Gmail Sent mailbox. Publ
 
 - Local music analysis is heuristic, not sophisticated trained multimodal AI. Cut points follow an estimated 8-beat grid, not guaranteed frame-perfect onsets.
 - Coverr's API sort `popular` is footage popularity **on Coverr**, not Instagram trends. Up to 3 queries per Reel; no mass downloading.
-- SoundCloud API gives current public track metadata. Only original audio you own and can lawfully download is used.
-- No live Coverr, SoundCloud, Gmail or Meta integration has been verified until you configure credentials and successfully run the workflows.
+- SoundCloud API provides public track metadata; actual Reel audio is the artist-published RSS enclosure. Podcast encoding may differ from the original master.
+- Live SoundCloud RSS download, Coverr clip retrieval/download accounting, private Gmail preview delivery and read-only Instagram identity have been verified; Instagram **publishing** remains untested and disabled.
 - **Instagram publishing is never enabled by default.** For Instagram professional accounts, set up a Meta app and the required permissions for your professional account; tokens expire and need renewal.
 - Email requires a Gmail app password. Google Workspace accounts may disallow app passwords; a Gmail OAuth/API implementation would then be needed.
 
