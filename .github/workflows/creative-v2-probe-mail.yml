@@ -1,0 +1,56 @@
+name: CarleCool — requested style-v2 preview with approval email
+# Single push-triggered test of new v2 aesthetics, review Issue and private Gmail.
+# No publishing or media artifacts. Subsequent code changes do not retrigger.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/creative-v2-probe-mail.yml'
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: carlecool-daily-reel
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
+      SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
+      COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+      GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+      SC_USE_RSS_AUDIO: 'true'
+      PUBLISH_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install FFmpeg and Python dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          pip install -r requirements.txt
+      - name: Check for an existing open approval
+        id: gate
+        run: |
+          OPEN=$(gh issue list --repo "$GITHUB_REPOSITORY" --label carlecool-review --state open --limit 20 --json number --jq 'length')
+          if [[ "$OPEN" -gt 0 ]]; then
+            echo "open=false" >> "$GITHUB_OUTPUT"
+            echo "No duplicate preview created: an approval is already open." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "open=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Generate actual CarleCool v2 private Reel (no Instagram)
+        if: steps.gate.outputs.open == 'true'
+        run: python -m carlecool.main --mode preview
+      - name: Create approval Issue with a direct Gmail review link
+        if: steps.gate.outputs.open == 'true'
+        run: python -m carlecool.review
