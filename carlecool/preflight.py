@@ -54,8 +54,10 @@ def soundcloud() -> Check:
         if not tracks:
             return Check("SoundCloud", "WARN", "API accessible but no eligible public tracks")
         downloadable = sum(bool(track.downloadable) for track in tracks)
+        newest = str(tracks[0].id)
         return Check("SoundCloud", "PASS",
-                     f"{len(tracks)} public tracks; {downloadable} marked downloadable (metadata only)")
+                     f"{len(tracks)} public tracks; {downloadable} marked downloadable; "
+                     f"newest public track ID: {newest} (metadata only)")
     except Exception as exc:
         return Check("SoundCloud", "FAIL", _http_status(exc))
 

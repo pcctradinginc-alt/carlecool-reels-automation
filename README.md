@@ -48,6 +48,14 @@ Go to **Settings → Secrets and variables → Actions**.
 
 **You still need original music files for rendering.** SoundCloud Pro access is *not* a blanket license or technical ability to rip the stream as MP3. Use a legitimate official downloadable track or upload your own masters to a private storage bucket. Coverr Free requires attribution (potentially a clickable logo according to the plan). The included caption credit may **not** satisfy this condition; get express confirmation before enabling publishing.
 
+## Free original music without publishing masters on GitHub
+
+SoundCloud streams are transcoded and are **not the original upload**. Direct downloading through SoundCloud requires an officially downloadable track; enabling downloads lets other signed-in listeners obtain that uploaded file too. SoundCloud API Terms also restrict persistent downloads by apps, so do not turn on scraping or automatic stream ripping. The read-only provider check reports the newest public track's numeric SoundCloud ID and how many of the 20 tracks are marked downloadable.
+
+**Preferred free private workflow:** In the same Gmail account already configured in GitHub Secrets, email your own MP3 master **from that address to itself**. Use the exact subject `CARLECOOL_AUDIO_123456789` where `123456789` is the numeric SoundCloud track ID, and attach a file named `123456789.mp3` (or `.wav`, `.flac`, `.m4a`). Do this once for each song (Gmail's normal attachment-size limits apply; our importer currently caps originals at 23 MB). Keep those messages in your Sent mailbox. The workflow looks up the selected song's original privately via authenticated IMAP, validates sender, recipient, subject and filename, and uses it only in-memory/temporary runner storage. It never commits songs or includes them in public artifacts.
+
+For a first trial, send **one** original MP3 of the newest SoundCloud song, then manually start the CarleCool daily Reel workflow in `dry-run` mode. The resulting Reel will be privately emailed to your `REVIEW_EMAIL`. If stock footage is not available or a required right is unresolved, the run stops without publishing anything.
+
 ## 3. Run once in dry-run
 
 GitHub → **Actions → CarleCool — make and review Reel → Run workflow** → choose `dry-run` → Run. This creates a 30-second 1080 × 1920 H.264/AAC MP4 from a current SoundCloud song and up to 8 clips. The exact rendered MP4 is emailed privately to `REVIEW_EMAIL`. No GitHub artifact is uploaded, no GitHub review Issue is opened, and nothing goes to Instagram in `dry-run`.
