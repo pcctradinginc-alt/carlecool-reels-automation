@@ -51,7 +51,7 @@ def _client():
     kwargs = {"verbose": False}
     token = os.environ.get("HF_TOKEN", "").strip()
     if token:
-        kwargs["hf_token"] = token
+        kwargs["token"] = token
     return Client(SPACE_ID, **kwargs)
 
 
