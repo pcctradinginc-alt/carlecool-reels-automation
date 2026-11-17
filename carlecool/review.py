@@ -61,6 +61,136 @@ def make_preview(video: Path, destination: Path) -> Path | None:
     return destination if destination.stat().st_size <= 10_000_000 else None
 
 
+def _safe_public_link(url: str, *, host: str) -> str:
+    """Reject injection, redirect tricks, and non-HTTPS links in private email."""
+    from urllib.parse import urlsplit
+    if not url:
+        return ""
+    parsed = urlsplit(url)
+    if (parsed.scheme != "https" or parsed.hostname != host or
+            parsed.username or parsed.password or parsed.port not in (None, 443)
+            or parsed.fragment or len(url) > 1000):
+        return ""
+    return url
+
+
+def review_plain_text(issue_url: str, metadata: dict) -> str:
+    """Useful even in Gmail clients that disable HTML email."""
+    title = str(metadata.get("title", "Neuer Track"))
+    profile = metadata.get("creative_profile") or {}
+    duration = metadata.get("duration", 30)
+    if issue_url:
+        actions = (
+            f"DEIN FREIGABELINK:\\n{issue_url}\\n\\n"
+            "Auf GitHub als Eigentümer kommentieren:\\n"
+            "  /revise mehr natur, weniger skate  - Video neu gestalten\\n"
+            "  /revise more_mpc              - mehr analoges Studio\\n"
+            "  /revise preset_rubin_lana     - Natur und Americana\\n"
+            "  /reject                       - verwerfen\\n"
+            "  /approve                      - freigeben (nur bei aktivierter Publikation)\\n"
+        )
+    else:
+        actions = "TESTVORSCHAU – keine Freigabe und keine Instagram-Veröffentlichung.\\n"
+    return (
+        f"CARLECOOL  /  CREATIVE REVIEW\\n\\n"
+        f"{title}\\n{duration} Sekunden · 9:16 Reel · MP4 im Anhang\\n\\n"
+        "Ein neuer visueller Entwurf ist bereit. Bitte erst das Video ansehen, "
+        "dann den nächsten Schritt auswählen.\\n\\n"
+        + actions + "\\n"
+        f"LOOK: {profile.get('preset', 'Rubin / Analog / Americana / Skate')}\\n"
+        f"SCHNITT: {profile.get('pace', 'medium')}   "
+        f"ANALOG: {profile.get('analog', 65)}%\\n\\n"
+        "Das MP4 ist nur dieser privaten Mail beigefügt. "
+        "Ein Link allein löst niemals eine Instagram-Veröffentlichung aus.\\n\\n"
+        f"Musik: {metadata.get('permalink', '')}\\n\\n"
+        f"Caption:\\n{metadata.get('caption', '')}\\n"
+    )
+
+
+def review_html(issue_url: str, metadata: dict) -> str:
+    """Responsive Gmail-safe, Apple-clean email; all text escaped, no tracking."""
+    h = lambda v: html_escape(str(v), quote=True)
+    title = h(metadata.get("title", "Neuer Track"))
+    profile = metadata.get("creative_profile") or {}
+    pace = {"slow": "Ruhig", "medium": "Musikalisch", "fast": "Dynamisch"}.get(
+        profile.get("pace", "medium"), "Musikalisch")
+    preset = str(profile.get("preset", "rubin_analog_lana_skate")).replace("_", " ").title()
+    duration = h(metadata.get("duration", 30))
+    analog = h(profile.get("analog", 65))
+    source = _safe_public_link(str(metadata.get("permalink") or ""), host="soundcloud.com")
+    song = (
+        f'<a href="{h(source)}" style="color:#606d81;text-decoration:underline">Song auf SoundCloud</a>'
+        if source else ""
+    )
+    url = _safe_public_link(issue_url, host="github.com")
+    if issue_url and not url:
+        raise ValueError("Review URL must be an exact HTTPS github.com link")
+    if url:
+        action_area = (
+            f'<a href="{h(url)}" style="display:inline-block;background:#1f2937;'
+            'color:#fff;font-size:15px;font-weight:700;padding:15px 24px;'
+            'border-radius:10px;text-decoration:none">Video freigeben oder überarbeiten</a>'
+            '<p style="font-size:12px;color:#79818e;margin-top:13px">'
+            'Öffnet ausschließlich die GitHub-Freigabe. Kein automatisches Posting.</p>'
+            '<div style="margin-top:26px;border-top:1px solid #e8e6e1;padding-top:20px">'
+            '<p style="font-size:12px;font-weight:700;letter-spacing:1.2px;'
+            'color:#7b756e;margin:0 0 14px">DEINE OPTIONEN</p>'
+            '<p style="font-size:14px;color:#202b36;margin:0 0 14px">'
+            '<b>✳ Überarbeiten</b><br>'
+            '<code style="font-family:monospace;font-size:12px;color:#4b5563">'
+            '/revise mehr natur, weniger skate</code></p>'
+            '<p style="font-size:14px;color:#202b36;margin:0 0 14px">'
+            '<b>✓ Gefällt mir</b><br>'
+            '<code style="font-family:monospace;font-size:12px;color:#4b5563">'
+            '/approve</code> <span style="font-size:12px;color:#7b756e">'
+            '(Instagram-Sperre bleibt aktiv)</span></p>'
+            '<p style="font-size:14px;color:#202b36;margin:0">'
+            '<b>× Verwerfen</b><br>'
+            '<code style="font-family:monospace;font-size:12px;color:#4b5563">/reject</code></p>'
+            '</div>'
+        )
+    else:
+        action_area = (
+            '<p style="font-size:14px;color:#5c6775">'
+            'Nur eine technische Testvorschau – kein Freigabelink und keine Veröffentlichung.</p>'
+        )
+    return (
+        '<!doctype html><html lang="de"><head><meta charset="utf-8"></head>'
+        '<body style="margin:0;padding:24px 12px;background:#f4f2ee;'
+        'font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif;color:#202b36">'
+        '<table role="presentation" cellpadding="0" cellspacing="0" width="100%"'
+        ' style="max-width:600px;margin:0 auto;background:#fff;border:1px solid #e9e5df;'
+        'border-radius:16px"><tr><td style="padding:34px 34px 28px">'
+        '<p style="margin:0 0 36px;font-size:11px;letter-spacing:3px;'
+        'font-weight:800;color:#333c48">CARLECOOL<span style="color:#bb8e72"> / STUDIO</span></p>'
+        '<p style="font-size:11px;letter-spacing:2px;color:#aa826c;'
+        'font-weight:700;margin:0 0 12px">NEUER VIDEOENTWURF</p>'
+        f'<h1 style="font-size:34px;letter-spacing:-1.3px;line-height:1.1;margin:0 0 18px">'
+        f'{title}</h1>'
+        '<p style="color:#616c79;font-size:15px;line-height:1.7;margin:0 0 20px">'
+        'Dein neuer 30-Sekunden-Film ist da. Ruhe, Analog-Texturen, '
+        'California Nostalgia und ein bisschen Skate. Schau dir erst den '
+        'MP4-Anhang an – anschließend entscheidest du über den nächsten Schnitt.</p>'
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"'
+        ' style="background:#f8f6f2;border:1px solid #efebe5;border-radius:10px">'
+        '<tr><td style="padding:16px 18px;font-size:12px;color:#687281">'
+        f'<b style="color:#202b36">REEL</b> &nbsp;{duration} s · 9:16 · MP4<br>'
+        f'<b style="color:#202b36">LOOK</b> &nbsp;{h(preset)}<br>'
+        f'<b style="color:#202b36">SCHNITT</b> &nbsp;{h(pace)}'
+        f' &nbsp;&nbsp;<b style="color:#202b36">ANALOG</b> &nbsp;{analog}%'
+        '</td></tr></table>'
+        '<p style="font-size:13px;color:#79818e;margin:22px 0 20px">'
+        '▶ Dein Video liegt als <b>CarleCool-Original.mp4</b> im Anhang.</p>'
+        + action_area +
+        f'<p style="margin:28px 0 0;font-size:12px;color:#87909a">{song}</p>'
+        '<p style="border-top:1px solid #eeeae4;margin:26px 0 0;padding-top:20px;'
+        'font-size:11px;line-height:1.6;color:#9499a2">'
+        'Private Vorschau · Keine automatische Instagram-Veröffentlichung · '
+        'Verlinkungen enthalten keine eingebetteten Trackingbilder.</p>'
+        '</td></tr></table></body></html>'
+    )
+
+
 def send_review_email(issue_url: str, metadata: dict, original_path: Path | None = None,
                       *, message_id: str | None = None, run_id: int | None = None) -> bool:
     """Send exact hashed original + metadata privately; never upload a GitHub artifact."""
@@ -85,49 +215,8 @@ def send_review_email(issue_url: str, metadata: dict, original_path: Path | None
     msg['X-CarleCool-Run-ID'] = str(run_id)
     msg['X-CarleCool-SHA256'] = metadata['sha256']
     msg['Subject'] = f"CarleCool | Reel zur Freigabe: {metadata['title']}"
-    instructions = (f"Direkt zur Freigabe und Überarbeitung: {issue_url}\n"
-                    "Als Eigentümer auf GitHub kommentieren: /approve oder /publish zur Freigabe, "
-                    "/reject zum Verwerfen, /revise mehr natur, weniger skate für neue Version. "
-                    "Ein Klick auf den Link allein veröffentlicht nichts."
-                    if issue_url else "Testvorschau ohne Freigabe-Issue: kein Instagram-Post.")
-    msg.set_content(f"""CarleCool – Neuer Reel-Vorschlag
-
-Song: {metadata['title']}
-Dauer: {metadata.get('duration', '30')} Sekunden
-SoundCloud: {metadata.get('permalink', '')}
-Suchbegriffe: {', '.join(metadata.get('search_keywords', []))}
-Bildsprache: {metadata.get('visual_direction', {}).get('name', 'Analog-Digital Nostalgia × Corecore × Zen Minimalism')}
-Schnitt: {metadata.get('visual_direction', {}).get('edit_plan', 'Stillness ↔ Action')}
-Stilprofil: {metadata.get('creative_profile', {}).get('preset', 'rubin_analog_lana_skate')}
-Schnittgeschwindigkeit: {metadata.get('creative_profile', {}).get('pace', 'medium')}
-Analog-Look: {metadata.get('creative_profile', {}).get('analog', 65)}%
-Gewichtung: {metadata.get('creative_profile', {}).get('weights', {})}
-
-Das ORIGINAL-REEL liegt ausschließlich dieser privaten E-Mail bei.
-{instructions}
-
-Kein Mail-Link allein veröffentlicht ein Video. Nur der GitHub-Eigentümer kann die
-Freigabe auslösen; dann wird exakt dieser E-Mail-Anhang per SHA-256 geprüft.
-
-Caption-Vorschlag:
-{metadata.get('caption', '')}
-""")
-    # The issue URL is a clickable email link. It NEVER posts without an
-    # authenticated owner comment and the separate publish-enabled gate.
-    if issue_url:
-        safe_link = html_escape(issue_url, quote=True)
-        safe_title = html_escape(str(metadata['title']))
-        msg.add_alternative(
-            f'<html><body style="font-family:Arial,sans-serif;max-width:640px">'
-            f'<h2>CarleCool – {safe_title}</h2>'
-            f'<p>Das Originalvideo liegt als privater MP4-Anhang bei.</p>'
-            f'<p><a href="{safe_link}" style="background:#181818;color:white;padding:14px 22px;'
-            f'border-radius:8px;text-decoration:none">Freigabe &amp; Überarbeitung öffnen</a></p>'
-            f'<p>Der Link öffnet nur das GitHub-Issue. Ein Kommentar <b>/approve</b> '
-            f'(oder <b>/publish</b>) ist zur Freigabe nötig; die Instagram-Sperre gilt weiter.</p>'
-            f'<p>Eine neue Version anfordern: <code>/revise mehr natur, weniger skate</code></p>'
-            f'<p>Verwerfen: <code>/reject</code></p>'
-            f'</body></html>', subtype='html')
+    msg.set_content(review_plain_text(issue_url, metadata))
+    msg.add_alternative(review_html(issue_url, metadata), subtype="html")
     msg.add_attachment(video_bytes, maintype='video', subtype='mp4', filename='CarleCool-Original.mp4')
     meta_bytes = json.dumps(metadata, ensure_ascii=False, sort_keys=True).encode('utf-8')
     msg.add_attachment(meta_bytes, maintype='application', subtype='json', filename='reel_metadata.json')
