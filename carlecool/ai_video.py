@@ -56,12 +56,15 @@ def _client():
 
 
 def probe(client=None) -> bool:
-    """Discover public API without consuming scarce free video-generation quota."""
+    """Discover public API without spending scarce video-generation quota."""
     client = client or _client()
     data = client.view_api(print_info=False)
-    # Gradio returns a dict of named and unnamed endpoints; version specific.
+    # API names are public. Report only their names (not endpoint descriptions).
     serialized = json.dumps(data, ensure_ascii=True, default=str)
-    if "generate_video" not in serialized:
+    print("Public Gradio API layout:", str(type(data).__name__))
+    print("Generation endpoint advertised:", "generate_video" in serialized)
+    print("Fallback predict endpoint advertised:", "/predict" in serialized)
+    if "generate_video" not in serialized and "/predict" not in serialized:
         raise AIUnavailable("Lightricks Space generation API is unavailable")
     return True
 
@@ -134,11 +137,15 @@ def main():
     args = parser.parse_args()
     if not (args.probe or args.generate):
         raise SystemExit("Only explicit --probe / --generate supported")
+    stage = "connect"
     try:
         client = _client()
+        print("PASS: Connected to public Lightricks Space client.")
+        stage = "schema"
         probe(client)
-        print("PASS: Lightricks/LTX-2-3 Gradio generation endpoint reachable.")
+        print("PASS: Gradio API schema is discoverable.")
         if args.generate:
+            stage = "generation"
             with tempfile.TemporaryDirectory(prefix="carlecool-ai-") as temp:
                 video = generate_one(
                     "Quiet California coastline, fading afternoon sun, palm silhouettes, "
@@ -147,8 +154,8 @@ def main():
                 print("PASS: Actual 2-second ZeroGPU video generated and validated; "
                       "temporary output erased. No GitHub artifact, no email or post.")
     except Exception as exc:
-        # Never print Gradio's raw error, signed URLs or optional HF token.
-        print("UNAVAILABLE: zero-cost LTX video: " + type(exc).__name__)
+        # Only print stage + exception class; never raw URLs or authentication.
+        print("UNAVAILABLE: free LTX at " + stage + " / " + type(exc).__name__)
         raise SystemExit(2)
 
 
