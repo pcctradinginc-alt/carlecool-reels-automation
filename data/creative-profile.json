@@ -1,6 +1,11 @@
 {
+  "analog": 65,
+  "avoid_faces": false,
   "creative_version": 2,
+  "music": "automatic",
+  "pace": "medium",
   "preset": "rubin_analog_lana_skate",
+  "revision": 0,
   "weights": {
     "nature": 28,
     "studio": 22,
@@ -9,10 +14,5 @@
     "y2k": 7,
     "night": 5
   },
-  "pace": "medium",
-  "analog": 65,
-  "music": "automatic",
-  "revision": 0,
-  "avoid_faces": false,
-  "ai_video": false
+  "ai_video": true
 }
