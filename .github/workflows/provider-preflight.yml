@@ -1,0 +1,42 @@
+name: CarleCool — provider connection preflight (read-only)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'carlecool/preflight.py'
+      - '.github/workflows/provider-preflight.yml'
+permissions:
+  contents: read
+concurrency:
+  group: carlecool-provider-preflight
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    env:
+      IG_USER_ID: ${{ secrets.IG_USER_ID }}
+      IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      GRAPH_API_VERSION: v27.0
+      SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
+      SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
+      COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+      GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+      AUDIO_S3_BUCKET: ${{ vars.AUDIO_S3_BUCKET }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      SC_ALLOW_OFFICIAL_DOWNLOADS: ${{ vars.SC_ALLOW_OFFICIAL_DOWNLOADS }}
+      PUBLISH_ENABLED: ${{ secrets.PUBLISH_ENABLED }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install requirements
+        run: pip install -r requirements.txt
+      - name: Read-only connectivity checks (never publish)
+        run: python -m carlecool.preflight
