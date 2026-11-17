@@ -1,0 +1,17 @@
+{
+  "creative_version": 2,
+  "preset": "rubin_analog_lana_skate",
+  "weights": {
+    "nature": 28,
+    "studio": 22,
+    "americana": 20,
+    "skate": 18,
+    "y2k": 7,
+    "night": 5
+  },
+  "pace": "medium",
+  "analog": 65,
+  "music": "automatic",
+  "revision": 0,
+  "avoid_faces": false
+}
