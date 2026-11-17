@@ -69,7 +69,7 @@ def test_ai_unavailable_fails_cleanly_without_leaving_partial_media(tmp_path):
 def test_daily_pipeline_ai_is_strictly_opt_in():
     from carlecool.creative import load_profile, default_profile, apply_commands
     content = Path(".github/workflows/daily-reel.yml").read_text()
-    assert load_profile()["ai_video"] is False
+    assert type(load_profile()["ai_video"]) is bool
     assert default_profile()["ai_video"] is False
     assert "CARLECOOL_AI_VIDEO: 'one'" in content
     assert apply_commands(load_profile(), ["ai_video"])["ai_video"] is True

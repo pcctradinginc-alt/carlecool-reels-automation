@@ -79,9 +79,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
             paths.append(ai_path)
             print("Experimental AI footage ready: 1 scene; no audio uploaded to HF.")
         except Exception as exc:
-            # Missing free quota / unavailable external Space must not block Reels.
-            print("Experimental AI footage unavailable, Coverr fallback: "
-                  + type(exc).__name__)
+            # Only emit internally sanitized AIUnavailable status, never raw
+            # Gradio HTTP exceptions, signed URLs or optional HF token.
+            from .ai_video import AIUnavailable
+            reason = str(exc) if isinstance(exc, AIUnavailable) else type(exc).__name__
+            print("Experimental AI footage unavailable, Coverr fallback: " + reason)
     for video in candidates:
         try:
             path = fetch_owned_stock(video, output_dir / f"stock_{len(paths):02d}.mp4") if video.source == "owned" else download_video(video.url, output_dir / f"stock_{len(paths):02d}.mp4")

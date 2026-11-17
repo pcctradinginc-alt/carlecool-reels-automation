@@ -127,8 +127,17 @@ def generate_one(direction: str, destination: Path, *, client=None,
         # Never log Gradio exception bodies; they could disclose remote info.
         if isinstance(exc, AIUnavailable):
             raise
+        # Classify upstream failures without leaking remotely supplied
+        # exception messages, URLs, signed payloads, or user identifiers.
+        detail = str(exc).lower()
+        category = (
+            "QUOTA" if any(word in detail for word in ("quota", "credits", "rate limit", "429")) else
+            "QUEUE_BUSY" if any(word in detail for word in ("queue", "busy", "capacity")) else
+            "TIMEOUT" if isinstance(exc, FutureTimeout) or "timeout" in detail else
+            "UNAVAILABLE"
+        )
         raise AIUnavailable("Free ZeroGPU video generation unavailable: " +
-                            type(exc).__name__) from None
+                            category + " / " + type(exc).__name__) from None
 
 
 def main():
