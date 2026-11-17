@@ -82,6 +82,20 @@ def download_video(url: str, destination: Path, session=None, max_bytes=180_000_
     raise RuntimeError("Too many video redirects")
 
 
+def _coverr_search_phrase(editorial_phrase: str) -> str:
+    """Map a detailed art-direction shot to Coverr's short search vocabulary."""
+    term = editorial_phrase.lower()
+    if "skate" in term or "bmx" in term:
+        return "skateboarding"
+    if any(x in term for x in ("coast", "malibu", "beach", "ocean", "meditation", "white room", "driftwood")):
+        return "beach"
+    if any(x in term for x in ("sunset", "palm", "retro", "vintage", "y2k", "super 8", "digicam", "cybershot", "1960")):
+        return "sunset"
+    if any(x in term for x in ("urban", "night", "neon", "city", "street", "rooftop")):
+        return "city"
+    return "nature"
+
+
 def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8, *, keywords=None) -> list[Video]:
     """A maximum of 3 searches (<50/hr free limit); results ranked for vertical fit."""
     if not key:
@@ -89,7 +103,8 @@ def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8,
     session = session or requests.Session()
     seen = set()
     per_lane = []
-    for query in (keywords if keywords is not None else select_keywords(mood))[:3]:
+    for editorial in (keywords if keywords is not None else select_keywords(mood))[:3]:
+        query = _coverr_search_phrase(editorial)
         r = session.get(
             "https://api.coverr.co/videos",
             headers={"x-api-key": key},
