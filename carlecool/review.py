@@ -79,6 +79,8 @@ def review_plain_text(issue_url: str, metadata: dict) -> str:
     title = str(metadata.get("title", "Neuer Track"))
     profile = metadata.get("creative_profile") or {}
     duration = metadata.get("duration", 30)
+    ai = any(x.get("provider") == "ai" for x in metadata.get("footage_sources", []))
+    footage_label = "KI-Kurzclip (LTX-2.3) + Coverr" if ai else "kuratierte Coverr-Clips"
     if issue_url:
         actions = (
             f"DEIN FREIGABELINK:\\n{issue_url}\\n\\n"
@@ -97,6 +99,7 @@ def review_plain_text(issue_url: str, metadata: dict) -> str:
         "Ein neuer visueller Entwurf ist bereit. Bitte erst das Video ansehen, "
         "dann den nächsten Schritt auswählen.\\n\\n"
         + actions + "\\n"
+        f"FOOTAGE: {footage_label}\\n"
         f"LOOK: {profile.get('preset', 'Rubin / Analog / Americana / Skate')}\\n"
         f"SCHNITT: {profile.get('pace', 'medium')}   "
         f"ANALOG: {profile.get('analog', 65)}%\\n\\n"
@@ -117,6 +120,8 @@ def review_html(issue_url: str, metadata: dict) -> str:
     preset = str(profile.get("preset", "rubin_analog_lana_skate")).replace("_", " ").title()
     duration = h(metadata.get("duration", 30))
     analog = h(profile.get("analog", 65))
+    ai = any(x.get("provider") == "ai" for x in metadata.get("footage_sources", []))
+    footage_label = "1 KI-Shot + Coverr" if ai else "kuratierte Coverr-Clips"
     source = _safe_public_link(str(metadata.get("permalink") or ""), host="soundcloud.com")
     song = (
         f'<a href="{h(source)}" style="color:#606d81;text-decoration:underline">Song auf SoundCloud</a>'
@@ -176,6 +181,7 @@ def review_html(issue_url: str, metadata: dict) -> str:
         '<tr><td style="padding:16px 18px;font-size:12px;color:#687281">'
         f'<b style="color:#202b36">REEL</b> &nbsp;{duration} s · 9:16 · MP4<br>'
         f'<b style="color:#202b36">LOOK</b> &nbsp;{h(preset)}<br>'
+        f'<b style="color:#202b36">BILDER</b> &nbsp;{h(footage_label)}<br>'
         f'<b style="color:#202b36">SCHNITT</b> &nbsp;{h(pace)}'
         f' &nbsp;&nbsp;<b style="color:#202b36">ANALOG</b> &nbsp;{analog}%'
         '</td></tr></table>'
