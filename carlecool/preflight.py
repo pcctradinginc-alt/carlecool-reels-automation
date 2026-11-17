@@ -53,7 +53,9 @@ def soundcloud() -> Check:
         tracks = fetch_tracks(Settings())
         if not tracks:
             return Check("SoundCloud", "WARN", "API accessible but no eligible public tracks")
-        return Check("SoundCloud", "PASS", f"{len(tracks)} public tracks found (metadata only)")
+        downloadable = sum(bool(track.downloadable) for track in tracks)
+        return Check("SoundCloud", "PASS",
+                     f"{len(tracks)} public tracks; {downloadable} marked downloadable (metadata only)")
     except Exception as exc:
         return Check("SoundCloud", "FAIL", _http_status(exc))
 
