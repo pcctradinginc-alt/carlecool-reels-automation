@@ -68,14 +68,21 @@ def coverr() -> Check:
         return Check("Coverr", "BLOCKED", "COVERR_API_KEY secret missing")
     try:
         res = requests.get("https://api.coverr.co/videos", headers={"x-api-key": key},
-                           params={"query": "skateboarding", "page_size": 2,
-                                   "sort": "popular", "urls": "false"},
+                           params={"query": "skateboarding", "page_size": 5,
+                                   "sort": "popular", "urls": "true"},
                            timeout=(10, 25))
         res.raise_for_status()
         data = res.json()
-        if not isinstance(data.get("hits"), list):
+        hits = data.get("hits")
+        if not isinstance(hits, list):
             return Check("Coverr", "WARN", "API reachable but unexpected response format")
-        return Check("Coverr", "PASS", "stock-search endpoint accessible (read-only)")
+        downloadable = sum(bool((x.get("urls") or {}).get("mp4_download")
+                                or (x.get("urls") or {}).get("mp4")) for x in hits)
+        if not downloadable:
+            return Check("Coverr", "WARN",
+                         f"Search returned {len(hits)} videos but 0 signed MP4 links")
+        return Check("Coverr", "PASS",
+                     f"Search returned {len(hits)} videos, {downloadable} signed MP4 links")
     except Exception as exc:
         return Check("Coverr", "FAIL", _http_status(exc))
 
