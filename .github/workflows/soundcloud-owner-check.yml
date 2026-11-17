@@ -1,0 +1,31 @@
+name: CarleCool — SoundCloud owner OAuth check (read-only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: carlecool-owner-oauth
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
+      SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
+      SC_OWNER_FERNET_KEY: ${{ secrets.SC_OWNER_FERNET_KEY }}
+      SOUNDCLOUD_PROFILE_URL: https://soundcloud.com/carlecool
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Verify connected artist and official download metadata only
+        run: python -m carlecool.sc_owner
