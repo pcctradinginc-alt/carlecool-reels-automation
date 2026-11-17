@@ -28,6 +28,14 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
           pip install 'gradio_client>=1.13,<3'
+      - name: Verify personal Hugging Face token is available without revealing it
+        shell: bash
+        run: |
+          if [[ -z "${HF_TOKEN}" ]]; then
+            echo "::error::HF_TOKEN is missing from repository Actions Secrets"
+            exit 1
+          fi
+          echo "HF_TOKEN is configured; testing authenticated free-tier generation."
       # Gradio 2.x needs return_format=dict; validate before making any GPU call.
       - name: Inspect public Gradio API without using GPU quota
         run: python -m carlecool.ai_video --probe
