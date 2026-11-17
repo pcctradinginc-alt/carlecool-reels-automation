@@ -16,6 +16,7 @@ from carlecool.config import Settings
 from carlecool.instagram import Instagram
 from carlecool.soundcloud import fetch_tracks
 from carlecool.mailstore import _sent_mailbox
+from carlecool.sc_rss import inspect_feed, public_rss_url
 
 @dataclass
 class Check:
@@ -98,6 +99,43 @@ def gmail() -> Check:
         return Check("Gmail IMAP", "FAIL", _http_status(exc))
     return Check("Gmail", "PASS", "SMTP login and IMAP Sent-folder access work; no message sent")
 
+
+def soundcloud_rss() -> Check:
+    """Discover only publicly enabled podcast audio; never request enclosure media."""
+    client_id = os.getenv("SOUNDCLOUD_CLIENT_ID", "")
+    secret = os.getenv("SOUNDCLOUD_CLIENT_SECRET", "")
+    if not client_id or not secret:
+        return Check("SoundCloud RSS", "WARN", "SoundCloud app credentials missing")
+    try:
+        oauth = requests.post("https://secure.soundcloud.com/oauth/token",
+                              auth=(client_id, secret),
+                              data={"grant_type": "client_credentials"},
+                              timeout=(10, 25))
+        oauth.raise_for_status()
+        token = oauth.json()["access_token"]
+        profile = requests.get("https://api.soundcloud.com/resolve",
+                               headers={"Authorization": f"OAuth {token}"},
+                               params={"url": "https://soundcloud.com/carlecool"}, timeout=(10, 25))
+        profile.raise_for_status()
+        who = profile.json()
+        user_id = str(who.get("id") or str(who.get("urn", "")).split(":")[-1])
+        url = public_rss_url(user_id)
+        response = requests.get(url, timeout=(10, 25), allow_redirects=False)
+        if response.status_code in (404, 403):
+            return Check("SoundCloud RSS", "WARN", "No accessible official RSS feed")
+        response.raise_for_status()
+        if len(response.content) > 2_000_000:
+            return Check("SoundCloud RSS", "WARN", "RSS XML too large to inspect")
+        tracks = fetch_tracks(Settings())
+        stats = inspect_feed(response.content, {x.id for x in tracks})
+        if stats["newest_20_matched"] == 0:
+            return Check("SoundCloud RSS", "WARN",
+                         f"RSS audio entries: {stats['rss_audio_entries']}; 0 of newest 20 match")
+        return Check("SoundCloud RSS", "PASS",
+                     f"RSS contains {stats['newest_20_matched']} of newest 20 tracks with audio enclosures")
+    except Exception as exc:
+        return Check("SoundCloud RSS", "WARN", _http_status(exc))
+
 def audio_readiness() -> Check:
     if os.getenv("GMAIL_ADDRESS") and os.getenv("GMAIL_APP_PASSWORD"):
         return Check("Original audio", "WARN", "private Gmail master-audio retrieval configured; actual files unverified")
@@ -113,7 +151,7 @@ def publication_gates() -> Check:
     return Check("Publishing", "PASS", "disabled; no live posts possible from preflight")
 
 def main() -> None:
-    results = [instagram(), soundcloud(), coverr(), gmail(),
+    results = [instagram(), soundcloud(), soundcloud_rss(), coverr(), gmail(),
                audio_readiness(), publication_gates()]
     lines = ["## CarleCool — read-only provider preflight", "",
              "No posting, media uploading, or email sending performed.", "",
