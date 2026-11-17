@@ -1,4 +1,5 @@
 name: CarleCool — one-time real Reel preview end-to-end (no publishing)
+# Retry after Coverr keyword simplification; no Instagram posting permitted.
 on:
   workflow_dispatch:
   push:
