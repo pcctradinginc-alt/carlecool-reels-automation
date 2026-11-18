@@ -48,17 +48,34 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     tracks = fetch_tracks(config)
     if not tracks:
         raise RuntimeError("No public SoundCloud tracks found")
+    profile = validate_profile(creative_profile) if creative_profile is not None else load_profile()
+    output_dir = Path("output")
+    output_dir.mkdir(exist_ok=True)
+    destination = output_dir / "original.mp3"
     if track_id is not None:
         track = next((t for t in tracks if t.id == str(track_id)), None)
         if track is None:
             raise ValueError('Revision track no longer appears in latest 20 SoundCloud uploads')
+        audio = locate_original(track, destination)
     else:
-        track = pick_preview_track(tracks, previews)
-    profile = validate_profile(creative_profile) if creative_profile is not None else load_profile()
+        # Keep balanced random rotation, but skip tracks lacking artist-authorized
+        # original audio; no SoundCloud stream ripping or unlicensed substitute.
+        remaining = list(tracks[:20])
+        while remaining:
+            track = pick_preview_track(remaining, previews)
+            try:
+                destination.unlink(missing_ok=True)
+                audio = locate_original(track, destination)
+                break
+            except FileNotFoundError:
+                destination.unlink(missing_ok=True)
+                print(f"Skipping SoundCloud ID {track.id}: no authorized original audio available")
+                remaining = [candidate for candidate in remaining if candidate.id != track.id]
+        else:
+            raise FileNotFoundError(
+                "No artist-authorized original audio among the newest 20 tracks; "
+                "check SoundCloud owner RSS publication or send a private Gmail master")
     print(f"Selected track: {track.title} (SoundCloud ID {track.id})")
-    output_dir = Path("output")
-    output_dir.mkdir(exist_ok=True)
-    audio = locate_original(track, output_dir / "original.mp3")
     features = analyze_audio(str(audio), config.reel_seconds, track.genre)
     if profile["music"] == "beginning":
         features = replace(features, excerpt_start=0.0)
