@@ -1,0 +1,12 @@
+name = "carlecool-approval"
+main = "src/index.js"
+compatibility_date = "2026-11-18"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "carlecool-approvals"
+database_id = "3f5135f9-85f3-483b-b84c-debc1d28fef9"
+
+[vars]
+GITHUB_REPOSITORY = "pcctradinginc-alt/carlecool-reels-automation"
