@@ -14,11 +14,32 @@ def _run(args):
 
 
 def probe_duration(path: Path) -> float:
+    """Read duration via ffprobe where available, otherwise bundled FFmpeg metadata.
+
+    imageio-ffmpeg bundles FFmpeg but not ffprobe. The Duration field is read from
+    FFmpeg's input inspection; no media is transcoded during this check.
+    """
+    import shutil
+    import re
+
+    if shutil.which("ffprobe"):
+        p = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "json", str(path)],
+            capture_output=True, text=True, check=True,
+        )
+        return float(json.loads(p.stdout)["format"]["duration"])
     p = subprocess.run(
-        ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "json", str(path)],
-        capture_output=True, text=True, check=True,
+        ["ffmpeg", "-hide_banner", "-i", str(path)],
+        capture_output=True, text=True,
     )
-    return float(json.loads(p.stdout)["format"]["duration"])
+    match = re.search(r"Duration:\\s*(\\d+):(\\d+):(\\d+(?:\\.\\d+)?)", p.stderr)
+    if not match:
+        raise RuntimeError(f"Cannot determine media duration: {path.name}")
+    hours, minutes, seconds = match.groups()
+    duration = int(hours) * 3600 + int(minutes) * 60 + float(seconds)
+    if duration <= 0:
+        raise RuntimeError(f"Invalid media duration: {path.name}")
+    return duration
 
 
 def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output: Path,
