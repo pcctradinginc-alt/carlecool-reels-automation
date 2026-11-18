@@ -52,7 +52,7 @@ def test_all_choices_are_visible_in_review_email_and_issue_stays_required():
         assert label in html
     assert html.count('href="' + ISSUE + '"') >= 3
     assert "Nur der Kommentar ist die Freigabe" in html
-    assert "bis zur API-Einrichtung gesperrt" in html
+    assert "bis zur Verbindung über Zernio" in html
 
 
 def test_dry_run_does_not_pretend_it_can_publish():
