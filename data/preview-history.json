@@ -15,7 +15,8 @@
         "Q60L2su7q3",
         "x8dpic5Sue"
       ],
-      "sha256": "814a32f84c97dbde6f8b3591cfa4fb4f6c0392068b00663c52db51b4dd1ad48c"
+      "sha256": "814a32f84c97dbde6f8b3591cfa4fb4f6c0392068b00663c52db51b4dd1ad48c",
+      "kind": "daily"
     },
     {
       "at": "2026-11-17T20:35:09Z",
@@ -31,13 +32,15 @@
         "4ZwK7eRI4R",
         "NHGTTrUCNG"
       ],
-      "sha256": "d202938267b635c65f437843ff938988db38ec1964795517cd35b60a80eb7e15"
+      "sha256": "d202938267b635c65f437843ff938988db38ec1964795517cd35b60a80eb7e15",
+      "kind": "revision"
     },
     {
       "at": "2026-11-18T16:51:23+00:00",
       "track_id": "2437525062",
       "run_id": 44351762557,
-      "video_ids": []
+      "video_ids": [],
+      "kind": "daily"
     }
   ]
 }
