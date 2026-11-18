@@ -1,4 +1,11 @@
 {
   "published": [],
-  "pending": null
+  "pending": {
+    "track_id": "2373071753",
+    "sha256": "69c825395c93ce9911eacc71571591924c4e52eeb5822a619e7283854af03dd4",
+    "at": "2026-11-18T20:30:09.697004+00:00",
+    "issue_number": 5,
+    "target": "tiktok",
+    "provider": "zernio"
+  }
 }
