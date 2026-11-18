@@ -41,10 +41,21 @@ def ensure_target_ready(target: str) -> None:
     """
     if target not in ('instagram', 'tiktok', 'both'):
         raise ValueError('Unknown publish destination')
-    if target != 'instagram':
+    # Default to the old Instagram-only integration until the owner explicitly
+    # connects two Zernio accounts and activates the new publisher.
+    if os.getenv('ZERNIO_PUBLISH_ENABLED') == 'true':
+        requested = ('instagram', 'tiktok') if target == 'both' else (target,)
+        if not os.getenv('ZERNIO_API_KEY', '').strip():
+            raise RuntimeError('ZERNIO_API_KEY missing; neither platform was posted')
+        required = {'instagram': 'ZERNIO_INSTAGRAM_ACCOUNT_ID',
+                    'tiktok': 'ZERNIO_TIKTOK_ACCOUNT_ID'}
+        missing = [required[name] for name in requested if not os.getenv(required[name], '').strip()]
+        if missing:
+            raise RuntimeError('Missing connected Zernio accounts: ' + ', '.join(missing))
+    elif target != 'instagram':
         raise RuntimeError(
-            'TikTok is not connected or approved. Neither TikTok nor Instagram '
-            'has been posted. See docs/tiktok-setup.md for required TikTok setup.'
+            'Zernio is not connected and enabled. Neither TikTok nor Instagram '
+            'has been posted. See docs/zernio-free-setup.md.'
         )
 
 
@@ -72,6 +83,67 @@ def verify_artifact(issue: dict, metadata: dict, video: Path, *, run_id: int) ->
     return approval
 
 
+def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
+                       video: Path, target: str, state: dict) -> None:
+    """Publish with official partner after consent and an immutable Git reserve.
+
+    Partial results and timeout are intentionally NOT retried automatically.
+    The journal remains pending until manually reconciled to prevent duplicates.
+    """
+    from .zernio import Zernio, published_platforms
+    if len(set(approval['video_ids'])) < 5:
+        raise RuntimeError('Require 5 unique licensed clips for automatic posting')
+    if state.get('pending'):
+        raise RuntimeError('Unresolved publication; reconcile before sending another')
+    if any(x.get('sha256') == approval['sha256'] for x in state.get('published', [])):
+        raise RuntimeError('These exact approved video bytes were already published')
+    client = Zernio(os.environ['ZERNIO_API_KEY'])
+    timestamp = datetime.now(timezone.utc).isoformat()
+    state['pending'] = {
+        'track_id': approval['track_id'],
+        'sha256': approval['sha256'],
+        'at': timestamp,
+        'issue_number': issue_number,
+        'target': target,
+        'provider': 'zernio',
+    }
+    save_state(state)
+    commit_state(f'journal: reserve approved zernio reel {issue_number} for {target}')
+    # Any crash or 207 now leaves a pending record, stopping accidental retries.
+    media_url = client.upload(video)
+    response = client.publish(
+        media_url=media_url, caption=approval['caption'], target=target,
+        instagram_id=os.getenv('ZERNIO_INSTAGRAM_ACCOUNT_ID', ''),
+        tiktok_id=os.getenv('ZERNIO_TIKTOK_ACCOUNT_ID', ''),
+        ai_generated=any(item.get('provider') == 'ai' for item in approval['footage_sources']),
+        sha256=approval['sha256'], issue_number=issue_number,
+    )
+    post = response.get('post') or {}
+    state['pending']['provider_post_id'] = post.get('_id', '')
+    per_platform = published_platforms(response, target)
+    state['pending']['platform_status'] = {
+        key: value.get('status', 'unknown') for key, value in per_platform.items()
+    }
+    save_state(state)
+    commit_state(f'journal: record zernio result for issue {issue_number}')
+    if any(item.get('status') != 'published' for item in per_platform.values()):
+        raise RuntimeError('One or more platforms not confirmed published; '
+                           'manual Zernio reconciliation needed before any retry')
+    state['published'].append({
+        'track_id': approval['track_id'], 'at': timestamp,
+        'video_ids': approval['video_ids'], 'sha256': approval['sha256'],
+        'approval_issue': issue_number, 'provider': 'zernio', 'target': target,
+        'provider_post_id': post.get('_id', ''),
+        'platform_status': state['pending']['platform_status'],
+    })
+    state['pending'] = None
+    save_state(state)
+    commit_state(f'journal: published zernio reel {issue_number} on {target}')
+    github_request('POST', f'issues/{issue_number}/comments',
+                   json_body={'body': f'✅ Veröffentlichung über Zernio bestätigt: {target}.'})
+    github_request('PATCH', f'issues/{issue_number}', json_body={'state': 'closed'})
+
+
 def publish(issue_number: int, run_id: int, directory: Path, *, target: str = 'instagram'):
     ensure_target_ready(target)
     if os.environ.get('GITHUB_ACTIONS') != 'true':
@@ -80,7 +152,7 @@ def publish(issue_number: int, run_id: int, directory: Path, *, target: str = 'i
     settings.validate()
     if not settings.publish_enabled:
         raise RuntimeError('PUBLISH_ENABLED secret is not true; approval alone cannot post')
-    if not settings.ig_access_token:
+    if os.getenv('ZERNIO_PUBLISH_ENABLED') != 'true' and not settings.ig_access_token:
         raise RuntimeError('IG_ACCESS_TOKEN is missing')
     issue = github_request('GET', f'issues/{issue_number}')
     metadata = json.loads((directory / 'output/reel_metadata.json').read_text(encoding='utf-8'))
@@ -94,9 +166,12 @@ def publish(issue_number: int, run_id: int, directory: Path, *, target: str = 'i
             and os.getenv('AI_VIDEO_PUBLISH_LICENSE_CONFIRMED') != 'true'):
         raise RuntimeError('AI-video distribution rights have not been confirmed')
     state = load_state()
+    if os.getenv('ZERNIO_PUBLISH_ENABLED') == 'true':
+        publish_via_zernio(issue_number, approval, metadata, video, target, state)
+        return
     if state.get('pending'):
         raise RuntimeError('Unresolved pending publication must be reconciled manually')
-    if any(x.get('sha256') == approval['sha256'] or str(x.get('track_id')) == str(approval['track_id'])
+    if any(x.get('sha256') == approval['sha256']
            for x in state.get('published', [])):
         raise RuntimeError('Track or reel was already published; no duplicate post')
     if len(set(approval['video_ids'])) < 5:
