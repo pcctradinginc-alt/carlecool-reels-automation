@@ -135,7 +135,7 @@ def download_owned_rss_audio(track_id: str, owner_id: str, destination, *,
                 checked = subprocess.run(
                     ["ffmpeg", "-hide_banner", "-i", str(path)],
                     capture_output=True, text=True, timeout=30)
-                if not re.search(r"Stream #\\d+:\\d+(?:\\[[^]]+\\])?(?:\\([^)]*\\))?: Audio:",
+                if not re.search(r"Stream #\d+:\d+(?:\[[^]]+\])?(?:\([^)]*\))?: Audio:",
                                  checked.stderr):
                     raise ValueError("RSS enclosure is not decodable audio")
                 return path
