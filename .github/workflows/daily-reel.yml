@@ -49,6 +49,8 @@ jobs:
       GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+      APPROVAL_LINK_SECRET: ${{ secrets.APPROVAL_LINK_SECRET }}
+      APPROVAL_BASE_URL: ${{ vars.APPROVAL_BASE_URL }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
