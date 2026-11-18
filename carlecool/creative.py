@@ -201,7 +201,8 @@ def interpret_revision(comment: str) -> list[str]:
     return found[:5]
 
 
-def choose_shots(profile: dict, *, track_id: str, mood: str, energy: float, limit=3) -> list[str]:
+def choose_shots(profile: dict, *, track_id: str, mood: str, energy: float, limit=3,
+                 run_key: str = "") -> list[str]:
     """Weighted without-replacement lane sampling, max three Coverr API searches."""
     p = validate_profile(profile)
     if not 1 <= limit <= 3:
@@ -215,7 +216,7 @@ def choose_shots(profile: dict, *, track_id: str, mood: str, energy: float, limi
     if p["avoid_faces"]:
         weights["nature"] += 15
     random_seed = hashlib.sha256(
-        f"{track_id}|{p['revision']}|{p['preset']}|{json.dumps(weights, sort_keys=True)}".encode()
+        f"{track_id}|{run_key}|{p['revision']}|{p['preset']}|{json.dumps(weights, sort_keys=True)}".encode()
     ).digest()
     rng = random.Random(int.from_bytes(random_seed, "big"))
     selected = []
