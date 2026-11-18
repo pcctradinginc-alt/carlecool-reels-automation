@@ -16,9 +16,14 @@ async function verify(env,payload,signature){
   return diff===0;
 }
 async function github(env,path,init={}){
-  if(!/^[a-z0-9_.-]+\/[a-z0-9_.-]+$/i.test(env.GITHUB_REPOSITORY||"") || !env.GITHUB_APPROVAL_TOKEN)throw Error("GitHub unconfigured");
-  const r=await fetch("https://api.github.com/repos/"+env.GITHUB_REPOSITORY+"/"+path,{...init,redirect:"manual",headers:{"Authorization":"Bearer "+env.GITHUB_APPROVAL_TOKEN,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","User-Agent":"CarleCool-Review",...(init.headers||{})}});
-  if(!r.ok)throw Error("GitHub HTTP "+r.status);return r.json();
+  if(!/^[a-z0-9_.-]+\/[a-z0-9_.-]+$/i.test(env.GITHUB_REPOSITORY||""))throw Error("config-repository");
+  if(typeof env.GITHUB_APPROVAL_TOKEN!=="string"||!env.GITHUB_APPROVAL_TOKEN.trim())throw Error("config-token");
+  let r;
+  try{
+    r=await fetch("https://api.github.com/repos/"+env.GITHUB_REPOSITORY+"/"+path,{...init,redirect:"manual",headers:{"Authorization":"Bearer "+env.GITHUB_APPROVAL_TOKEN,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","User-Agent":"CarleCool-Review",...(init.headers||{})}});
+  }catch(_error){throw Error("github-network")}
+  if(!r.ok)throw Error("github-http-"+r.status);
+  try{return await r.json()}catch(_error){throw Error("github-response-json")}
 }
 function issuePayload(body){
   const start="<!-- CARLECOOL_APPROVAL_JSON\n",end="\nEND_CARLECOOL_APPROVAL_JSON -->";
@@ -74,8 +79,10 @@ export default {async fetch(request,env){
   }catch(error){
     // Never log signed URLs, hashes, approval tokens, authorization headers, or response bodies.
     // Keep diagnostic output to an allowlisted stage and an optional GitHub HTTP status.
-    const http=String(error?.message||"").match(/^GitHub HTTP (401|403|404|422|429|500|502|503)$/);
-    console.error("CarleCool approval diagnostic", {phase, code:http?http[1]:"internal"});
+    const diagnostic=String(error?.message||"");
+    const code=/^(config-repository|config-token|github-network|github-response-json|github-http-[1-5][0-9]{2})$/.test(diagnostic)
+      ? diagnostic : "internal";
+    console.error("CarleCool approval diagnostic", {phase, code});
     return page("Status ungeklärt","<p>Die Weitergabe konnte nicht bestätigt werden. Bitte den GitHub-Workflow prüfen und nicht blind erneut freigeben.</p>",502);
   }
 }};
