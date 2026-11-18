@@ -8,7 +8,7 @@ const key = "a-dedicated-very-long-private-secret-for-unit-tests";
 const sha = "a".repeat(64);
 const base = "https://carlecool-test.example.workers.dev";
 function link(choice) {
-  const path = "review/15/990/" + sha + "/" + choice + "/1900000000";
+  const path = "review/15/990/" + sha + "/" + choice + "/" + (Math.floor(Date.now()/1000) + 3600);
   const mac = createHmac("sha256", key).update(path).digest("hex");
   return base + "/" + path + "/" + mac;
 }
