@@ -76,6 +76,38 @@ class Zernio:
             verified[platform] = True
         return verified
 
+    def preflight_tiktok(self, account_id: str) -> None:
+        """Read-only final validation of actual TikTok posting eligibility."""
+        headers = {"Authorization": "Bearer " + self.key, "Accept": "application/json"}
+        health = self.session.get(API + "/v1/accounts/health",
+                                  headers=headers, timeout=(10, 30),
+                                  allow_redirects=False)
+        health.raise_for_status()
+        if health.status_code != 200:
+            raise RuntimeError("Unexpected Zernio account-health response")
+        status = health.json()
+        accounts = status.get("accounts") or []
+        matching = [a for a in accounts
+                    if str(a.get("accountId", "")) == account_id
+                    and a.get("platform") == "tiktok"]
+        if len(matching) != 1:
+            raise RuntimeError("TikTok account missing from account health")
+        account = matching[0]
+        if (not account.get("canPost") or not account.get("tokenValid")
+                or account.get("needsReconnect")):
+            raise RuntimeError("TikTok token or posting permissions are not ready")
+        info = self.session.get(
+            API + "/v1/accounts/" + account_id + "/tiktok/creator-info",
+            params={"mediaType": "video"},
+            headers=headers, timeout=(10, 30), allow_redirects=False)
+        info.raise_for_status()
+        if info.status_code != 200:
+            raise RuntimeError("Unexpected TikTok creator-info response")
+        payload = info.json()
+        levels = payload.get("privacyLevels") or []
+        if "PUBLIC_TO_EVERYONE" not in levels:
+            raise RuntimeError("TikTok creator does not currently permit public direct posts")
+
     def upload(self, video: Path) -> str:
         """Upload a reviewed MP4 via a time-limited signed URL."""
         video = Path(video)
