@@ -277,6 +277,18 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str,
                           token=token, repo=repo, session=session)
 
 
+def _remember_sent_preview(metadata: dict, run_id: int, kind: str) -> None:
+    """Persist only after successful private Gmail delivery, not on a failed render."""
+    if os.getenv("GITHUB_ACTIONS") != "true":
+        return
+    from .history import record_preview_delivery
+    changed = record_preview_delivery(
+        metadata, run_id=run_id, kind=kind,
+        token=os.getenv("GH_TOKEN", ""), repo=os.getenv("GITHUB_REPOSITORY", ""),
+    )
+    print("Preview rotation history:", "recorded" if changed else "already recorded")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--metadata', default='output/reel_metadata.json')
@@ -289,6 +301,7 @@ def main():
     if args.dry_run_email:
         if not send_review_email('', metadata, original, message_id=message_id, run_id=run_id):
             raise RuntimeError('Gmail configuration is missing; no preview was sent')
+        _remember_sent_preview(metadata, run_id, 'test')
         print('Private dry-run email sent; no approval issue, no Instagram call')
         return
     issue = create_review(metadata, run_id=run_id,
@@ -307,6 +320,7 @@ def main():
         except Exception as cleanup_error:
             print('Warning: review issue cleanup failed:', type(cleanup_error).__name__)
         raise
+    _remember_sent_preview(metadata, run_id, 'daily')
     print('Private review email delivered; approval issue:', issue['html_url'])
 
 
