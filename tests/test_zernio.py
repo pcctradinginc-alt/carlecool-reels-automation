@@ -107,6 +107,11 @@ def test_pending_journal_stays_after_partial_provider_result(tmp_path, monkeypat
     state = {"pending": None, "published": []}
     monkeypatch.setattr(approve, "save_state", lambda s: save_calls.append(s["pending"].copy() if s["pending"] else None))
     monkeypatch.setattr(approve, "commit_state", lambda m: commits.append(m))
+    monkeypatch.setattr(Zernio, "verify_connections", lambda self, accounts: {
+        name: True for name in accounts
+    })
+    monkeypatch.setenv("ZERNIO_INSTAGRAM_ACCOUNT_ID", "ig1")
+    monkeypatch.setenv("ZERNIO_TIKTOK_ACCOUNT_ID", "tt1")
     monkeypatch.setattr(Zernio, "upload", lambda self, video: PRESIGN["publicUrl"])
     monkeypatch.setattr(Zernio, "publish", lambda self, **kwargs: {"post": {
         "_id": "z123", "status": "partial",
