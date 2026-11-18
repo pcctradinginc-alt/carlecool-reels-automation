@@ -18,7 +18,7 @@ async function verify(env,payload,signature){
 async function github(env,path,init={}){
   if(!/^[a-z0-9_.-]+\/[a-z0-9_.-]+$/i.test(env.GITHUB_REPOSITORY||"") || !env.GITHUB_APPROVAL_TOKEN)throw Error("GitHub unconfigured");
   const r=await fetch("https://api.github.com/repos/"+env.GITHUB_REPOSITORY+"/"+path,{...init,redirect:"manual",headers:{"Authorization":"Bearer "+env.GITHUB_APPROVAL_TOKEN,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28","User-Agent":"CarleCool-Review",...(init.headers||{})}});
-  if(!r.ok)throw Error("GitHub request failed");return r.json();
+  if(!r.ok)throw Error("GitHub HTTP "+r.status);return r.json();
 }
 function issuePayload(body){
   const start="<!-- CARLECOOL_APPROVAL_JSON\n",end="\nEND_CARLECOOL_APPROVAL_JSON -->";
@@ -34,12 +34,15 @@ export default {async fetch(request,env){
   const now=Math.floor(Date.now()/1000);
   if(Number(expiry)<now||Number(expiry)>now+49*3600)return page("Abgelaufen","<p>Dieser Link ist nicht mehr gültig.</p>",410);
   if(!(await verify(env,"review/"+issue+"/"+run+"/"+sha+"/"+choice+"/"+expiry,mac)))return page("Ungültiger Link","<p>Signatur ungültig.</p>",403);
+  let phase="d1-read";
   try{
     const existing=await env.DB.prepare("SELECT action FROM used_approvals WHERE issue=?").bind(Number(issue)).first();
     if(existing)return page("Bereits entschieden","<p>Dieser Entwurf wurde bereits bearbeitet.</p>",409);
+    phase="github-issue-get";
     const item=await github(env,"issues/"+issue);
     if(item.state!=="open"||item.pull_request||!(item.labels||[]).some(x=>x.name==="carlecool-review"))
       return page("Geschlossen","<p>Dieser Entwurf ist nicht mehr freigegeben.</p>",409);
+    phase="issue-payload";
     const approved=issuePayload(item.body);
     if(Number(approved.run_id)!==Number(run)||approved.sha256!==sha)
       return page("Falsches Video","<p>Die Videoidentität stimmt nicht überein.</p>",409);
@@ -59,12 +62,20 @@ export default {async fetch(request,env){
     const form=await request.formData();
     if(form.get("consent")!=="yes")return page("Zustimmung fehlt","<p>Bitte zustimmen.</p>",400);
     // Atomic first-writer-wins. No retry after uncertain GitHub response.
+    phase="d1-reserve";
     const reserved=await env.DB.prepare("INSERT OR IGNORE INTO used_approvals(issue,run_id,sha256,action,created_at) VALUES(?,?,?,?,?)")
       .bind(Number(issue),Number(run),sha,choice,now).run();
     if(reserved.meta?.changes!==1)return page("Bereits entschieden","<p>Dieser Entwurf wurde bereits bearbeitet.</p>",409);
+    phase="github-comment-post";
     await github(env,"issues/"+issue+"/comments",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({body:commands[choice]})});
     return page("Entscheidung übermittelt","<p>"+esc(names[choice])+" wurde an GitHub weitergegeben.</p><p>"+
       (deleting?"Der Freigabeentwurf wird verworfen; die E-Mail-Kopie bleibt erhalten.":
       "Der Veröffentlichungsworkflow verarbeitet deine Entscheidung. Bitte den tatsächlichen Plattformstatus prüfen.")+"</p>");
-  }catch(_error){return page("Status ungeklärt","<p>Die Weitergabe konnte nicht bestätigt werden. Bitte den GitHub-Workflow prüfen und nicht blind erneut freigeben.</p>",502);}
+  }catch(error){
+    // Never log signed URLs, hashes, approval tokens, authorization headers, or response bodies.
+    // Keep diagnostic output to an allowlisted stage and an optional GitHub HTTP status.
+    const http=String(error?.message||"").match(/^GitHub HTTP (401|403|404|422|429|500|502|503)$/);
+    console.error("CarleCool approval diagnostic", {phase, code:http?http[1]:"internal"});
+    return page("Status ungeklärt","<p>Die Weitergabe konnte nicht bestätigt werden. Bitte den GitHub-Workflow prüfen und nicht blind erneut freigeben.</p>",502);
+  }
 }};
