@@ -92,6 +92,23 @@
         "3is4G319dk"
       ],
       "sha256": "7dc0c138c68727c098ab861201558ef61065963f28d468fb4b0ae903d34852ed"
+    },
+    {
+      "at": "2026-11-18T20:12:49+00:00",
+      "kind": "daily",
+      "run_id": 44388283881,
+      "track_id": "2373071753",
+      "video_ids": [
+        "QTeHbzXw4l",
+        "QxERwvAPQs",
+        "FJ5XQZCXpM",
+        "YGh2RJZLtq",
+        "ISuN3YNuzd",
+        "PtDce945WL",
+        "SsgHbBG5f8",
+        "XNYRS57eAV"
+      ],
+      "sha256": "69c825395c93ce9911eacc71571591924c4e52eeb5822a619e7283854af03dd4"
     }
   ]
 }
