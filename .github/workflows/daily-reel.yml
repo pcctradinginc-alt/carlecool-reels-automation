@@ -59,12 +59,37 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
-      - name: Install media tools
+      - name: Verify FFmpeg (install only if absent)
+        timeout-minutes: 4
+        shell: bash
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
-          pip install -r requirements.txt
-          pip install 'gradio_client>=1.13,<3'
+          set -euo pipefail
+          if command -v ffmpeg >/dev/null 2>&1 && command -v ffprobe >/dev/null 2>&1; then
+            echo "FFmpeg already available; skipping apt"
+          else
+            echo "FFmpeg missing; installing with bounded apt commands"
+            timeout 120s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=20
+            timeout 90s sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ffmpeg
+          fi
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+      - name: Install core Python dependencies
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip --version
+          timeout 240s python -m pip install --disable-pip-version-check --retries 2 --timeout 20 -r requirements.txt
+      - name: Install optional AI video client
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${CARLECOOL_AI_VIDEO:-off}" == "one" ]]; then
+            timeout 240s python -m pip install --disable-pip-version-check --retries 2 --timeout 20 'gradio_client>=1.13,<3'
+          else
+            echo "Experimental AI client disabled; skipping installation"
+          fi
       # Every scheduled run creates a NEW proposal, even when older reviews
       # remain open. Only an explicit owner approval can ever publish.
       - name: Render a balanced random Reel (no Instagram calls)
