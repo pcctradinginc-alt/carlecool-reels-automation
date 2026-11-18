@@ -67,7 +67,7 @@ class Zernio:
             raise RuntimeError("Zernio account list is invalid")
         verified = {}
         for platform, account_id in accounts.items():
-            matches = [r for r in rows if str(r.get("_id", "")) == account_id
+            matches = [r for r in rows if str(r.get("id") or r.get("_id") or "") == account_id
                        and r.get("platform") == platform]
             if len(matches) != 1:
                 raise RuntimeError("Requested Zernio " + platform + " account is not connected")
