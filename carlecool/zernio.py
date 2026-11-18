@@ -50,6 +50,28 @@ class Zernio:
             raise RuntimeError("Unexpected Zernio API response")
         return result
 
+    def verify_connections(self, accounts: dict[str, str]) -> dict[str, bool]:
+        """Read-only account-ID check; never posts media or reveals account data."""
+        result = self.session.get(
+            API + "/v1/accounts", headers={"Authorization": "Bearer " + self.key},
+            timeout=(10, 30),
+        )
+        result.raise_for_status()
+        body = result.json()
+        rows = body.get("accounts") or []
+        if not isinstance(rows, list):
+            raise RuntimeError("Zernio account list is invalid")
+        verified = {}
+        for platform, account_id in accounts.items():
+            matches = [r for r in rows if str(r.get("_id", "")) == account_id
+                       and r.get("platform") == platform]
+            if len(matches) != 1:
+                raise RuntimeError("Requested Zernio " + platform + " account is not connected")
+            if matches[0].get("isActive") is False or matches[0].get("enabled") is False:
+                raise RuntimeError("Zernio " + platform + " account is disabled")
+            verified[platform] = True
+        return verified
+
     def upload(self, video: Path) -> str:
         """Upload a reviewed MP4 via a time-limited signed URL."""
         video = Path(video)
