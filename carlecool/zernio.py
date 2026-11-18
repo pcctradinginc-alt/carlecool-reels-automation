@@ -19,7 +19,8 @@ API = "https://zernio.com/api"
 def _check_media_url(url: str, *, upload: bool) -> str:
     parsed = urlsplit(url)
     host = (parsed.hostname or "").lower()
-    if parsed.scheme != "https" or parsed.username or parsed.password or parsed.fragment:
+    if (parsed.scheme != "https" or parsed.username or parsed.password
+            or parsed.fragment or parsed.port not in (None, 443)):
         raise ValueError("Unsafe Zernio media endpoint")
     if upload:
         if not host.endswith(".r2.cloudflarestorage.com") or host == ".r2.cloudflarestorage.com":
@@ -43,8 +44,11 @@ class Zernio:
         headers = {"Authorization": "Bearer " + self.key, "Accept": "application/json"}
         if idempotency_key:
             headers["Idempotency-Key"] = idempotency_key
-        response = self.session.post(API + path, json=data, headers=headers, timeout=(15, 75))
+        response = self.session.post(API + path, json=data, headers=headers,
+                                     timeout=(15, 75), allow_redirects=False)
         response.raise_for_status()
+        if not 200 <= response.status_code < 300:
+            raise RuntimeError("Unexpected Zernio API redirect")
         result = response.json()
         if not isinstance(result, dict):
             raise RuntimeError("Unexpected Zernio API response")
@@ -90,8 +94,10 @@ class Zernio:
         with video.open("rb") as stream:
             response = self.session.put(upload_url, data=stream,
                                         headers={"Content-Type": "video/mp4"},
-                                        timeout=(15, 120))
+                                        timeout=(15, 120), allow_redirects=False)
             response.raise_for_status()
+            if response.status_code not in (200, 201, 204):
+                raise RuntimeError("Unexpected Zernio media upload redirect")
         return public_url
 
     def publish(self, *, media_url: str, caption: str, target: str,
