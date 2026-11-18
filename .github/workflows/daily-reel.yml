@@ -1,8 +1,9 @@
 name: CarleCool — make and review Reel
 on:
   schedule:
-    # Daily 10:15 UTC, delayed starts possible. Always REVIEW, never auto-publish.
-    - cron: '15 10 * * *'
+    # Daily 19:30 Europe/Berlin (CET/CEST), delayed starts possible. Always REVIEW, never auto-publish.
+    - cron: '30 19 * * *'
+      timezone: 'Europe/Berlin'
   workflow_dispatch:
     inputs:
       mode:
