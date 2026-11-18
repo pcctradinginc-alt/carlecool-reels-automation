@@ -8,7 +8,7 @@ on:
     paths:
       - '.github/workflows/creative-v2-probe-mail.yml'
 permissions:
-  contents: read
+  contents: write
   issues: write
 concurrency:
   group: carlecool-daily-reel
