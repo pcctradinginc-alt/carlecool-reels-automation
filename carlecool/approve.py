@@ -98,6 +98,10 @@ def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
     if any(x.get('sha256') == approval['sha256'] for x in state.get('published', [])):
         raise RuntimeError('These exact approved video bytes were already published')
     client = Zernio(os.environ['ZERNIO_API_KEY'])
+    ids = {'instagram': os.getenv('ZERNIO_INSTAGRAM_ACCOUNT_ID', ''),
+           'tiktok': os.getenv('ZERNIO_TIKTOK_ACCOUNT_ID', '')}
+    required = ('instagram', 'tiktok') if target == 'both' else (target,)
+    client.verify_connections({name: ids[name] for name in required})
     timestamp = datetime.now(timezone.utc).isoformat()
     state['pending'] = {
         'track_id': approval['track_id'],
