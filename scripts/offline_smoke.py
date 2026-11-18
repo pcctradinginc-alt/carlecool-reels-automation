@@ -27,6 +27,9 @@ def main():
             'permalink_url': 'https://soundcloud.com/carlecool',
             'created_at': '2026-11-15T00:00:00Z', 'genre': 'Electronic'}]))
         (root / 'data/state.json').write_text(json.dumps({'published': [], 'pending': None}))
+        (root / 'data/preview-history.json').write_text(json.dumps({
+            'version': 1, 'previews': []
+        }))
         (root / 'assets/stock/manifest.json').write_text(json.dumps({'clips': [{
             'id': 'synthetic', 'file': 'synthetic.mp4', 'title': 'synthetic only',
             'license_confirmed': True, 'commercial_social_allowed': True
