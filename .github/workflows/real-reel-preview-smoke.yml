@@ -7,7 +7,7 @@ on:
     paths:
       - '.github/workflows/real-reel-preview-smoke.yml'
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: carlecool-full-preview-smoke
   cancel-in-progress: false
@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
+      GH_TOKEN: ${{ github.token }}
       SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
       SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
       COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
