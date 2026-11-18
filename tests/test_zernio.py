@@ -111,6 +111,7 @@ def test_pending_journal_stays_after_partial_provider_result(tmp_path, monkeypat
     monkeypatch.setattr(Zernio, "verify_connections", lambda self, accounts: {
         name: True for name in accounts
     })
+    monkeypatch.setattr(Zernio, "preflight_tiktok", lambda self, account_id: None)
     monkeypatch.setenv("ZERNIO_INSTAGRAM_ACCOUNT_ID", "ig1")
     monkeypatch.setenv("ZERNIO_TIKTOK_ACCOUNT_ID", "tt1")
     monkeypatch.setattr(Zernio, "upload", lambda self, video: PRESIGN["publicUrl"])
