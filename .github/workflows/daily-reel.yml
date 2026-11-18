@@ -1,5 +1,6 @@
 name: CarleCool — make and review Reel
 # One-time signed email approval verification: all four choices, no automatic publication.
+# Explicit owner-requested review run after bounded installation fix; no auto-publish.
 on:
   schedule:
     # Daily 19:30 Europe/Berlin (CET/CEST), delayed starts possible. Always REVIEW, never auto-publish.
