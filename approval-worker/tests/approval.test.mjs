@@ -12,7 +12,7 @@ function link(choice) {
   const mac = createHmac("sha256", key).update(path).digest("hex");
   return base + "/" + path + "/" + mac;
 }
-function harness() {
+function harness({deleted=false}={}) {
   let used = null, posted = [];
   const env = {
     APPROVAL_LINK_SECRET: key,
@@ -38,6 +38,7 @@ function harness() {
   const initialFetch = globalThis.fetch;
   globalThis.fetch = async (url, options) => {
     if (url.endsWith("/issues/15")) {
+      if (deleted) return {ok:false,status:410};
       return { ok: true, json: async () => ({
         state: "open", labels: [{name:"carlecool-review"}],
         body: "<!-- CARLECOOL_APPROVAL_JSON\n" +
@@ -94,4 +95,17 @@ test("discard emits only /reject; wrong Origin and tampered signature cannot act
     assert.equal(discarded.status,200);
     assert.deepEqual(h.posted,["/reject"]);
   }finally{h.restore();}
+});
+
+test("deleted GitHub review (410) shows final state, never posts or reserves",async()=>{
+  const h=harness({deleted:true});
+  try {
+    const response=await worker.fetch(new Request(link("tiktok")),h.env);
+    assert.equal(response.status,410);
+    assert.match(await response.text(),/Entwurf gelöscht/);
+    assert.deepEqual(h.posted,[]);
+    const postResponse=await worker.fetch(post(link("tiktok")),h.env);
+    assert.equal(postResponse.status,410);
+    assert.deepEqual(h.posted,[]);
+  } finally {h.restore();}
 });
