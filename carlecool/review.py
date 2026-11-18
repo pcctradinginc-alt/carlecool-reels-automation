@@ -156,8 +156,8 @@ def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = N
     if issue_url and not url:
         raise ValueError("Review URL must be an exact HTTPS github.com link")
     if url:
-        # Email HTML cannot safely execute authenticated actions. Each card
-        # opens the same owner-only Issue, where the exact command is confirmed.
+        # With a configured Worker each card opens a safe confirmation page.
+        # Otherwise preserve the owner-authenticated GitHub issue fallback.
         publication_options = (
             ("Nur TikTok", "tiktok", "/publish tiktok"),
             ("Nur Instagram", "instagram", "/publish instagram"),
@@ -185,7 +185,7 @@ def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = N
             + ('Gewünschte Plattform anklicken und auf der sicheren Seite ein zweites Mal bestätigen. '
                'Ein Linkklick allein löst nichts aus.</p>' if direct_links else
                'Gewünschte Plattform anklicken, auf GitHub den zugehörigen Kommentar '
-               'eingeben und bestätigen. Nur der Kommentar ist die Freigabe.</p>')
+               'eingeben und bestätigen. Nur der Kommentar ist die Freigabe.</p>') +
             '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
             + choice_rows + '</table>'
             '<p style="font-size:12px;color:#8a6860;line-height:1.5">'
