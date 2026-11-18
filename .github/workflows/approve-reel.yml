@@ -30,6 +30,10 @@ jobs:
       GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
       PUBLISH_ENABLED: ${{ secrets.PUBLISH_ENABLED }}
+      ZERNIO_PUBLISH_ENABLED: ${{ secrets.ZERNIO_PUBLISH_ENABLED }}
+      ZERNIO_API_KEY: ${{ secrets.ZERNIO_API_KEY }}
+      ZERNIO_INSTAGRAM_ACCOUNT_ID: ${{ secrets.ZERNIO_INSTAGRAM_ACCOUNT_ID }}
+      ZERNIO_TIKTOK_ACCOUNT_ID: ${{ secrets.ZERNIO_TIKTOK_ACCOUNT_ID }}
       COVERR_PUBLISH_PERMISSION_CONFIRMED: ${{ secrets.COVERR_PUBLISH_PERMISSION_CONFIRMED }}
       AI_VIDEO_PUBLISH_LICENSE_CONFIRMED: ${{ secrets.AI_VIDEO_PUBLISH_LICENSE_CONFIRMED }}
       REVIEW_ISSUE: ${{ github.event.issue.number }}
@@ -66,7 +70,8 @@ jobs:
       - name: Publish the SHA-256 verified media (fail closed)
         env:
           RUN_ID: ${{ steps.source.outputs.run_id }}
-        run: python -m carlecool.approve --issue "$REVIEW_ISSUE" --run "$RUN_ID"
+          PUBLISH_COMMAND: ${{ github.event.comment.body }}
+        run: python -m carlecool.approve --issue "$REVIEW_ISSUE" --run "$RUN_ID" --command "$PUBLISH_COMMAND"
   reject:
     if: >-
       github.event.issue.pull_request == null &&
