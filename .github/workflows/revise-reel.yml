@@ -41,11 +41,11 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
-      - name: Install media tools and dependencies
+      - name: Install media tools and dependencies (no apt)
+        timeout-minutes: 9
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
-          pip install -r requirements.txt
-          pip install 'gradio_client>=1.13,<3'
+          python -m pip install --disable-pip-version-check --retries 2 --timeout 30 -r requirements.txt 'imageio-ffmpeg==0.6.0'
+          python scripts/setup_ffmpeg.py
+          python -m pip install --disable-pip-version-check --retries 2 --timeout 30 'gradio_client>=1.13,<3'
       - name: Create new private preview and new approval link
         run: python -m carlecool.revise
