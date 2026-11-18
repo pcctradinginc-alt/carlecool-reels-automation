@@ -15,6 +15,39 @@ from .mailstore import fetch_reel_from_sent
 from .state import load_state, save_state, commit_state
 
 
+PUBLISH_CHOICES = {
+    '/approve': 'instagram',       # legacy owner-only command
+    '/publish': 'instagram',       # legacy owner-only command
+    '/publish instagram': 'instagram',
+    '/publish tiktok': 'tiktok',
+    '/publish both': 'both',
+}
+
+
+def resolve_publish_target(command: str) -> str:
+    """Only exact owner comments may select publication destinations."""
+    try:
+        return PUBLISH_CHOICES[command]
+    except KeyError as exc:
+        raise ValueError('Unknown or ambiguous publish command') from exc
+
+
+def ensure_target_ready(target: str) -> None:
+    """Fail before ANY upload if a requested platform is not configured.
+
+    TikTok Content Posting API requires app approval, authorized user OAuth,
+    creator-info-driven controls and an audit for public videos.
+    The corresponding client is intentionally not yet implemented.
+    """
+    if target not in ('instagram', 'tiktok', 'both'):
+        raise ValueError('Unknown publish destination')
+    if target != 'instagram':
+        raise RuntimeError(
+            'TikTok is not connected or approved. Neither TikTok nor Instagram '
+            'has been posted. See docs/tiktok-setup.md for required TikTok setup.'
+        )
+
+
 def verify_artifact(issue: dict, metadata: dict, video: Path, *, run_id: int) -> dict:
     if issue.get('state') != 'open':
         raise ValueError('Review issue is not open')
@@ -39,7 +72,8 @@ def verify_artifact(issue: dict, metadata: dict, video: Path, *, run_id: int) ->
     return approval
 
 
-def publish(issue_number: int, run_id: int, directory: Path):
+def publish(issue_number: int, run_id: int, directory: Path, *, target: str = 'instagram'):
+    ensure_target_ready(target)
     if os.environ.get('GITHUB_ACTIONS') != 'true':
         raise RuntimeError('Publishing is only available through audited GitHub Actions')
     settings = Settings()
@@ -100,7 +134,14 @@ def main():
     parser.add_argument('--directory', default='approval_artifact')
     parser.add_argument('--inspect', action='store_true', help='Print immutable source run id')
     parser.add_argument('--fetch', action='store_true', help='Retrieve exact approved Gmail original')
+    parser.add_argument('--command', default='/approve', help='Exact GitHub issue comment')
+    parser.add_argument('--preflight', action='store_true', help='Verify selected target before any uploads')
     args = parser.parse_args()
+    target = resolve_publish_target(args.command)
+    if args.preflight:
+        ensure_target_ready(target)
+        print('Allowed publication destination:', target)
+        return
     if args.inspect:
         issue = github_request('GET', f'issues/{args.issue}')
         if issue.get('state') != 'open' or 'carlecool-review' not in [x.get('name') for x in issue.get('labels', [])]:
@@ -120,7 +161,7 @@ def main():
         return
     if not args.run:
         parser.error('--run is required unless --inspect')
-    publish(args.issue, args.run, Path(args.directory))
+    publish(args.issue, args.run, Path(args.directory), target=target)
 
 
 if __name__ == '__main__':
