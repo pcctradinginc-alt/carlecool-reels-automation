@@ -18,7 +18,8 @@ from .config import Settings
 from .keywords import select_keywords
 from .render import render_reel
 from .soundcloud import fetch_tracks
-from .state import load_state, pick_track
+from .state import load_state
+from .history import load_preview_history, pick_preview_track, recent_video_ids
 from .video import download_video, gather_videos, fetch_owned_stock, record_coverr_download
 
 
@@ -43,6 +44,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     config = Settings()
     config.validate()
     state = load_state()
+    previews = load_preview_history()
     tracks = fetch_tracks(config)
     if not tracks:
         raise RuntimeError("No public SoundCloud tracks found")
@@ -51,7 +53,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         if track is None:
             raise ValueError('Revision track no longer appears in latest 20 SoundCloud uploads')
     else:
-        track = pick_track(tracks, state, config.cooldown_days)
+        track = pick_preview_track(tracks, previews)
     profile = validate_profile(creative_profile) if creative_profile is not None else load_profile()
     print(f"Selected track: {track.title} (SoundCloud ID {track.id})")
     output_dir = Path("output")
@@ -61,9 +63,15 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     if profile["music"] == "beginning":
         features = replace(features, excerpt_start=0.0)
     print(f"Estimated musical features: BPM={features.bpm}, mood={features.mood}, energy={features.energy}")
-    recent = {video_id for record in state.get("published", [])[-20:] for video_id in record.get("video_ids", [])}
+    recent = recent_video_ids(previews)
+    recent.update(video_id for record in state.get("published", [])[-6:]
+                  for video_id in record.get("video_ids", []))
+    # Unique GitHub run identity changes the art direction on every new email.
+    # Local/manual runs also get a fresh seed, while tests can pass a fixed seed.
+    import secrets
+    edition = os.getenv("GITHUB_RUN_ID") or secrets.token_hex(8)
     keywords = choose_shots(profile, track_id=track.id, mood=features.mood,
-                            energy=features.energy, limit=3)
+                            energy=features.energy, limit=3, run_key=edition)
     print(f"Video search phrases: {keywords}")
     candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=9, keywords=keywords)
     selected = []
