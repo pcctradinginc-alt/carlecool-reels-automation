@@ -74,7 +74,7 @@ def _safe_public_link(url: str, *, host: str) -> str:
     return url
 
 
-def review_plain_text(issue_url: str, metadata: dict) -> str:
+def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | None = None) -> str:
     """Copy-friendly alternatives to HTML mail, never publish on link open."""
     title = str(metadata.get("title", "Neuer Track"))
     profile = metadata.get("creative_profile") or {}
@@ -104,6 +104,20 @@ def review_plain_text(issue_url: str, metadata: dict) -> str:
             "TESTVORSCHAU – keine Freigabe und keine Veröffentlichung.\n"
             "Bei der echten Freigabe stehen Instagram, TikTok und beide Plattformen zur Wahl.\n"
         )
+    if issue_url and direct_links:
+        actions = (
+            "DEINE VIER SICHEREN FREIGABELINKS (48 Stunden gültig):\n"
+            f"Nur TikTok: {direct_links['tiktok']}\n"
+            f"Nur Instagram: {direct_links['instagram']}\n"
+            f"TikTok & Instagram: {direct_links['both']}\n"
+            f"Nicht veröffentlichen – Entwurf löschen: {direct_links['discard']}\n\n"
+            "Jeder Link öffnet eine Bestätigungsseite. Erst ein zweiter Klick "
+            "mit ausdrücklicher Zustimmung löst die Entscheidung aus.\n"
+            "Entwurf löschen bedeutet Freigabe verwerfen; die E-Mail bleibt "
+            "bis zu deiner eigenen Löschung im Postfach.\n"
+        )
+    elif issue_url:
+        actions += "  /reject                       - Nicht veröffentlichen / Entwurf verwerfen\n"
     return (
         "CARLECOOL  /  CREATIVE REVIEW\n\n"
         f"{title}\n{duration} Sekunden · 9:16 Reel · MP4 im Anhang\n\n"
@@ -121,7 +135,7 @@ def review_plain_text(issue_url: str, metadata: dict) -> str:
     )
 
 
-def review_html(issue_url: str, metadata: dict) -> str:
+def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = None) -> str:
     """Responsive Gmail-safe, Apple-clean email; all text escaped, no tracking."""
     h = lambda v: html_escape(str(v), quote=True)
     title = h(metadata.get("title", "Neuer Track"))
@@ -145,18 +159,19 @@ def review_html(issue_url: str, metadata: dict) -> str:
         # Email HTML cannot safely execute authenticated actions. Each card
         # opens the same owner-only Issue, where the exact command is confirmed.
         publication_options = (
-            ("Nur Instagram", "/publish instagram"),
-            ("Nur TikTok", "/publish tiktok"),
-            ("TikTok & Instagram", "/publish both"),
+            ("Nur TikTok", "tiktok", "/publish tiktok"),
+            ("Nur Instagram", "instagram", "/publish instagram"),
+            ("TikTok & Instagram", "both", "/publish both"),
+            ("Nicht veröffentlichen – Entwurf löschen", "discard", "/reject"),
         )
         choice_rows = ''.join(
             '<tr><td style="padding:7px 0">'
-            f'<a href="{h(url)}" style="display:inline-block;background:#f6f3ef;'
+            f'<a href="{h(direct_links[choice] if direct_links else url)}" style="display:inline-block;background:#f6f3ef;'
             'border:1px solid #e4ded7;border-radius:9px;color:#202b36;'
             f'font-size:14px;font-weight:700;padding:12px 14px;text-decoration:none">{h(name)}</a>'
             f'<span style="padding-left:12px;font-size:12px;color:#5d6774">'
-            f'Kommentar: <code>{h(command)}</code></span>'
-            '</td></tr>' for name, command in publication_options
+            f'{("Bestätigungsseite öffnen" if direct_links else "Kommentar: " + command)}</span>'
+            '</td></tr>' for name, choice, command in publication_options
         )
         action_area = (
             f'<a href="{h(url)}" style="display:inline-block;background:#1f2937;'
@@ -167,8 +182,10 @@ def review_html(issue_url: str, metadata: dict) -> str:
             '<p style="font-size:12px;font-weight:700;color:#202b36;margin-top:24px">'
             'VERÖFFENTLICHUNG AUSWÄHLEN</p>'
             '<p style="font-size:12px;color:#657080;line-height:1.5">'
-            'Gewünschte Plattform anklicken, auf GitHub den zugehörigen Kommentar '
-            'eingeben und bestätigen. Nur der Kommentar ist die Freigabe.</p>'
+            + ('Gewünschte Plattform anklicken und auf der sicheren Seite ein zweites Mal bestätigen. '
+               'Ein Linkklick allein löst nichts aus.</p>' if direct_links else
+               'Gewünschte Plattform anklicken, auf GitHub den zugehörigen Kommentar '
+               'eingeben und bestätigen. Nur der Kommentar ist die Freigabe.</p>')
             '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
             + choice_rows + '</table>'
             '<p style="font-size:12px;color:#8a6860;line-height:1.5">'
@@ -260,8 +277,12 @@ def send_review_email(issue_url: str, metadata: dict, original_path: Path | None
     msg['X-CarleCool-Run-ID'] = str(run_id)
     msg['X-CarleCool-SHA256'] = metadata['sha256']
     msg['Subject'] = f"CarleCool | Reel zur Freigabe: {metadata['title']}"
-    msg.set_content(review_plain_text(issue_url, metadata))
-    msg.add_alternative(review_html(issue_url, metadata), subtype="html")
+    direct_links = {}
+    if issue_url:
+        from .approval_links import approval_links
+        direct_links = approval_links(issue_url, metadata, run_id)
+    msg.set_content(review_plain_text(issue_url, metadata, direct_links=direct_links))
+    msg.add_alternative(review_html(issue_url, metadata, direct_links=direct_links), subtype="html")
     msg.add_attachment(video_bytes, maintype='video', subtype='mp4', filename='CarleCool-Original.mp4')
     meta_bytes = json.dumps(metadata, ensure_ascii=False, sort_keys=True).encode('utf-8')
     msg.add_attachment(meta_bytes, maintype='application', subtype='json', filename='reel_metadata.json')
