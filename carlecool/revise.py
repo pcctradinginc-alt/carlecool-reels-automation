@@ -93,6 +93,19 @@ def revise(issue_number: int, command: str) -> str:
                 pass
         raise
 
+    # Revisions help avoid reused footage but do not count as a new daily song.
+    try:
+        from .history import record_preview_delivery
+        record_preview_delivery(
+            metadata, run_id=int(os.environ["GITHUB_RUN_ID"]), kind="revision",
+            token=os.environ["GH_TOKEN"], repo=os.environ["GITHUB_REPOSITORY"],
+        )
+    except Exception as exc:
+        # The private original was already sent and the new approval is valid.
+        # Do not re-email or reactivate the old issue after a history failure.
+        print("Warning: revised preview sent, but history was not stored:",
+              type(exc).__name__)
+
     # "Feedback memory": learn explicit, interpreted choices for next Reels.
     # The profile file contains only public style weights, never secrets/media.
     profile["revision"] = 0
