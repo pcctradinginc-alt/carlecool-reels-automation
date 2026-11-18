@@ -3,7 +3,10 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['.github/workflows/tiktok-readiness.yml']
+    paths:
+      - '.github/workflows/tiktok-readiness.yml'
+      - 'carlecool/zernio.py'
+      - 'scripts/tiktok_publish_readiness.py'
 permissions:
   contents: read
 jobs:
