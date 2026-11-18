@@ -18,7 +18,7 @@ concurrency:
   group: carlecool-daily-reel
   cancel-in-progress: false
 permissions:
-  contents: read
+  contents: write
   actions: read
   issues: write
 jobs:
@@ -57,26 +57,13 @@ jobs:
           sudo apt-get install -y -qq ffmpeg
           pip install -r requirements.txt
           pip install 'gradio_client>=1.13,<3'
-      - id: approval_gate
-        name: Avoid making a new proposal while another review is open
+      # Every scheduled run creates a NEW proposal, even when older reviews
+      # remain open. Only an explicit owner approval can ever publish.
+      - name: Render a balanced random Reel (no Instagram calls)
+        run: python -m carlecool.main --mode preview
+      - name: Email exact original privately and remember rotation
         env:
           MODE: ${{ github.event_name == 'schedule' && 'review' || inputs.mode }}
-        run: |
-          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
-          OPEN=$(gh issue list --repo "$GITHUB_REPOSITORY" --label carlecool-review --state open --limit 20 --json number --jq 'length')
-          if [[ "$OPEN" -gt 0 ]]; then
-            echo 'pending=true' >> "$GITHUB_OUTPUT"
-            echo 'An earlier review is open; no new Reel produced.' >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo 'pending=false' >> "$GITHUB_OUTPUT"
-          fi
-      - name: Render Reel (no Instagram calls)
-        if: steps.approval_gate.outputs.pending == 'false'
-        run: python -m carlecool.main --mode preview
-      - name: Email exact original privately (no public artifacts)
-        if: steps.approval_gate.outputs.pending == 'false'
-        env:
-          MODE: ${{ steps.approval_gate.outputs.mode }}
         run: |
           if [[ "$MODE" == "review" ]]; then
             python -m carlecool.review
