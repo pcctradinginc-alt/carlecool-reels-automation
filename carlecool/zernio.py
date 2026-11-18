@@ -105,8 +105,19 @@ class Zernio:
             raise RuntimeError("Unexpected TikTok creator-info response")
         payload = info.json()
         levels = payload.get("privacyLevels") or []
-        if "PUBLIC_TO_EVERYONE" not in levels:
+        permitted = {entry.get("value") if isinstance(entry, dict) else entry
+                     for entry in levels}
+        if "PUBLIC_TO_EVERYONE" not in permitted:
             raise RuntimeError("TikTok creator does not currently permit public direct posts")
+        if payload.get("creator", {}).get("canPostMore") is False:
+            raise RuntimeError("TikTok daily posting allowance has been reached")
+        options = (payload.get("postingLimits") or {}).get("interactionSettings") or {}
+        for setting, selected in (("allow_comment", True),
+                                  ("allow_duet", False),
+                                  ("allow_stitch", False)):
+            entry = options.get(setting) or {}
+            if selected and entry.get("enabled") is False:
+                raise RuntimeError("TikTok creator disables a required interaction: " + setting)
 
     def upload(self, video: Path) -> str:
         """Upload a reviewed MP4 via a time-limited signed URL."""
