@@ -44,7 +44,14 @@ export default {async fetch(request,env){
     const existing=await env.DB.prepare("SELECT action FROM used_approvals WHERE issue=?").bind(Number(issue)).first();
     if(existing)return page("Bereits entschieden","<p>Dieser Entwurf wurde bereits bearbeitet.</p>",409);
     phase="github-issue-get";
-    const item=await github(env,"issues/"+issue);
+    let item;
+    try {
+      item=await github(env,"issues/"+issue);
+    } catch (error) {
+      if (error?.message==="github-http-410")
+        return page("Entwurf gelöscht","<p>Der zugehörige GitHub-Freigabeentwurf wurde bereits gelöscht. Dieser alte E-Mail-Link kann nicht mehr verwendet werden. Es wurde keine neue Veröffentlichung ausgelöst.</p>",410);
+      throw error;
+    }
     if(item.state!=="open"||item.pull_request||!(item.labels||[]).some(x=>x.name==="carlecool-review"))
       return page("Geschlossen","<p>Dieser Entwurf ist nicht mehr freigegeben.</p>",409);
     phase="issue-payload";
