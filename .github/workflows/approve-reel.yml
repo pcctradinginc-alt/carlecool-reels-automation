@@ -15,7 +15,11 @@ jobs:
     if: >-
       github.event.issue.pull_request == null &&
       github.event.comment.user.login == github.repository_owner &&
-      (github.event.comment.body == '/publish' || github.event.comment.body == '/approve') &&
+      (github.event.comment.body == '/publish' ||
+       github.event.comment.body == '/approve' ||
+       github.event.comment.body == '/publish instagram' ||
+       github.event.comment.body == '/publish tiktok' ||
+       github.event.comment.body == '/publish both') &&
       contains(github.event.issue.labels.*.name, 'carlecool-review')
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -45,6 +49,10 @@ jobs:
         run: |
           git config user.name 'CarleCool Automation'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - name: Confirm publication target before any Instagram or TikTok operation
+        env:
+          PUBLISH_COMMAND: ${{ github.event.comment.body }}
+        run: python -m carlecool.approve --issue "$REVIEW_ISSUE" --command "$PUBLISH_COMMAND" --preflight
       - name: Resolve immutable reviewed run
         id: source
         run: |
@@ -53,7 +61,8 @@ jobs:
       - name: Restore SHA-256 verified original from private Gmail Sent
         env:
           RUN_ID: ${{ steps.source.outputs.run_id }}
-        run: python -m carlecool.approve --issue "$REVIEW_ISSUE" --run "$RUN_ID" --fetch
+          PUBLISH_COMMAND: ${{ github.event.comment.body }}
+        run: python -m carlecool.approve --issue "$REVIEW_ISSUE" --run "$RUN_ID" --command "$PUBLISH_COMMAND" --fetch
       - name: Publish the SHA-256 verified media (fail closed)
         env:
           RUN_ID: ${{ steps.source.outputs.run_id }}
