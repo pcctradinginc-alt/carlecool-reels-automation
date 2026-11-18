@@ -83,6 +83,26 @@ def verify_artifact(issue: dict, metadata: dict, video: Path, *, run_id: int) ->
     return approval
 
 
+def validate_footage_rights(approval: dict) -> None:
+    """Reject unknown sources and require free Coverr API credit in final caption.
+
+    Licensed fallback stock is declared in assets/stock/manifest.json at render
+    time; that declaration, and Coverr metadata, remain subject to human review.
+    """
+    sources = approval.get('footage_sources')
+    if not isinstance(sources, list) or not sources:
+        raise RuntimeError('Missing footage provenance; no publication')
+    providers = {str(entry.get('provider', '')) for entry in sources
+                 if isinstance(entry, dict)}
+    if len(providers) == 0 or len(providers) > 3 or any(
+            name not in ('coverr', 'owned', 'ai') for name in providers):
+        raise RuntimeError('Unknown footage source; no publication')
+    caption = str(approval.get('caption', ''))
+    if 'coverr' in providers and ('Footage by Coverr' not in caption
+                                 or 'https://coverr.co' not in caption):
+        raise RuntimeError('Coverr free API credit missing from approved caption')
+
+
 def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
                        video: Path, target: str, state: dict) -> None:
     """Publish with official partner after consent and an immutable Git reserve.
@@ -162,6 +182,7 @@ def publish(issue_number: int, run_id: int, directory: Path, *, target: str = 'i
     metadata = json.loads((directory / 'output/reel_metadata.json').read_text(encoding='utf-8'))
     video = directory / metadata['output']
     approval = verify_artifact(issue, metadata, video, run_id=run_id)
+    validate_footage_rights(approval)
     if any(x.get('provider') == 'coverr' for x in approval['footage_sources']) and not settings.coverr_permission_confirmed:
         raise RuntimeError('Coverr free-tier attribution is not cleared for this publish method')
     # AI video still requires explicit license review and cannot be silently
