@@ -122,6 +122,8 @@ def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
            'tiktok': os.getenv('ZERNIO_TIKTOK_ACCOUNT_ID', '')}
     required = ('instagram', 'tiktok') if target == 'both' else (target,)
     client.verify_connections({name: ids[name] for name in required})
+    if 'tiktok' in required:
+        client.preflight_tiktok(ids['tiktok'])
     timestamp = datetime.now(timezone.utc).isoformat()
     state['pending'] = {
         'track_id': approval['track_id'],
