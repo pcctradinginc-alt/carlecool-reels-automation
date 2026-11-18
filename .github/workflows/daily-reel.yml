@@ -61,7 +61,7 @@ jobs:
           python-version: '3.11'
           cache: pip
       - name: Verify FFmpeg (install only if absent)
-        timeout-minutes: 4
+        timeout-minutes: 13
         shell: bash
         run: |
           set -euo pipefail
@@ -69,8 +69,10 @@ jobs:
             echo "FFmpeg already available; skipping apt"
           else
             echo "FFmpeg missing; installing with bounded apt commands"
-            timeout 120s sudo apt-get update -o Acquire::Retries=1 -o Acquire::http::Timeout=20
-            timeout 90s sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ffmpeg
+            timeout 180s sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=45
+            # Ubuntu runners may download 60+ MB of multimedia libraries at variable speeds.
+            # Do not terminate a healthy, progressing package download after just 90 seconds.
+            timeout 600s sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends -o Acquire::Retries=3 -o Acquire::http::Timeout=60 ffmpeg
           fi
           ffmpeg -version | head -n 1
           ffprobe -version | head -n 1
