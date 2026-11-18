@@ -97,8 +97,6 @@ def download_owned_rss_audio(track_id: str, owner_id: str, destination, *,
     from urllib.parse import urljoin
     import requests
     import subprocess
-    import json
-
     session = session or requests.Session()
     feed = public_rss_url(owner_id)
     _safe_audio_url(feed)
@@ -132,12 +130,13 @@ def download_owned_rss_audio(track_id: str, owner_id: str, destination, *,
                 if count < 4096:
                     raise ValueError("RSS audio download is unexpectedly short")
                 # Reject error pages or video masquerading as podcast audio.
+                # imageio-ffmpeg provides FFmpeg but not a separate ffprobe binary.
+                # Inspect declared media streams without decoding or transcoding.
                 checked = subprocess.run(
-                    ["ffprobe", "-v", "error", "-select_streams", "a:0",
-                     "-show_entries", "stream=codec_type", "-of", "json", str(path)],
-                    capture_output=True, text=True, check=True, timeout=30)
-                codecs = json.loads(checked.stdout).get("streams", [])
-                if not codecs or codecs[0].get("codec_type") != "audio":
+                    ["ffmpeg", "-hide_banner", "-i", str(path)],
+                    capture_output=True, text=True, timeout=30)
+                if not re.search(r"Stream #\\d+:\\d+(?:\\[[^]]+\\])?(?:\\([^)]*\\))?: Audio:",
+                                 checked.stderr):
                     raise ValueError("RSS enclosure is not decodable audio")
                 return path
             finally:
