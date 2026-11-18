@@ -32,7 +32,7 @@ def probe_duration(path: Path) -> float:
         ["ffmpeg", "-hide_banner", "-i", str(path)],
         capture_output=True, text=True,
     )
-    match = re.search(r"Duration:\\s*(\\d+):(\\d+):(\\d+(?:\\.\\d+)?)", p.stderr)
+    match = re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)", p.stderr)
     if not match:
         raise RuntimeError(f"Cannot determine media duration: {path.name}")
     hours, minutes, seconds = match.groups()
