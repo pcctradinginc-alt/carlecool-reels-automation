@@ -4,6 +4,11 @@ on:
     # Daily 19:30 Europe/Berlin (CET/CEST), delayed starts possible. Always REVIEW, never auto-publish.
     - cron: '30 19 * * *'
       timezone: 'Europe/Berlin'
+  # One-off, opt-in test run: editing this workflow starts a REAL approval email,
+  # never a social publication. The rendered video still needs owner approval.
+  push:
+    branches: [main]
+    paths: ['.github/workflows/daily-reel.yml']
   workflow_dispatch:
     inputs:
       mode:
@@ -63,7 +68,7 @@ jobs:
         run: python -m carlecool.main --mode preview
       - name: Email exact original privately and remember rotation
         env:
-          MODE: ${{ github.event_name == 'schedule' && 'review' || inputs.mode }}
+          MODE: ${{ github.event_name != 'workflow_dispatch' && 'review' || inputs.mode }}
         run: |
           if [[ "$MODE" == "review" ]]; then
             python -m carlecool.review
