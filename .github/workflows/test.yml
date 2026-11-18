@@ -29,7 +29,9 @@ jobs:
               with open(path) as f: yaml.safe_load(f)
               print('YAML parsed:', path)
           PY
-      - name: Validate Cloudflare email confirmation Worker syntax
-        run: node --check approval-worker/src/index.js
+      - name: Test secure Cloudflare email confirmation Worker
+        run: |
+          node --check approval-worker/src/index.js
+          node --test approval-worker/tests/*.test.mjs
       - name: Offline FFmpeg dry run (test music + test footage, never publish)
         run: python scripts/offline_smoke.py
