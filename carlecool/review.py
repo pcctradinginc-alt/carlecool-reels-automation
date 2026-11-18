@@ -88,7 +88,10 @@ def review_plain_text(issue_url: str, metadata: dict) -> str:
             "  /publish instagram     - nur Instagram\n"
             "  /publish tiktok        - nur TikTok (API noch nicht aktiv)\n"
             "  /publish both          - TikTok und Instagram (API noch nicht aktiv)\n\n"
-            "Ein Linkklick allein veröffentlicht nichts. TikTok ist noch gesperrt.\n"
+            "Ein Linkklick allein veröffentlicht nichts. TikTok bleibt gesperrt, bis die\n"
+            "Zernio-Konten verbunden und die Publishing-Gates freigegeben sind.\n"
+            "Mit /publish tiktok oder /publish both bestätigst du ausdrücklich,\n"
+            "dass du das MP4 geprüft hast und es öffentlich auf TikTok erscheinen darf.\n"
             "Weitere Optionen:\n"
             "  /revise mehr natur, weniger skate  - Video neu gestalten\n"
             "  /revise more_mpc              - mehr analoges Studio\n"
@@ -169,8 +172,10 @@ def review_html(issue_url: str, metadata: dict) -> str:
             '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
             + choice_rows + '</table>'
             '<p style="font-size:12px;color:#8a6860;line-height:1.5">'
-            'TikTok-Veröffentlichungen sind bis zur API-Einrichtung gesperrt. '
-            'Bei „beide“ wird vorab geprüft; bis dahin erfolgt auch kein Instagram-Post.</p>'
+            'TikTok ist bis zur Verbindung über Zernio und Aktivierung der Sperren blockiert. '
+            'Bei „beide“ wird vorab geprüft; bis dahin erfolgt auch kein Instagram-Post. '
+            'Der Kommentar für TikTok bestätigt die Prüfung des MP4 und deine ausdrückliche '
+            'Einwilligung zur öffentlichen TikTok-Veröffentlichung.</p>'
             '<div style="margin-top:26px;border-top:1px solid #e8e6e1;padding-top:20px">'
             '<p style="font-size:12px;font-weight:700;letter-spacing:1.2px;'
             'color:#7b756e;margin:0 0 14px">DEINE OPTIONEN</p>'
