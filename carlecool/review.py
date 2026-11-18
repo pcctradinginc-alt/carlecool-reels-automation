@@ -75,7 +75,7 @@ def _safe_public_link(url: str, *, host: str) -> str:
 
 
 def review_plain_text(issue_url: str, metadata: dict) -> str:
-    """Useful even in Gmail clients that disable HTML email."""
+    """Copy-friendly alternatives to HTML mail, never publish on link open."""
     title = str(metadata.get("title", "Neuer Track"))
     profile = metadata.get("creative_profile") or {}
     duration = metadata.get("duration", 30)
@@ -83,30 +83,38 @@ def review_plain_text(issue_url: str, metadata: dict) -> str:
     footage_label = "KI-Kurzclip (LTX-2.3) + Coverr" if ai else "kuratierte Coverr-Clips"
     if issue_url:
         actions = (
-            f"DEIN FREIGABELINK:\\n{issue_url}\\n\\n"
-            "Auf GitHub als Eigentümer kommentieren:\\n"
-            "  /revise mehr natur, weniger skate  - Video neu gestalten\\n"
-            "  /revise more_mpc              - mehr analoges Studio\\n"
-            "  /revise preset_rubin_lana     - Natur und Americana\\n"
-            "  /reject                       - verwerfen\\n"
-            "  /approve                      - freigeben (nur bei aktivierter Publikation)\\n"
+            f"DEIN FREIGABELINK:\n{issue_url}\n\n"
+            "Nach dem Öffnen bei GitHub EXAKT EINEN Kommentar eingeben:\n"
+            "  /publish instagram     - nur Instagram\n"
+            "  /publish tiktok        - nur TikTok (API noch nicht aktiv)\n"
+            "  /publish both          - TikTok und Instagram (API noch nicht aktiv)\n\n"
+            "Ein Linkklick allein veröffentlicht nichts. TikTok ist noch gesperrt.\n"
+            "Weitere Optionen:\n"
+            "  /revise mehr natur, weniger skate  - Video neu gestalten\n"
+            "  /revise more_mpc              - mehr analoges Studio\n"
+            "  /revise preset_rubin_lana     - Natur und Americana\n"
+            "  /reject                       - verwerfen\n"
+            "  /approve                      - alte Kurzform für nur Instagram\n"
         )
     else:
-        actions = "TESTVORSCHAU – keine Freigabe und keine Instagram-Veröffentlichung.\\n"
+        actions = (
+            "TESTVORSCHAU – keine Freigabe und keine Veröffentlichung.\n"
+            "Bei der echten Freigabe stehen Instagram, TikTok und beide Plattformen zur Wahl.\n"
+        )
     return (
-        f"CARLECOOL  /  CREATIVE REVIEW\\n\\n"
-        f"{title}\\n{duration} Sekunden · 9:16 Reel · MP4 im Anhang\\n\\n"
+        "CARLECOOL  /  CREATIVE REVIEW\n\n"
+        f"{title}\n{duration} Sekunden · 9:16 Reel · MP4 im Anhang\n\n"
         "Ein neuer visueller Entwurf ist bereit. Bitte erst das Video ansehen, "
-        "dann den nächsten Schritt auswählen.\\n\\n"
-        + actions + "\\n"
-        f"FOOTAGE: {footage_label}\\n"
-        f"LOOK: {profile.get('preset', 'Rubin / Analog / Americana / Skate')}\\n"
+        "dann den nächsten Schritt auswählen.\n\n"
+        + actions + "\n"
+        f"FOOTAGE: {footage_label}\n"
+        f"LOOK: {profile.get('preset', 'Rubin / Analog / Americana / Skate')}\n"
         f"SCHNITT: {profile.get('pace', 'medium')}   "
-        f"ANALOG: {profile.get('analog', 65)}%\\n\\n"
+        f"ANALOG: {profile.get('analog', 65)}%\n\n"
         "Das MP4 ist nur dieser privaten Mail beigefügt. "
-        "Ein Link allein löst niemals eine Instagram-Veröffentlichung aus.\\n\\n"
-        f"Musik: {metadata.get('permalink', '')}\\n\\n"
-        f"Caption:\\n{metadata.get('caption', '')}\\n"
+        "Ein Link allein löst niemals eine Veröffentlichung aus.\n\n"
+        f"Musik: {metadata.get('permalink', '')}\n\n"
+        f"Caption:\n{metadata.get('caption', '')}\n"
     )
 
 
@@ -131,12 +139,38 @@ def review_html(issue_url: str, metadata: dict) -> str:
     if issue_url and not url:
         raise ValueError("Review URL must be an exact HTTPS github.com link")
     if url:
+        # Email HTML cannot safely execute authenticated actions. Each card
+        # opens the same owner-only Issue, where the exact command is confirmed.
+        publication_options = (
+            ("Nur Instagram", "/publish instagram"),
+            ("Nur TikTok", "/publish tiktok"),
+            ("TikTok & Instagram", "/publish both"),
+        )
+        choice_rows = ''.join(
+            '<tr><td style="padding:7px 0">'
+            f'<a href="{h(url)}" style="display:inline-block;background:#f6f3ef;'
+            'border:1px solid #e4ded7;border-radius:9px;color:#202b36;'
+            f'font-size:14px;font-weight:700;padding:12px 14px;text-decoration:none">{h(name)}</a>'
+            f'<span style="padding-left:12px;font-size:12px;color:#5d6774">'
+            f'Kommentar: <code>{h(command)}</code></span>'
+            '</td></tr>' for name, command in publication_options
+        )
         action_area = (
             f'<a href="{h(url)}" style="display:inline-block;background:#1f2937;'
             'color:#fff;font-size:15px;font-weight:700;padding:15px 24px;'
             'border-radius:10px;text-decoration:none">Video freigeben oder überarbeiten</a>'
             '<p style="font-size:12px;color:#79818e;margin-top:13px">'
             'Öffnet ausschließlich die GitHub-Freigabe. Kein automatisches Posting.</p>'
+            '<p style="font-size:12px;font-weight:700;color:#202b36;margin-top:24px">'
+            'VERÖFFENTLICHUNG AUSWÄHLEN</p>'
+            '<p style="font-size:12px;color:#657080;line-height:1.5">'
+            'Gewünschte Plattform anklicken, auf GitHub den zugehörigen Kommentar '
+            'eingeben und bestätigen. Nur der Kommentar ist die Freigabe.</p>'
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
+            + choice_rows + '</table>'
+            '<p style="font-size:12px;color:#8a6860;line-height:1.5">'
+            'TikTok-Veröffentlichungen sind bis zur API-Einrichtung gesperrt. '
+            'Bei „beide“ wird vorab geprüft; bis dahin erfolgt auch kein Instagram-Post.</p>'
             '<div style="margin-top:26px;border-top:1px solid #e8e6e1;padding-top:20px">'
             '<p style="font-size:12px;font-weight:700;letter-spacing:1.2px;'
             'color:#7b756e;margin:0 0 14px">DEINE OPTIONEN</p>'
@@ -260,8 +294,12 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str,
             f"**Creative Profile:** `{metadata.get('creative_profile', {}).get('preset', 'default')}` "
             f"· Tempo `{metadata.get('creative_profile', {}).get('pace', 'medium')}` "
             f"· Analog `{metadata.get('creative_profile', {}).get('analog', 65)}%`\n\n"
-            "**Freigabe:** Schreibe als Repository-Eigentümer den exakten Kommentar `/approve` "
-            "(alternativ `/publish`). Die Instagram-Veröffentlichung bleibt zusätzlich gesperrt, "
+            "**Plattform wählen (als Repository-Eigentümer kommentieren):**\\n"
+            "- `/publish instagram` – nur Instagram\\n"
+            "- `/publish tiktok` – nur TikTok (derzeit API-Sperre)\\n"
+            "- `/publish both` – beide Plattformen (derzeit API-Sperre; kein teilweiser Upload)\\n\\n"
+            "`/approve` und `/publish` sind alte Kurzformen nur für Instagram. "
+            "Die Instagram-Veröffentlichung bleibt zusätzlich gesperrt, "
             "solange `PUBLISH_ENABLED` nicht bewusst aktiviert wurde. "
             "Das exakte Original wird aus Gmail Sent abgerufen und per SHA-256 geprüft. "
             "Eine Linköffnung allein veröffentlicht nichts.\n\n"
