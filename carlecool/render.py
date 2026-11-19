@@ -6,7 +6,8 @@ import os
 import json
 import subprocess
 
-from .analysis import AudioFeatures, beat_cut_lengths
+from .analysis import AudioFeatures
+from .cinematic import plan_cuts, build_storyboard
 
 
 def _run(args):
@@ -55,19 +56,14 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         raise ValueError('Only 1080x1920 production or 270x480 offline test rendering permitted')
     if pace not in ("slow", "medium", "fast") or type(analog) is not int or not 0 <= analog <= 100:
         raise ValueError("Invalid creative editing controls")
-    if pace == "medium":
-        intervals = beat_cut_lengths(features.bpm, length)
-    else:
-        beats = 12 if pace == "slow" else 4
-        interval = min(9.0, max(1.6, beats * 60 / max(65, features.bpm)))
-        intervals = []
-        remaining = float(length)
-        while remaining > .01:
-            step = min(interval, remaining)
-            if remaining - step < 1.0:
-                step = remaining
-            intervals.append(round(step, 3))
-            remaining -= step
+    # Beat-phase-aware, source-offset-aware montage. No stochastic edits.
+    intervals = plan_cuts(float(length), float(features.bpm), pace=pace,
+                          beat_phase=getattr(features, "beat_phase", 0.0))
+    source_durations = [probe_duration(path) for path in videos]
+    if any(d < 1.0 for d in source_durations):
+        raise ValueError("Video too short")
+    storyboard = build_storyboard(intervals, source_durations,
+                                 seed=str(features.excerpt_start))
     # Quiet, desaturated analogue texture. No false retro footage claim.
     level = analog / 100.0
     saturation = 1.0 - 0.33 * level
@@ -79,16 +75,14 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "format=yuv420p")
     filters = base + (f",noise=alls={grain}:allf=u" if grain else "")
     files = []
-    for index, seconds in enumerate(intervals):
-        source = videos[index % len(videos)]
-        duration = probe_duration(source)
-        if duration < 1:
-            raise ValueError(f"Video too short: {source}")
+    for index, shot in enumerate(storyboard):
+        seconds = shot.duration
+        source = videos[shot.source_index]
         # Loop short, cleared footage, then normalize dimensions/frame rate/codec.
         part = work / f"clip_{index:03}.mp4"
         _run([
             "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-            "-stream_loop", "-1", "-i", str(source), "-t", f"{seconds:.3f}",
+            "-stream_loop", "-1", "-ss", f"{shot.source_offset:.3f}", "-i", str(source), "-t", f"{seconds:.3f}",
             "-vf", filters,
             "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "22",
             "-g", "60", "-video_track_timescale", "30000", str(part),
@@ -122,4 +116,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     if output.stat().st_size > MAX_ATTACHMENT_BYTES:
         raise RuntimeError("Reel exceeds safe Gmail attachment limit after compression")
     return {"duration": probe_duration(output), "scenes": len(files),
-            "resolution": f"{width}x{height}", "pace": pace, "analog": analog}
+            "resolution": f"{width}x{height}", "pace": pace, "analog": analog,
+            "edit_plan": [{"source_index": s.source_index,
+                           "source_offset": s.source_offset,
+                           "duration": s.duration} for s in storyboard]}

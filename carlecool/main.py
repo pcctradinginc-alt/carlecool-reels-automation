@@ -122,6 +122,20 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
             print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}")
     if not paths:
         raise RuntimeError("No licensed clips available; add assets/stock and manifest.json as fallback")
+    # Optional cover-guided visual ranking. Any artwork/network/decode error
+    # leaves the existing safe licensed-stock selection untouched.
+    cover_matching = {"available": False, "scores": []}
+    if os.getenv("CARLECOOL_COVER_MATCH", "true").lower() in ("true", "1", "yes"):
+        from .cover_visual import fetch_cover, rank_by_cover
+        cover = output_dir / "public_cover"
+        if fetch_cover(getattr(track, "artwork_url", ""), cover):
+            order, scores = rank_by_cover(cover, paths)
+            if scores and len(order) == len(paths):
+                paths = [paths[i] for i in order]
+                selected = [selected[i] for i in order]
+                cover_matching = {"available": True, "scores": [scores[i] for i in order]}
+                print("Album-cover palette matching applied to licensed clips")
+        cover.unlink(missing_ok=True)
     out = output_dir / f"carlecool_{track.id}.mp4"
     details = render_reel(audio, paths, features, out, config.reel_seconds,
                           pace=profile["pace"], analog=profile["analog"])
@@ -132,6 +146,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "caption": caption_for(track, selected), "search_keywords": keywords,
         "visual_direction": editorial_brief(features.mood, features.energy, features.bpm),
         "creative_profile": profile,
+        "cover_matching": cover_matching,
         "output": str(out), "sha256": hashlib.sha256(out.read_bytes()).hexdigest(), **details,
     }
     (output_dir / "reel_metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")

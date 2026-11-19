@@ -13,6 +13,7 @@ class AudioFeatures:
     excerpt_start: float
     mood: str
     seconds: float
+    beat_phase: float = 0.0  # seconds to first estimated beat relative to excerpt
 
 
 def analyze_audio(path: str, reel_seconds: int, genre: str = "") -> AudioFeatures:
@@ -46,8 +47,13 @@ def analyze_audio(path: str, reel_seconds: int, genre: str = "") -> AudioFeature
     if autocorr[minimum:maximum + 1].size and autocorr[minimum:maximum + 1].max() > 1e-9:
         best = int(np.argmax(autocorr[minimum:maximum + 1])) + minimum
         bpm = 60 * fps / best
+        # Phase-align edits to onset peaks rather than an arbitrary t=0.
+        folded = np.bincount(np.arange(len(onset)) % best,
+                             weights=np.maximum(onset, 0.0), minlength=best)
+        phase = float(np.argmax(folded) / fps)
     else:
         bpm = 120.0  # explicit fallback for quiet music
+        phase = 0.0
     energy = float(np.clip(np.mean(np.abs(clip)) * 8, 0, 1))
     genre_lower = genre.lower()
     if any(x in genre_lower for x in ("ambient", "chill", "downtempo", "lofi")) or energy < 0.12:
@@ -56,7 +62,7 @@ def analyze_audio(path: str, reel_seconds: int, genre: str = "") -> AudioFeature
         mood = "nightdrive"
     else:
         mood = "cinematic"
-    return AudioFeatures(round(float(bpm), 1), round(energy, 3), float(start), mood, seconds)
+    return AudioFeatures(round(float(bpm), 1), round(energy, 3), float(start), mood, seconds, round(phase, 3))
 
 
 def beat_cut_lengths(bpm: float, seconds: int) -> list[float]:
