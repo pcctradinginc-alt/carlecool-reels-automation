@@ -15,6 +15,13 @@ async function verify(env,payload,signature){
   let diff=0;for(let i=0;i<hex.length;i++)diff|=hex.charCodeAt(i)^signature.charCodeAt(i);
   return diff===0;
 }
+// Independent, purpose-bound form token prevents cross-site POSTs when a
+// privacy-focused browser omits the Origin header on a normal same-site form.
+async function confirmationToken(env, payload) {
+  const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(env.APPROVAL_LINK_SECRET),{name:"HMAC",hash:"SHA-256"},false,["sign"]);
+  const bytes=new Uint8Array(await crypto.subtle.sign("HMAC",key,new TextEncoder().encode("form-confirm/v1/"+payload)));
+  return Array.from(bytes,b=>b.toString(16).padStart(2,"0")).join("");
+}
 async function github(env,path,init={}){
   if(!/^[a-z0-9_.-]+\/[a-z0-9_.-]+$/i.test(env.GITHUB_REPOSITORY||""))throw Error("config-repository");
   if(typeof env.GITHUB_APPROVAL_TOKEN!=="string"||!env.GITHUB_APPROVAL_TOKEN.trim())throw Error("config-token");
@@ -59,19 +66,30 @@ export default {async fetch(request,env){
     if(Number(approved.run_id)!==Number(run)||approved.sha256!==sha)
       return page("Falsches Video","<p>Die Videoidentität stimmt nicht überein.</p>",409);
     const deleting=choice==="discard";
+    const payload="review/"+issue+"/"+run+"/"+sha+"/"+choice+"/"+expiry;
+    const confirmation=await confirmationToken(env,payload);
     if(request.method==="GET"){
       const detail=deleting?"Der Entwurf wird verworfen und die Freigabe geschlossen. Die E-Mail-Kopie bleibt in deinem Postfach.":
         "Das geprüfte Reel wird nach Bestätigung zur ausgewählten Plattform weitergeleitet.";
       const consent=deleting?"Ich möchte diesen Entwurf verwerfen.":
         "Ich habe das Video geprüft und stimme der öffentlichen Veröffentlichung ausdrücklich zu.";
       return page("Freigabe bestätigen","<p><strong>"+esc(names[choice])+"</strong></p><p>"+esc(detail)+
-        "</p><form action='"+esc(url.pathname)+"' method='POST'><label><input type='checkbox' name='consent' value='yes' required> "+
+        "</p><form action='"+esc(url.pathname)+"' method='POST'><input type='hidden' name='confirmation' value='"+confirmation+"'><label><input type='checkbox' name='consent' value='yes' required> "+
         esc(consent)+"</label><button type='submit'>"+esc(deleting?"Entwurf verwerfen":"Jetzt Veröffentlichung freigeben")+
         "</button></form><p><small>Ein Link-Aufruf allein löst nichts aus.</small></p>");
     }
-    if(request.headers.get("Origin")!==url.origin||!(request.headers.get("Content-Type")||"").startsWith("application/x-www-form-urlencoded"))
+    const origin=request.headers.get("Origin");
+    const fetchSite=request.headers.get("Sec-Fetch-Site");
+    // Reject explicit cross-origin submissions. Missing Origin is normal in
+    // some privacy clients and is accepted ONLY with the separate form MAC.
+    if((origin && origin!==url.origin) ||
+       (fetchSite && !["same-origin","none"].includes(fetchSite)) ||
+       !(request.headers.get("Content-Type")||"").startsWith("application/x-www-form-urlencoded"))
       return page("Ungültige Anfrage","<p>Bitte die Bestätigungsseite verwenden.</p>",403);
     const form=await request.formData();
+    const supplied=String(form.get("confirmation")||"");
+    if(!(await verify(env,"form-confirm/v1/"+payload,supplied)))
+      return page("Ungültige Anfrage","<p>Bitte die Bestätigungsseite erneut öffnen.</p>",403);
     if(form.get("consent")!=="yes")return page("Zustimmung fehlt","<p>Bitte zustimmen.</p>",400);
     // Atomic first-writer-wins. No retry after uncertain GitHub response.
     phase="d1-reserve";
