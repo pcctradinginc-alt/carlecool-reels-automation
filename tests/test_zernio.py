@@ -128,9 +128,10 @@ def test_pending_journal_stays_after_partial_provider_result(tmp_path, monkeypat
         "video_ids": [str(i) for i in range(5)],
         "caption": "#CarleCool", "footage_sources": [],
     }
-    with pytest.raises(RuntimeError, match="manual Zernio reconciliation"):
+    with pytest.raises(RuntimeError, match="Journal stays pending"):
         approve.publish_via_zernio(9, preview, preview, tmp_path / "x.mp4", "both", state)
     assert state["pending"]["provider_post_id"] == "z123"
     assert state["pending"]["platform_status"] == {"instagram": "published", "tiktok": "failed"}
-    assert len(commits) == 2
+    assert "tiktok" in state["pending"]["platform_errors"]
+    assert len(commits) == 3
     assert state["published"] == []

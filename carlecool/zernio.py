@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
+import re
+import time
 from urllib.parse import urlsplit
 import uuid
 
@@ -190,6 +192,55 @@ class Zernio:
         identity = f"carlecool|{issue_number}|{sha256}|{target}"
         key = str(uuid.uuid5(uuid.NAMESPACE_URL, identity))
         return self._post("/v1/posts", body, idempotency_key=key)
+
+
+IN_FLIGHT = {"pending", "processing", "uploading"}
+TERMINAL = {"published", "failed", "cancelled"}
+POST_ID = re.compile(r"[A-Za-z0-9_-]{6,64}")
+
+
+def _get_post(client: "Zernio", post_id: str) -> dict:
+    """Read-only status of one post (GET /v1/posts/{postId})."""
+    if not POST_ID.fullmatch(post_id or ""):
+        raise ValueError("Invalid Zernio post id")
+    response = client.session.get(f"{API}/v1/posts/{post_id}",
+                                  headers={"Authorization": "Bearer " + client.key,
+                                           "Accept": "application/json"},
+                                  timeout=(15, 45), allow_redirects=False)
+    response.raise_for_status()
+    data = response.json()
+    if not isinstance(data, dict):
+        raise RuntimeError("Unexpected Zernio post response")
+    # Normalise to the create-post shape {"post": {...}}.
+    return data if isinstance(data.get("post"), dict) else {"post": data}
+
+
+def wait_for_result(client: "Zernio", response: dict, target: str, *,
+                    timeout: float = 720, interval: float = 15,
+                    sleep=None, clock=None) -> tuple[dict, bool]:
+    """Poll until every requested platform is published/failed/cancelled.
+
+    Zernio answers publishNow with transient entry statuses (`uploading` …) while the
+    video is still being processed; TikTok typically finishes minutes later.
+    Returns (latest response, finished). Network errors during polling are tolerated
+    until the deadline: the post already exists, so we only ever READ here.
+    """
+    sleep = sleep or time.sleep
+    clock = clock or time.monotonic
+    post_id = str((response.get("post") or {}).get("_id") or "")
+    latest = response
+    deadline = clock() + timeout
+    while True:
+        entries = published_platforms(latest, target)
+        if all(e.get("status") in TERMINAL for e in entries.values()):
+            return latest, True
+        if not post_id or clock() >= deadline:
+            return latest, False
+        sleep(interval)
+        try:
+            latest = _get_post(client, post_id)
+        except (requests.RequestException, RuntimeError, ValueError) as exc:
+            print("Zernio status check failed, retrying:", type(exc).__name__)
 
 
 def published_platforms(response: dict, target: str) -> dict[str, dict]:

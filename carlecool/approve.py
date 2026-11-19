@@ -109,8 +109,9 @@ def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
                        video: Path, target: str, state: dict) -> None:
     """Publish with official partner after consent and an immutable Git reserve.
 
-    Partial results and timeout are intentionally NOT retried automatically.
-    The journal remains pending until manually reconciled to prevent duplicates.
+    After submitting, the final per-platform status is polled (read-only) for up to
+    12 minutes. Published → journal + post URLs + issue closed automatically.
+    Failed, partial or still processing → journal stays pending; never re-posted.
     """
     from .zernio import Zernio, published_platforms
     if len(set(approval['video_ids'])) < 5:
@@ -148,28 +149,53 @@ def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
         audio_name=str(approval.get('song_label') or ''),
     )
     post = response.get('post') or {}
-    state['pending']['provider_post_id'] = post.get('_id', '')
+    post_id = str(post.get('_id', ''))
+    state['pending']['provider_post_id'] = post_id
     per_platform = published_platforms(response, target)
     state['pending']['platform_status'] = {
         key: value.get('status', 'unknown') for key, value in per_platform.items()
     }
     save_state(state)
     commit_state(f'journal: record zernio result for issue {issue_number}')
-    if any(item.get('status') != 'published' for item in per_platform.values()):
-        raise RuntimeError('One or more platforms not confirmed published; '
-                           'manual Zernio reconciliation needed before any retry')
-    state['published'].append({
+    # publishNow often answers "uploading"; the platform finishes minutes later.
+    # Poll (read-only) for the final per-platform status instead of failing early.
+    from .zernio import wait_for_result
+    response, finished = wait_for_result(client, response, target)
+    per_platform = published_platforms(response, target)
+    statuses = {key: value.get('status', 'unknown') for key, value in per_platform.items()}
+    urls = {key: str(value.get('platformPostUrl') or '') for key, value in per_platform.items()
+            if value.get('platformPostUrl')}
+    if not finished or any(status != 'published' for status in statuses.values()):
+        state['pending']['platform_status'] = statuses
+        errors = {key: f"{value.get('errorCategory', '')}: {value.get('errorMessage', '')}".strip(': ')
+                  for key, value in per_platform.items() if value.get('status') == 'failed'}
+        if errors:
+            state['pending']['platform_errors'] = errors
+        if urls:
+            state['pending']['platform_post_urls'] = urls
+        save_state(state)
+        commit_state(f'journal: zernio outcome for issue {issue_number} needs review')
+        detail = ('still processing after waiting' if not finished
+                  else 'failed: ' + '; '.join(f'{k} {v}' for k, v in errors.items()) if errors
+                  else 'not published: ' + ', '.join(f'{k}={v}' for k, v in statuses.items()))
+        raise RuntimeError(f'Zernio {detail}. Journal stays pending; check Zernio Studio '
+                           'before any retry (no automatic re-post).')
+    record = {
         'track_id': approval['track_id'], 'at': timestamp,
         'video_ids': approval['video_ids'], 'sha256': approval['sha256'],
         'approval_issue': issue_number, 'provider': 'zernio', 'target': target,
-        'provider_post_id': post.get('_id', ''),
-        'platform_status': state['pending']['platform_status'],
-    })
+        'provider_post_id': post_id,
+        'platform_status': statuses,
+    }
+    if urls:
+        record['platform_post_urls'] = urls
+    state['published'].append(record)
     state['pending'] = None
     save_state(state)
     commit_state(f'journal: published zernio reel {issue_number} on {target}')
+    links = ''.join(f'\n- {name}: {url}' for name, url in urls.items())
     github_request('POST', f'issues/{issue_number}/comments',
-                   json_body={'body': f'✅ Veröffentlichung über Zernio bestätigt: {target}.'})
+                   json_body={'body': f'✅ Veröffentlichung über Zernio bestätigt: {target}.{links}'})
     github_request('PATCH', f'issues/{issue_number}', json_body={'state': 'closed'})
 
 
