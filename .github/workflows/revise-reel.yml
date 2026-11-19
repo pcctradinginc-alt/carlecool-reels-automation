@@ -17,24 +17,15 @@ jobs:
       contains(github.event.issue.labels.*.name, 'carlecool-review')
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    # Non-secret configuration only; secrets go to the revise step below.
     env:
-      GH_TOKEN: ${{ github.token }}
       REVIEW_ISSUE: ${{ github.event.issue.number }}
       REVISE_COMMAND: ${{ github.event.comment.body }}
-      SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
-      SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
-      COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
-      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-      HF_TOKEN: ${{ secrets.HF_TOKEN }}
       CARLECOOL_AI_VIDEO: 'one'
-      GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
-      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-      REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
       MASTER_S3_BUCKET: ${{ vars.MASTER_S3_BUCKET }}
       S3_ENDPOINT_URL: ${{ vars.S3_ENDPOINT_URL }}
       AWS_DEFAULT_REGION: ${{ vars.S3_REGION || 'auto' }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      APPROVAL_BASE_URL: ${{ vars.APPROVAL_BASE_URL }}
       SC_USE_RSS_AUDIO: 'true'
       PUBLISH_ENABLED: 'false'
     steps:
@@ -54,4 +45,17 @@ jobs:
           python scripts/setup_ffmpeg.py
           python -m pip install --disable-pip-version-check --retries 2 --timeout 30 'gradio_client>=1.13,<3'
       - name: Create new private preview and new approval link
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
+          SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
+          COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+          APPROVAL_LINK_SECRET: ${{ secrets.APPROVAL_LINK_SECRET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: python -m carlecool.revise

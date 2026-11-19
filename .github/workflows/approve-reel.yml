@@ -23,47 +23,37 @@ jobs:
       contains(github.event.issue.labels.*.name, 'carlecool-review')
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    # Secrets are given ONLY to the steps whose code reads them, never to
+    # dependency installation (a compromised package could read the environment).
     env:
-      GH_TOKEN: ${{ github.token }}
-      IG_USER_ID: ${{ secrets.IG_USER_ID }}
-      IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-      GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
-      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-      PUBLISH_ENABLED: ${{ secrets.PUBLISH_ENABLED }}
-      ZERNIO_PUBLISH_ENABLED: ${{ secrets.ZERNIO_PUBLISH_ENABLED }}
-      ZERNIO_API_KEY: ${{ secrets.ZERNIO_API_KEY }}
-      ZERNIO_INSTAGRAM_ACCOUNT_ID: ${{ secrets.ZERNIO_INSTAGRAM_ACCOUNT_ID }}
-      ZERNIO_TIKTOK_ACCOUNT_ID: ${{ secrets.ZERNIO_TIKTOK_ACCOUNT_ID }}
-      COVERR_PUBLISH_PERMISSION_CONFIRMED: ${{ secrets.COVERR_PUBLISH_PERMISSION_CONFIRMED }}
+      REVIEW_ISSUE: ${{ github.event.issue.number }}
       MASTER_S3_BUCKET: ${{ vars.MASTER_S3_BUCKET }}
       S3_ENDPOINT_URL: ${{ vars.S3_ENDPOINT_URL }}
       AWS_DEFAULT_REGION: ${{ vars.S3_REGION || 'auto' }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AI_VIDEO_PUBLISH_LICENSE_CONFIRMED: ${{ secrets.AI_VIDEO_PUBLISH_LICENSE_CONFIRMED }}
-      REVIEW_ISSUE: ${{ github.event.issue.number }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
-          fetch-depth: 0
-          persist-credentials: true
+          # The journal is written via the GitHub API; no git token on disk.
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: pip
-      - name: Install Python dependencies
+      - name: Install Python dependencies (no secrets in this step)
         run: pip install -r requirements.txt
-      - name: Git journal identity
-        run: |
-          git config user.name 'CarleCool Automation'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
       - name: Confirm publication target before any Instagram or TikTok operation
         env:
           PUBLISH_COMMAND: ${{ github.event.comment.body }}
+          ZERNIO_PUBLISH_ENABLED: ${{ secrets.ZERNIO_PUBLISH_ENABLED }}
+          ZERNIO_API_KEY: ${{ secrets.ZERNIO_API_KEY }}
+          ZERNIO_INSTAGRAM_ACCOUNT_ID: ${{ secrets.ZERNIO_INSTAGRAM_ACCOUNT_ID }}
+          ZERNIO_TIKTOK_ACCOUNT_ID: ${{ secrets.ZERNIO_TIKTOK_ACCOUNT_ID }}
         run: python -m carlecool.approve --issue "$REVIEW_ISSUE" --command "$PUBLISH_COMMAND" --preflight
       - name: Resolve immutable reviewed run
         id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           RUN_ID=$(python -m carlecool.approve --issue "$REVIEW_ISSUE" --inspect)
           echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
@@ -71,11 +61,26 @@ jobs:
         env:
           RUN_ID: ${{ steps.source.outputs.run_id }}
           PUBLISH_COMMAND: ${{ github.event.comment.body }}
+          GH_TOKEN: ${{ github.token }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: python -m carlecool.approve --issue "$REVIEW_ISSUE" --run "$RUN_ID" --command "$PUBLISH_COMMAND" --fetch
       - name: Publish the SHA-256 verified media (fail closed)
         env:
           RUN_ID: ${{ steps.source.outputs.run_id }}
           PUBLISH_COMMAND: ${{ github.event.comment.body }}
+          GH_TOKEN: ${{ github.token }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          PUBLISH_ENABLED: ${{ secrets.PUBLISH_ENABLED }}
+          ZERNIO_PUBLISH_ENABLED: ${{ secrets.ZERNIO_PUBLISH_ENABLED }}
+          ZERNIO_API_KEY: ${{ secrets.ZERNIO_API_KEY }}
+          ZERNIO_INSTAGRAM_ACCOUNT_ID: ${{ secrets.ZERNIO_INSTAGRAM_ACCOUNT_ID }}
+          ZERNIO_TIKTOK_ACCOUNT_ID: ${{ secrets.ZERNIO_TIKTOK_ACCOUNT_ID }}
+          COVERR_PUBLISH_PERMISSION_CONFIRMED: ${{ secrets.COVERR_PUBLISH_PERMISSION_CONFIRMED }}
+          AI_VIDEO_PUBLISH_LICENSE_CONFIRMED: ${{ secrets.AI_VIDEO_PUBLISH_LICENSE_CONFIRMED }}
         run: python -m carlecool.approve --issue "$REVIEW_ISSUE" --run "$RUN_ID" --command "$PUBLISH_COMMAND"
   reject:
     if: >-

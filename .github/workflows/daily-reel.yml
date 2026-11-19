@@ -4,6 +4,7 @@ name: CarleCool — make and review Reel
 # TikTok review request 2026-11-19: send new private approval email with TikTok choice; never auto-publish.
 # Fresh review requested after Zernio cleanup: private preview and new issue only, no TikTok upload.
 # Owner-requested Instagram-only test: new private email review; publication requires separate explicit Instagram approval.
+# Security: secrets are scoped to the render and email steps only (not pip installs).
 # Owner-requested review verification with bundled FFmpeg and authorized-audio fallback; no auto-publish.
 on:
   schedule:
@@ -39,16 +40,13 @@ jobs:
     # Human issue approval is still mandatory; publish secret stays disabled.
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    # Only non-secret configuration here. Secrets are passed to the two steps that
+    # use them, never to dependency installation steps.
     env:
-      COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
-      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-      HF_TOKEN: ${{ secrets.HF_TOKEN }}
       CARLECOOL_AI_VIDEO: 'one'
       CARLECOOL_TRENDS: 'true'
       CARLECOOL_COVER_MATCH: 'true' # Creative v3: enable safe, local album-art palette ranking
       CARLECOOL_SEMANTIC: ${{ vars.CARLECOOL_SEMANTIC == 'off' && 'off' || 'on' }}
-      SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
-      SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
       SC_ALLOW_OFFICIAL_DOWNLOADS: ${{ vars.SC_ALLOW_OFFICIAL_DOWNLOADS }}
       AUDIO_S3_BUCKET: ${{ vars.AUDIO_S3_BUCKET }}
       STOCK_S3_BUCKET: ${{ vars.STOCK_S3_BUCKET }}
@@ -56,16 +54,12 @@ jobs:
       MASTER_S3_BUCKET: ${{ vars.MASTER_S3_BUCKET }}
       S3_ENDPOINT_URL: ${{ vars.S3_ENDPOINT_URL }}
       AWS_DEFAULT_REGION: ${{ vars.S3_REGION || 'auto' }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
-      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-      REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
-      APPROVAL_LINK_SECRET: ${{ secrets.APPROVAL_LINK_SECRET }}
       APPROVAL_BASE_URL: ${{ vars.APPROVAL_BASE_URL }}
-      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # History is written via the GitHub API; no git token on disk.
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -106,10 +100,27 @@ jobs:
       # Every scheduled run creates a NEW proposal, even when older reviews
       # remain open. Only an explicit owner approval can ever publish.
       - name: Render a balanced random Reel (no Instagram calls)
+        env:
+          COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
+          SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: python -m carlecool.main --mode preview
       - name: Email exact original privately and remember rotation
         env:
           MODE: ${{ github.event_name != 'workflow_dispatch' && 'review' || inputs.mode }}
+          GH_TOKEN: ${{ github.token }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+          APPROVAL_LINK_SECRET: ${{ secrets.APPROVAL_LINK_SECRET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           if [[ "$MODE" == "review" ]]; then
             python -m carlecool.review
