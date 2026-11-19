@@ -12,7 +12,7 @@ from .config import Settings
 from .instagram import Instagram
 from .review import decode_issue_data, github_request
 from .mailstore import fetch_reel_from_sent
-from .state import load_state, save_state, commit_state
+from .state import load_state, save_state, commit_state, is_already_attempted_sha
 
 
 PUBLISH_CHOICES = {
@@ -117,8 +117,8 @@ def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
         raise RuntimeError('Require 5 unique licensed clips for automatic posting')
     if state.get('pending'):
         raise RuntimeError('Unresolved publication; reconcile before sending another')
-    if any(x.get('sha256') == approval['sha256'] for x in state.get('published', [])):
-        raise RuntimeError('These exact approved video bytes were already published')
+    if is_already_attempted_sha(state, approval['sha256']):
+        raise RuntimeError('These exact approved video bytes were previously published or attempted; no blind retry')
     client = Zernio(os.environ['ZERNIO_API_KEY'])
     ids = {'instagram': os.getenv('ZERNIO_INSTAGRAM_ACCOUNT_ID', ''),
            'tiktok': os.getenv('ZERNIO_TIKTOK_ACCOUNT_ID', '')}
@@ -201,9 +201,8 @@ def publish(issue_number: int, run_id: int, directory: Path, *, target: str = 'i
         return
     if state.get('pending'):
         raise RuntimeError('Unresolved pending publication must be reconciled manually')
-    if any(x.get('sha256') == approval['sha256']
-           for x in state.get('published', [])):
-        raise RuntimeError('Track or reel was already published; no duplicate post')
+    if is_already_attempted_sha(state, approval['sha256']):
+        raise RuntimeError('Reel bytes were previously published or attempted; no duplicate post')
     if len(set(approval['video_ids'])) < 5:
         raise RuntimeError('Require 5 unique licensed clips for automatic posting')
     # Verify assigned Instagram asset before recording a pending publication.
