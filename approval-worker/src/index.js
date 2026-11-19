@@ -78,13 +78,14 @@ export default {async fetch(request,env){
         esc(consent)+"</label><button type='submit'>"+esc(deleting?"Entwurf verwerfen":"Jetzt Veröffentlichung freigeben")+
         "</button></form><p><small>Ein Link-Aufruf allein löst nichts aus.</small></p>");
     }
-    const origin=request.headers.get("Origin");
-    const fetchSite=request.headers.get("Sec-Fetch-Site");
-    // Reject explicit cross-origin submissions. Missing Origin is normal in
-    // some privacy clients and is accepted ONLY with the separate form MAC.
-    if((origin && origin!==url.origin) ||
-       (fetchSite && !["same-origin","none"].includes(fetchSite)) ||
-       !(request.headers.get("Content-Type")||"").startsWith("application/x-www-form-urlencoded"))
+    // Browser / mail webviews may omit, send "null", or rewrite Origin and
+    // Sec-Fetch-Site on an otherwise valid first-party form submission.
+    // These headers are not authenticated evidence of the submitter. Instead,
+    // require the purpose-bound HMAC generated only by the signed GET page,
+    // explicit consent, an unexpired signed URL, and single-use D1 reservation.
+    // Cross-site forms without the independent secret-derived token cannot act.
+    const contentType=(request.headers.get("Content-Type")||"").toLowerCase();
+    if(!contentType.startsWith("application/x-www-form-urlencoded"))
       return page("Ungültige Anfrage","<p>Bitte die Bestätigungsseite verwenden.</p>",403);
     const form=await request.formData();
     const supplied=String(form.get("confirmation")||"");
