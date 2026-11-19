@@ -177,6 +177,19 @@
         "AZXXXJmPmZ"
       ],
       "sha256": "225d2e238c2133f53ed8751d0f0d6255fabbcc520be86540b63dac012c8221bf"
+    },
+    {
+      "at": "2026-11-19T18:36:41+00:00",
+      "kind": "test",
+      "run_id": 44588789496,
+      "track_id": "2437525041",
+      "video_ids": [
+        "45MfTZTHTT",
+        "TnhH3rqEox",
+        "lKk4O0SwKD",
+        "hITeFvnRkU"
+      ],
+      "sha256": "5643e931bb38fa4b9aa54cf8dbb148fee903eed40f4c4bf2cf9fb89d4d509f77"
     }
   ]
 }
