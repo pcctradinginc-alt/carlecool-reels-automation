@@ -76,7 +76,7 @@ def test_coverr_strict_portrait_mode(monkeypatch):
 
 def test_caption_credit_present():
     text = caption_for(tr("7"), [Video("a", "coverr")])
-    assert "Coverr" in text and "Link in Bio" in text and "soundcloud.com" not in text
+    assert "Coverr" in text and "Link in Bio" not in text and "soundcloud.com" not in text
 
 
 def test_no_unapproved_local_footage(tmp_path, monkeypatch):

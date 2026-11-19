@@ -64,7 +64,7 @@ def test_caption_link_in_bio_and_pexels_credit_passes_rights_check(monkeypatch):
     track = Track(id="1", title="mikosh", permalink_url="https://soundcloud.com/carlecool/mikosh")
     videos = [Video("px-1", "pexels", creator_name="Ana"), Video("px-2", "pexels", creator_name="Ana")]
     caption = caption_for(track, videos)
-    assert caption.startswith("🎧 carl e cool - mikosh\n🎶 Full track: Link in Bio\n")
+    assert caption.startswith("🎧 carl e cool - mikosh\n🎬 Videos provided by Pexels")
     assert "https://www.pexels.com" in caption and caption.count("Video by Ana on Pexels") == 1
     validate_footage_rights({"caption": caption, "footage_sources": [{"provider": "pexels"}]})
     with pytest.raises(RuntimeError, match="Pexels"):

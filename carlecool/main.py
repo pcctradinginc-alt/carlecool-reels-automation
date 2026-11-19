@@ -25,8 +25,7 @@ from .video import download_video, gather_videos, fetch_owned_stock, record_cove
 
 
 def caption_for(track, videos) -> str:
-    # Links are not clickable in Instagram/TikTok captions: point to the bio instead.
-    caption = f"🎧 {song_label(track.title)}\n🎶 Full track: Link in Bio\n"
+    caption = f"🎧 {song_label(track.title)}\n"
     if any(v.source == "ai" for v in videos):
         caption += "✨ Enthält KI-generierte Filmszenen (LTX-2.3)\n"
     if any(v.source == "coverr" for v in videos):
