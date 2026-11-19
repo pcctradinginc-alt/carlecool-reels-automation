@@ -89,6 +89,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     edition = os.getenv("GITHUB_RUN_ID") or secrets.token_hex(8)
     keywords = choose_shots(profile, track_id=track.id, mood=features.mood,
                             energy=features.energy, limit=3, run_key=edition)
+    trend_signals = {"status": "disabled", "topics": []}
+    if os.getenv("CARLECOOL_TRENDS", "false").lower() in ("true", "1", "on"):
+        from .trend_signals import fetch_signals, apply_trend
+        trend_signals = fetch_signals()
+        keywords = apply_trend(keywords, trend_signals)
     print(f"Video search phrases: {keywords}")
     candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=9, keywords=keywords)
     selected = []
@@ -135,6 +140,18 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                 selected = [selected[i] for i in order]
                 cover_matching = {"available": True, "scores": [scores[i] for i in order]}
                 print("Album-cover palette matching applied to licensed clips")
+            # Model is an explicit free opt-in, never required for a safe preview.
+            if os.getenv("CARLECOOL_SEMANTIC", "off").lower() == "on":
+                from .semantic import score_semantic
+                semantic = score_semantic(cover, paths, style=profile["preset"])
+                if semantic and len(semantic["order"]) == len(paths):
+                    order = semantic["order"]
+                    paths = [paths[i] for i in order]
+                    selected = [selected[i] for i in order]
+                    cover_matching["semantic"] = {
+                        "model": semantic["model"], "scores": semantic["scores"],
+                        "themes": semantic["themes"]}
+                    print("OpenCLIP semantic cover/frame matching applied")
         cover.unlink(missing_ok=True)
     out = output_dir / f"carlecool_{track.id}.mp4"
     details = render_reel(audio, paths, features, out, config.reel_seconds,
@@ -147,6 +164,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "visual_direction": editorial_brief(features.mood, features.energy, features.bpm),
         "creative_profile": profile,
         "cover_matching": cover_matching,
+        "trend_signals": trend_signals,
         "output": str(out), "sha256": hashlib.sha256(out.read_bytes()).hexdigest(), **details,
     }
     (output_dir / "reel_metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")

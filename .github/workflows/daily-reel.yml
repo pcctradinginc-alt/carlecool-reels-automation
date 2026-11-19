@@ -39,6 +39,8 @@ jobs:
       COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
       CARLECOOL_AI_VIDEO: 'one'
+      CARLECOOL_TRENDS: 'true'
+      CARLECOOL_SEMANTIC: ${{ vars.CARLECOOL_SEMANTIC }}
       SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
       SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
       SC_ALLOW_OFFICIAL_DOWNLOADS: ${{ vars.SC_ALLOW_OFFICIAL_DOWNLOADS }}
@@ -67,6 +69,13 @@ jobs:
           set -euo pipefail
           python -m pip install --disable-pip-version-check --retries 2 --timeout 30 -r requirements.txt 'imageio-ffmpeg==0.6.0'
           python scripts/setup_ffmpeg.py
+      - name: Optional free OpenCLIP model dependencies (explicit opt-in)
+        if: ${{ vars.CARLECOOL_SEMANTIC == 'on' }}
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --retries 1 --timeout 45 'open_clip_torch>=3,<4' 'Pillow>=10,<13'
       - name: Install optional AI video client
         timeout-minutes: 5
         shell: bash

@@ -70,6 +70,13 @@ def build_storyboard(durations: list[float], source_durations: list[float],
         # Stable variation for a song/edition without scrambling source lanes.
         shift = int.from_bytes(hashlib.sha256(f"{seed}:{index}".encode()).digest()[:2], "big")
         preferred = (index + shift % len(source_durations)) % len(source_durations)
+        # Story arc: begin with the best cover-matching clip; return to its
+        # visual motif at the end for a recognisable ending/possible loop.
+        if len(durations) >= 3 and len(source_durations) >= 2:
+            if index == 0 or index == len(durations) - 1:
+                preferred = 0
+            elif index == 1:
+                preferred = 1
         if len(source_durations) > 1 and preferred == last:
             preferred = (preferred + 1) % len(source_durations)
         source_duration = source_durations[preferred]

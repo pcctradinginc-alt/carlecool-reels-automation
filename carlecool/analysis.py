@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import subprocess
 import numpy as np
+from .music_structure import detect_structure
 
 
 @dataclass(frozen=True)
@@ -14,6 +15,7 @@ class AudioFeatures:
     mood: str
     seconds: float
     beat_phase: float = 0.0  # seconds to first estimated beat relative to excerpt
+    structure_events: tuple[float, ...] = ()  # excerpt-relative energy transition candidates
 
 
 def analyze_audio(path: str, reel_seconds: int, genre: str = "") -> AudioFeatures:
@@ -62,7 +64,8 @@ def analyze_audio(path: str, reel_seconds: int, genre: str = "") -> AudioFeature
         mood = "nightdrive"
     else:
         mood = "cinematic"
-    return AudioFeatures(round(float(bpm), 1), round(energy, 3), float(start), mood, seconds, round(phase, 3))
+    events = detect_structure(clip, 8000)
+    return AudioFeatures(round(float(bpm), 1), round(energy, 3), float(start), mood, seconds, round(phase, 3), events)
 
 
 def beat_cut_lengths(bpm: float, seconds: int) -> list[float]:
