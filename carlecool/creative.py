@@ -208,6 +208,8 @@ def choose_shots(profile: dict, *, track_id: str, mood: str, energy: float, limi
     if not 1 <= limit <= 3:
         raise ValueError("Coverr Free can search at most 3 lanes")
     weights = dict(p["weights"])
+    from .quality_learning import load as load_learning, adjusted_weights
+    weights = adjusted_weights(weights, load_learning())
     if mood == "calm":
         weights["nature"] += 8
         weights["studio"] += 5
