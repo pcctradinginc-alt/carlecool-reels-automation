@@ -22,6 +22,7 @@ class Track:
     duration_ms: int = 0
     downloadable: bool = False
     uploader_id: str = ""
+    artwork_url: str = ""
 
     @classmethod
     def parse(cls, data: dict) -> "Track":
@@ -39,6 +40,7 @@ class Track:
             downloadable=bool(data.get("downloadable", False)),
             uploader_id=str((data.get("user") or {}).get("id")
                             or str((data.get("user") or {}).get("urn") or "").split(":")[-1]),
+            artwork_url=str(data.get("artwork_url") or ""),
         )
 
 
