@@ -40,7 +40,22 @@ def compare(audio: Path, videos: list[Path], output: Path, *,
         target = folder / "preview.mp4"
         details = render_reel(audio, videos, features, target, length,
                               pace=pace, analog=analog)
+        edit_plan = details["edit_plan"]
+        unique_sources = len({shot["source_index"] for shot in edit_plan})
+        boundaries = []
+        elapsed = 0.
+        for shot in edit_plan[:-1]:
+            elapsed += shot["duration"]
+            boundaries.append(elapsed)
+        nearby_events = sum(any(abs(t-e) <= .65 for e in features.structure_events)
+                            for t in boundaries)
+        # Diagnostic, NOT an aesthetic grade or virality prediction.
         results.append({"name": label, "pace": pace, "analog": analog,
+                        "diagnostics": {
+                            "unique_sources": unique_sources,
+                            "source_count": len(videos),
+                            "structural_cut_hits": nearby_events,
+                            "total_cuts": len(boundaries)},
                         "file": str(target), "sha256": hashlib.sha256(target.read_bytes()).hexdigest(),
                         "duration": details["duration"], "scenes": details["scenes"],
                         "resolution": details["resolution"]})
