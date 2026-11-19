@@ -1,5 +1,4 @@
 name: CarleCool — Zernio connection preflight (read-only)
-name: CarleCool — Zernio connection preflight (read-only)
 # Owner-requested Instagram test: verify linked accounts without uploading or publishing.
 on:
   workflow_dispatch:
