@@ -161,3 +161,17 @@ def test_coverr_error_on_later_lane_keeps_earlier_clips(monkeypatch):
     result = search_coverr("k", "calm", set(), session=session, wanted=8,
                            keywords=["street skate", "vinyl record turntable grooves"])
     assert len(result) == 8 and session.get.call_count == 2
+
+
+def test_failing_fill_in_clip_is_skipped_not_fatal():
+    from carlecool.main import fill_up
+    accepted = []
+    clips = [Video(i, "coverr") for i in ("a", "bad", "b", "c")]
+
+    def accept(video, path):
+        if video.id == "bad":
+            raise RuntimeError("403 Forbidden on Coverr download stats")
+        accepted.append(video.id)
+
+    fill_up([(v, n) for n, v in enumerate(clips)], accept, lambda: len(accepted) >= 2)
+    assert accepted == ["a", "b"]

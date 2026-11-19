@@ -42,6 +42,21 @@ def caption_for(track, videos) -> str:
     return caption.rstrip() + "\n\n#carlecool #instrumental #electronic #rap #producer"
 
 
+def fill_up(reserve, accept, full) -> None:
+    """Accept landscape fill-in clips one by one; a failing clip is skipped, never fatal.
+
+    (Run 44607728662 crashed because Coverr's download-stats call returned 403 for a
+    single fill-in clip; the portrait path already skipped such clips.)
+    """
+    for video, path in reserve:
+        if full():
+            break
+        try:
+            accept(video, path)
+        except Exception as exc:
+            print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}")
+
+
 def process(publish: bool, *, track_id: str | None = None, creative_profile: dict | None = None) -> None:
     if publish:
         raise RuntimeError("Direct publication is disabled; use the human-approved Gmail workflow")
@@ -157,10 +172,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     # Landscape only fills up a thin portrait supply, and always after the portrait clips.
     if portrait_count < MIN_PORTRAIT_CLIPS:
         # Fill up to the normal clip count so a landscape-only catalogue still gives variety.
-        for video, path in landscape_reserve:
-            if len(paths) >= stock_limit:
-                break
-            accept(video, path)
+        fill_up(landscape_reserve, accept, lambda: len(paths) >= stock_limit)
     for video, path in landscape_reserve:
         if path not in paths and video.source != "owned":
             path.unlink(missing_ok=True)
