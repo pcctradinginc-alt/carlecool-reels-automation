@@ -167,12 +167,35 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         from .titlecard import TITLE_SECONDS, make_title_card
         card = make_title_card(title_card[0], title_card[1], width, height, work / "title_card.png")
     card_start = max(0.0, length - TITLE_SECONDS) if card is not None else None
+    # Content-aware 9:16 reframing for landscape sources (decoded once per source).
+    from . import reframe
+    dims = []
+    for path in videos:
+        try:
+            dims.append(probe_dimensions(path))
+        except (RuntimeError, ValueError, subprocess.SubprocessError):
+            dims.append((0, 0))
+    samples: dict[int, object] = {}
+    reframed = 0
     files = []
     shot_start = 0.0
     for index, shot in enumerate(storyboard):
         source = videos[shot.source_index]
-        chain = [f"scale={width}:{height}:force_original_aspect_ratio=increase:flags=lanczos",
-                 f"crop={width}:{height}", "setsar=1", f"fps={FPS}"]
+        src_w, src_h = dims[shot.source_index]
+        smart = None
+        if os.getenv("CARLECOOL_SMART_CROP", "true").lower() in ("true", "1", "yes", "on") \
+                and reframe.needs_reframe(src_w, src_h):
+            try:
+                if shot.source_index not in samples:
+                    samples[shot.source_index] = reframe.FrameSamples.decode(source, src_w, src_h)
+                crop = reframe.plan_crop(samples[shot.source_index], shot.source_offset, shot.duration)
+                smart = [reframe.crop_filter(crop, src_h, shot.duration),
+                         f"scale={width}:{height}:flags=lanczos"]
+                reframed += 1
+            except (OSError, ValueError, subprocess.SubprocessError) as exc:
+                print("Smart crop unavailable; centre crop:", type(exc).__name__)
+        chain = (smart or [f"scale={width}:{height}:force_original_aspect_ratio=increase:flags=lanczos",
+                           f"crop={width}:{height}"]) + ["setsar=1", f"fps={FPS}"]
         lut = luts[shot.source_index]
         if lut is not None:
             chain.append(f"lut3d=file={_filter_path(lut)}:interp=tetrahedral")
@@ -242,6 +265,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "resolution": f"{width}x{height}", "fps": FPS, "pace": pace, "analog": analog,
             "cover_graded": sum(1 for lut in luts if lut is not None),
             "title_card": card is not None,
+            "smart_cropped_shots": reframed,
             "compressed_for_email": compressed_for_email,
             "edit_plan": [{"source_index": s.source_index,
                            "source_offset": s.source_offset,
