@@ -8,6 +8,7 @@ import subprocess
 
 from .analysis import AudioFeatures
 from .cinematic import plan_cuts, build_storyboard
+from .music_structure import align_to_structure
 
 
 def _run(args):
@@ -59,6 +60,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     # Beat-phase-aware, source-offset-aware montage. No stochastic edits.
     intervals = plan_cuts(float(length), float(features.bpm), pace=pace,
                           beat_phase=getattr(features, "beat_phase", 0.0))
+    intervals = align_to_structure(intervals, getattr(features, "structure_events", ()))
     source_durations = [probe_duration(path) for path in videos]
     if any(d < 1.0 for d in source_durations):
         raise ValueError("Video too short")
