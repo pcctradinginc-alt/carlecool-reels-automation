@@ -52,13 +52,14 @@ def _coverr_session():
     return session
 
 
-def test_coverr_real_phrases_portrait_only(monkeypatch):
-    monkeypatch.delenv("CARLECOOL_ALLOW_LANDSCAPE", raising=False)
+def test_coverr_real_phrases_portrait_first(monkeypatch):
+    monkeypatch.delenv("CARLECOOL_PORTRAIT_ONLY", raising=False)
     session = _coverr_session()
     phrases = ["MPC 2000 XL sampler closeup", "vintage roadside motel dusk", "night drive coastal road"]
     result = search_coverr("fakekey", "nightdrive", set(), session=session, wanted=4, keywords=phrases)
-    assert [x.id for x in result] == ["a"]  # landscape clip never selected
-    assert result[0].vertical and result[0].query == phrases[0]
+    # Portrait leads; landscape is only kept as a later fill-in candidate.
+    assert [x.id for x in result] == ["a", "b"]
+    assert result[0].vertical and not result[1].vertical and result[0].query == phrases[0]
     assert result[0].thumb_url.endswith("a.jpg") and result[0].tags == ("sunset",)
     queries = [call.kwargs["params"]["query"] for call in session.get.call_args_list]
     # Full descriptive phrase first, broad term only as fallback; at most 6 requests.
@@ -66,11 +67,11 @@ def test_coverr_real_phrases_portrait_only(monkeypatch):
     assert session.get.call_count <= 6
 
 
-def test_coverr_landscape_only_with_explicit_opt_in(monkeypatch):
-    monkeypatch.setenv("CARLECOOL_ALLOW_LANDSCAPE", "true")
+def test_coverr_strict_portrait_mode(monkeypatch):
+    monkeypatch.setenv("CARLECOOL_PORTRAIT_ONLY", "true")
     result = search_coverr("fakekey", "nightdrive", set(), session=_coverr_session(), wanted=2,
                            keywords=["sunset"])
-    assert [x.id for x in result] == ["a", "b"]
+    assert [x.id for x in result] == ["a"]
 
 
 def test_caption_credit_present():

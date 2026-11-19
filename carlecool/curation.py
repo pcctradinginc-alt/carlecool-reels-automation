@@ -230,11 +230,13 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
     if not any(score > -1 for score in scores):
         # No thumbnail could be scored: keep discovery order, never lose all stock.
         return remote[:keep] + others, []
-    scored = [(scores[i], i) for i in range(len(remote))]
-    order = [i for _, i in sorted(scored, key=lambda x: (-x[0], x[1]))]
+    # Portrait clips always rank ahead of landscape fill-ins (which need a 9:16 crop).
+    rank = [scores[i] + (1.0 if remote[i].vertical else 0.0) for i in range(len(remote))]
+    order = sorted(range(len(remote)), key=lambda i: (-rank[i], i))
     chosen: list[int] = []
     for lane in dict.fromkeys(c.query for c in remote):
-        best = next((i for i in order if remote[i].query == lane and scores[i] > -1), None)
+        best = next((i for i in order if remote[i].query == lane and scores[i] > -1
+                     and (remote[i].vertical or not any(r.vertical for r in remote))), None)
         if best is not None and best not in chosen:
             chosen.append(best)
     for i in order:
@@ -242,7 +244,7 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
             break
         if i not in chosen and scores[i] > -1:
             chosen.append(i)
-    chosen = sorted(chosen[:keep], key=lambda i: -scores[i])
+    chosen = sorted(chosen[:keep], key=lambda i: -rank[i])
     report = [{"id": remote[i].id, "query": remote[i].query, "score": scores[i]} for i in chosen]
     from dataclasses import replace
     picked = [replace(remote[i], score=float(scores[i])) for i in chosen]

@@ -13,7 +13,7 @@ What changed and why:
 | Search | 60 phrases collapsed to 7 generic Coverr words (`music`, `sunset`…) | The full art-direction phrase is searched; the broad word is only a fallback (≤ 6 requests) |
 | Cover | Only re-ordered 8 already-downloaded clips | The cover **chooses** 2 of 3 search phrases (OpenCLIP, or a warmth/brightness/saturation fallback) and ~24 candidates are **ranked by thumbnail before download**; the best 7 are kept, at least one per lane |
 | Look | Same desaturation filter on every clip | Per-clip 3D LUT (Reinhard colour transfer in Lab) towards the cover palette, bounded strength |
-| Orientation | Landscape clips centre-cropped to 9:16 | **Portrait only** (API flag *and* real file check). Opt-in: repository variable `CARLECOOL_ALLOW_LANDSCAPE=true` |
+| Orientation | Landscape clips centre-cropped to 9:16 | **Portrait first** (API flag *and* real file check). Landscape only fills up when fewer than 4 portrait clips exist and never opens/closes the Reel (Coverr's free catalogue is mostly 16:9). Strict mode: repository variable `CARLECOOL_PORTRAIT_ONLY=true` |
 | Music | 8 kHz RMS tempo guess, fixed 8-beat grid, loudest 30 s | librosa beats + bass-onset downbeats, per-beat energy; low energy → 8 beats per shot, peaks → 2 beats; a cut lands on the hook |
 | Length / hook | 30 s | **8–15 s, whole bars** (ends on a downbeat → clean loop); excerpt starts one bar before the biggest energy lift, so it hits in the first ~1–3 s. `REEL_SECONDS` is now the maximum (default 15) |
 | AI shot | Opened and closed the Reel (weakest clip as hook) | Appended last and never used as first/last shot |

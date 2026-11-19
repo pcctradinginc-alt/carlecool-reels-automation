@@ -120,28 +120,48 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     if prerank:
         print(f"Pre-download ranking kept {len(prerank)} of the candidate clips")
     from .render import is_portrait
-    from .video import allow_landscape
+    from .video import MIN_PORTRAIT_CLIPS, allow_landscape
     selected = []
     paths = []
     stock_limit = 7
+    landscape_reserve = []  # downloaded landscape clips, used only to fill up
+
+    def accept(video, path):
+        if video.source == "coverr":
+            record_coverr_download(video.id, config.coverr_key)
+        selected.append(video)
+        paths.append(path)
+
     for video in candidates:
+        if len(paths) >= stock_limit:
+            break
         try:
-            path = fetch_owned_stock(video, output_dir / f"stock_{len(paths):02d}.mp4") if video.source == "owned" else download_video(video.url, output_dir / f"stock_{len(paths):02d}.mp4")
-            if not allow_landscape() and not is_portrait(path):
+            target = output_dir / f"stock_{len(paths) + len(landscape_reserve):02d}.mp4"
+            path = fetch_owned_stock(video, target) if video.source == "owned" else download_video(video.url, target)
+            if is_portrait(path):
+                accept(video, path)
+            elif allow_landscape():
+                landscape_reserve.append((video, path))
+            else:
                 print(f"Clip skipped (not portrait): {video.id}")
                 if video.source != "owned":
                     path.unlink(missing_ok=True)
-                continue
-            if video.source == "coverr":
-                record_coverr_download(video.id, config.coverr_key)
-            selected.append(video)
-            paths.append(path)
-            if len(paths) >= stock_limit:
-                break
         except Exception as exc:
             print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}")
+    portrait_count = len(paths)
+    portrait_paths = set(paths)
+    # Landscape only fills up a thin portrait supply, and always after the portrait clips.
+    if portrait_count < MIN_PORTRAIT_CLIPS:
+        for video, path in landscape_reserve:
+            if len(paths) >= max(MIN_PORTRAIT_CLIPS, min(stock_limit, portrait_count + 4)):
+                break
+            accept(video, path)
+    for video, path in landscape_reserve:
+        if path not in paths and video.source != "owned":
+            path.unlink(missing_ok=True)
+    print(f"Footage: {portrait_count} portrait + {len(paths) - portrait_count} landscape fill-in clips")
     if not paths:
-        raise RuntimeError("No licensed portrait clips available; add assets/stock and manifest.json as fallback")
+        raise RuntimeError("No licensed clips available; add assets/stock and manifest.json as fallback")
     # Optional AI shot: appended LAST and excluded from the opening/closing shot,
     # because it is short (2 s) and low resolution (512×768).
     if profile["ai_video"] and os.getenv("CARLECOOL_AI_VIDEO", "off") == "one":
@@ -180,7 +200,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                     "model": semantic["model"], "scores": semantic["scores"],
                     "themes": semantic["themes"]}
                 print("OpenCLIP semantic cover/frame matching applied")
+    # Neither the AI shot nor a centre-cropped landscape clip may open or close the Reel.
     no_bookend = {i for i, v in enumerate(selected) if v.source == "ai"}
+    no_bookend |= {i for i, path in enumerate(paths) if path not in portrait_paths and selected[i].source != "ai"}
     from . import masterstore
     out = output_dir / f"carlecool_{track.id}.mp4"
     try:

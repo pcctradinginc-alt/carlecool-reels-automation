@@ -149,9 +149,21 @@ def _coverr_search_phrase(editorial_phrase: str) -> str:
     return "nature"
 
 
+def portrait_only() -> bool:
+    """Strict mode: never use landscape clips, even if too few portrait clips exist."""
+    return os.getenv("CARLECOOL_PORTRAIT_ONLY", "false").strip().lower() in ("true", "1", "yes")
+
+
 def allow_landscape() -> bool:
-    """Portrait-only by default; landscape needs an explicit repository variable."""
-    return os.getenv("CARLECOOL_ALLOW_LANDSCAPE", "false").strip().lower() in ("true", "1", "yes")
+    """Landscape clips may FILL UP when portrait supply is short (default), never lead.
+
+    Coverr's free catalogue is mostly 16:9; a strict portrait rule produced zero clips
+    for many art-direction phrases. Set CARLECOOL_PORTRAIT_ONLY=true for strict mode.
+    """
+    return not portrait_only()
+
+
+MIN_PORTRAIT_CLIPS = 4
 
 
 def _is_portrait(item: dict) -> bool:
@@ -197,9 +209,12 @@ def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8,
         if broad.lower() != editorial.lower():
             queries.append(broad)
         for attempt, query in enumerate(queries):
-            if attempt and len(lane) >= per_lane_minimum:
+            if attempt and sum(1 for v in lane if v.vertical) >= per_lane_minimum:
                 break
-            for item in _coverr_request(session, key, query, page_size):
+            hits = _coverr_request(session, key, query, page_size)
+            print(f"Coverr '{query}': {len(hits)} hits, "
+                  f"{sum(1 for h in hits if _is_portrait(h))} portrait")
+            for item in hits:
                 vid = str(item.get("id", ""))
                 if not vid or vid in seen or vid in recent:
                     continue
