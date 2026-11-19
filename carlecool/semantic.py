@@ -92,6 +92,8 @@ def score_semantic(cover: Path, videos: list[Path], *, style: str = "",
             themes = [DESCRIPTIONS[int(x)] for x in top.tolist()]
             return {"order": ranking, "scores": [scores[i] for i in ranking],
                     "themes": themes, "model": "OpenCLIP ViT-B-32 LAION-2B"}
-    except (ImportError, OSError, ValueError, RuntimeError, subprocess.SubprocessError) as exc:
+    except Exception as exc:
+        # Optional inference must never block delivery of a licensed-stock preview.
+        # Includes third-party model download and inference errors.
         print("Optional semantic scoring unavailable:", type(exc).__name__)
         return None
