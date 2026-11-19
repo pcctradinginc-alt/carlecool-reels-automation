@@ -8,7 +8,7 @@
 
 A free, bounded enhancement to the existing *human-reviewed* pipeline:
 
-- **Cover visual semantics:** optional `OpenCLIP ViT-B-32 / laion2b_s34b_b79k` compares the artist's official public SoundCloud cover with up to three sampled frames from each downloaded licensed clip. Descriptive visual themes are inferred from text/image embeddings. Only **public model weights** are downloaded; no private audio or images are uploaded to a model service. Opt in through GitHub Actions repository variable `CARLECOOL_SEMANTIC=on`; all other values preserve the palette-only fallback. The workflow installs optional OpenCLIP and Pillow only in that mode. Model download and CPU inference can be slow/unavailable and are not guaranteed to succeed. Confirm the model's applicable license before commercial deployment.
+- **Cover visual semantics:** optional `OpenCLIP ViT-B-32 / laion2b_s34b_b79k` compares the artist's official public SoundCloud cover with up to three sampled frames from each downloaded licensed clip. Descriptive visual themes are inferred from text/image embeddings. Only **public model weights** are downloaded; no private audio or images are uploaded to a model service. The daily workflow attempts OpenCLIP automatically on a standard free GitHub runner; set repository variable `CARLECOOL_SEMANTIC=off` to disable model loading and use the palette-only path. Optional installation/model failures also automatically fall back to palette matching. Only public pretrained weights are cached, never artist media. Model download and CPU inference can be slow/unavailable and are not guaranteed to succeed. Confirm the model's applicable license before commercial deployment.
 - **Musical structure:** measures abrupt energy transitions *within the chosen excerpt* and safely snaps existing beat-phase cuts to nearby transitions. This is a heuristic: it does **not** positively identify choruses, exact downbeats or true drops.
 - **Narrative edit:** deterministic visual opening/closing motif based on ranked footage; intermediary shots avoid immediate repetition and advance within source videos instead of restarting.
 - **Public search-interest signals:** daily email-preview workflow reads Google's public US Trending Now RSS (read-only, strict size/timeouts, 7-day freshness); only a small whitelist of visually relevant terms can influence the third Coverr query. Google searches are **not evidence of Instagram/TikTok virality**. An unavailable or irrelevant feed leaves the normal creative searches unchanged. Local/offline tests have trend fetching disabled.
@@ -16,7 +16,7 @@ A free, bounded enhancement to the existing *human-reviewed* pipeline:
 - **Three private editing alternatives:** `python -m carlecool.variant_compare --audio /path/to/owned.mp3 --video /path/to/licensed.mp4 --output /private/output --length 20` produces Americana Cinema, Rubin Minimal and Electronic Cut previews and a `comparison.json` metadata sheet. These are local media: never commit/upload them to the public repository. Human selection is still required. The synthetic FFmpeg CI smoke exercises all three variants.
 - **Safe gates unchanged:** owner approval, Coverr license clearance, Gmail original hash checks and Instagram publishing restrictions remain in place. No automatic social publishing.
 
-**Operational costs:** all local computation and public data sources are free-to-use *subject to hosting quotas, third-party terms and API limits*. Enabling OpenCLIP can cause large first-time model downloads and high CPU time; only turn it on when the runner budget and model terms have been checked.
+**Operational costs:** all local computation and public data sources are free-to-use *subject to hosting quotas, third-party terms and API limits*. OpenCLIP may cause large first-time dependency/model downloads and high CPU time; monitor public-runner limits and verify model terms. Set `CARLECOOL_SEMANTIC=off` if the overhead is undesirable.
 
 ### Validation
 
@@ -25,7 +25,7 @@ python -m pytest -q
 python scripts/offline_smoke.py
 ```
 
-The default test pipeline validates the no-network code paths and three **synthetic** video variants. It cannot certify the subjective quality of real reels, external model availability, full Coverr licensing or Instagram engagement. Test model-backed semantic ranking on a private/manual preview before trusting it for daily production.
+The default test pipeline validates the no-network code paths and three **synthetic** video variants. It cannot certify the subjective quality of real reels, external model availability, full Coverr licensing or Instagram engagement. The real CPU pretrained-model smoke workflow independently exercises OpenCLIP on synthetic video. Review the first production preview and the semantic/palette fallback metadata before trusting its artistic ranking.
 
 ## Public repository / zero-cost GitHub Actions
 
