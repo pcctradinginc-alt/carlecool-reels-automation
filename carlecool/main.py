@@ -90,7 +90,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     keywords = choose_shots(profile, track_id=track.id, mood=features.mood,
                             energy=features.energy, limit=3, run_key=edition)
     trend_signals = {"status": "disabled", "topics": []}
-    if os.getenv("CARLECOOL_TRENDS", "true").lower() in ("true", "1", "on"):
+    if os.getenv("CARLECOOL_TRENDS", "false").lower() in ("true", "1", "on"):
         from .trend_signals import fetch_signals, apply_trend
         trend_signals = fetch_signals()
         keywords = apply_trend(keywords, trend_signals)
