@@ -54,9 +54,15 @@ function harness({deleted=false}={}) {
   };
   return {env, posted, restore(){globalThis.fetch = initialFetch;}};
 }
-function post(url,origin=base){
-  return new Request(url,{ method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded",Origin:origin},
-    body:"consent=yes" });
+function post(url,origin=base,{confirmation=true,fetchSite}={}){
+  const parsed=new URL(url);
+  const payload=parsed.pathname.slice(1).split("/").slice(0,-1).join("/");
+  const mac=createHmac("sha256",key).update("form-confirm/v1/"+payload).digest("hex");
+  const headers={"Content-Type":"application/x-www-form-urlencoded"};
+  if(origin!==null)headers.Origin=origin;
+  if(fetchSite)headers["Sec-Fetch-Site"]=fetchSite;
+  return new Request(url,{method:"POST",headers,
+    body:"consent=yes"+(confirmation?"&confirmation="+mac:"")});
 }
 test("GET scans never post or reserve approval",async()=>{
   const h=harness();
@@ -108,4 +114,25 @@ test("deleted GitHub review (410) shows final state, never posts or reserves",as
     assert.equal(postResponse.status,410);
     assert.deepEqual(h.posted,[]);
   } finally {h.restore();}
+});
+
+test("privacy-mode browser omitting Origin can confirm only a signed GET-form token",async()=>{
+  const h=harness();
+  try{
+    const url=link("tiktok");
+    const get=await worker.fetch(new Request(url),h.env);
+    assert.equal(get.status,200);
+    const html=await get.text();
+    const match=html.match(/name='confirmation' value='([0-9a-f]{64})'/);
+    assert.ok(match,"GET form includes independently signed confirmation token");
+    const noToken=await worker.fetch(post(url,null,{confirmation:false}),h.env);
+    assert.equal(noToken.status,403);
+    assert.deepEqual(h.posted,[]);
+    const crossSite=await worker.fetch(post(url,null,{fetchSite:"cross-site"}),h.env);
+    assert.equal(crossSite.status,403);
+    assert.deepEqual(h.posted,[]);
+    const valid=await worker.fetch(post(url,null,{fetchSite:"same-origin"}),h.env);
+    assert.equal(valid.status,200);
+    assert.deepEqual(h.posted,["/publish tiktok"]);
+  }finally{h.restore();}
 });
