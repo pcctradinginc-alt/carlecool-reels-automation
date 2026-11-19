@@ -88,10 +88,10 @@ test("a confirmed POST chooses one platform; competing link is blocked",async()=
     assert.deepEqual(h.posted,["/publish tiktok"]);
   }finally{h.restore();}
 });
-test("discard emits only /reject; wrong Origin and tampered signature cannot act",async()=>{
+test("discard emits only /reject; missing form signature and tampered URL cannot act",async()=>{
   const h=harness();
   try{
-    const invalid=await worker.fetch(post(link("discard"),"https://attacker.invalid"),h.env);
+    const invalid=await worker.fetch(post(link("discard"),"https://attacker.invalid",{confirmation:false}),h.env);
     assert.equal(invalid.status,403);
     const url=link("both").replace("/both/","/tiktok/");
     const tampered=await worker.fetch(new Request(url),h.env);
@@ -128,11 +128,36 @@ test("privacy-mode browser omitting Origin can confirm only a signed GET-form to
     const noToken=await worker.fetch(post(url,null,{confirmation:false}),h.env);
     assert.equal(noToken.status,403);
     assert.deepEqual(h.posted,[]);
-    const crossSite=await worker.fetch(post(url,null,{fetchSite:"cross-site"}),h.env);
+    const crossSite=await worker.fetch(post(url,null,{confirmation:false,fetchSite:"cross-site"}),h.env);
     assert.equal(crossSite.status,403);
     assert.deepEqual(h.posted,[]);
-    const valid=await worker.fetch(post(url,null,{fetchSite:"same-origin"}),h.env);
+    // Some in-app browsers send Origin: null or Sec-Fetch-Site: cross-site.
+    // A valid secret-derived form HMAC + consent must still succeed.
+    const valid=await worker.fetch(post(url,"null",{fetchSite:"cross-site"}),h.env);
     assert.equal(valid.status,200);
+    assert.deepEqual(h.posted,["/publish tiktok"]);
+  }finally{h.restore();}
+});
+
+test("request without token cannot confirm even with a valid signed review URL",async()=>{
+  const h=harness();
+  try{
+    const url=link("instagram");
+    const req=post(url,base,{confirmation:false});
+    assert.equal((await worker.fetch(req,h.env)).status,403);
+    assert.deepEqual(h.posted,[]);
+  }finally{h.restore();}
+});
+test("tokenized cross-origin form succeeds only because of explicit signed confirmation",async()=>{
+  const h=harness();
+  try{
+    const url=link("tiktok");
+    // Headers are only hints, not credentials. Cross-site with no form MAC fails.
+    assert.equal((await worker.fetch(post(url,"https://attacker.invalid",{confirmation:false}),h.env)).status,403);
+    assert.deepEqual(h.posted,[]);
+    // A legitimately generated form can be submitted from an in-app browser
+    // whose visible origin differs from the Worker URL.
+    assert.equal((await worker.fetch(post(url,"https://privacy-browser.invalid",{confirmation:true}),h.env)).status,200);
     assert.deepEqual(h.posted,["/publish tiktok"]);
   }finally{h.restore();}
 });
