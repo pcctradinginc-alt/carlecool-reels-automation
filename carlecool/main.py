@@ -39,7 +39,7 @@ def caption_for(track, videos) -> str:
         names = dict.fromkeys(v.creator_name for v in videos if v.source == "pexels" and v.creator_name)
         for name in names:
             caption += f"Video by {name} on Pexels\n"
-    return caption + "\n#CarleCool #ElectronicMusic #NewMusic #Reels"
+    return caption.rstrip() + "\n\n#carlecool #instrumental #electronic #rap #producer"
 
 
 def process(publish: bool, *, track_id: str | None = None, creative_profile: dict | None = None) -> None:
