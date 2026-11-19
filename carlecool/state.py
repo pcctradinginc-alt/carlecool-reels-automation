@@ -1,18 +1,27 @@
 """Durable, fail-closed publication journal committed to the repository."""
 from __future__ import annotations
 
+import base64
 from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
-import subprocess
+import time
 
 from .soundcloud import Track
 
 STATE_PATH = Path("data/state.json")
 
 
+# Text of data/state.json as last known to match main (set on load, updated per write).
+_synced: str | None = None
+
+
 def load_state(path: Path = STATE_PATH) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+    global _synced
+    text = path.read_text(encoding="utf-8")
+    if path == STATE_PATH:
+        _synced = text
+    return json.loads(text)
 
 
 def pick_track(tracks: list[Track], state: dict, cooldown_days: int = 19, now=None) -> Track:
@@ -50,10 +59,41 @@ def save_state(state: dict, path: Path = STATE_PATH) -> None:
     path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def commit_state(message: str) -> None:
-    """Persist intent before external publishing to make ambiguous results fail closed."""
-    def git(*args):
-        subprocess.run(["git", *args], check=True, stdout=subprocess.DEVNULL)
-    git("add", "data/state.json")
-    git("commit", "-m", message)
-    git("push", "origin", "HEAD:main")
+def commit_state(message: str, *, request=None, retries: int = 4) -> None:
+    """Persist the journal to main via the GitHub contents API (no `git push`).
+
+    Why: a publish run takes minutes (Gmail fetch, upload, waiting for TikTok). Any
+    other commit on main in between (preview history, code) made the old `git push`
+    fail with "non-fast-forward" — possibly AFTER a post went live, leaving the journal
+    stuck on "pending". The contents API only conflicts if data/state.json ITSELF
+    changed; then we refuse to overwrite someone else's journal edit (fail closed).
+    """
+    global _synced
+    import requests
+    if request is None:
+        from .review import github_request as request
+    desired = STATE_PATH.read_text(encoding="utf-8")
+    if _synced is None:
+        raise RuntimeError("Journal was not loaded in this run; refusing to write blindly")
+    for attempt in range(retries):
+        current = request("GET", "contents/data/state.json?ref=main")
+        remote = base64.b64decode(current["content"]).decode("utf-8")
+        if remote == desired:
+            _synced = desired
+            return
+        if remote != _synced:
+            raise RuntimeError("data/state.json was changed on main during this run; "
+                               "not overwriting it. Reconcile the journal manually.")
+        try:
+            request("PUT", "contents/data/state.json", json_body={
+                "message": message, "branch": "main", "sha": current["sha"],
+                "content": base64.b64encode(desired.encode("utf-8")).decode("ascii"),
+            })
+            _synced = desired
+            return
+        except requests.HTTPError as exc:
+            status = getattr(exc.response, "status_code", None)
+            if status not in (409, 422) or attempt == retries - 1:
+                raise
+            time.sleep(min(2 ** attempt, 4))
+    raise RuntimeError("Journal write failed after concurrent updates")
