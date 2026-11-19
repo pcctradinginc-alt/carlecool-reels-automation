@@ -48,6 +48,7 @@ def main():
         assert json.loads((root / 'data/state.json').read_text())['published'] == []
         # Three filmic variants from synthetic music and synthetic licensed stock.
         # No emails, public media artifacts, API or real song required.
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
         from carlecool.variant_compare import compare
         import os as _os
         old_dims = {_name: _os.environ.get(_name) for _name in ('REEL_WIDTH', 'REEL_HEIGHT')}
