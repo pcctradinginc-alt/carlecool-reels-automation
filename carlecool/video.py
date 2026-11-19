@@ -25,6 +25,14 @@ class Video:
     vertical: bool = False
     creator_name: str = ""
     creator_url: str = ""
+    # Search provenance and cheap pre-download signals (thumbnail, tags, size).
+    query: str = ""
+    thumb_url: str = ""
+    tags: tuple[str, ...] = ()
+    duration: float = 0.0
+    width: int = 0
+    height: int = 0
+    score: float = 0.0
 
 
 from .keywords import select_keywords
@@ -141,41 +149,86 @@ def _coverr_search_phrase(editorial_phrase: str) -> str:
     return "nature"
 
 
-def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8, *, keywords=None) -> list[Video]:
-    """A maximum of 3 searches (<50/hr free limit); results ranked for vertical fit."""
+def allow_landscape() -> bool:
+    """Portrait-only by default; landscape needs an explicit repository variable."""
+    return os.getenv("CARLECOOL_ALLOW_LANDSCAPE", "false").strip().lower() in ("true", "1", "yes")
+
+
+def _is_portrait(item: dict) -> bool:
+    if item.get("is_vertical") is True:
+        return True
+    try:
+        return int(item.get("max_height") or 0) > int(item.get("max_width") or 0) > 0
+    except (TypeError, ValueError):
+        return False
+
+
+def _coverr_request(session, key: str, query: str, page_size: int):
+    r = session.get(
+        "https://api.coverr.co/videos",
+        headers={"x-api-key": key},
+        params={"query": query, "page_size": page_size, "sort": "popular", "urls": "true"},
+        timeout=30,
+    )
+    if r.status_code == 429:
+        raise RuntimeError("Coverr 429: rate limit hit; try cached licensed assets or later schedule")
+    r.raise_for_status()
+    return r.json().get("hits", [])
+
+
+def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8, *,
+                  keywords=None, page_size: int = 40, per_lane_minimum: int = 4) -> list[Video]:
+    """Search Coverr with the real art-direction phrase, portrait clips only.
+
+    One request per lane with the full descriptive phrase; only if it yields fewer
+    than `per_lane_minimum` usable portrait clips, one broader fallback request.
+    At most 6 requests (well below the free 50/hour limit).
+    """
     if not key:
         return []
     session = session or requests.Session()
+    landscape_ok = allow_landscape()
     seen = set()
     per_lane = []
     for editorial in (keywords if keywords is not None else select_keywords(mood))[:3]:
-        query = _coverr_search_phrase(editorial)
-        r = session.get(
-            "https://api.coverr.co/videos",
-            headers={"x-api-key": key},
-            params={"query": query, "page_size": 16, "sort": "popular", "urls": "true"},
-            timeout=30,
-        )
-        if r.status_code == 429:
-            raise RuntimeError("Coverr 429: rate limit hit; try cached licensed assets or later schedule")
-        r.raise_for_status()
         lane = []
-        for item in r.json().get("hits", []):
-            vid = str(item.get("id", ""))
-            if not vid or vid in seen or vid in recent:
-                continue
-            if any(item.get(field) is True for field in
-                   ("is_premium", "premium", "is_sponsored", "sponsored", "is_watermarked")):
-                continue
-            seen.add(vid)
-            video_url = (item.get("urls") or {}).get("mp4_download") or (item.get("urls") or {}).get("mp4")
-            if not video_url:
-                continue
-            creator_name, creator_url = _coverr_creator_metadata(item)
-            lane.append(Video(vid, "coverr", url=video_url, title=item.get("title", ""),
-                              views=int(item.get("views") or 0),
-                              vertical=bool(item.get("is_vertical")),
-                              creator_name=creator_name, creator_url=creator_url))
+        queries = [editorial]
+        broad = _coverr_search_phrase(editorial)
+        if broad.lower() != editorial.lower():
+            queries.append(broad)
+        for attempt, query in enumerate(queries):
+            if attempt and len(lane) >= per_lane_minimum:
+                break
+            for item in _coverr_request(session, key, query, page_size):
+                vid = str(item.get("id", ""))
+                if not vid or vid in seen or vid in recent:
+                    continue
+                if any(item.get(field) is True for field in
+                       ("is_premium", "premium", "is_sponsored", "sponsored", "is_watermarked")):
+                    continue
+                portrait = _is_portrait(item)
+                if not portrait and not landscape_ok:
+                    continue
+                urls = item.get("urls") or {}
+                video_url = urls.get("mp4_download") or urls.get("mp4")
+                if not video_url:
+                    continue
+                seen.add(vid)
+                creator_name, creator_url = _coverr_creator_metadata(item)
+                tags = tuple(str(t).lower() for t in (item.get("tags") or [])
+                             if isinstance(t, str))[:30]
+                try:
+                    duration = float(item.get("duration") or 0)
+                except (TypeError, ValueError):
+                    duration = 0.0
+                lane.append(Video(vid, "coverr", url=video_url, title=item.get("title", ""),
+                                  views=int(item.get("views") or 0), vertical=portrait,
+                                  creator_name=creator_name, creator_url=creator_url,
+                                  query=editorial,
+                                  thumb_url=str(item.get("thumbnail") or item.get("poster") or ""),
+                                  tags=tags, duration=duration,
+                                  width=int(item.get("max_width") or 0),
+                                  height=int(item.get("max_height") or 0)))
         per_lane.append(sorted(lane, key=lambda x: (x.vertical, x.views), reverse=True))
     found = []
     while len(found) < wanted and any(per_lane):

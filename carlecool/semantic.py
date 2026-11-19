@@ -26,6 +26,33 @@ DESCRIPTIONS = (
 )
 
 
+_CLIP = None
+
+
+def semantic_enabled() -> bool:
+    return os.getenv("CARLECOOL_SEMANTIC", "off").strip().lower() == "on"
+
+
+def load_clip():
+    """Load OpenCLIP once per process; returns (model, preprocess, tokenizer) or None."""
+    global _CLIP
+    if _CLIP is not None:
+        return _CLIP or None
+    try:
+        import torch
+        import open_clip
+        torch.set_num_threads(min(2, torch.get_num_threads()))
+        model, _, preprocess = open_clip.create_model_and_transforms(
+            "ViT-B-32", pretrained="laion2b_s34b_b79k", device="cpu")
+        model.eval()
+        _CLIP = (model, preprocess, open_clip.get_tokenizer("ViT-B-32"))
+    except Exception as exc:
+        print("Optional OpenCLIP unavailable:", type(exc).__name__)
+        _CLIP = False
+        return None
+    return _CLIP
+
+
 def _frame(path: Path, seconds: float) -> "PIL.Image.Image":
     from PIL import Image
     cmd = ["ffmpeg", "-v", "error"]
@@ -51,11 +78,10 @@ def score_semantic(cover: Path, videos: list[Path], *, style: str = "",
     try:
         import torch
         if model is None:
-            import open_clip
-            torch.set_num_threads(min(2, torch.get_num_threads()))
-            model, _, preprocess = open_clip.create_model_and_transforms(
-                "ViT-B-32", pretrained="laion2b_s34b_b79k", device="cpu")
-            tokenizer = open_clip.get_tokenizer("ViT-B-32")
+            loaded = load_clip()
+            if loaded is None:
+                return None
+            model, preprocess, tokenizer = loaded
         model.eval()
         with torch.no_grad():
             cover_embedding = model.encode_image(preprocess(_frame(cover, 0)).unsqueeze(0))

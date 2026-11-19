@@ -76,10 +76,12 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                 "No artist-authorized original audio among the newest 20 tracks; "
                 "check SoundCloud owner RSS publication or send a private Gmail master")
     print(f"Selected track: {track.title} (SoundCloud ID {track.id})")
-    features = analyze_audio(str(audio), config.reel_seconds, track.genre)
-    if profile["music"] == "beginning":
-        features = replace(features, excerpt_start=0.0)
-    print(f"Estimated musical features: BPM={features.bpm}, mood={features.mood}, energy={features.energy}")
+    fixed_start = 0.0 if profile["music"] == "beginning" else None
+    features = analyze_audio(str(audio), config.reel_seconds, track.genre, fixed_start=fixed_start)
+    reel_length = float(features.reel_length or config.reel_seconds)
+    print(f"Estimated musical features: BPM={features.bpm}, mood={features.mood}, "
+          f"energy={features.energy}, analyzer={features.analyzer}, length={reel_length:.2f}s, "
+          f"hook at {features.hook_at:.2f}s")
     recent = recent_video_ids(previews)
     recent.update(video_id for record in state.get("published", [])[-6:]
                   for video_id in record.get("video_ids", []))
@@ -87,19 +89,61 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     # Local/manual runs also get a fresh seed, while tests can pass a fixed seed.
     import secrets
     edition = os.getenv("GITHUB_RUN_ID") or secrets.token_hex(8)
-    keywords = choose_shots(profile, track_id=track.id, mood=features.mood,
-                            energy=features.energy, limit=3, run_key=edition)
+    profile_queries = choose_shots(profile, track_id=track.id, mood=features.mood,
+                                   energy=features.energy, limit=3, run_key=edition)
+    # The album cover comes FIRST: it decides what we search for, how candidates
+    # are ranked before download and how every clip is colour graded.
+    cover = None
+    cover_choice = {"method": "disabled", "queries": [], "lanes": []}
+    if os.getenv("CARLECOOL_COVER_MATCH", "true").lower() in ("true", "1", "yes"):
+        from .cover_visual import fetch_cover
+        candidate_cover = output_dir / "public_cover"
+        if fetch_cover(getattr(track, "artwork_url", ""), candidate_cover):
+            cover = candidate_cover
+            from .curation import cover_queries
+            cover_choice = cover_queries(cover, profile["weights"], run_key=edition)
+    if cover_choice.get("queries"):
+        from .curation import merge_queries
+        keywords = merge_queries(cover_choice, profile_queries)
+        print(f"Cover-led search ({cover_choice['method']}): {cover_choice['queries']}")
+    else:
+        keywords = profile_queries
     trend_signals = {"status": "disabled", "topics": []}
     if os.getenv("CARLECOOL_TRENDS", "false").lower() in ("true", "1", "on"):
         from .trend_signals import fetch_signals, apply_trend
         trend_signals = fetch_signals()
         keywords = apply_trend(keywords, trend_signals)
     print(f"Video search phrases: {keywords}")
-    candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=9, keywords=keywords)
+    candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=24, keywords=keywords)
+    from .curation import rank_candidates
+    candidates, prerank = rank_candidates(candidates, cover, output_dir / "thumbs", keep=10)
+    if prerank:
+        print(f"Pre-download ranking kept {len(prerank)} of the candidate clips")
+    from .render import is_portrait
+    from .video import allow_landscape
     selected = []
     paths = []
-    # Explicit experimental mode only: daily production stays on proven Coverr.
-    # A single 2-second AI clip may be blended into a manual preview.
+    stock_limit = 7
+    for video in candidates:
+        try:
+            path = fetch_owned_stock(video, output_dir / f"stock_{len(paths):02d}.mp4") if video.source == "owned" else download_video(video.url, output_dir / f"stock_{len(paths):02d}.mp4")
+            if not allow_landscape() and not is_portrait(path):
+                print(f"Clip skipped (not portrait): {video.id}")
+                if video.source != "owned":
+                    path.unlink(missing_ok=True)
+                continue
+            if video.source == "coverr":
+                record_coverr_download(video.id, config.coverr_key)
+            selected.append(video)
+            paths.append(path)
+            if len(paths) >= stock_limit:
+                break
+        except Exception as exc:
+            print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}")
+    if not paths:
+        raise RuntimeError("No licensed portrait clips available; add assets/stock and manifest.json as fallback")
+    # Optional AI shot: appended LAST and excluded from the opening/closing shot,
+    # because it is short (2 s) and low resolution (512×768).
     if profile["ai_video"] and os.getenv("CARLECOOL_AI_VIDEO", "off") == "one":
         try:
             from .ai_video import generate_one
@@ -114,48 +158,38 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
             from .ai_video import AIUnavailable
             reason = str(exc) if isinstance(exc, AIUnavailable) else type(exc).__name__
             print("Experimental AI footage unavailable, Coverr fallback: " + reason)
-    for video in candidates:
-        try:
-            path = fetch_owned_stock(video, output_dir / f"stock_{len(paths):02d}.mp4") if video.source == "owned" else download_video(video.url, output_dir / f"stock_{len(paths):02d}.mp4")
-            if video.source == "coverr":
-                record_coverr_download(video.id, config.coverr_key)
-            selected.append(video)
-            paths.append(path)
-            if len(paths) >= 8:
-                break
-        except Exception as exc:
-            print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}")
-    if not paths:
-        raise RuntimeError("No licensed clips available; add assets/stock and manifest.json as fallback")
-    # Optional cover-guided visual ranking. Any artwork/network/decode error
-    # leaves the existing safe licensed-stock selection untouched.
-    cover_matching = {"available": False, "scores": []}
-    if os.getenv("CARLECOOL_COVER_MATCH", "true").lower() in ("true", "1", "yes"):
-        from .cover_visual import fetch_cover, rank_by_cover
-        cover = output_dir / "public_cover"
-        if fetch_cover(getattr(track, "artwork_url", ""), cover):
-            order, scores = rank_by_cover(cover, paths)
-            if scores and len(order) == len(paths):
+    cover_matching = {"available": cover is not None, "scores": [],
+                      "search": cover_choice, "prerank": prerank}
+    if cover is not None:
+        # Real-frame re-ranking of downloaded clips decides the opening/closing shot.
+        from .cover_visual import rank_by_cover
+        order, scores = rank_by_cover(cover, paths)
+        if scores and len(order) == len(paths):
+            paths = [paths[i] for i in order]
+            selected = [selected[i] for i in order]
+            cover_matching["scores"] = [scores[i] for i in order]
+            print("Album-cover palette matching applied to licensed clips")
+        if os.getenv("CARLECOOL_SEMANTIC", "off").lower() == "on":
+            from .semantic import score_semantic
+            semantic = score_semantic(cover, paths, style=profile["preset"])
+            if semantic and len(semantic["order"]) == len(paths):
+                order = semantic["order"]
                 paths = [paths[i] for i in order]
                 selected = [selected[i] for i in order]
-                cover_matching = {"available": True, "scores": [scores[i] for i in order]}
-                print("Album-cover palette matching applied to licensed clips")
-            # Model is an explicit free opt-in, never required for a safe preview.
-            if os.getenv("CARLECOOL_SEMANTIC", "off").lower() == "on":
-                from .semantic import score_semantic
-                semantic = score_semantic(cover, paths, style=profile["preset"])
-                if semantic and len(semantic["order"]) == len(paths):
-                    order = semantic["order"]
-                    paths = [paths[i] for i in order]
-                    selected = [selected[i] for i in order]
-                    cover_matching["semantic"] = {
-                        "model": semantic["model"], "scores": semantic["scores"],
-                        "themes": semantic["themes"]}
-                    print("OpenCLIP semantic cover/frame matching applied")
-        cover.unlink(missing_ok=True)
+                cover_matching["semantic"] = {
+                    "model": semantic["model"], "scores": semantic["scores"],
+                    "themes": semantic["themes"]}
+                print("OpenCLIP semantic cover/frame matching applied")
+    no_bookend = {i for i, v in enumerate(selected) if v.source == "ai"}
+    from . import masterstore
     out = output_dir / f"carlecool_{track.id}.mp4"
-    details = render_reel(audio, paths, features, out, config.reel_seconds,
-                          pace=profile["pace"], analog=profile["analog"])
+    try:
+        details = render_reel(audio, paths, features, out, reel_length,
+                              pace=profile["pace"], analog=profile["analog"], cover=cover,
+                              no_bookend=no_bookend, fit_email=not masterstore.configured())
+    finally:
+        if cover is not None:
+            cover.unlink(missing_ok=True)
     metadata = {
         "track_id": track.id, "title": track.title, "permalink": track.permalink_url,
         "features": vars(features), "video_ids": [v.id for v in selected],
@@ -164,6 +198,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "visual_direction": editorial_brief(features.mood, features.energy, features.bpm),
         "creative_profile": profile,
         "cover_matching": cover_matching,
+        "music_analysis": {"analyzer": features.analyzer, "reel_length": reel_length,
+                           "hook_at": features.hook_at, "beats": len(features.beats),
+                           "downbeats": len(features.downbeats)},
         "trend_signals": trend_signals,
         "output": str(out), "sha256": hashlib.sha256(out.read_bytes()).hexdigest(), **details,
     }

@@ -18,7 +18,10 @@ def main():
         (root / 'assets/stock').mkdir(parents=True)
         (root / 'data').mkdir()
         # Never touch the user's real accounts in this test.
-        ffmpeg('-f', 'lavfi', '-i', 'sine=frequency=330:sample_rate=48000', '-t', '22',
+        # 120 BPM synthetic kick + tone with an energy lift at 12 s (tests hook detection).
+        expr = ('(0.25+0.75*gte(t,12))*(0.8*sin(2*PI*55*t)*exp(-25*mod(t,0.5))'
+                '+0.15*sin(2*PI*330*t))')
+        ffmpeg('-f', 'lavfi', '-i', f"aevalsrc='{expr}':s=44100:d=32",
                '-c:a', 'libmp3lame', str(root / 'assets/audio/1000.mp3'))
         ffmpeg('-f', 'lavfi', '-i', 'testsrc2=size=270x480:rate=10', '-t', '5',
                '-pix_fmt', 'yuv420p', str(root / 'assets/stock/synthetic.mp4'))
@@ -35,7 +38,7 @@ def main():
             'license_confirmed': True, 'commercial_social_allowed': True
         }]}))
         env = os.environ.copy()
-        env.update({'REEL_SECONDS': '20', 'REEL_WIDTH': '270', 'REEL_HEIGHT': '480',
+        env.update({'REEL_SECONDS': '15', 'REEL_WIDTH': '270', 'REEL_HEIGHT': '480',
                     'COVERR_API_KEY': '', 'SOUNDCLOUD_CLIENT_ID': '',
                     'SOUNDCLOUD_CLIENT_SECRET': '', 'PUBLISH_ENABLED': 'false',
                     'PYTHONPATH': str(Path(__file__).resolve().parents[1])})
@@ -43,7 +46,13 @@ def main():
                        cwd=root, env=env, check=True)
         assert (root / 'output/carlecool_1000.mp4').is_file()
         meta = json.loads((root / 'output/reel_metadata.json').read_text())
-        assert meta['track_id'] == '1000' and meta['duration'] >= 19
+        assert meta['track_id'] == '1000' and 7.9 <= meta['duration'] <= 15.6, meta['duration']
+        try:
+            import librosa  # noqa: F401
+            assert meta['music_analysis']['analyzer'] == 'librosa', meta['music_analysis']
+        except ImportError:
+            pass
+        assert meta['fps'] == 24
         assert meta['resolution'] == '270x480'
         assert json.loads((root / 'data/state.json').read_text())['published'] == []
         # Three filmic variants from synthetic music and synthetic licensed stock.

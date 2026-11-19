@@ -38,7 +38,7 @@ def compare(audio: Path, videos: list[Path], output: Path, *,
         folder = output / label
         folder.mkdir(parents=True, exist_ok=True)
         target = folder / "preview.mp4"
-        details = render_reel(audio, videos, features, target, length,
+        details = render_reel(audio, videos, features, target, features.reel_length or length,
                               pace=pace, analog=analog)
         edit_plan = details["edit_plan"]
         unique_sources = len({shot["source_index"] for shot in edit_plan})

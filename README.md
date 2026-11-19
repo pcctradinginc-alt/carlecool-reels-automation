@@ -4,6 +4,33 @@
 
 **Never automatically publishes just because a schedule runs or an email link is clicked.** Only the authenticated repository owner can write `/publish` on an open `carlecool-review` issue, and publishing is additionally blocked by `PUBLISH_ENABLED` unless explicitly enabled.
 
+## Video quality v4 — cover-led footage, beat editing, full-quality master (2026-11-19)
+
+What changed and why:
+
+| Area | Before | Now |
+| --- | --- | --- |
+| Search | 60 phrases collapsed to 7 generic Coverr words (`music`, `sunset`…) | The full art-direction phrase is searched; the broad word is only a fallback (≤ 6 requests) |
+| Cover | Only re-ordered 8 already-downloaded clips | The cover **chooses** 2 of 3 search phrases (OpenCLIP, or a warmth/brightness/saturation fallback) and ~24 candidates are **ranked by thumbnail before download**; the best 7 are kept, at least one per lane |
+| Look | Same desaturation filter on every clip | Per-clip 3D LUT (Reinhard colour transfer in Lab) towards the cover palette, bounded strength |
+| Orientation | Landscape clips centre-cropped to 9:16 | **Portrait only** (API flag *and* real file check). Opt-in: repository variable `CARLECOOL_ALLOW_LANDSCAPE=true` |
+| Music | 8 kHz RMS tempo guess, fixed 8-beat grid, loudest 30 s | librosa beats + bass-onset downbeats, per-beat energy; low energy → 8 beats per shot, peaks → 2 beats; a cut lands on the hook |
+| Length / hook | 30 s | **8–15 s, whole bars** (ends on a downbeat → clean loop); excerpt starts one bar before the biggest energy lift, so it hits in the first ~1–3 s. `REEL_SECONDS` is now the maximum (default 15) |
+| AI shot | Opened and closed the Reel (weakest clip as hook) | Appended last and never used as first/last shot |
+| Encoding | 30 fps, bicubic, CRF 22, 128k AAC, forced 2.5 Mbit/s for Gmail | 24 fps, Lanczos, CRF 18 (`-tune grain`), ≤16 Mbit/s, 256k AAC, two-pass −14 LUFS |
+
+### Full-quality master outside Gmail (optional, recommended)
+
+Without configuration the master must still fit a Gmail attachment (≤16 MB; at 8–15 s this is ~8+ Mbit/s, usually fine). For the uncompromised master use a **private** Cloudflare R2 bucket (free tier, 10 GB):
+
+1. Cloudflare → R2 → *Create bucket* (e.g. `carlecool-masters`), keep it **private**, no public URL. Optional lifecycle rule: delete objects after 30 days.
+2. R2 → *Manage API tokens* → token with *Object Read & Write* for that bucket only.
+3. GitHub → Settings → Secrets and variables → Actions:
+   - Secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` = the R2 token's key pair.
+   - Variables `MASTER_S3_BUCKET` = bucket name, `S3_ENDPOINT_URL` = `https://<account-id>.r2.cloudflarestorage.com`.
+
+Then the review email carries a 720p preview, the master goes to `carlecool/masters/<run_id>/<sha256>.mp4`, and `/publish` downloads it and verifies the SHA-256 from the approval issue (the review email must still exist in Gmail Sent; deleting it still cancels).
+
 ## Creative Intelligence v3 (2026-11-19)
 
 A free, bounded enhancement to the existing *human-reviewed* pipeline:
@@ -143,7 +170,7 @@ For a first trial, send **one** original MP3 of the newest SoundCloud song, then
 
 ## 3. Run once in dry-run
 
-GitHub → **Actions → CarleCool — make and review Reel → Run workflow** → choose `dry-run` → Run. This creates a 30-second 1080 × 1920 H.264/AAC MP4 from a current SoundCloud song and up to 8 clips. The exact rendered MP4 is emailed privately to `REVIEW_EMAIL`. No GitHub artifact is uploaded, no GitHub review Issue is opened, and nothing goes to Instagram in `dry-run`.
+GitHub → **Actions → CarleCool — make and review Reel → Run workflow** → choose `dry-run` → Run. This creates an 8–15-second (whole bars) 1080 × 1920 H.264/AAC MP4 from a current SoundCloud song and up to 8 clips. The exact rendered MP4 is emailed privately to `REVIEW_EMAIL`. No GitHub artifact is uploaded, no GitHub review Issue is opened, and nothing goes to Instagram in `dry-run`.
 
 If there are no original tracks, no SoundCloud API credentials, or no stock clips, the run **fails safely** and reports exactly what's missing. It never fabricates a song or posts anything.
 

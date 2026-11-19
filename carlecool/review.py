@@ -54,11 +54,31 @@ def github_request(method: str, path: str, *, json_body=None, token=None, repo=N
 def make_preview(video: Path, destination: Path) -> Path | None:
     """Mail-friendly reduced-resolution preview, not the publishing original."""
     subprocess.run(['ffmpeg', '-y', '-hide_banner', '-loglevel', 'error', '-i', str(video),
-                    '-vf', 'scale=540:960:force_original_aspect_ratio=decrease,pad=540:960:(ow-iw)/2:(oh-ih)/2',
-                    '-c:v', 'libx264', '-preset', 'ultrafast', '-b:v', '650k', '-maxrate', '750k',
-                    '-bufsize', '1000k', '-c:a', 'aac', '-b:a', '80k', '-movflags', '+faststart',
+                    '-vf', 'scale=720:1280:force_original_aspect_ratio=decrease:flags=lanczos,'
+                           'pad=720:1280:(ow-iw)/2:(oh-ih)/2',
+                    '-c:v', 'libx264', '-preset', 'medium', '-crf', '23', '-maxrate', '3500k',
+                    '-bufsize', '7000k', '-pix_fmt', 'yuv420p',
+                    '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart',
                     str(destination)], check=True, stdout=subprocess.DEVNULL)
-    return destination if destination.stat().st_size <= 10_000_000 else None
+    return destination if destination.stat().st_size <= MAX_ATTACHMENT_BYTES else None
+
+
+def prepare_delivery(metadata: dict, run_id: int, metadata_path: Path | None = None) -> dict:
+    """Upload the full-quality master privately when MASTER_S3_BUCKET is configured.
+
+    Returns the (possibly updated) metadata. Without storage the legacy Gmail-attached
+    original is used unchanged.
+    """
+    from . import masterstore
+    if not masterstore.configured():
+        return metadata
+    location = masterstore.upload_master(Path(metadata['output']), run_id=run_id,
+                                         sha256=metadata['sha256'])
+    metadata = dict(metadata, master_storage=location)
+    if metadata_path is not None:
+        metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding='utf-8')
+    print('Full-quality master stored privately:', location['bytes'], 'bytes')
+    return metadata
 
 
 def _safe_public_link(url: str, *, host: str) -> str:
@@ -78,7 +98,7 @@ def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | No
     """Copy-friendly alternatives to HTML mail, never publish on link open."""
     title = str(metadata.get("title", "Neuer Track"))
     profile = metadata.get("creative_profile") or {}
-    duration = metadata.get("duration", 30)
+    duration = round(float(metadata.get("duration", 15) or 15))
     ai = any(x.get("provider") == "ai" for x in metadata.get("footage_sources", []))
     footage_label = "KI-Kurzclip (LTX-2.3) + Coverr" if ai else "kuratierte Coverr-Clips"
     if issue_url:
@@ -143,7 +163,7 @@ def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = N
     pace = {"slow": "Ruhig", "medium": "Musikalisch", "fast": "Dynamisch"}.get(
         profile.get("pace", "medium"), "Musikalisch")
     preset = str(profile.get("preset", "rubin_analog_lana_skate")).replace("_", " ").title()
-    duration = h(metadata.get("duration", 30))
+    duration = h(round(float(metadata.get("duration", 15) or 15)))
     analog = h(profile.get("analog", 65))
     ai = any(x.get("provider") == "ai" for x in metadata.get("footage_sources", []))
     footage_label = "1 KI-Shot + Coverr" if ai else "kuratierte Coverr-Clips"
@@ -229,7 +249,7 @@ def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = N
         f'<h1 style="font-size:34px;letter-spacing:-1.3px;line-height:1.1;margin:0 0 18px">'
         f'{title}</h1>'
         '<p style="color:#616c79;font-size:15px;line-height:1.7;margin:0 0 20px">'
-        'Dein neuer 30-Sekunden-Film ist da. Ruhe, Analog-Texturen, '
+        f'Dein neuer {duration}-Sekunden-Film ist da. Ruhe, Analog-Texturen, '
         'California Nostalgia und ein bisschen Skate. Schau dir erst den '
         'MP4-Anhang an – anschließend entscheidest du über den nächsten Schnitt.</p>'
         '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"'
@@ -265,11 +285,19 @@ def send_review_email(issue_url: str, metadata: dict, original_path: Path | None
     if not original_path or not original_path.is_file() or not message_id or run_id is None:
         raise RuntimeError('Private review email requires original MP4, Message-ID and run ID')
     import hashlib
-    video_bytes = original_path.read_bytes()
+    if not metadata.get('master_storage') and original_path.stat().st_size > MAX_ATTACHMENT_BYTES:
+        raise RuntimeError('Gmail attachment is too large; cannot safely deliver original Reel')
+    if hashlib.sha256(original_path.read_bytes()).hexdigest() != metadata.get('sha256'):
+        raise RuntimeError('Original video differs from approved review metadata')
+    if metadata.get('master_storage'):
+        preview = make_preview(original_path, original_path.with_name('email_preview.mp4'))
+        if preview is None:
+            raise RuntimeError('Email preview too large for Gmail')
+        video_bytes, video_name = preview.read_bytes(), 'CarleCool-Preview.mp4'
+    else:
+        video_bytes, video_name = original_path.read_bytes(), 'CarleCool-Original.mp4'
     if len(video_bytes) > MAX_ATTACHMENT_BYTES:
         raise RuntimeError('Gmail attachment is too large; cannot safely deliver original Reel')
-    if hashlib.sha256(video_bytes).hexdigest() != metadata.get('sha256'):
-        raise RuntimeError('Original video differs from approved review metadata')
     msg = EmailMessage()
     msg['From'] = sender
     msg['To'] = recipient
@@ -283,7 +311,7 @@ def send_review_email(issue_url: str, metadata: dict, original_path: Path | None
         direct_links = approval_links(issue_url, metadata, run_id)
     msg.set_content(review_plain_text(issue_url, metadata, direct_links=direct_links))
     msg.add_alternative(review_html(issue_url, metadata, direct_links=direct_links), subtype="html")
-    msg.add_attachment(video_bytes, maintype='video', subtype='mp4', filename='CarleCool-Original.mp4')
+    msg.add_attachment(video_bytes, maintype='video', subtype='mp4', filename=video_name)
     meta_bytes = json.dumps(metadata, ensure_ascii=False, sort_keys=True).encode('utf-8')
     msg.add_attachment(meta_bytes, maintype='application', subtype='json', filename='reel_metadata.json')
     with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=40) as smtp:
@@ -304,6 +332,7 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str,
                'caption': metadata['caption'], 'created_from': 'daily-review',
                'mail_message_id': mail_message_id or make_msgid(domain='carlecool.invalid'),
                'creative_profile': metadata.get('creative_profile'),
+               'master_storage': metadata.get('master_storage'),
                'revision_number': metadata.get('creative_profile', {}).get('revision', 0)}
     name = 'carlecool-review'
     try:
@@ -361,6 +390,7 @@ def main():
     metadata = json.loads(Path(args.metadata).read_text(encoding='utf-8'))
     original = Path(metadata['output'])
     run_id = int(os.environ['GITHUB_RUN_ID'])
+    metadata = prepare_delivery(metadata, run_id, Path(args.metadata))
     message_id = make_msgid(domain='carlecool.invalid')
     if args.dry_run_email:
         if not send_review_email('', metadata, original, message_id=message_id, run_id=run_id):

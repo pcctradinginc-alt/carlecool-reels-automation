@@ -17,7 +17,7 @@ from .creative import (
 )
 from .main import process
 from .review import (
-    create_review, decode_issue_data, github_request, send_review_email,
+    create_review, decode_issue_data, github_request, prepare_delivery, send_review_email,
 )
 
 
@@ -58,6 +58,8 @@ def revise(issue_number: int, command: str) -> str:
         # Reuse the identical track, but pick new clips and render with revised intent.
         process(publish=False, track_id=str(old["track_id"]), creative_profile=profile)
         metadata = json.loads(Path("output/reel_metadata.json").read_text(encoding="utf-8"))
+        metadata = prepare_delivery(metadata, int(os.environ["GITHUB_RUN_ID"]),
+                                    Path("output/reel_metadata.json"))
         message_id = make_msgid(domain="carlecool.invalid")
         new_issue = create_review(
             metadata, run_id=int(os.environ["GITHUB_RUN_ID"]),

@@ -76,15 +76,9 @@ def fetch_reel_from_sent(approval: dict, target: Path, *, connection=None) -> tu
     if not re.fullmatch(r'[0-9a-f]{64}', header_sha) or header_sha != approval['sha256']:
         raise ValueError('Approval SHA differs from Gmail message')
     attachments = [part for part in msg.iter_attachments()]
-    videos = [part for part in attachments if part.get_filename() == 'CarleCool-Original.mp4']
     metadatas = [part for part in attachments if part.get_filename() == 'reel_metadata.json']
-    if len(videos) != 1 or len(metadatas) != 1:
-        raise RuntimeError('Original Reel and metadata must be attached exactly once')
-    video_bytes = videos[0].get_payload(decode=True)
-    if not video_bytes or len(video_bytes) > MAX_ATTACHMENT_BYTES:
-        raise ValueError('Email Reel attachment is absent or exceeds the safe size limit')
-    if hashlib.sha256(video_bytes).hexdigest() != approval['sha256']:
-        raise ValueError('Original Reel Gmail attachment SHA-256 mismatch')
+    if len(metadatas) != 1:
+        raise RuntimeError('Reel metadata must be attached exactly once')
     metadata = json.loads(metadatas[0].get_payload(decode=True))
     if metadata.get('sha256') != approval['sha256'] or str(metadata.get('track_id')) != str(approval['track_id']):
         raise ValueError('Attached metadata disagrees with approval')
@@ -94,7 +88,24 @@ def fetch_reel_from_sent(approval: dict, target: Path, *, connection=None) -> tu
     target.mkdir(parents=True, exist_ok=True)
     reel = target / output
     reel.parent.mkdir(parents=True, exist_ok=True)
-    reel.write_bytes(video_bytes)
+    storage = approval.get('master_storage')
+    if storage:
+        # Full-quality master lives in private object storage; the email (still
+        # required, so deleting it cancels the approval) carries only a preview.
+        if metadata.get('master_storage') != storage:
+            raise ValueError('Master storage location differs between email and approval')
+        from .masterstore import download_master
+        download_master(storage, reel, expected_sha256=approval['sha256'])
+    else:
+        videos = [part for part in attachments if part.get_filename() == 'CarleCool-Original.mp4']
+        if len(videos) != 1:
+            raise RuntimeError('Original Reel and metadata must be attached exactly once')
+        video_bytes = videos[0].get_payload(decode=True)
+        if not video_bytes or len(video_bytes) > MAX_ATTACHMENT_BYTES:
+            raise ValueError('Email Reel attachment is absent or exceeds the safe size limit')
+        if hashlib.sha256(video_bytes).hexdigest() != approval['sha256']:
+            raise ValueError('Original Reel Gmail attachment SHA-256 mismatch')
+        reel.write_bytes(video_bytes)
     (target / 'output/reel_metadata.json').write_text(json.dumps(metadata, ensure_ascii=False), encoding='utf-8')
     return metadata, reel
 
