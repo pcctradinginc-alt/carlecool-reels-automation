@@ -14,6 +14,7 @@ from .aesthetic import editorial_brief
 from .creative import load_profile, choose_shots, validate_profile
 from .audio import locate_original
 from .video import Video
+from .naming import song_label
 from .config import Settings
 from .keywords import select_keywords
 from .render import render_reel
@@ -24,7 +25,7 @@ from .video import download_video, gather_videos, fetch_owned_stock, record_cove
 
 
 def caption_for(track, videos) -> str:
-    caption = f"🎧 {track.title}\n"
+    caption = f"🎧 {song_label(track.title)}\n"
     if track.permalink_url:
         caption += f"🎶 Full track: {track.permalink_url}\n"
     if any(v.source == "ai" for v in videos):
@@ -215,6 +216,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
             cover.unlink(missing_ok=True)
     metadata = {
         "track_id": track.id, "title": track.title, "permalink": track.permalink_url,
+        "song_label": song_label(track.title),
         "features": vars(features), "video_ids": [v.id for v in selected],
         "footage_sources": [{"id": v.id, "provider": v.source, "title": v.title} for v in selected],
         "caption": caption_for(track, selected), "search_keywords": keywords,

@@ -58,13 +58,15 @@ class Instagram:
         self.user_id = self.verified_account["id"]
         return self.verified_account
 
-    def create_and_upload(self, video: Path, caption: str) -> str:
+    def create_and_upload(self, video: Path, caption: str, *, audio_name: str = "") -> str:
         if self.verified_account is None:
             self.verify_access()
-        payload = self._request("POST", f"{self.user_id}/media", data={
-            "media_type": "REELS", "upload_type": "resumable", "caption": caption,
-            "share_to_feed": "true",
-        })
+        data = {"media_type": "REELS", "upload_type": "resumable", "caption": caption,
+                "share_to_feed": "true"}
+        if audio_name:
+            # Replaces "Original audio" with e.g. "carl e cool - nastro azzuro" (set once, at creation).
+            data["audio_name"] = audio_name
+        payload = self._request("POST", f"{self.user_id}/media", data=data)
         container_id = str(payload["id"])
         upload_url = payload.get("uri") or f"https://rupload.facebook.com/ig-api-upload/{self.api_version}/{container_id}"
         parsed = urlparse(upload_url)

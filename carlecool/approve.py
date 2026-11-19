@@ -143,6 +143,7 @@ def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
         tiktok_id=os.getenv('ZERNIO_TIKTOK_ACCOUNT_ID', ''),
         ai_generated=any(item.get('provider') == 'ai' for item in approval['footage_sources']),
         sha256=approval['sha256'], issue_number=issue_number,
+        audio_name=str(approval.get('song_label') or ''),
     )
     post = response.get('post') or {}
     state['pending']['provider_post_id'] = post.get('_id', '')
@@ -211,7 +212,8 @@ def publish(issue_number: int, run_id: int, directory: Path, *, target: str = 'i
                         'sha256': approval['sha256'], 'issue_number': issue_number}
     save_state(state)
     commit_state(f'journal: reserve human approved reel {issue_number}')
-    container_id = client.create_and_upload(video, approval['caption'])
+    container_id = client.create_and_upload(video, approval['caption'],
+                                            audio_name=str(approval.get('song_label') or ''))
     state['pending']['container_id'] = container_id
     save_state(state)
     commit_state(f'journal: created container for review {issue_number}')

@@ -96,7 +96,7 @@ def _safe_public_link(url: str, *, host: str) -> str:
 
 def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | None = None) -> str:
     """Copy-friendly alternatives to HTML mail, never publish on link open."""
-    title = str(metadata.get("title", "Neuer Track"))
+    title = str(metadata.get("song_label") or metadata.get("title", "Neuer Track"))
     profile = metadata.get("creative_profile") or {}
     duration = round(float(metadata.get("duration", 15) or 15))
     ai = any(x.get("provider") == "ai" for x in metadata.get("footage_sources", []))
@@ -158,7 +158,7 @@ def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | No
 def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = None) -> str:
     """Responsive Gmail-safe, Apple-clean email; all text escaped, no tracking."""
     h = lambda v: html_escape(str(v), quote=True)
-    title = h(metadata.get("title", "Neuer Track"))
+    title = h(metadata.get("song_label") or metadata.get("title", "Neuer Track"))
     profile = metadata.get("creative_profile") or {}
     pace = {"slow": "Ruhig", "medium": "Musikalisch", "fast": "Dynamisch"}.get(
         profile.get("pace", "medium"), "Musikalisch")
@@ -304,7 +304,7 @@ def send_review_email(issue_url: str, metadata: dict, original_path: Path | None
     msg['Message-ID'] = message_id
     msg['X-CarleCool-Run-ID'] = str(run_id)
     msg['X-CarleCool-SHA256'] = metadata['sha256']
-    msg['Subject'] = f"CarleCool | Reel zur Freigabe: {metadata['title']}"
+    msg['Subject'] = f"CarleCool | Reel zur Freigabe: {metadata.get('song_label') or metadata['title']}"
     direct_links = {}
     if issue_url:
         from .approval_links import approval_links
@@ -333,6 +333,7 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str,
                'mail_message_id': mail_message_id or make_msgid(domain='carlecool.invalid'),
                'creative_profile': metadata.get('creative_profile'),
                'master_storage': metadata.get('master_storage'),
+               'song_label': metadata.get('song_label'),
                'revision_number': metadata.get('creative_profile', {}).get('revision', 0)}
     name = 'carlecool-review'
     try:
@@ -343,7 +344,7 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str,
         if e.response is None or e.response.status_code != 422:
             raise
     body = (f"## CarleCool – Reel zum Freigeben\n\n"
-            f"**Track:** {metadata['title']}\n\n"
+            f"**Track:** {metadata.get('song_label') or metadata['title']}\n\n"
             "**Privates Original:** Gmail-Anhang, nicht bei GitHub gespeichert.\n\n"
             f"**Caption:**\n\n{metadata['caption']}\n\n"
             f"**Creative Profile:** `{metadata.get('creative_profile', {}).get('preset', 'default')}` "
@@ -365,7 +366,7 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str,
             "**Verwerfen:** `/reject` kommentieren.\n\n"
             "**Achtung:** Die Originaldatei bleibt nur in deinem privaten Gmail-Postfach. "
             "Lösche die gesendete E-Mail erst nach Freigabe/Verwerfen.\n\n" + encode_issue_data(payload))
-    return github_request('POST', 'issues', json_body={'title': f"🎬 Freigabe: {metadata['title']}",
+    return github_request('POST', 'issues', json_body={'title': f"🎬 Freigabe: {metadata.get('song_label') or metadata['title']}",
                          'body': body, 'labels': [name]},
                           token=token, repo=repo, session=session)
 

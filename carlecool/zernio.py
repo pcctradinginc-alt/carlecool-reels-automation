@@ -145,7 +145,8 @@ class Zernio:
 
     def publish(self, *, media_url: str, caption: str, target: str,
                 instagram_id: str, tiktok_id: str,
-                ai_generated: bool, sha256: str, issue_number: int) -> dict:
+                ai_generated: bool, sha256: str, issue_number: int,
+                audio_name: str = "") -> dict:
         media_url = _check_media_url(media_url, upload=False)
         requested = {
             "instagram": ["instagram"], "tiktok": ["tiktok"],
@@ -173,10 +174,18 @@ class Zernio:
                 "express_consent_given": True,
                 "video_made_with_ai": bool(ai_generated),
             }
-        if ai_generated and "instagram" in requested:
-            for platform in platforms:
-                if platform["platform"] == "instagram":
-                    platform["platformSpecificData"] = {"isAiGenerated": True}
+        for platform in platforms:
+            if platform["platform"] != "instagram":
+                continue
+            data = {}
+            if ai_generated:
+                data["isAiGenerated"] = True
+            if audio_name:
+                # Zernio: "Renames the Reel's own audio (replaces 'Original Audio')".
+                # TikTok has no equivalent API field; its sound keeps the account name.
+                data["audioName"] = audio_name
+            if data:
+                platform["platformSpecificData"] = data
         # Stable across retries for the same approved bytes and target.
         identity = f"carlecool|{issue_number}|{sha256}|{target}"
         key = str(uuid.uuid5(uuid.NAMESPACE_URL, identity))
