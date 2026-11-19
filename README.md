@@ -19,6 +19,13 @@ What changed and why:
 | AI shot | Opened and closed the Reel (weakest clip as hook) | Appended last and never used as first/last shot |
 | Encoding | 30 fps, bicubic, CRF 22, 128k AAC, forced 2.5 Mbit/s for Gmail | 24 fps, Lanczos, CRF 18 (`-tune grain`), ≤16 Mbit/s, 256k AAC, two-pass −14 LUFS |
 
+### Portrait footage from Pexels, song naming and end title card
+
+- **Pexels (portrait 9:16):** live runs showed Coverr returns 0 portrait clips. With the secret `PEXELS_API_KEY` (free key from https://www.pexels.com/api/) Pexels is searched first with `orientation=portrait` (full phrase, then its core words; ≤ 6 requests, limit 200/hour), files closest to 1080×1920 are used, and the caption credits Pexels and each creator. Without the key Coverr remains the source.
+- **Song name everywhere:** `carl e cool - <title>` (spelling of the Apple Music/Deezer profile; override with variable `CARLECOOL_ARTIST_NAME`) on Instagram's audio label (`audio_name` / Zernio `audioName`), caption, review mail and approval issue. TikTok has no API field for the sound name.
+- **Caption:** "🎶 Full track: Link in Bio" (caption links are not clickable) — put the SoundCloud/streaming link in the Instagram and TikTok bio.
+- **End title card:** artist + song title fade in over the last ~2.2 s, centred above the platform UI. Disable with variable `CARLECOOL_TITLE_CARD=false`.
+
 ### Full-quality master outside Gmail (optional, recommended)
 
 Without configuration the master must still fit a Gmail attachment (≤16 MB; at 8–15 s this is ~8+ Mbit/s, usually fine). For the uncompromised master use a **private** Cloudflare R2 bucket (free tier, 10 GB):

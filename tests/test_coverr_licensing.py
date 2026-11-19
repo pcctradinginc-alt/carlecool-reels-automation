@@ -23,7 +23,7 @@ def test_caption_credits_coverr_and_named_creators():
     )
     assert "https://coverr.co" in reel
     assert reel.count("Video by J. Creator") == 1
-    assert "soundcloud.com/carlecool" in reel
+    assert "Link in Bio" in reel  # captions have no clickable links
 
 
 def test_download_tracking_only_acknowledged_on_204():

@@ -137,7 +137,7 @@ def plan_intervals(features: AudioFeatures, length: float, pace: str) -> list[fl
 def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output: Path,
                 length: float = 30, *, pace="medium", analog=65, cover: Path | None = None,
                 no_bookend: set[int] | frozenset[int] = frozenset(),
-                fit_email: bool = True) -> dict:
+                fit_email: bool = True, title_card: tuple[str, str] | None = None) -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -162,7 +162,13 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     saturation = 1.0 - 0.25 * level
     contrast = 1.0 - 0.07 * level
     grain = int(round(6 * level))
+    card = None
+    if title_card is not None:
+        from .titlecard import TITLE_SECONDS, make_title_card
+        card = make_title_card(title_card[0], title_card[1], width, height, work / "title_card.png")
+    card_start = max(0.0, length - TITLE_SECONDS) if card is not None else None
     files = []
+    shot_start = 0.0
     for index, shot in enumerate(storyboard):
         source = videos[shot.source_index]
         chain = [f"scale={width}:{height}:force_original_aspect_ratio=increase:flags=lanczos",
@@ -173,20 +179,31 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         chain.append(f"eq=saturation={saturation:.3f}:contrast={contrast:.3f}:gamma=1.015")
         if grain:
             chain.append(f"noise=alls={grain}:allf=t")
-        chain.append("format=yuv420p")
         part = work / f"clip_{index:03}.mp4"
         # Seek before input; -stream_loop is only a last resort for sources shorter than the shot.
         loop = ["-stream_loop", "-1"] if source_durations[shot.source_index] - shot.source_offset < shot.duration else []
+        inputs = [*loop, "-ss", f"{shot.source_offset:.3f}", "-i", str(source)]
+        shot_end = shot_start + shot.duration
+        if card_start is not None and shot_end > card_start + 1e-3:
+            # Title card fades in over the last ~2 s, after grain so the text stays crisp.
+            local = max(0.0, card_start - shot_start)
+            fade = "" if card_start < shot_start - 1e-3 else f",fade=t=in:st={local:.3f}:d=0.35:alpha=1"
+            inputs += ["-loop", "1", "-framerate", str(FPS), "-i", str(card)]
+            graph = (f"[0:v]{','.join(chain)}[base];[1:v]format=rgba{fade}[card];"
+                     f"[base][card]overlay=0:0:shortest=1:enable='gte(t,{local:.3f})',format=yuv420p[out]")
+            video_args = ["-filter_complex", graph, "-map", "[out]"]
+        else:
+            video_args = ["-vf", ",".join(chain + ["format=yuv420p"])]
         _run([
-            "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-            *loop, "-ss", f"{shot.source_offset:.3f}", "-i", str(source),
+            "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *inputs,
             "-frames:v", str(max(1, round(shot.duration * FPS))),
-            "-vf", ",".join(chain),
+            *video_args,
             "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "18",
             "-tune", "grain" if grain else "film", "-profile:v", "high",
             "-maxrate", "16M", "-bufsize", "24M",
             "-g", str(FPS * 2), "-r", str(FPS), "-video_track_timescale", str(FPS * 1000), str(part),
         ])
+        shot_start = shot_end
         files.append(part)
     concat_path = work / "concat.txt"
     # FFmpeg concat demuxer does not parse shell quoting; enforce simple generated filenames.
@@ -224,6 +241,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     return {"duration": probe_duration(output), "scenes": len(files),
             "resolution": f"{width}x{height}", "fps": FPS, "pace": pace, "analog": analog,
             "cover_graded": sum(1 for lut in luts if lut is not None),
+            "title_card": card is not None,
             "compressed_for_email": compressed_for_email,
             "edit_plan": [{"source_index": s.source_index,
                            "source_offset": s.source_offset,

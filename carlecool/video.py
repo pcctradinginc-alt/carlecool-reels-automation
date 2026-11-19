@@ -43,7 +43,7 @@ def _check_host(url: str) -> None:
     if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
         raise ValueError("Video download must use a safe HTTPS URL")
     host = parsed.hostname.lower()
-    permitted = os.getenv("VIDEO_ALLOWED_HOSTS", "coverr.co,*.coverr.co,*.cloudfront.net").split(",")
+    permitted = os.getenv("VIDEO_ALLOWED_HOSTS", "coverr.co,*.coverr.co,*.cloudfront.net,videos.pexels.com,images.pexels.com").split(",")
     permitted = [h.lower().strip() for h in permitted if h.strip()]
     if not any(host == h or (h.startswith("*.") and host.endswith(h[1:])) for h in permitted):
         raise ValueError(f"Video URL host is not approved: {host}. Check domain, then extend VIDEO_ALLOWED_HOSTS.")
@@ -316,12 +316,21 @@ def fallback_videos(recent: set[str]) -> list[Video]:
 
 
 def gather_videos(key: str, mood: str, recent: set[str], wanted=8, *, keywords=None) -> list[Video]:
+    """Pexels portrait clips first (if PEXELS_API_KEY is set), then Coverr, then owned stock."""
+    from . import pexels
+    phrases = list(keywords if keywords is not None else select_keywords(mood))
+    selected: list[Video] = []
+    if pexels.configured():
+        try:
+            selected += pexels.search_pexels(os.getenv("PEXELS_API_KEY", "").strip(), phrases, recent,
+                                             wanted=wanted)
+        except (requests.RequestException, RuntimeError, ValueError) as exc:
+            print(f"Pexels unavailable; continuing with Coverr: {type(exc).__name__}")
     try:
-        selected = search_coverr(key, mood, recent, wanted=wanted, keywords=keywords)
+        selected += search_coverr(key, mood, recent, wanted=wanted, keywords=phrases)
     except (requests.RequestException, RuntimeError, ValueError) as exc:
         print(f"Coverr unavailable; using licensed local fallback: {type(exc).__name__}")
-        selected = []
-    # Keep fallback candidates even if Coverr returns enough metadata but signed downloads fail.
+    # Keep fallback candidates even if providers return metadata but downloads fail.
     return selected + fallback_videos(recent)
 
 

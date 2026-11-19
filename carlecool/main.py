@@ -25,9 +25,8 @@ from .video import download_video, gather_videos, fetch_owned_stock, record_cove
 
 
 def caption_for(track, videos) -> str:
-    caption = f"🎧 {song_label(track.title)}\n"
-    if track.permalink_url:
-        caption += f"🎶 Full track: {track.permalink_url}\n"
+    # Links are not clickable in Instagram/TikTok captions: point to the bio instead.
+    caption = f"🎧 {song_label(track.title)}\n🎶 Full track: Link in Bio\n"
     if any(v.source == "ai" for v in videos):
         caption += "✨ Enthält KI-generierte Filmszenen (LTX-2.3)\n"
     if any(v.source == "coverr" for v in videos):
@@ -36,6 +35,11 @@ def caption_for(track, videos) -> str:
                                  if v.source == "coverr" and v.creator_name and v.creator_url)
         for name, url in creators:
             caption += f"Video by {name} on Coverr: {url}\n"
+    if any(v.source == "pexels" for v in videos):
+        caption += "🎬 Videos provided by Pexels: https://www.pexels.com\n"
+        names = dict.fromkeys(v.creator_name for v in videos if v.source == "pexels" and v.creator_name)
+        for name in names:
+            caption += f"Video by {name} on Pexels\n"
     return caption + "\n#CarleCool #ElectronicMusic #NewMusic #Reels"
 
 
@@ -206,11 +210,15 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     no_bookend = {i for i, v in enumerate(selected) if v.source == "ai"}
     no_bookend |= {i for i, path in enumerate(paths) if path not in portrait_paths and selected[i].source != "ai"}
     from . import masterstore
+    from .naming import artist_name
+    from .titlecard import enabled as title_card_enabled
+    title_card = (artist_name(), track.title) if title_card_enabled() else None
     out = output_dir / f"carlecool_{track.id}.mp4"
     try:
         details = render_reel(audio, paths, features, out, reel_length,
                               pace=profile["pace"], analog=profile["analog"], cover=cover,
-                              no_bookend=no_bookend, fit_email=not masterstore.configured())
+                              no_bookend=no_bookend, fit_email=not masterstore.configured(),
+                              title_card=title_card)
     finally:
         if cover is not None:
             cover.unlink(missing_ok=True)

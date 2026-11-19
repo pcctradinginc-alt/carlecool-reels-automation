@@ -53,6 +53,11 @@ def main():
         except ImportError:
             pass
         assert meta['fps'] == 24
+        try:
+            import PIL  # noqa: F401
+            assert meta['title_card'] is True
+        except ImportError:
+            pass
         assert meta['resolution'] == '270x480'
         assert json.loads((root / 'data/state.json').read_text())['published'] == []
         # Three filmic variants from synthetic music and synthetic licensed stock.

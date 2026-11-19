@@ -217,8 +217,8 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
     Candidates without a thumbnail (e.g. owned fallback stock) keep a neutral score and
     stay after the scored stock clips.
     """
-    remote = [c for c in candidates if c.source == "coverr"]
-    others = [c for c in candidates if c.source != "coverr"]
+    remote = [c for c in candidates if c.source in ("coverr", "pexels")]
+    others = [c for c in candidates if c.source not in ("coverr", "pexels")]
     if len(remote) <= keep:
         return candidates, []
     thumbs = [download_thumbnail(c.thumb_url, workdir / f"thumb_{i:02d}.jpg", session=session)

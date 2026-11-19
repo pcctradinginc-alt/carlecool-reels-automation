@@ -94,13 +94,15 @@ def validate_footage_rights(approval: dict) -> None:
         raise RuntimeError('Missing footage provenance; no publication')
     providers = {str(entry.get('provider', '')) for entry in sources
                  if isinstance(entry, dict)}
-    if len(providers) == 0 or len(providers) > 3 or any(
-            name not in ('coverr', 'owned', 'ai') for name in providers):
+    if len(providers) == 0 or len(providers) > 4 or any(
+            name not in ('coverr', 'pexels', 'owned', 'ai') for name in providers):
         raise RuntimeError('Unknown footage source; no publication')
     caption = str(approval.get('caption', ''))
     if 'coverr' in providers and ('Footage by Coverr' not in caption
                                  or 'https://coverr.co' not in caption):
         raise RuntimeError('Coverr free API credit missing from approved caption')
+    if 'pexels' in providers and 'https://www.pexels.com' not in caption:
+        raise RuntimeError('Pexels credit missing from approved caption')
 
 
 def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
