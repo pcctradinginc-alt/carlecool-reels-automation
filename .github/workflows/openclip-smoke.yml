@@ -1,0 +1,40 @@
+name: OpenCLIP real-model smoke (synthetic media only)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/openclip-smoke.yml'
+permissions:
+  contents: read
+jobs:
+  real-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install optional open model and portable FFmpeg
+        timeout-minutes: 12
+        run: |
+          python -m pip install --disable-pip-version-check --retries 2 --timeout 60 \
+            'open_clip_torch>=3,<4' 'Pillow>=10,<13' 'numpy>=1.26,<3' 'imageio-ffmpeg==0.6.0'
+          python scripts/setup_ffmpeg.py
+      - name: Real CPU embedding and video-frame smoke (no account credentials)
+        timeout-minutes: 10
+        run: |
+          mkdir -p /tmp/carlecool-semantic
+          ffmpeg -hide_banner -loglevel error -y -f lavfi -i color=c=yellow:size=256x256 -frames:v 1 /tmp/carlecool-semantic/cover.png
+          ffmpeg -hide_banner -loglevel error -y -f lavfi -i testsrc2=size=256x256:rate=8 -t 4 -pix_fmt yuv420p /tmp/carlecool-semantic/stock.mp4
+          python - <<'PY'
+          from pathlib import Path
+          from carlecool.semantic import score_semantic
+          p=Path('/tmp/carlecool-semantic')
+          result=score_semantic(p/'cover.png', [p/'stock.mp4'])
+          assert result is not None, 'Real pretrained model unavailable or inference failed'
+          assert result['order']==[0] and len(result['scores'])==1
+          assert -1 < result['scores'][0] <= 1
+          print('PASS: Real OpenCLIP embeddings and synthetic video frame ranking')
+          PY
