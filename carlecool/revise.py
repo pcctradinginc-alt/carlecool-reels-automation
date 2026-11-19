@@ -109,6 +109,11 @@ def revise(issue_number: int, command: str) -> str:
     # "Feedback memory": learn explicit, interpreted choices for next Reels.
     # The profile file contains only public style weights, never secrets/media.
     profile["revision"] = 0
+    # Explicit owner revision after successful delivery is the only signal.
+    from .quality_learning import PATH as LEARN_PATH, load as load_learning, observe
+    updated_learning = observe(load_learning(), instructions)
+    LEARN_PATH.parent.mkdir(parents=True, exist_ok=True)
+    LEARN_PATH.write_text(json.dumps(updated_learning, indent=2) + "\n", encoding="utf-8")
     PROFILE_PATH.parent.mkdir(parents=True, exist_ok=True)
     PROFILE_PATH.write_text(json.dumps(profile, indent=2, ensure_ascii=False) + "\n",
                             encoding="utf-8")
@@ -116,7 +121,7 @@ def revise(issue_number: int, command: str) -> str:
         subprocess.run(["git", "config", "user.name", "CarleCool Creative Bot"], check=True)
         subprocess.run(["git", "config", "user.email",
                         "41898282+github-actions[bot]@users.noreply.github.com"], check=True)
-        subprocess.run(["git", "add", str(PROFILE_PATH)], check=True)
+        subprocess.run(["git", "add", str(PROFILE_PATH), str(LEARN_PATH)], check=True)
         changes = subprocess.run(["git", "diff", "--cached", "--quiet"])
         if changes.returncode:
             subprocess.run(["git", "commit", "-m",
