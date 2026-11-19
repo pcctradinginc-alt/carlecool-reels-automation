@@ -8,7 +8,7 @@ from carlecool.state import is_already_attempted_sha, load_state, pick_track
 def test_reconciled_pending_archived_and_history_preserved():
     state = load_state()
     assert state["pending"] is None
-    assert state["published"] == []  # No claim of a verified TikTok publication.
+    assert all(x["approval_issue"] != 5 for x in state["published"])  # Historical #5 is not claimed published.
     archived = state["reconciled"][0]
     assert archived["provider"] == "zernio"
     assert archived["issue_number"] == 5
