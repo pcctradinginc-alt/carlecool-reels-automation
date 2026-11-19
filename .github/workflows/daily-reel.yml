@@ -3,6 +3,7 @@ name: CarleCool — make and review Reel
 # Manual verification 2026-11-19: push-to-main creates ONE private v4 preview and approval issue; social publication stays gated.
 # TikTok review request 2026-11-19: send new private approval email with TikTok choice; never auto-publish.
 # Fresh review requested after Zernio cleanup: private preview and new issue only, no TikTok upload.
+# Owner-requested Instagram-only test: new private email review; publication requires separate explicit Instagram approval.
 # Owner-requested review verification with bundled FFmpeg and authorized-audio fallback; no auto-publish.
 on:
   schedule:
