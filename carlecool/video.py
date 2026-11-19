@@ -125,6 +125,51 @@ def record_coverr_download(video_id: str, api_key: str, *, session=None):
         raise RuntimeError("Coverr download stats endpoint did not acknowledge selection")
 
 
+# Coverr matches every word of a query, so long art-direction phrases return 0 hits
+# (verified in the live run 44588789496). Each phrase therefore gets a 1–2 word core
+# query that keeps its specific subject before the broad lane word is used.
+SHORT_QUERIES = {
+    "quiet forest sunrise backlight": "forest sunrise", "river flowing natural light": "river",
+    "wind moving trees morning": "trees wind", "warm minimal white room wood floor": "minimal interior",
+    "ocean window gentle sunlight": "ocean sunlight",
+    "vintage drum machine sampler pads hands": "drum machine", "MPC 2000 XL sampler closeup": "sampler",
+    "vinyl record turntable grooves": "vinyl", "analog mixing console knobs": "mixing console",
+    "cassette tape reel studio": "cassette", "guitar wood grain notebook paper": "guitar",
+    "studio musician hands keyboard": "keyboard", "dim recording studio candlelight": "recording studio",
+    "California coastal highway sunset": "coastal highway", "palm trees golden hour": "palm trees",
+    "vintage roadside motel dusk": "motel", "old American diner after dark": "diner",
+    "classic car interior road trip": "road trip", "faded Super 8 summer film": "vintage summer",
+    "dusty open highway desert": "desert road", "old Hollywood empty ballroom": "ballroom",
+    "90s California skateboard fisheye low angle": "skateboard", "skater asphalt sunset silhouette": "skater sunset",
+    "skateboard wheels sidewalk closeup": "skateboard wheels", "skatepark natural light documentary": "skatepark",
+    "old camcorder street skate": "street skate",
+    "Y2K digital camera flash night": "camera flash", "early 2000s camcorder grain": "camcorder",
+    "VHS tracking retro tape": "vhs", "consumer digicam summer": "summer friends",
+    "night drive coastal road": "night drive", "purple blue neon city reflection": "neon",
+    "lonely motel night lights": "motel night", "city road rain window": "rain window",
+}
+_FILLER = {"a", "an", "the", "of", "and", "with", "in", "on", "at", "after", "old", "vintage", "classic",
+           "faded", "quiet", "warm", "dim", "gentle", "natural", "minimal", "lonely", "early", "dusty",
+           "light", "closeup", "low", "angle", "documentary", "grain", "film", "90s", "2000s"}
+
+
+def short_query(editorial_phrase: str) -> str:
+    """1–2 core words for Coverr's all-words search (curated map, then a word filter)."""
+    if editorial_phrase in SHORT_QUERIES:
+        return SHORT_QUERIES[editorial_phrase]
+    words = [w for w in re.findall(r"[a-z0-9]+", editorial_phrase.lower()) if w not in _FILLER]
+    return " ".join(words[:2]) or editorial_phrase
+
+
+def query_ladder(editorial_phrase: str) -> list[str]:
+    """Specific → core → broad, without duplicates."""
+    ladder = []
+    for query in (editorial_phrase, short_query(editorial_phrase), _coverr_search_phrase(editorial_phrase)):
+        if query.lower() not in [q.lower() for q in ladder]:
+            ladder.append(query)
+    return ladder
+
+
 def _coverr_search_phrase(editorial_phrase: str) -> str:
     """Map a detailed art-direction shot to Coverr's short search vocabulary."""
     term = editorial_phrase.lower()
@@ -192,9 +237,8 @@ def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8,
                   keywords=None, page_size: int = 40, per_lane_minimum: int = 4) -> list[Video]:
     """Search Coverr with the real art-direction phrase, portrait clips only.
 
-    One request per lane with the full descriptive phrase; only if it yields fewer
-    than `per_lane_minimum` usable portrait clips, one broader fallback request.
-    At most 6 requests (well below the free 50/hour limit).
+    Per lane: full phrase, then its 1–2 word core, then the broad lane word — each
+    only while the lane still lacks material. At most 9 requests (free limit: 50/hour).
     """
     if not key:
         return []
@@ -204,12 +248,10 @@ def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8,
     per_lane = []
     for editorial in (keywords if keywords is not None else select_keywords(mood))[:3]:
         lane = []
-        queries = [editorial]
-        broad = _coverr_search_phrase(editorial)
-        if broad.lower() != editorial.lower():
-            queries.append(broad)
-        for attempt, query in enumerate(queries):
-            if attempt and sum(1 for v in lane if v.vertical) >= per_lane_minimum:
+        for attempt, query in enumerate(query_ladder(editorial)):
+            # Stop descending once this lane has enough on-style material.
+            if attempt and (sum(1 for v in lane if v.vertical) >= per_lane_minimum
+                            or len(lane) >= 2 * per_lane_minimum):
                 break
             hits = _coverr_request(session, key, query, page_size)
             print(f"Coverr '{query}': {len(hits)} hits, "

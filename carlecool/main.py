@@ -152,8 +152,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     portrait_paths = set(paths)
     # Landscape only fills up a thin portrait supply, and always after the portrait clips.
     if portrait_count < MIN_PORTRAIT_CLIPS:
+        # Fill up to the normal clip count so a landscape-only catalogue still gives variety.
         for video, path in landscape_reserve:
-            if len(paths) >= max(MIN_PORTRAIT_CLIPS, min(stock_limit, portrait_count + 4)):
+            if len(paths) >= stock_limit:
                 break
             accept(video, path)
     for video, path in landscape_reserve:

@@ -62,9 +62,9 @@ def test_coverr_real_phrases_portrait_first(monkeypatch):
     assert result[0].vertical and not result[1].vertical and result[0].query == phrases[0]
     assert result[0].thumb_url.endswith("a.jpg") and result[0].tags == ("sunset",)
     queries = [call.kwargs["params"]["query"] for call in session.get.call_args_list]
-    # Full descriptive phrase first, broad term only as fallback; at most 6 requests.
-    assert queries[0] == phrases[0] and "music" in queries
-    assert session.get.call_count <= 6
+    # Full phrase, then its core words, broad term last; at most 9 requests.
+    assert queries[:3] == [phrases[0], "sampler", "music"]
+    assert session.get.call_count <= 9
 
 
 def test_coverr_strict_portrait_mode(monkeypatch):
@@ -133,3 +133,14 @@ def test_no_unconfirmed_meta_upload(tmp_path):
     with pytest.raises(ValueError, match="upload host"):
         Instagram("123", "fake-token", session=mock).create_and_upload(path, "x")
     mock.post.assert_not_called()
+
+
+def test_every_art_direction_phrase_has_a_short_coverr_query():
+    from carlecool.creative import CUES
+    from carlecool.video import SHORT_QUERIES, query_ladder, short_query
+    for phrases in CUES.values():
+        for phrase in phrases:
+            assert phrase in SHORT_QUERIES
+            assert 1 <= len(short_query(phrase).split()) <= 2
+    assert query_ladder("faded Super 8 summer film") == ["faded Super 8 summer film", "vintage summer", "sunset"]
+    assert short_query("lonely neon gas station at night") == "neon gas"
