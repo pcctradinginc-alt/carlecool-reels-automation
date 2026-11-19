@@ -32,7 +32,11 @@
     "at": "2026-11-19T20:20:22.731190+00:00",
     "issue_number": 25,
     "target": "instagram",
-    "provider": "zernio"
+    "provider": "zernio",
+    "provider_post_id": "6aff5a099bf46160e3a48a54",
+    "platform_status": {
+      "instagram": "processing"
+    }
   },
   "reconciled": [
     {
