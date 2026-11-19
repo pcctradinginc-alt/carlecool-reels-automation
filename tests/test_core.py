@@ -144,3 +144,20 @@ def test_every_art_direction_phrase_has_a_short_coverr_query():
             assert 1 <= len(short_query(phrase).split()) <= 2
     assert query_ladder("faded Super 8 summer film") == ["faded Super 8 summer film", "vintage summer", "sunset"]
     assert short_query("lonely neon gas station at night") == "neon gas"
+
+
+def test_coverr_error_on_later_lane_keeps_earlier_clips(monkeypatch):
+    import requests
+    ok = MagicMock()
+    ok.status_code = 200
+    ok.json.return_value = {"hits": [{"id": f"v{i}", "title": "t", "views": 1, "is_vertical": False,
+        "max_width": 1920, "max_height": 1080,
+        "urls": {"mp4_download": f"https://storage.coverr.co/{i}.mp4"}} for i in range(10)]}
+    failing = MagicMock()
+    failing.status_code = 403
+    failing.raise_for_status.side_effect = requests.HTTPError(response=failing)
+    session = MagicMock()
+    session.get.side_effect = [ok, failing]
+    result = search_coverr("k", "calm", set(), session=session, wanted=8,
+                           keywords=["street skate", "vinyl record turntable grooves"])
+    assert len(result) == 8 and session.get.call_count == 2

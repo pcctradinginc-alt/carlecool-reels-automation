@@ -246,14 +246,24 @@ def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8,
     landscape_ok = allow_landscape()
     seen = set()
     per_lane = []
+    stop = False
     for editorial in (keywords if keywords is not None else select_keywords(mood))[:3]:
+        if stop:
+            break
         lane = []
         for attempt, query in enumerate(query_ladder(editorial)):
             # Stop descending once this lane has enough on-style material.
             if attempt and (sum(1 for v in lane if v.vertical) >= per_lane_minimum
                             or len(lane) >= 2 * per_lane_minimum):
                 break
-            hits = _coverr_request(session, key, query, page_size)
+            try:
+                hits = _coverr_request(session, key, query, page_size)
+            except (requests.RequestException, RuntimeError, ValueError) as exc:
+                # Keep everything found so far (e.g. hourly limit hit on a later lane).
+                status = getattr(getattr(exc, "response", None), "status_code", "")
+                print(f"Coverr '{query}' failed ({type(exc).__name__} {status}); keeping earlier results")
+                stop = True
+                break
             print(f"Coverr '{query}': {len(hits)} hits, "
                   f"{sum(1 for h in hits if _is_portrait(h))} portrait")
             for item in hits:
@@ -287,6 +297,8 @@ def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8,
                                   width=int(item.get("max_width") or 0),
                                   height=int(item.get("max_height") or 0)))
         per_lane.append(sorted(lane, key=lambda x: (x.vertical, x.views), reverse=True))
+    if stop and not any(per_lane):
+        raise RuntimeError("Coverr unavailable before any usable result")
     found = []
     while len(found) < wanted and any(per_lane):
         next_lanes = []
