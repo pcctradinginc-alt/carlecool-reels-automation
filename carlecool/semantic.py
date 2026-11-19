@@ -77,7 +77,7 @@ def score_semantic(cover: Path, videos: list[Path], *, style: str = "",
                 vectors = []
                 for second in sample_seconds[:3]:
                     try:
-                        v = model.encode_image(preprocess(_frame(path, max(0.0, second)).unsqueeze(0)))
+                        v = model.encode_image(preprocess(_frame(path, max(0.0, second))).unsqueeze(0))
                         vectors.append(torch.nn.functional.normalize(v, dim=-1))
                     except (OSError, ValueError, subprocess.SubprocessError):
                         continue
