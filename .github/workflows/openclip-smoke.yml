@@ -1,6 +1,10 @@
 name: OpenCLIP real-model smoke (synthetic media only)
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/openclip-smoke.yml"
+      - "carlecool/semantic.py"
   push:
     branches: [main]
     paths:
