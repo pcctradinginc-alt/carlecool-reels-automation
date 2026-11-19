@@ -46,6 +46,26 @@ def main():
         assert meta['track_id'] == '1000' and meta['duration'] >= 19
         assert meta['resolution'] == '270x480'
         assert json.loads((root / 'data/state.json').read_text())['published'] == []
+        # Three filmic variants from synthetic music and synthetic licensed stock.
+        # No emails, public media artifacts, API or real song required.
+        from carlecool.variant_compare import compare
+        import os as _os
+        old_dims = {_name: _os.environ.get(_name) for _name in ('REEL_WIDTH', 'REEL_HEIGHT')}
+        try:
+            _os.environ['REEL_WIDTH'] = '270'
+            _os.environ['REEL_HEIGHT'] = '480'
+            variants = compare(root / 'assets/audio/1000.mp3',
+                               [root / 'assets/stock/synthetic.mp4'],
+                               root / 'variants', length=8)
+        finally:
+            for _name, _value in old_dims.items():
+                if _value is None:
+                    _os.environ.pop(_name, None)
+                else:
+                    _os.environ[_name] = _value
+        assert len(variants['variants']) == 3
+        assert all(Path(v['file']).is_file() for v in variants['variants'])
+        assert (root / 'variants/comparison.json').is_file()
         print('PASS: Synthetic end-to-end render, SHA-256 metadata, zero social-media calls')
 
 
