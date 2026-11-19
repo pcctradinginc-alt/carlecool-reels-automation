@@ -1,5 +1,6 @@
 name: CarleCool — make and review Reel
 # One-time signed email approval verification: all four choices, no automatic publication.
+# Manual verification 2026-11-19: push-to-main creates ONE private v4 preview and approval issue; social publication stays gated.
 # Owner-requested review verification with bundled FFmpeg and authorized-audio fallback; no auto-publish.
 on:
   schedule:
