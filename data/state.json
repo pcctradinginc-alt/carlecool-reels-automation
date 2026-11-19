@@ -1,6 +1,13 @@
 {
   "published": [],
-  "pending": null,
+  "pending": {
+    "track_id": "2437525038",
+    "sha256": "8b015647d07a2c1fe5578aa6f85253e878771ddfb14545f580117ebce4aad337",
+    "at": "2026-11-19T19:53:28.376846+00:00",
+    "issue_number": 22,
+    "target": "tiktok",
+    "provider": "zernio"
+  },
   "reconciled": [
     {
       "track_id": "2373071753",
