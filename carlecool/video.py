@@ -143,9 +143,6 @@ SHORT_QUERIES = {
     "90s California skateboard fisheye low angle": "skateboard", "skater asphalt sunset silhouette": "skater sunset",
     "skateboard wheels sidewalk closeup": "skateboard wheels", "skatepark natural light documentary": "skatepark",
     "old camcorder street skate": "street skate",
-    # Creative v5 uses three existing free search lanes (two signature roles).
-    "skateboarder performing street tricks": "skateboarder",
-    "adult woman cinematic portrait": "woman portrait",
     "Y2K digital camera flash night": "camera flash", "early 2000s camcorder grain": "camcorder",
     "VHS tracking retro tape": "vhs", "consumer digicam summer": "summer friends",
     "night drive coastal road": "night drive", "purple blue neon city reflection": "neon",
@@ -178,8 +175,6 @@ def _coverr_search_phrase(editorial_phrase: str) -> str:
     term = editorial_phrase.lower()
     if "skate" in term or "bmx" in term:
         return "skateboarding"
-    if "woman" in term or "women" in term or "female portrait" in term:
-        return "woman"
     if any(x in term for x in ("mpc", "sampler", "console", "synth", "cassette", "vinyl",
                                 "guitar", "notebook", "keyboard", "recording studio",
                                 "drum machine", "turntable", "music")):
