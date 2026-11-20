@@ -72,8 +72,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     v5 = creative_v5_enabled()
     # Never run the experimental director on daily schedules or review revisions.
     if (v5 and os.getenv("GITHUB_ACTIONS") == "true"
-            and os.getenv("GITHUB_EVENT_NAME") != "workflow_dispatch"):
-        raise RuntimeError("Creative v5 is restricted to explicit manual preview runs")
+            and os.getenv("GITHUB_WORKFLOW") != "CarleCool — Creative v5 FREE private preview"):
+        raise RuntimeError("Creative v5 is restricted to its isolated, no-publish workflow")
     v5_plan = None
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
