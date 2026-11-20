@@ -60,7 +60,6 @@ jobs:
           AWS_DEFAULT_REGION: ${{ vars.S3_REGION || 'auto' }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          VIDEO_ALLOWED_HOSTS: ${{ vars.VIDEO_ALLOWED_HOSTS }}
         run: python -m carlecool.main --mode preview
       - name: Send only private TEST preview by Gmail (no approval issue)
         timeout-minutes: 4
