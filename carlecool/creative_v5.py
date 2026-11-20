@@ -7,6 +7,7 @@ All visual labels are model estimates requiring human review, not guarantees.
 from __future__ import annotations
 
 import os
+import subprocess
 from pathlib import Path
 
 ROLE_QUERIES = {
@@ -213,7 +214,7 @@ def verify_signatures(paths: list[Path], selected: list) -> dict:
             for second in (0.5, 1.5, 2.5):
                 try:
                     images.append(preprocess(_frame(path, second)))
-                except (OSError, ValueError, RuntimeError):
+                except (OSError, ValueError, RuntimeError, subprocess.SubprocessError):
                     continue
             if not images:
                 scores.append({})
