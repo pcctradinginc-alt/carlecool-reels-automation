@@ -304,10 +304,7 @@ def send_review_email(issue_url: str, metadata: dict, original_path: Path | None
     msg['Message-ID'] = message_id
     msg['X-CarleCool-Run-ID'] = str(run_id)
     msg['X-CarleCool-SHA256'] = metadata['sha256']
-    if metadata.get("creative_v5"):
-        msg['Subject'] = f"CarleCool | Creative v5 TESTVORSCHAU (nicht freigeben): {metadata.get('song_label') or metadata['title']}"
-    else:
-        msg['Subject'] = f"CarleCool | Reel zur Freigabe: {metadata.get('song_label') or metadata['title']}"
+    msg['Subject'] = f"CarleCool | Reel zur Freigabe: {metadata.get('song_label') or metadata['title']}"
     direct_links = {}
     if issue_url:
         from .approval_links import approval_links
