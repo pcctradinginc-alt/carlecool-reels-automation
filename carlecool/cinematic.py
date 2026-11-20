@@ -140,8 +140,7 @@ def plan_cuts_from_beats(duration: float, beats: tuple[float, ...] | list[float]
 
 
 def build_storyboard(durations: list[float], source_durations: list[float],
-                     *, seed: str = "", no_bookend: set[int] | frozenset[int] = frozenset(),
-                     featured_sources: tuple[int, int] | None = None) -> list[Shot]:
+                     *, seed: str = "", no_bookend: set[int] | frozenset[int] = frozenset()) -> list[Shot]:
     """Rotate sources without repeatedly restarting every video at time zero.
 
     Distinct clips are preferred over immediate repeats. Each reused clip
@@ -154,15 +153,6 @@ def build_storyboard(durations: list[float], source_durations: list[float],
     if any(not math.isfinite(x) or x <= 0 for x in durations + source_durations):
         raise ValueError("Durations must be positive and finite")
     count = len(source_durations)
-    featured = {}
-    if featured_sources is not None:
-        if (len(durations) < 4 or len(featured_sources) != 2
-                or len(set(featured_sources)) != 2
-                or any(type(x) is not int or not 0 <= x < count for x in featured_sources)):
-            raise ValueError("Creative v5 requires two distinct sources and at least four scenes")
-        # Two interior shots: first the female subject, then the skater.
-        # Preserve intro/outro continuity and the existing music-aligned cuts.
-        featured = {1: featured_sources[0], max(2, (len(durations) - 1) // 2): featured_sources[1]}
     bookend = next((i for i in range(count) if i not in no_bookend), 0)
     second = next((i for i in range(count) if i not in no_bookend and i != bookend), None)
     offsets = [0.0] * count
@@ -178,8 +168,6 @@ def build_storyboard(durations: list[float], source_durations: list[float],
                 preferred = bookend
             elif index == 1 and second is not None:
                 preferred = second
-        if index in featured:
-            preferred = featured[index]
         candidates = [(preferred + k) % count for k in range(count)]
 
         def fits(src):
@@ -197,8 +185,6 @@ def build_storyboard(durations: list[float], source_durations: list[float],
             choice = next((c for c in candidates if allowed(c) and source_durations[c] >= length - 1e-6), None)
         if choice is None:
             choice = next((c for c in candidates if allowed(c)), preferred)
-        if index in featured and choice != featured[index]:
-            raise RuntimeError("Creative v5 featured source cannot fit its music-aligned scene")
         source_duration = source_durations[choice]
         if source_duration - offsets[choice] < length - 1e-6:
             offsets[choice] = 0.0  # rewind rather than loop past the end
