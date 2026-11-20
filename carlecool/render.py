@@ -137,7 +137,8 @@ def plan_intervals(features: AudioFeatures, length: float, pace: str) -> list[fl
 def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output: Path,
                 length: float = 30, *, pace="medium", analog=65, cover: Path | None = None,
                 no_bookend: set[int] | frozenset[int] = frozenset(),
-                fit_email: bool = True, title_card: tuple[str, str] | None = None) -> dict:
+                fit_email: bool = True, title_card: tuple[str, str] | None = None,
+                featured_sources: tuple[int, int] | None = None) -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -155,7 +156,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     if any(d < 1.0 for d in source_durations):
         raise ValueError("Video too short")
     storyboard = build_storyboard(intervals, source_durations,
-                                 seed=str(features.excerpt_start), no_bookend=set(no_bookend))
+                                 seed=str(features.excerpt_start), no_bookend=set(no_bookend),
+                                 featured_sources=featured_sources)
     from .grading import cover_luts
     luts = cover_luts(cover, videos, work)
     level = analog / 100.0
