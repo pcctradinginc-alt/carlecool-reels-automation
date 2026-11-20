@@ -50,7 +50,14 @@
       }
     }
   ],
-  "pending": null,
+  "pending": {
+    "track_id": "2437525047",
+    "sha256": "144420abe8434d064b38b9b9c0084c67ebcaa6e8130c172e06be9dc237ed9139",
+    "at": "2026-11-20T15:37:14.037803+00:00",
+    "issue_number": 30,
+    "target": "tiktok",
+    "provider": "zernio"
+  },
   "reconciled": [
     {
       "track_id": "2373071753",
