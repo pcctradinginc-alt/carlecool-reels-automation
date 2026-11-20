@@ -250,6 +250,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         print("Creative v5 signatures verified in separate real clips: woman + skater")
     # Neither the AI shot nor a centre-cropped landscape clip may open or close the Reel.
     no_bookend = {i for i, v in enumerate(selected) if v.source == "ai"}
+    if v5_signatures is not None:
+        # A cover-world shot, not either mandatory role, anchors the loop.
+        no_bookend.update(v5_signatures[role]["index"] for role in ("woman", "skater"))
     no_bookend |= {i for i, path in enumerate(paths) if path not in portrait_paths and selected[i].source != "ai"}
     from . import masterstore
     from .naming import artist_name
