@@ -68,6 +68,13 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     if not tracks:
         raise RuntimeError("No public SoundCloud tracks found")
     profile = validate_profile(creative_profile) if creative_profile is not None else load_profile()
+    from .creative_v5 import enabled as creative_v5_enabled
+    v5 = creative_v5_enabled()
+    # Never run the experimental director on daily schedules or review revisions.
+    if (v5 and os.getenv("GITHUB_ACTIONS") == "true"
+            and os.getenv("GITHUB_EVENT_NAME") != "workflow_dispatch"):
+        raise RuntimeError("Creative v5 is restricted to explicit manual preview runs")
+    v5_plan = None
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
     destination = output_dir / "original.mp3"
@@ -121,21 +128,32 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
             cover = candidate_cover
             from .curation import cover_queries
             cover_choice = cover_queries(cover, profile["weights"], run_key=edition)
-    if cover_choice.get("queries"):
+    if v5:
+        if cover is None:
+            raise RuntimeError("Creative v5 requires a readable official SoundCloud cover; no preview sent")
+        from .creative_v5 import analyze_cover, search_phrases
+        v5_plan = analyze_cover(cover)
+        keywords = search_phrases(v5_plan)
+        print(f"Creative v5 local cover director: {v5_plan['style']} ({v5_plan['basis']})")
+    elif cover_choice.get("queries"):
         from .curation import merge_queries
         keywords = merge_queries(cover_choice, profile_queries)
         print(f"Cover-led search ({cover_choice['method']}): {cover_choice['queries']}")
     else:
         keywords = profile_queries
     trend_signals = {"status": "disabled", "topics": []}
-    if os.getenv("CARLECOOL_TRENDS", "false").lower() in ("true", "1", "on"):
+    if not v5 and os.getenv("CARLECOOL_TRENDS", "false").lower() in ("true", "1", "on"):
         from .trend_signals import fetch_signals, apply_trend
         trend_signals = fetch_signals()
         keywords = apply_trend(keywords, trend_signals)
     print(f"Video search phrases: {keywords}")
     candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=24, keywords=keywords)
     from .curation import rank_candidates
-    candidates, prerank = rank_candidates(candidates, cover, output_dir / "thumbs", keep=10)
+    candidates, prerank = rank_candidates(candidates, cover, output_dir / "thumbs",
+                                          keep=18 if v5 else 10)
+    if v5:
+        from .creative_v5 import prioritize_candidates
+        candidates = prioritize_candidates(candidates)
     if prerank:
         print(f"Pre-download ranking kept {len(prerank)} of the candidate clips")
     from .render import is_portrait
@@ -159,6 +177,14 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
             path = fetch_owned_stock(video, target) if video.source == "owned" else download_video(video.url, target)
             if is_portrait(path):
                 accept(video, path)
+            elif v5 and allow_landscape():
+                from .creative_v5 import is_role_candidate
+                if is_role_candidate(video):
+                    # The two required subjects get priority even when the free
+                    # catalog only offers landscape; safe 9:16 smart-crop remains.
+                    accept(video, path)
+                else:
+                    landscape_reserve.append((video, path))
             elif allow_landscape():
                 landscape_reserve.append((video, path))
             else:
@@ -167,8 +193,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                     path.unlink(missing_ok=True)
         except Exception as exc:
             print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}")
-    portrait_count = len(paths)
-    portrait_paths = set(paths)
+    portrait_paths = {p for p in paths if is_portrait(p)}
+    portrait_count = len(portrait_paths)
     # Landscape only fills up a thin portrait supply, and always after the portrait clips.
     if portrait_count < MIN_PORTRAIT_CLIPS:
         # Fill up to the normal clip count so a landscape-only catalogue still gives variety.
@@ -181,7 +207,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         raise RuntimeError("No licensed clips available; add assets/stock and manifest.json as fallback")
     # Optional AI shot: appended LAST and excluded from the opening/closing shot,
     # because it is short (2 s) and low resolution (512×768).
-    if profile["ai_video"] and os.getenv("CARLECOOL_AI_VIDEO", "off") == "one":
+    if not v5 and profile["ai_video"] and os.getenv("CARLECOOL_AI_VIDEO", "off") == "one":
         try:
             from .ai_video import generate_one
             ai_path = generate_one(keywords[0], output_dir / "ai_experiment.mp4")
@@ -217,6 +243,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                     "model": semantic["model"], "scores": semantic["scores"],
                     "themes": semantic["themes"]}
                 print("OpenCLIP semantic cover/frame matching applied")
+    v5_signatures = None
+    if v5:
+        from .creative_v5 import verify_signatures
+        v5_signatures = verify_signatures(paths, selected)
+        print("Creative v5 signatures verified in separate real clips: woman + skater")
     # Neither the AI shot nor a centre-cropped landscape clip may open or close the Reel.
     no_bookend = {i for i, v in enumerate(selected) if v.source == "ai"}
     no_bookend |= {i for i, path in enumerate(paths) if path not in portrait_paths and selected[i].source != "ai"}
@@ -229,6 +260,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         details = render_reel(audio, paths, features, out, reel_length,
                               pace=profile["pace"], analog=profile["analog"], cover=cover,
                               no_bookend=no_bookend, fit_email=not masterstore.configured(),
+                              featured_sources=(v5_signatures["woman"]["index"],
+                                                v5_signatures["skater"]["index"])
+                              if v5_signatures is not None else None,
                               title_card=title_card)
     finally:
         if cover is not None:
@@ -248,6 +282,13 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "trend_signals": trend_signals,
         "output": str(out), "sha256": hashlib.sha256(out.read_bytes()).hexdigest(), **details,
     }
+    if v5:
+        metadata["creative_v5"] = {
+            "mode": "manual_dry_run_only", "cover_director": v5_plan,
+            "signatures": v5_signatures,
+            "method": "local OpenCLIP on sampled frames; human visual review required",
+            "cost": "existing free stock quotas and local model; no paid provider",
+        }
     (output_dir / "reel_metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Rendered preview: {out} ({details['scenes']} beat-aligned scenes)")
     print("Preview mode: no Instagram API call, no state change")
