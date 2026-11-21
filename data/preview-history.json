@@ -404,6 +404,31 @@
         "PyMXboUUmL"
       ],
       "sha256": "2d4e93be9a19f13cfd1c417ea2d58ba307069c27b46d985452aa4a21c8e6c583"
+    },
+    {
+      "at": "2026-11-21T11:11:21+00:00",
+      "kind": "daily",
+      "run_id": 44897255951,
+      "track_id": "2437525056",
+      "video_ids": [
+        "pl-Sagaofth1957",
+        "WTi8voysdM",
+        "pEdXVksb4G",
+        "k0vqAoJ3Si",
+        "zu1HATHkPo",
+        "hb3r7k9hId",
+        "Wyk3TiZqce",
+        "pl-Paradeof1941",
+        "gCbOlgwtyy",
+        "lIjk6o5phk",
+        "b6E88kwuqk",
+        "Rm6YTPXHFG",
+        "KiVKL4jpFd",
+        "ZKfjkNND2W",
+        "BvC15VpUl8",
+        "HkfxGAIYxD"
+      ],
+      "sha256": "b98b910ca5905c1ca6d2e786b3bfed95a4707dbccf069ec3f2cf2178c0ba343f"
     }
   ]
 }
