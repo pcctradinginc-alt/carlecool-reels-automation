@@ -5,7 +5,8 @@
 **Never automatically publishes just because a schedule runs or an email link is clicked.** Only the authenticated repository owner can write `/publish` on an open `carlecool-review` issue, and publishing is additionally blocked by `PUBLISH_ENABLED` unless explicitly enabled.
 
 ## Strict cinematic visual gate (production)
-The scheduled Reel workflow sets `CARLECOOL_VISUAL_STRICT=true`,
+Strict checking is also the default in `main.process()` (including /revise).
+The scheduled Reel workflow explicitly sets `CARLECOOL_VISUAL_STRICT=true`,
 `CARLECOOL_SEMANTIC=on` and `CARLECOOL_AI_VIDEO=off`. Every selected
 clip, whether from Coverr, Pexels, archival sources, signature slots or an
 owned library, must pass an OpenCLIP-based check of **five actual video frames**
