@@ -109,8 +109,11 @@ def make_cover_card(cover: Path, artist: str, title: str, width: int, height: in
         return None
     artist = " ".join(str(artist).split()).lower()
     title = " ".join(str(title).split())
-    side = int(width * 0.64)
+    side = int(width * 0.72)
+    # Downscale with Lanczos plus a light unsharp mask: crisp edges after the
+    # platforms' own re-encode. (Source is now up to 3000x3000, never 100x100.)
     art = ImageOps.fit(art, (side, side), method=Image.LANCZOS)
+    art = art.filter(ImageFilter.UnsharpMask(radius=1.2, percent=60, threshold=2))
     canvas = Image.new("RGBA", (width, height), (8, 8, 10, 120))
     left = (width - side) // 2
     top = int(height * 0.40) - side // 2

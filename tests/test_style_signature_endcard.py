@@ -159,3 +159,30 @@ def test_low_resolution_landscape_is_framed_not_cropped(tmp_path, monkeypatch):
     features = AudioFeatures(120.0, 0.5, 0.0, "calm", 6.0)
     d = render_reel(audio, [hd, old], features, tmp_path / "out/r.mp4", 4.0, fit_email=False)
     assert d["framed_shots"] >= 1 and d["smart_cropped_shots"] >= 1
+
+
+def test_cover_is_fetched_in_the_largest_soundcloud_size(tmp_path):
+    from carlecool.cover_visual import artwork_variants, fetch_cover
+    url = "https://i1.sndcdn.com/artworks-abc-XyZ-large.jpg"
+    assert artwork_variants(url)[:3] == [
+        "https://i1.sndcdn.com/artworks-abc-XyZ-t3000x3000.jpg",
+        "https://i1.sndcdn.com/artworks-abc-XyZ-original.jpg",
+        "https://i1.sndcdn.com/artworks-abc-XyZ-t500x500.jpg"]
+    tried = []
+
+    class Resp:
+        def __init__(self, ok):
+            self.status_code = 200 if ok else 404
+            self.headers = {}
+        def iter_content(self, n):
+            yield b"x" * 4096
+        def close(self):
+            pass
+
+    class Session:
+        def get(self, u, **kw):
+            tried.append(u)
+            return Resp("t500x500" in u)  # pretend 3000 and original are missing
+
+    assert fetch_cover(url, tmp_path / "c.jpg", session=Session())
+    assert [u.rsplit("-", 1)[1] for u in tried] == ["t3000x3000.jpg", "original.jpg", "t500x500.jpg"]

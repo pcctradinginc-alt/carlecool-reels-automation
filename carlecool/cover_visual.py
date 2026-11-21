@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 import numpy as np
 import requests
 
-MAX_ART_BYTES = 3_000_000
+MAX_ART_BYTES = 8_000_000
 PIXELS = 32 * 32 * 3
 
 
@@ -27,11 +27,38 @@ def _allowed_cover_url(url: str) -> bool:
     return bool(re.fullmatch(r"i[1-4]\.sndcdn\.com", (parsed.hostname or "").lower()))
 
 
+SIZE_SUFFIX = re.compile(r"-(?:large|t\d+x\d+|original|crop|small|badge|tiny|mini|t67x67|t300x300)(\.(?:jpg|jpeg|png))$", re.I)
+
+
+def artwork_variants(url: str) -> list[str]:
+    """Largest first: the API's default `-large` artwork is only 100x100 px, which made
+    the cover on the end card blurry. SoundCloud also serves 3000x3000 / 500x500."""
+    match = SIZE_SUFFIX.search(url or "")
+    if not match:
+        return [url] if url else []
+    stem, ext = url[:match.start()], match.group(1)
+    out = []
+    for size in ("t3000x3000", "original", "t500x500"):
+        candidate = f"{stem}-{size}{ext}"
+        if candidate not in out:
+            out.append(candidate)
+    if url not in out:
+        out.append(url)
+    return out
+
+
 def fetch_cover(url: str, destination: Path, *, session=None) -> bool:
-    """Download public artwork only; never follow cross-domain redirects."""
+    """Download the largest available public artwork; never follow cross-domain redirects."""
     if not url or not _allowed_cover_url(url):
         return False
     session = session or requests.Session()
+    for candidate in artwork_variants(url):
+        if _allowed_cover_url(candidate) and _fetch_one(candidate, destination, session):
+            return True
+    return False
+
+
+def _fetch_one(url: str, destination: Path, session) -> bool:
     try:
         response = session.get(url, stream=True, allow_redirects=False, timeout=(10, 25))
         try:
