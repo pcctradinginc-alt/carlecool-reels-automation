@@ -232,8 +232,11 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             card = make_title_card(title_card[0], title_card[1], width, height, work / "title_card.png")
             card_seconds = TITLE_SECONDS
     card_start = max(0.0, length - card_seconds) if card is not None else None
+    # Owner feedback: the cover belongs at the END only. The loop stays seamless through the
+    # audio crossfade and a hard cut on the downbeat back to shot 1; the opening cover
+    # bridge is opt-in (CARLECOOL_LOOP_BRIDGE=on).
     loop_bridge = (card is not None and card.name == "cover_card.png" and length > 6
-                   and os.getenv("CARLECOOL_LOOP_BRIDGE", "true").lower() in ("true", "1", "yes", "on"))
+                   and os.getenv("CARLECOOL_LOOP_BRIDGE", "off").lower() in ("true", "1", "yes", "on"))
     # Cover frame for Instagram/TikTok: the end card fully faded in, just before the loop.
     cover_frame_ms = int(round(max(0.0, length - 0.5) * 1000)) if card is not None else None
     # Content-aware 9:16 reframing for landscape sources (decoded once per source).
