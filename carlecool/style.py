@@ -239,18 +239,19 @@ def motif_queries(decision: dict) -> tuple[str, ...]:
 # rather than generic cars).
 # Short words only: Coverr matches every word of a query.
 SEARCH_QUERIES = {
-    "lana": ("motel", "diner", "road trip", "friends night", "american flag", "neon sign",
-             "porsche", "land rover", "classic car", "convertible", "palm trees", "gas station",
-             "summer friends", "desert road", "sunset drive", "jukebox", "retro"),
-    "rubin": ("friends walking", "basketball court", "parking lot", "empty road", "american flag",
-              "land rover", "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
-              "golden hour", "friends talking", "street"),
+    "lana": ("motel", "diner", "palm trees", "vintage car", "desert sunset",
+             "summer friends", "horse riding", "golden field", "coastal sunset",
+             "film camera", "skater silhouette", "retro motel", "gas station"),
+    "rubin": ("vinyl record", "analog studio", "cassette tape", "wood interior",
+              "ocean horizon", "forest sunlight", "studio musician", "mixing console",
+              "friends sitting", "guitar hands", "skateboard wheels", "minimal interior",
+              "quiet beach"),
 }
 NIGHT_QUERIES = {
-    "lana": ("neon sign", "motel", "diner", "night drive", "friends night", "gas station",
-             "porsche", "city lights", "american flag", "neon"),
-    "rubin": ("friends night", "parking lot", "gas station", "night drive", "street night",
-              "american flag", "porsche", "basketball court"),
+    "lana": ("motel", "neon sign", "diner", "palm trees", "vintage car",
+             "film camera", "retro motel", "gas station"),
+    "rubin": ("analog studio", "vinyl record", "quiet studio", "cassette tape",
+              "friends sitting", "wood interior", "minimal interior"),
 }
 SEARCH_LANES = 5
 # Fallback when a style word finds nothing on Coverr (style words never broaden into
@@ -259,7 +260,7 @@ SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("v
                    "land rover": ("defender", "off road"),
                    "jukebox": ("retro",), "convertible": ("classic car",), "motel": ("motel sign",),
                    "neon sign": ("neon",), "friends night": ("friends",), "summer friends": ("friends",),
-                   "pickup truck": ("truck",), "american flag": ("flag",), "road trip": ("road",),
+                   "pickup truck": ("truck",), "american flag": ("flag",), "road trip": (),
                    "gas station": ("gas station night",), "diner": ("retro diner",)}
 
 
@@ -268,8 +269,7 @@ def search_ladders(words: list[str]) -> dict[str, tuple[str, ...]]:
 
 
 def search_queries(decision: dict, run_key: str = "", lanes: int = SEARCH_LANES) -> list[str]:
-    """`lanes` style words for this run, rotated so consecutive Reels search differently;
-    always one car (Porsche / classic car) and the flag in the mix."""
+    """Rotate strictly world-specific subject words; never require cars or flags."""
     import hashlib
     world = decision.get("style")
     if world not in SEARCH_QUERIES:
@@ -277,10 +277,7 @@ def search_queries(decision: dict, run_key: str = "", lanes: int = SEARCH_LANES)
     pool = list((NIGHT_QUERIES if decision.get("variant") == "night" else SEARCH_QUERIES)[world])
     start = int.from_bytes(hashlib.sha256(f"{run_key}|search".encode()).digest()[:2], "big") % len(pool)
     pool = pool[start:] + pool[:start]
-    cars = ("porsche", "land rover", "classic car")
-    must = [q for q in pool if q in cars][:1] + ["american flag"]
-    rest = [q for q in pool if q not in must and q not in cars]
-    return (must + rest)[:lanes]
+    return pool[:lanes]
 
 
 # Text for the optional AI shot (no artist names, no celebrity likeness, no logos).
