@@ -481,6 +481,38 @@
         "KVAzS3gBk9"
       ],
       "sha256": "51d4f85898b86083ac97ea1713bc06811bae09fc6c60ad9953e1706a21261062"
+    },
+    {
+      "at": "2026-11-21T18:47:06+00:00",
+      "kind": "daily",
+      "run_id": 44936428959,
+      "track_id": "2429901348",
+      "video_ids": [
+        "Z3TY7oWfde",
+        "jCeMsmBLEN",
+        "xGftICw6wt",
+        "aTuwKsIljC",
+        "wm-40b61434aa78",
+        "7r58aaMkjS",
+        "wm-fdbdab774012",
+        "1db7R8yPQA",
+        "aHgwiHJPug",
+        "u6SkrZ68jr",
+        "OZfZXy4k4x",
+        "pl-TexasFar1952",
+        "pl-6393_HM_Can_10890_San_Francisco_01_08_09_00",
+        "pl-Summersc1941",
+        "TQRGJRocZn",
+        "4HUNUwbA03",
+        "wm-3a24cabb7b06",
+        "0RUCSMEscL",
+        "hV3xjiORHB",
+        "tzVdfYKB9r",
+        "CLHshTzB67",
+        "L53bCozH50",
+        "zgM1Ah9ngg"
+      ],
+      "sha256": "d5ff2744f26a2d82184df279b873f511d223d34e39eed3ceed7ddd798536bf10"
     }
   ]
 }
