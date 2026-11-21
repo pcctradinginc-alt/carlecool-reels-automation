@@ -21,6 +21,9 @@ from .cinematic import FPS, build_storyboard, plan_cuts, plan_cuts_from_beats, s
 from .music_structure import align_to_structure
 
 
+FRAMED_UPSCALE_LIMIT = 3.0  # crop upscale beyond this → framed presentation
+
+
 def _run(args):
     subprocess.run(args, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
 
@@ -199,13 +202,23 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             dims.append((0, 0))
     samples: dict[int, object] = {}
     reframed = 0
+    framed = 0
     files = []
     shot_start = 0.0
     for index, shot in enumerate(storyboard):
         source = videos[shot.source_index]
         src_w, src_h = dims[shot.source_index]
         smart = None
-        if os.getenv("CARLECOOL_SMART_CROP", "true").lower() in ("true", "1", "yes", "on") \
+        # Low-resolution landscape (e.g. 640x480 archive film): a 9:16 crop would be
+        # upscaled ~4x and look mushy. Show it full-width over a blurred copy instead.
+        if src_w > src_h > 0 and width / max(1.0, src_h * 9 / 16) > FRAMED_UPSCALE_LIMIT:
+            smart = [f"split=2[fa{index}][fb{index}];"
+                     f"[fa{index}]scale={width}:{height}:force_original_aspect_ratio=increase,"
+                     f"crop={width}:{height},boxblur=24:2,eq=brightness=-0.12:saturation=0.8[bg{index}];"
+                     f"[fb{index}]scale={width}:-2:flags=lanczos[fg{index}];"
+                     f"[bg{index}][fg{index}]overlay=(W-w)/2:(H-h)/2"]
+            framed += 1
+        if smart is None and os.getenv("CARLECOOL_SMART_CROP", "true").lower() in ("true", "1", "yes", "on") \
                 and reframe.needs_reframe(src_w, src_h):
             try:
                 if shot.source_index not in samples:
@@ -291,6 +304,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "cover_endcard": card is not None and card.name == "cover_card.png",
             "cover_frame_ms": cover_frame_ms,
             "smart_cropped_shots": reframed,
+            "framed_shots": framed,
             "signature_shots": {role: sum(1 for sh in storyboard if sh.source_index == idx)
                                 for role, idx in (signature_slots or {}).items()},
             "compressed_for_email": compressed_for_email,

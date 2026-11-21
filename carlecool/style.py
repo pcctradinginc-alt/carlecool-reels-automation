@@ -155,4 +155,7 @@ def grade_filters(style: str | None) -> list[str]:
 
 
 def motif_queries(decision: dict) -> tuple[str, ...]:
+    """Motif echo only when the cover was clearly recognised (no guessing on unclear covers)."""
+    if not decision.get("style") or decision.get("basis") == "manual":
+        return ()
     return MOTIF_QUERIES.get(decision.get("prompt") or "", ())

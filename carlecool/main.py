@@ -39,6 +39,10 @@ def caption_for(track, videos) -> str:
         names = dict.fromkeys(v.creator_name for v in videos if v.source == "pexels" and v.creator_name)
         for name in names:
             caption += f"Video by {name} on Pexels\n"
+    if any(v.source == "nasa" for v in videos):
+        caption += "🎬 Archive footage: NASA (images.nasa.gov)\n"
+    if any(v.source == "prelinger" for v in videos):
+        caption += "🎬 Archive footage: Prelinger Archives, public domain (archive.org)\n"
     return caption.rstrip() + "\n\n#carlecool #instrumental #electronic #rap #producer"
 
 
@@ -174,6 +178,13 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                     path.unlink(missing_ok=True)
         except Exception as exc:
             print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}")
+    # Free archival footage matching the cover style (NASA for Rubin/Night,
+    # public-domain Prelinger films for Lana); landscape, so never a bookend.
+    archival = []
+    if style_name:
+        from .archives import fetch_archival
+        archival = fetch_archival(style_name, set(recent_video_ids(previews, limit=30)) | recent,
+                                  output_dir / "archive", run_key=edition)
     portrait_count = len(paths)
     portrait_paths = set(paths)
     # Landscape only fills up a thin portrait supply, and always after the portrait clips.
@@ -183,7 +194,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     for video, path in landscape_reserve:
         if path not in paths and video.source != "owned":
             path.unlink(missing_ok=True)
-    print(f"Footage: {portrait_count} portrait + {len(paths) - portrait_count} landscape fill-in clips")
+    for video in archival:
+        selected.append(video)
+        paths.append(Path(video.path))
+    print(f"Footage: {portrait_count} portrait + {len(paths) - portrait_count - len(archival)} landscape fill-in"
+          f" + {len(archival)} archival clips")
     if not paths:
         raise RuntimeError("No licensed clips available; add assets/stock and manifest.json as fallback")
     # Optional AI shot: appended LAST and excluded from the opening/closing shot,

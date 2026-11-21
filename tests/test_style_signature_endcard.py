@@ -134,3 +134,28 @@ def test_signature_never_dominates_short_edits():
     used = {s.source_index for s in placed}
     assert {3, 4} <= used and 2 not in used  # skater + woman kept, motif dropped
     assert sum(1 for s in placed if s.source_index >= 2) == 2
+
+
+def test_no_motif_when_style_unclear_or_manual():
+    unclear = style.decide({"lana": (0.241, "a rider on a horse with an american flag"),
+                            "rubin": (0.238, "b"), "night": (0.2, "c")}, 0.5)
+    assert unclear["style"] is None and style.motif_queries(unclear) == ()
+    assert style.motif_queries({"style": "night", "basis": "manual", "prompt": ""}) == ()
+
+
+def test_low_resolution_landscape_is_framed_not_cropped(tmp_path, monkeypatch):
+    import subprocess
+    from carlecool.analysis import AudioFeatures
+    from carlecool.render import render_reel
+    monkeypatch.setenv("REEL_WIDTH", "270")
+    monkeypatch.setenv("REEL_HEIGHT", "480")
+    old = tmp_path / "old.mp4"
+    hd = tmp_path / "hd.mp4"
+    audio = tmp_path / "a.mp3"
+    run = lambda *a: subprocess.run(["ffmpeg", "-v", "error", "-y", *a], check=True)
+    run("-f", "lavfi", "-i", "testsrc2=s=160x120:r=24:d=4", "-pix_fmt", "yuv420p", str(old))
+    run("-f", "lavfi", "-i", "testsrc2=s=640x360:r=24:d=4", "-pix_fmt", "yuv420p", str(hd))
+    run("-f", "lavfi", "-i", "sine=f=220:d=6", str(audio))
+    features = AudioFeatures(120.0, 0.5, 0.0, "calm", 6.0)
+    d = render_reel(audio, [hd, old], features, tmp_path / "out/r.mp4", 4.0, fit_email=False)
+    assert d["framed_shots"] >= 1 and d["smart_cropped_shots"] >= 1

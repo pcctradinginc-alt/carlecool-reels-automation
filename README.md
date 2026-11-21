@@ -19,6 +19,14 @@ What changed and why:
 | AI shot | Opened and closed the Reel (weakest clip as hook) | Appended last and never used as first/last shot |
 | Encoding | 30 fps, bicubic, CRF 22, 128k AAC, forced 2.5 Mbit/s for Gmail | 24 fps, Lanczos, CRF 18 (`-tune grain`), ≤16 Mbit/s, 256k AAC, two-pass −14 LUFS |
 
+### Free archival footage: NASA and Prelinger (2026-11-21)
+
+- **NASA** (Rubin and Night styles, no key): planets, nebulae, Earth from orbit. Talks, news, trailers and items crediting partner agencies (ESA, JAXA, "courtesy of", ©) are excluded; never shows NASA logos as intent (CLIP rejects spacecraft/logo frames).
+- **Prelinger Archives** (Lana style, no key): only **public-domain amateur/home movies** (Kodachrome road trips, towns, summers) — no ads, brands, propaganda or accident films.
+- Only a ~9 s segment is cut from the remote film (no full download). Three spots per film are sampled; OpenCLIP must rate the frames as the wanted scene rather than people/interviews, text, logos, spacecraft or black-and-white; after cutting, start/middle/end must pass again. Without OpenCLIP no archive footage is used.
+- Max. 2 archive clips per Reel, landscape, never first/last shot. Low-resolution footage (crop upscale > 3×) is shown **framed** (full width over a blurred copy) instead of a mushy 9:16 crop.
+- Caption credits "Archive footage: NASA" / "Prelinger Archives, public domain"; the rights check enforces them. Off: `CARLECOOL_ARCHIVES=false`.
+
 ### Cover style, cover end card and signature shots (v4.1, 2026-11-21)
 
 Built **on top of** v4 (the reverted Creative v5 replaced the v4 search lanes and looked clearly worse):
