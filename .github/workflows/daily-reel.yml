@@ -85,7 +85,7 @@ jobs:
           python -m pip install --disable-pip-version-check --retries 2 --timeout 30 -r requirements.txt 'imageio-ffmpeg==0.6.0'
           python scripts/setup_ffmpeg.py
       - name: Cache only public pretrained model weights (never artist media)
-        if: ${{ vars.CARLECOOL_SEMANTIC != 'off' }}
+        if: ${{ env.CARLECOOL_SEMANTIC == 'on' }}
         uses: actions/cache@v4
         with:
           path: |
@@ -94,7 +94,7 @@ jobs:
           key: carlecool-public-openclip-v1-${{ runner.os }}
       - name: Optional free OpenCLIP model dependencies (safe fallback)
         if: ${{ vars.CARLECOOL_SEMANTIC != 'off' }}
-        continue-on-error: true
+        continue-on-error: false # required by fail-closed visual gate
         timeout-minutes: 8
         shell: bash
         run: |
