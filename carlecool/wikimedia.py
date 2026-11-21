@@ -33,6 +33,10 @@ MEDIA_HOST = "upload.wikimedia.org"
 THUMB_HOSTS = (MEDIA_HOST, "thumb.wikimedia.org")
 DEFAULT_UA = "ReelBuilder/1.0 (automated short-video montage; python-requests)"
 SEGMENT_SECONDS = 7.0
+# Videos are fetched ONCE in full (one request) and cut locally: many small range
+# requests per file got HTTP 429 from upload.wikimedia.org even with a contact UA
+# (run 44899530106). Large files (long documentaries) are skipped instead.
+MAX_VIDEO_BYTES = 120 * 1024 * 1024
 PHOTO_SECONDS = 5.0
 
 CATEGORIES = {
@@ -130,7 +134,8 @@ def category_files(category: str, *, session=None, limit: int = 60, pause: float
                     "artist": _text((meta.get("Artist") or {}).get("value"))[:80],
                     "page": str(info.get("descriptionurl") or ""), "url": url,
                     "thumb": str(info.get("thumburl") or ""), "mime": str(info.get("mime") or ""),
-                    "width": int(info.get("width") or 0), "height": int(info.get("height") or 0)})
+                    "width": int(info.get("width") or 0), "height": int(info.get("height") or 0),
+                    "bytes": int(info.get("size") or 0)})
     return out
 
 
@@ -139,6 +144,50 @@ def credit_line(item: dict) -> str:
         who = item["artist"] or "Unknown author"
         return f"{who} / Wikimedia Commons ({item['license']})"
     return "Wikimedia Commons (public domain)"
+
+
+def download_video(item: dict, destination: Path, *, session=None) -> Path:
+    """Whole file in a single streamed GET (≤ MAX_VIDEO_BYTES); one polite retry on 429."""
+    url = str(item["url"])
+    if urlparse(url).scheme != "https" or urlparse(url).hostname != MEDIA_HOST:
+        raise ValueError("Unexpected Wikimedia media host")
+    if not 0 < int(item.get("bytes") or 0) <= MAX_VIDEO_BYTES:
+        raise ValueError("Video too large or size unknown")
+    session = _session(session)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    for attempt in range(2):
+        r = session.get(url, stream=True, timeout=(15, 120), allow_redirects=True)
+        try:
+            if r.status_code == 429 and attempt == 0:
+                wait = min(30.0, float(r.headers.get("Retry-After") or 15))
+                print(f"Wikimedia media throttled (429); waiting {wait:.0f}s once")
+                time.sleep(wait)
+                continue
+            if r.status_code != 200:
+                raise ValueError(f"Wikimedia media HTTP {r.status_code}")
+            final = (urlparse(r.url).hostname or "").lower()
+            if not (final == "wikimedia.org" or final.endswith(".wikimedia.org")):
+                raise ValueError("Wikimedia redirect to a foreign host")
+            total = 0
+            with open(destination, "wb") as fh:
+                for chunk in r.iter_content(1024 * 1024):
+                    total += len(chunk)
+                    if total > MAX_VIDEO_BYTES:
+                        raise ValueError("Video larger than announced")
+                    fh.write(chunk)
+            return destination
+        finally:
+            r.close()
+    raise ValueError("Wikimedia media throttled (429)")
+
+
+def _cut_local(source: Path, start: float, destination: Path, seconds: float) -> Path:
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", f"{start:.2f}", "-i", str(source),
+                    "-t", f"{seconds:.2f}", "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "16",
+                    "-pix_fmt", "yuv420p", str(destination)], check=True, capture_output=True, timeout=180)
+    if destination.stat().st_size < 10_000:
+        raise ValueError("Segment too small")
+    return destination
 
 
 def _ken_burns(image_url: str, destination: Path, key: str) -> Path:
@@ -163,7 +212,7 @@ def fetch_wikimedia(role: str, exclude: set[str], workdir: Path, *, run_key: str
     """Checked Commons clips for a style ("lana", "rubin") or role ("skater"); never raises."""
     if not enabled() or role not in CATEGORIES:
         return []
-    from .archives import MIN_MARGIN, cut_segment_any, remote_info
+    from .archives import MIN_MARGIN, remote_info
     from .archives import frame_margin_custom, sample_best
     session = _session(session)
     pool: list[tuple[dict, str]] = []
@@ -180,7 +229,7 @@ def fetch_wikimedia(role: str, exclude: set[str], workdir: Path, *, run_key: str
     pool = pool[shift:] + pool[:shift]
     positive, negative = POSITIVE[role], NEGATIVE
     found: list[Video] = []
-    for item, kind in pool[:attempts * 2]:
+    for item, kind in pool:  # unusable items (size, resolution) are skipped without a request
         if len(found) >= max_clips or attempts <= 0:
             break
         try:
@@ -191,19 +240,24 @@ def fetch_wikimedia(role: str, exclude: set[str], workdir: Path, *, run_key: str
                 attempts -= 1
                 _ken_burns(item["thumb"], target, f"{run_key}|{item['id']}")
             else:
-                if not item["mime"].startswith("video/") or item["height"] < 720:
+                if (not item["mime"].startswith("video/") or item["height"] < 720
+                        or not 0 < item.get("bytes", 0) <= MAX_VIDEO_BYTES):
                     continue
                 attempts -= 1
-                duration, _w, _h = remote_info(item["url"], user_agent())
-                if duration < SEGMENT_SECONDS + 2:
-                    continue
-                start, margin = sample_best(item["url"], duration, positive, negative,
-                                            f"{run_key}|{item['id']}", SEGMENT_SECONDS, user_agent())
-                if start is None:
-                    print(f"Wikimedia clip rejected by content check: {item['title'][:50]} ({margin})")
-                    continue
-                cut_segment_any(item["url"], start, target, SEGMENT_SECONDS, allowed=(MEDIA_HOST,),
-                                user_agent=user_agent())
+                suffix = Path(urlparse(item["url"]).path).suffix.lower()[:6] or ".webm"
+                local = download_video(item, workdir / f"wm_src_{role}{suffix}", session=session)
+                try:
+                    duration, _w, _h = remote_info(str(local))
+                    if duration < SEGMENT_SECONDS + 2:
+                        continue
+                    start, margin = sample_best(str(local), duration, positive, negative,
+                                                f"{run_key}|{item['id']}", SEGMENT_SECONDS)
+                    if start is None:
+                        print(f"Wikimedia clip rejected by content check: {item['title'][:50]} ({margin})")
+                        continue
+                    _cut_local(local, start, target, SEGMENT_SECONDS)
+                finally:
+                    local.unlink(missing_ok=True)
             margins = [frame_margin_custom(target, at, positive, negative)
                        for at in (0.4, 2.5, (PHOTO_SECONDS if kind == "photo" else SEGMENT_SECONDS) - 0.6)]
             if not all(m == m and m > 0 for m in margins) or sum(margins) / len(margins) < MIN_MARGIN:

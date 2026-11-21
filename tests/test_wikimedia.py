@@ -113,3 +113,35 @@ def test_sensitive_period_captions_are_filtered():
                   "1940 African American children Natchitoches Louisiana"):
         assert _blocked(title.lower(), wikimedia.SENSITIVE)
     assert not _blocked("40 days lincoln, nebraska.jpg", wikimedia.SENSITIVE)
+
+
+class _Resp:
+    def __init__(self, status, body=b"", url="https://upload.wikimedia.org/a.webm", headers=None):
+        self.status_code, self._body, self.url, self.headers = status, body, url, headers or {}
+    def iter_content(self, n):
+        yield self._body
+    def close(self):
+        pass
+
+
+def test_video_is_fetched_in_one_request_with_one_retry_on_429(tmp_path, monkeypatch):
+    monkeypatch.setattr(wikimedia.time, "sleep", lambda s: None)
+    session = MagicMock(headers={})
+    session.get.side_effect = [_Resp(429, headers={"Retry-After": "3"}), _Resp(200, b"x" * 5000)]
+    item = {"url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Skate.webm", "bytes": 5000}
+    out = wikimedia.download_video(item, tmp_path / "v.webm", session=session)
+    assert out.read_bytes() == b"x" * 5000 and session.get.call_count == 2
+    assert "Range" not in (session.get.call_args.kwargs.get("headers") or {})
+
+
+def test_video_download_refuses_big_unknown_or_foreign_files(tmp_path):
+    import pytest
+    base = "https://upload.wikimedia.org/wikipedia/commons/a/ab/Doc.webm"
+    for item in ({"url": base, "bytes": wikimedia.MAX_VIDEO_BYTES + 1}, {"url": base, "bytes": 0},
+                 {"url": "https://evil.example.org/x.webm", "bytes": 10}):
+        with pytest.raises(ValueError):
+            wikimedia.download_video(item, tmp_path / "v.webm", session=MagicMock(headers={}))
+    session = MagicMock(headers={})
+    session.get.return_value = _Resp(200, b"x", url="https://evil.example.org/x.webm")
+    with pytest.raises(ValueError, match="foreign"):
+        wikimedia.download_video({"url": base, "bytes": 10}, tmp_path / "v.webm", session=session)
