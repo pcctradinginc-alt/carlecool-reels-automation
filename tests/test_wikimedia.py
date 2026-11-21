@@ -93,3 +93,23 @@ def test_sensitive_historical_titles_are_excluded(monkeypatch):
     session.get.return_value = resp
     titles = [i["title"] for i in wikimedia.category_files("x", session=session)]
     assert titles == ["Highway 66 gas station, Texas.jpg"]
+
+
+def test_photos_from_the_thumb_host_are_accepted_and_others_refused(tmp_path, monkeypatch):
+    import pytest
+    calls = []
+    monkeypatch.setattr(wikimedia.subprocess, "run", lambda *a, **k: calls.append(a))
+    monkeypatch.setattr("carlecool.httpbridge.local_url", lambda u, ua=None: "http://127.0.0.1:1/x")
+    wikimedia._ken_burns("https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/x.jpg/1920px-x.jpg",
+                         tmp_path / "k.mp4", "k")
+    assert calls
+    with pytest.raises(ValueError):
+        wikimedia._ken_burns("https://evil.example.org/x.jpg", tmp_path / "k.mp4", "k")
+
+
+def test_sensitive_period_captions_are_filtered():
+    from carlecool.archives import _blocked
+    for title in ('"Backstage" at the "girlie" show at the Vermont state fair',
+                  "1940 African American children Natchitoches Louisiana"):
+        assert _blocked(title.lower(), wikimedia.SENSITIVE)
+    assert not _blocked("40 days lincoln, nebraska.jpg", wikimedia.SENSITIVE)

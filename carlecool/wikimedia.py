@@ -29,6 +29,8 @@ from .video import Video
 
 API = "https://commons.wikimedia.org/w/api.php"
 MEDIA_HOST = "upload.wikimedia.org"
+# Scaled photos (iiurlwidth) are served from thumb.wikimedia.org since late 2026.
+THUMB_HOSTS = (MEDIA_HOST, "thumb.wikimedia.org")
 DEFAULT_UA = "ReelBuilder/1.0 (automated short-video montage; python-requests)"
 SEGMENT_SECONDS = 7.0
 PHOTO_SECONDS = 5.0
@@ -47,7 +49,14 @@ POSITIVE = {
                "feet on a skateboard on asphalt"),
 }
 SENSITIVE = ("slave", "lynch", "klan", "segregat", "internment", "camp", "relief client",
-             "borrower", "sharecropper", "migrant", "poverty", "destitute", "jail", "funeral")
+             "borrower", "sharecropper", "migrant", "poverty", "destitute", "jail", "funeral",
+             # real, identifiable people of the 1940s in a promotional Reel: no children,
+             # no strip/burlesque shows, no ethnic labels from period captions
+             "girlie", "burlesque", "strip", "nude", "child", "children", "boy", "girl",
+             "baby", "school", "african american", "colored", "mexican", "chinese",
+             "japanese", "jewish", "native american", "hispanic", "spanish-american",
+             # animal welfare / hunting films sit in the horse and animal categories
+             "slaughter", "dominion", "documentary", "feral", "hunt", "abuse", "rodeo")
 NEGATIVE = ("a portrait of a person looking at the camera", "a document, map or text",
             "a black and white photo", "a logo or graphic", "a black or blank screen",
             "a crowd at an event", "a car crash or an accident")
@@ -134,7 +143,7 @@ def credit_line(item: dict) -> str:
 
 def _ken_burns(image_url: str, destination: Path, key: str) -> Path:
     """Slow zoom (and gentle drift) over a still photo: 5 s, 24 fps, 1920 px wide."""
-    if urlparse(image_url).hostname != MEDIA_HOST:
+    if urlparse(image_url).hostname not in THUMB_HOSTS:
         raise ValueError("Unexpected Wikimedia image host")
     zoom_in = int(hashlib.sha256(key.encode()).digest()[0]) % 2 == 0
     frames = int(PHOTO_SECONDS * 24)
