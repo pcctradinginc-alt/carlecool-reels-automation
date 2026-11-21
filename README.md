@@ -15,8 +15,9 @@ match one of two independent photographic worlds: Lana-Americana or
 Rubin organic/documentary minimalism. Hard negatives include cartoons,
 emoji/smiley racing, CGI, ordinary European/German road traffic, racing,
 generic advertising and text-heavy graphics. Metadata blocklists add an
-independent precaution. Any missing model, failed quality check, missing
-opening shot or insufficient approved clips stops the run **without a preview**.
+independent precaution. Rejected clips are removed. A missing model,
+missing approved opening shot, or insufficient approved clips stops the run
+**without a preview**.
 There is no uninspected AI, discovery-order or palette fallback in strict mode.
 
 CLIP is a heuristic, *not* reliable geolocation or a guarantee against every
