@@ -4,6 +4,28 @@
 
 **Never automatically publishes just because a schedule runs or an email link is clicked.** Only the authenticated repository owner can write `/publish` on an open `carlecool-review` issue, and publishing is additionally blocked by `PUBLISH_ENABLED` unless explicitly enabled.
 
+## Strict cinematic visual gate (production)
+The scheduled Reel workflow sets `CARLECOOL_VISUAL_STRICT=true`,
+`CARLECOOL_SEMANTIC=on` and `CARLECOOL_AI_VIDEO=off`. Every selected
+clip, whether from Coverr, Pexels, archival sources, signature slots or an
+owned library, must pass an OpenCLIP-based check of **five actual video frames**
+(10%, 30%, 50%, 70%, 90%) before v4's renderer can use it. Each frame must
+match one of two independent photographic worlds: Lana-Americana or
+Rubin organic/documentary minimalism. Hard negatives include cartoons,
+emoji/smiley racing, CGI, ordinary European/German road traffic, racing,
+generic advertising and text-heavy graphics. Metadata blocklists add an
+independent precaution. Any missing model, failed quality check, missing
+opening shot or insufficient approved clips stops the run **without a preview**.
+There is no uninspected AI, discovery-order or palette fallback in strict mode.
+
+CLIP is a heuristic, *not* reliable geolocation or a guarantee against every
+semantic mistake. The source rights, final visual quality and final posting
+still require human review. Uncertain clips are rejected. Only the
+**source admission and style-search decisions** change here; v4 beat cuts,
+grading, cover card and rendering stay intact. CI tests exercise fail-closed
+and negative cases offline; production OpenCLIP availability is not assumed
+by those tests.
+
 ## Video quality v4 — cover-led footage, beat editing, full-quality master (2026-11-19)
 
 What changed and why:
