@@ -56,8 +56,8 @@ PRELINGER_EXCLUDE = ("crash", "accident", "signal 30", "war", "atomic", "bomb", 
                      "kill", "blood", "fire", "disaster", "riot", "race", "negro", "indian",
                      "chevrolet", "ford", "general motors", "motorama", "advertis", "commercial",
                      "sponsor", "coca", "pepsi", "initiation", "snowstorm", "world's fair")
-THIRD_PARTY = ("esa", "european space agency", "jaxa", "csa", "courtesy of", "copyright",
-               "©", "getty", "ap photo", "reuters")
+THIRD_PARTY = ("esa", "european space agency", "jaxa", "csa", "dlr", "herschel", "planck", "gaia",
+               "sofia", "courtesy of", "copyright", "©", "getty", "ap photo", "reuters")
 POSITIVE = {
     "nasa": ("the earth or a planet seen from space",
              "stars, a nebula or a galaxy in deep space",
@@ -107,7 +107,7 @@ def search_nasa(queries, exclude: set[str], *, session=None, rows: int = 12) -> 
             credits = _clean(meta.get("description")) + " " + _clean(meta.get("secondary_creator"))
             # NASA media can embed partner imagery (ESA, JAXA …) that is NOT public domain.
             if (not nasa_id or f"nasa-{nasa_id}" in exclude or _blocked(text, NASA_EXCLUDE)
-                    or _blocked(credits, THIRD_PARTY)):
+                    or _blocked(credits + " " + text, THIRD_PARTY)):
                 continue
             items.append({"id": f"nasa-{nasa_id}", "source": "nasa", "query": query,
                           "title": str(meta.get("title") or "")[:120], "nasa_id": nasa_id,
@@ -177,12 +177,19 @@ def prelinger_media(item: dict, *, session=None) -> tuple[str, float]:
 
 
 def _ua(user_agent: str | None) -> list[str]:
-    return ["-user_agent", user_agent] if user_agent else []
+    """Kept for call-site compatibility; the User-Agent is sent by the HTTP bridge."""
+    return []
+
+
+def _src(url: str, user_agent: str | None = None) -> str:
+    """FFmpeg input: remote URLs go through the local Python bridge (see httpbridge.py)."""
+    from .httpbridge import local_url
+    return local_url(str(url), user_agent)
 
 
 def remote_info(url: str, user_agent: str | None = None) -> tuple[float, int, int]:
     """(duration, width, height) via FFmpeg's input inspection (one ranged request)."""
-    p = subprocess.run(["ffmpeg", "-hide_banner", *_ua(user_agent), "-i", url], capture_output=True, text=True,
+    p = subprocess.run(["ffmpeg", "-hide_banner", "-i", _src(url, user_agent)], capture_output=True, text=True,
                        encoding="utf-8", errors="replace", timeout=60)
     dur = re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)", p.stderr)
     size = re.search(r"Video:.*?(?<![0-9a-fA-Fx])(\d{2,5})x(\d{2,5})(?![0-9])", p.stderr)
@@ -204,7 +211,7 @@ def cut_segment(url: str, start: float, destination: Path, seconds: float = SEGM
         raise ValueError("Archive segment host not allowed")
     destination.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-reconnect", "1", "-reconnect_streamed", "1",
-                    "-ss", f"{start:.2f}", "-i", url, "-t", f"{seconds:.2f}", "-an",
+                    "-ss", f"{start:.2f}", "-i", _src(url), "-t", f"{seconds:.2f}", "-an",
                     "-c:v", "libx264", "-preset", "veryfast", "-crf", "16", "-pix_fmt", "yuv420p",
                     str(destination)], check=True, capture_output=True, timeout=180)
     if destination.stat().st_size < 10_000:
@@ -220,7 +227,7 @@ def _remote_frame(url: str, at: float, user_agent: str | None = None):
     build lacked one, so every frame check failed in CI with margin -1.0)."""
     from PIL import Image
     p = subprocess.run(["ffmpeg", "-v", "error", "-ss", f"{at:.2f}",
-                        *(_ua(user_agent) if url.startswith("http") else []), "-i", url, "-frames:v", "1",
+                        "-i", _src(url, user_agent), "-frames:v", "1",
                         "-vf", f"scale={FRAME_W}:{FRAME_H}:force_original_aspect_ratio=decrease,"
                                f"pad={FRAME_W}:{FRAME_H}:(ow-iw)/2:(oh-ih)/2",
                         "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
@@ -275,7 +282,7 @@ def cut_segment_any(url: str, start: float, destination: Path, seconds: float,
         raise ValueError("Segment host not allowed")
     destination.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(["ffmpeg", "-v", "error", "-y", *_ua(user_agent), "-reconnect", "1", "-reconnect_streamed", "1",
-                    "-ss", f"{start:.2f}", "-i", url, "-t", f"{seconds:.2f}", "-an",
+                    "-ss", f"{start:.2f}", "-i", _src(url, user_agent), "-t", f"{seconds:.2f}", "-an",
                     "-c:v", "libx264", "-preset", "veryfast", "-crf", "16", "-pix_fmt", "yuv420p",
                     str(destination)], check=True, capture_output=True, timeout=180)
     if destination.stat().st_size < 10_000:

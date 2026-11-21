@@ -133,8 +133,8 @@ def _ken_burns(image_url: str, destination: Path, key: str) -> Path:
     frames = int(PHOTO_SECONDS * 24)
     z = "min(1+0.0011*on,1.13)" if zoom_in else "max(1.13-0.0011*on,1.0)"
     destination.parent.mkdir(parents=True, exist_ok=True)
-    ua = ["-user_agent", user_agent()] if str(image_url).startswith("http") else []
-    subprocess.run(["ffmpeg", "-v", "error", "-y", *ua, "-i", image_url, "-vf",
+    from .httpbridge import local_url
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", local_url(str(image_url), user_agent()), "-vf",
                     f"scale=3840:-2,zoompan=z='{z}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
                     f":d={frames}:s=1920x1440:fps=24,format=yuv420p",
                     "-frames:v", str(frames), "-c:v", "libx264", "-crf", "16", "-preset", "veryfast",
