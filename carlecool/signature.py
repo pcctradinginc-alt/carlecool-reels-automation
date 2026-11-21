@@ -33,6 +33,7 @@ MEMORY_REELS = 30
 SLOT_POSITION = {"friends": 0.25, "motif": 0.15, "flag": 0.38, "gear": 0.44, "skater": 0.5, "car": 0.62,
                  "woman": 0.72, "americana": 0.82, "friends2": 0.9}
 PRIORITY = ("skater", "friends", "flag", "gear", "woman", "car", "americana", "friends2", "motif")
+DEFAULT_PRIORITY = PRIORITY  # performance.role_priority() reorders a copy per Reel
 MAX_ROLES = 8  # searched/downloaded roles per Reel (placement cap is ~40 % of the shots)
 STRICT_ROLES = ("gear", "car", "flag")  # role negatives are specific → negative score = reject
 

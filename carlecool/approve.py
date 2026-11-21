@@ -201,6 +201,8 @@ def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
         'provider_post_id': post_id,
         'platform_status': statuses,
     }
+    if isinstance(approval.get('reel_facts'), dict):
+        record['reel_facts'] = approval['reel_facts']  # for performance learning
     if urls:
         record['platform_post_urls'] = urls
     state['published'].append(record)

@@ -105,6 +105,11 @@ def _style_line(metadata: dict) -> str:
                        ("woman", "Frau"), ("car", "Porsche/Klassiker"), ("americana", "Americana"),
                        ("motif", "Cover-Motiv")):
         parts.append(f"{name} {'✓' if role in signature else '–'}")
+    facts = metadata.get("reel_facts") or {}
+    if facts.get("length_bucket"):
+        parts.append(f"Länge {facts.get('length_s')}s ({facts['length_bucket']})")
+    if metadata.get("performance_summary"):
+        parts.append(str(metadata["performance_summary"]))
     return " · ".join(parts) + "  (ändern: /revise stil lana|rubin|night|auto)"
 
 
@@ -351,6 +356,7 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str,
                'master_storage': metadata.get('master_storage'),
                'song_label': metadata.get('song_label'),
                'cover_frame_ms': metadata.get('cover_frame_ms'),
+               'reel_facts': metadata.get('reel_facts'),
                'revision_number': metadata.get('creative_profile', {}).get('revision', 0)}
     name = 'carlecool-review'
     try:

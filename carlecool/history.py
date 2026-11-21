@@ -81,6 +81,8 @@ def record_preview_delivery(metadata: dict, *, run_id: int, kind: str = "daily",
         "video_ids": [str(v) for v in metadata.get("video_ids", [])],
         "sha256": str(metadata["sha256"]),
     }
+    if metadata.get("length_bucket") in ("short", "long"):
+        new_entry["length_bucket"] = metadata["length_bucket"]  # length A/B test per song
     # Only the canonical repository-relative path is used; no user-controlled URL.
     from .review import github_request
     for attempt in range(4):

@@ -27,8 +27,11 @@ MEMORY_REELS = 30  # clips shown in the last 30 preview mails are avoided (fresh
 PRELINGER_CLIPS = 2  # public-domain home movies per Reel (4 made the edit a collage)
 
 
-def caption_for(track, videos) -> str:
-    caption = f"🎧 {song_label(track.title)}\n"
+def caption_for(track, videos, copy: dict | None = None) -> str:
+    """Song line (+ search line / question / niche hashtags from captions.py when `copy`
+    is given), then every licence credit."""
+    from . import captions
+    caption = captions.head(song_label(track.title), copy) if copy else f"🎧 {song_label(track.title)}\n"
     if any(v.source == "ai" for v in videos):
         caption += "✨ Enthält KI-generierte Filmszenen (LTX-2.3)\n"
     if any(v.source == "coverr" for v in videos):
@@ -49,7 +52,8 @@ def caption_for(track, videos) -> str:
         caption += "🎬 " + "; ".join(wiki) + "\n"
     if any(v.source == "prelinger" for v in videos):
         caption += "🎬 Archive footage: Prelinger Archives, public domain (archive.org)\n"
-    return caption.rstrip() + "\n\n#carlecool #instrumental #electronic #rap #producer"
+    tags = captions.tail(copy) if copy else "#carlecool #instrumental #electronic #rap #producer"
+    return caption.rstrip() + "\n\n" + tags
 
 
 class QualityTooLow(RuntimeError):
@@ -132,18 +136,23 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                 "check SoundCloud owner RSS publication or send a private Gmail master")
     print(f"Selected track: {track.title} (SoundCloud ID {track.id})")
     fixed_start = 0.0 if profile["music"] == "beginning" else None
-    features = analyze_audio(str(audio), config.reel_seconds, track.genre, fixed_start=fixed_start)
-    reel_length = float(features.reel_length or config.reel_seconds)
+    # Unique GitHub run identity changes the art direction on every new email.
+    # Local/manual runs also get a fresh seed, while tests can pass a fixed seed.
+    import secrets
+    edition = os.getenv("GITHUB_RUN_ID") or secrets.token_hex(8)
+    # Length test (≈12 s vs ≈30 s, per song in turn) and what the numbers taught so far.
+    from . import performance
+    perf_model = performance.load_model()
+    length_choice = performance.choose_length(track.id, previews, config.reel_seconds, edition, perf_model)
+    print(f"Reel length: {length_choice['bucket']} (target {length_choice['target']:.0f}s; {length_choice['reason']})")
+    features = analyze_audio(str(audio), length_choice["target"], track.genre, fixed_start=fixed_start)
+    reel_length = float(features.reel_length or length_choice["target"])
     print(f"Estimated musical features: BPM={features.bpm}, mood={features.mood}, "
           f"energy={features.energy}, analyzer={features.analyzer}, length={reel_length:.2f}s, "
           f"hook at {features.hook_at:.2f}s")
     recent = recent_video_ids(previews)
     recent.update(video_id for record in state.get("published", [])[-6:]
                   for video_id in record.get("video_ids", []))
-    # Unique GitHub run identity changes the art direction on every new email.
-    # Local/manual runs also get a fresh seed, while tests can pass a fixed seed.
-    import secrets
-    edition = os.getenv("GITHUB_RUN_ID") or secrets.token_hex(8)
     # The album cover comes FIRST: it picks the style package, what we search for,
     # how candidates are ranked before download and how every clip is graded.
     cover = None
@@ -356,8 +365,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         exclude = set(memory) | set(recent) | {v.id for v in selected}
         # Gen Z friends + Americana belong to both style worlds; priority order, and the
         # search stops once enough roles are filled (Coverr allows ~50 requests/hour).
+        # Learned from platform numbers: roles that clearly help come first (also for the
+        # ~40 % placement cap), roles that clearly hurt come last.
+        signature.PRIORITY = performance.role_priority(signature.DEFAULT_PRIORITY, perf_model)
         roles = [(role, signature.queries_for(role, style_name, style_variant))
-                 for role in ("skater", "friends", "flag", "gear", "woman", "car", "americana", "friends2")]
+                 for role in signature.PRIORITY if role != "motif"]
         roles.append(("motif", style_pkg.motif_queries(style_decision)))
         for role, queries in roles:
             if not queries or len(signature_slots) >= signature.MAX_ROLES:
@@ -429,12 +441,28 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     finally:
         if cover is not None:
             cover.unlink(missing_ok=True)
+    from . import captions
+    caption_copy = captions.variant(style_name, style_variant, edition)
+    if performance.ask_question(perf_model, bool(caption_copy["question"])) != bool(caption_copy["question"]):
+        caption_copy["question"] = (captions.QUESTIONS[0] if not caption_copy["question"] else "")
+    reel_facts = {
+        "style": style_name, "variant": style_variant, "style_basis": style_decision.get("basis"),
+        "length_s": round(reel_length, 2), "length_bucket": performance.bucket(reel_length),
+        "scenes": details.get("scenes"), "bpm": features.bpm,
+        "roles": sorted(r for r, n in (details.get("signature_shots") or {}).items() if n),
+        "opening_clip": (selected[details["opening_clip"]].id if details.get("opening_clip") is not None else None),
+        "archival": sum(1 for v in selected if v.source in ("prelinger", "nasa", "wikimedia")),
+        "question": bool(caption_copy["question"]), "hashtags": caption_copy["hashtags"],
+    }
     metadata = {
         "track_id": track.id, "title": track.title, "permalink": track.permalink_url,
         "song_label": song_label(track.title),
         "features": vars(features), "video_ids": [v.id for v in selected],
         "footage_sources": [{"id": v.id, "provider": v.source, "title": v.title} for v in selected],
-        "caption": caption_for(track, selected), "search_keywords": keywords,
+        "caption": caption_for(track, selected, caption_copy), "caption_variant": caption_copy,
+        "reel_facts": reel_facts, "length_bucket": reel_facts["length_bucket"],
+        "performance_summary": performance.summary(perf_model),
+        "search_keywords": keywords,
         "visual_direction": editorial_brief(features.mood, features.energy, features.bpm),
         "creative_profile": profile,
         "cover_matching": cover_matching,

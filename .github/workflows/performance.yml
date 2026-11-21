@@ -1,0 +1,31 @@
+name: CarleCool — collect performance and learn (read-only on platforms)
+# Fetches Zernio analytics for published Reels (2 / 7 / 28 days after posting), stores
+# data/performance.json and the learned data/performance-model.json. Never posts anything.
+on:
+  schedule:
+    - cron: '0 17 * * *'   # daily, before the 19:30 Reel so it uses fresh numbers
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/performance.yml']   # first probe when this workflow changes
+permissions:
+  contents: write
+concurrency:
+  group: carlecool-performance
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install requests only
+        run: pip install requests
+      - name: Fetch analytics, update the model (GET only on Zernio)
+        env:
+          ZERNIO_API_KEY: ${{ secrets.ZERNIO_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+        run: python -m carlecool.performance
