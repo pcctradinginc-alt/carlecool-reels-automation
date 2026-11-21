@@ -76,7 +76,9 @@ def test_bar_based_cuts_land_on_downbeats_and_breathe_in_calm_parts(pace):
     assert any(abs(e + frame - 8.0) < 1e-3 for e in edges)  # picture changes on the hook
     calm = [c for c, start in zip(cuts, [0.0] + edges) if start + c <= 8.0]
     peak = [c for c, start in zip(cuts, [0.0] + edges) if start >= 8.0 - frame]
-    assert sum(peak) / len(peak) <= sum(calm) / len(calm)
+    # calm parts are never cut faster than energetic ones (shots capped at ~3.3 s)
+    assert sum(peak) / len(peak) <= sum(calm) / len(calm) + 0.05
+    assert max(cuts) <= 3.4
 
 
 def test_fast_song_is_not_cut_every_two_beats():
@@ -240,3 +242,10 @@ def test_master_mode_emails_preview_and_restores_master(tmp_path, monkeypatch):
         _, restored = fetch_reel_from_sent(approval, tmp_path / "approval",
                                            connection=FakeIMAP(FakeSMTP.outgoing.as_bytes()))
     assert hashlib.sha256(restored.read_bytes()).hexdigest() == sha
+
+
+def test_slow_song_uses_half_bars_not_five_second_shots():
+    beat = 60 / 96  # live case "NAD+": 96 BPM → 2.5 s bars
+    beats = tuple(round(i * beat, 4) for i in range(16))
+    cuts = plan_cuts_from_beats(10.0, beats, beats[::4], (0.9,) * 16, pace="medium", hook_at=4 * beat)
+    assert len(cuts) >= 6 and max(cuts) <= 3.3

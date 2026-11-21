@@ -194,7 +194,8 @@ def remote_info(url: str, user_agent: str | None = None) -> tuple[float, int, in
     dur = re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)", p.stderr)
     size = re.search(r"Video:.*?(?<![0-9a-fA-Fx])(\d{2,5})x(\d{2,5})(?![0-9])", p.stderr)
     if not dur or not size:
-        raise ValueError("Remote video could not be inspected")
+        last = [l for l in p.stderr.strip().splitlines() if l.strip()][-1:] if p.stderr else []
+        raise ValueError("Remote video could not be inspected" + (f": {last[0][:120]}" if last else ""))
     h, m, s = dur.groups()
     return int(h) * 3600 + int(m) * 60 + float(s), int(size.group(1)), int(size.group(2))
 

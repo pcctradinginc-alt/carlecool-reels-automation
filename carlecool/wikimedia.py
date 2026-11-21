@@ -46,6 +46,8 @@ POSITIVE = {
     "skater": ("a skateboarder riding a skateboard, face not visible",
                "feet on a skateboard on asphalt"),
 }
+SENSITIVE = ("slave", "lynch", "klan", "segregat", "internment", "camp", "relief client",
+             "borrower", "sharecropper", "migrant", "poverty", "destitute", "jail", "funeral")
 NEGATIVE = ("a portrait of a person looking at the camera", "a document, map or text",
             "a black and white photo", "a logo or graphic", "a black or blank screen",
             "a crowd at an event", "a car crash or an accident")
@@ -108,6 +110,11 @@ def category_files(category: str, *, session=None, limit: int = 60, pause: float
         restr = _text((meta.get("Restrictions") or {}).get("value"))
         url = str(info.get("url") or "")
         if not license_ok(lic, restr) or urlparse(url).hostname != MEDIA_HOST:
+            continue
+        # Historical captions (e.g. 1940s FSA) can contain slurs or depict real people
+        # in sensitive contexts — never use those in promotional Reels.
+        from .archives import PRELINGER_EXCLUDE, _blocked
+        if _blocked(str(page.get("title", "")).lower(), PRELINGER_EXCLUDE + SENSITIVE):
             continue
         out.append({"id": "wm-" + hashlib.sha1(page.get("title", "").encode()).hexdigest()[:12],
                     "title": str(page.get("title", ""))[5:120], "license": lic,
@@ -200,7 +207,7 @@ def fetch_wikimedia(role: str, exclude: set[str], workdir: Path, *, run_key: str
                                duration=PHOTO_SECONDS if kind == "photo" else SEGMENT_SECONDS))
             print(f"Wikimedia {kind}: {item['title'][:60]} ({item['license']})")
         except (requests.RequestException, ValueError, KeyError, OSError, subprocess.SubprocessError) as exc:
-            print(f"Wikimedia clip skipped: {item.get('title', '')[:40]}: {type(exc).__name__}"
+            print(f"Wikimedia clip skipped: {item.get('title', '')[:40]}: {type(exc).__name__}: {str(exc)[:140]}"
                   + ("" if os.getenv("WIKIMEDIA_USER_AGENT") else
                      " (tip: set WIKIMEDIA_USER_AGENT with a contact; Wikimedia throttles anonymous clients)"))
     return found

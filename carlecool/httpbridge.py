@@ -23,6 +23,7 @@ ALLOWED_SUFFIXES = (".nasa.gov", "archive.org", ".wikimedia.org")
 _lock = threading.Lock()
 _server: ThreadingHTTPServer | None = None
 _routes: dict[str, tuple[str, str | None]] = {}
+_reported: set[tuple[str, int]] = set()
 
 
 def _allowed(url: str) -> bool:
@@ -56,6 +57,12 @@ class _Handler(BaseHTTPRequestHandler):
             if not _allowed(upstream.url):
                 self.send_error(403)
                 return
+            if upstream.status_code >= 400:
+                # Surface throttling/blocking (e.g. Wikimedia 429) in the run log, once per host.
+                host = urlparse(url).hostname or "?"
+                if (host, upstream.status_code) not in _reported:
+                    _reported.add((host, upstream.status_code))
+                    print(f"Media host {host} answered HTTP {upstream.status_code}")
             self.send_response(upstream.status_code)
             for name in ("Content-Type", "Content-Length", "Content-Range", "Accept-Ranges", "Last-Modified"):
                 if upstream.headers.get(name):

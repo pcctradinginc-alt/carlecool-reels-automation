@@ -117,9 +117,15 @@ def plan_cuts_from_beats(duration: float, beats: tuple[float, ...] | list[float]
         vals = [e for b, e in zip(beats, energy) if t0 - 1e-6 <= b < t1]
         return sum(vals) / len(vals) if vals else 0.5
 
-    grid = sorted(set(bars + [bars[-1] + k * bar_len for k in range(1, 64)
-                               if bars[-1] + k * bar_len < duration]))
-    half = sorted(set(grid + [g + bar_len / 2 for g in grid if g + bar_len / 2 < duration]))
+    bar_grid = sorted(set(bars + [bars[-1] + k * bar_len for k in range(1, 64)
+                                   if bars[-1] + k * bar_len < duration]))
+    # Slow songs (bar > 2.2 s, i.e. < ~110 BPM): a 2-bar shot would last 5 s+. Use
+    # half bars (beats 1 and 3) as the editing unit instead ("NAD+", 96 BPM: 3 shots in
+    # 10 s was far too static). Fast songs keep whole bars.
+    unit = bar_len / 2 if bar_len > 2.2 else bar_len
+    grid = (sorted(set(bar_grid + [g + bar_len / 2 for g in bar_grid if g + bar_len / 2 < duration]))
+            if unit < bar_len else bar_grid)
+    half = sorted(set(grid + [g + unit / 2 for g in grid if g + unit / 2 < duration]))
     hook = min(grid, key=lambda g: abs(g - hook_at)) if hook_at > 0 else None
     boundaries = [0.0]
     t = grid[0] if grid[0] >= min_shot else next((g for g in grid if g >= min_shot), duration)
@@ -128,9 +134,14 @@ def plan_cuts_from_beats(duration: float, beats: tuple[float, ...] | list[float]
     while t < duration - min_shot * 0.6:
         if t - boundaries[-1] >= min(min_shot, 0.5) - 1e-6:
             boundaries.append(t)
-        step = _bars_for_energy(level_at(t, t + bar_len), pace) * bar_len
+        units = _bars_for_energy(level_at(t, t + unit), pace)
+        if units * unit > 3.3:
+            units = max(1.0, units / 2)  # never longer than ~3 s per shot
+        if units < 1 and units * unit < 0.9:
+            units = 1.0  # sub-unit cuts only where they stay readable
+        step = units * unit
         target = t + step
-        pool = half if step < bar_len else grid
+        pool = half if step < unit else grid
         nxt = min((g for g in pool if g >= target - 1e-3), default=duration)
         if hook is not None and t + 1e-3 < hook < nxt - 1e-3 and hook - t >= min_shot * 0.9:
             nxt = hook  # always change picture on the hook

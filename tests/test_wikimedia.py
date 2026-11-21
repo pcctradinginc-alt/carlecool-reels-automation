@@ -80,3 +80,16 @@ def test_disabled_or_unknown_role(monkeypatch, tmp_path):
     assert wikimedia.fetch_wikimedia("night", set(), tmp_path) == []
     monkeypatch.setenv("CARLECOOL_WIKIMEDIA", "false")
     assert wikimedia.fetch_wikimedia("lana", set(), tmp_path) == []
+
+
+def test_sensitive_historical_titles_are_excluded(monkeypatch):
+    monkeypatch.setattr(wikimedia.time, "sleep", lambda s: None)
+    session = MagicMock(headers={})
+    resp = MagicMock(status_code=200)
+    resp.json.return_value = {"query": {"pages": {
+        "1": _page("A negro Farm Security Administration borrower.jpg", "Public domain", mime="image/jpeg"),
+        "2": _page("Migrant camp, California.jpg", "Public domain", mime="image/jpeg"),
+        "3": _page("Highway 66 gas station, Texas.jpg", "Public domain", mime="image/jpeg")}}}
+    session.get.return_value = resp
+    titles = [i["title"] for i in wikimedia.category_files("x", session=session)]
+    assert titles == ["Highway 66 gas station, Texas.jpg"]
