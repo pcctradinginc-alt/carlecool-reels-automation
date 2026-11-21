@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "posts": {
+    "6aff53bc0f2ada679bf1efcb": {
+      "track_id": "2437525038",
+      "at": "2026-11-19T19:53:28.376846+00:00",
+      "target": "tiktok",
+      "facts": {},
+      "checkpoints": {
+        "d2": {
+          "fetched": "2026-11-21T21:21:03+00:00",
+          "platforms": {
+            "tiktok": {
+              "views": 222.0,
+              "impressions": 0.0,
+              "reach": 220.0,
+              "likes": 2.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 2480.0,
+              "completionRate": 0.0319,
+              "replays": 0.0,
+              "videoDurationSeconds": 12.625,
+              "engagementRate": 0.91,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7709973233797270817?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
+        }
+      }
+    },
+    "6aff5a099bf46160e3a48a54": {
+      "track_id": "2429897994",
+      "at": "2026-11-19T20:20:22.731190+00:00",
+      "target": "instagram",
+      "facts": {},
+      "checkpoints": {}
+    },
+    "6b00692cae2ed8a04f4fbe50": {
+      "track_id": "2437525047",
+      "at": "2026-11-20T15:37:14.037803+00:00",
+      "target": "tiktok",
+      "facts": {},
+      "checkpoints": {}
+    },
+    "6b0183de64bcc19e79622762": {
+      "track_id": "2437525047",
+      "at": "2026-11-21T11:43:23.837307+00:00",
+      "target": "both",
+      "facts": {},
+      "checkpoints": {}
+    },
+    "6b01c3b88bffd16f3297e92b": {
+      "track_id": "2437525038",
+      "at": "2026-11-21T16:15:49.058620+00:00",
+      "target": "tiktok",
+      "facts": {},
+      "checkpoints": {}
+    },
+    "6b01eed9a6fb10bd584b1f58": {
+      "track_id": "2437525050",
+      "at": "2026-11-21T19:19:51.482023+00:00",
+      "target": "tiktok",
+      "facts": {},
+      "checkpoints": {}
+    }
+  },
+  "updated": "2026-11-21T21:21:04+00:00"
+}
