@@ -18,9 +18,9 @@ def _video(index, *, source="coverr", title="", tags=()):
     return SimpleNamespace(id=f"clip-{index}", source=source, title=title, tags=tags)
 
 
-def test_strict_mode_environment_opt_in(monkeypatch):
+def test_strict_mode_defaults_on_and_can_be_explicitly_disabled_for_local_tests(monkeypatch):
     monkeypatch.delenv("CARLECOOL_VISUAL_STRICT", raising=False)
-    assert not visual_gate.enabled()
+    assert visual_gate.enabled()
     monkeypatch.setenv("CARLECOOL_VISUAL_STRICT", "true")
     assert visual_gate.enabled()
     monkeypatch.setenv("CARLECOOL_VISUAL_STRICT", "off")
