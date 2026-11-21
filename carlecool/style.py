@@ -110,18 +110,37 @@ def mode() -> str:
     return os.getenv("CARLECOOL_STYLE", "auto").strip().lower() or "auto"
 
 
+DARK_TIMBRE_HZ = 1800.0   # warm, dark sound (e.g. "chronocyte horizon" ≈ 1500 Hz) → Rubin
+AMBIENT_PERCUSSIVE = 0.08  # almost no drums (pads/ambient) → Rubin
+SPACIOUS_DYNAMICS = 2.8    # lots of space between loud and quiet → Rubin
+
+
 def music_style(features) -> tuple[str, str]:
-    """World from the music alone: slow or sparse → Rubin, otherwise Lana."""
+    """World from the music alone.
+
+    Rubin: slow (≤ 100 BPM), calm, sparse, a dark/warm timbre, almost no percussion or lots
+    of dynamic space. Lana: brighter, flowing tracks. Calibrated on the owner's catalogue
+    (owner verdict: "chronocyte horizon" = Rubin; "luère froid" = Lana; "NAD+" = Rubin).
+    """
     bpm = float(getattr(features, "bpm", 0) or 0)
     energy = [float(e) for e in (getattr(features, "beat_energy", ()) or ())]
     mean = sum(energy) / len(energy) if energy else 1.0
+    timbre = float(getattr(features, "timbre_hz", 0) or 0)
+    perc = float(getattr(features, "percussive", 0) or 0)
+    dyn = float(getattr(features, "dynamics", 0) or 0)
     if getattr(features, "mood", "") == "calm":
         return "rubin", "music: calm"
     if 0 < bpm <= SLOW_BPM:
         return "rubin", f"music: slow ({bpm:.0f} BPM)"
     if mean < SPARSE_ENERGY:
         return "rubin", f"music: sparse (energy {mean:.2f})"
-    return "lana", f"music: {bpm:.0f} BPM, flowing"
+    if 0 < timbre < DARK_TIMBRE_HZ:
+        return "rubin", f"music: dark, warm sound ({timbre:.0f} Hz)"
+    if 0 < perc < AMBIENT_PERCUSSIVE:
+        return "rubin", f"music: ambient, few drums ({perc:.2f})"
+    if dyn >= SPACIOUS_DYNAMICS:
+        return "rubin", f"music: lots of space (dynamics {dyn:.1f})"
+    return "lana", f"music: {bpm:.0f} BPM, bright and flowing" + (f" ({timbre:.0f} Hz)" if timbre else "")
 
 
 def decide(scores: dict[str, tuple[float, str]], brightness: float | None, features=None) -> dict:

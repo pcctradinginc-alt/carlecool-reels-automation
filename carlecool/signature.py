@@ -148,6 +148,13 @@ def _rotate(queries: tuple[str, ...], key: str) -> list[str]:
     return list(queries[start:]) + list(queries[:start])
 
 
+def item_view(item: dict):
+    """Minimal title/tags view of a raw Coverr item for the word gate."""
+    from types import SimpleNamespace
+    return SimpleNamespace(title=str(item.get("title") or ""),
+                           tags=tuple(str(t) for t in (item.get("tags") or []) if isinstance(t, str)))
+
+
 def search_slot(api_key: str, queries, *, exclude: set[str], session=None,
                 per_query: int = 30, enough: int = 4, role: str = "") -> list[Video]:
     """Up to 3 Coverr requests; stops once `enough` usable clips were found."""
@@ -171,6 +178,11 @@ def search_slot(api_key: str, queries, *, exclude: set[str], session=None,
                                                          "sponsored", "is_watermarked"))):
                 continue
             exclude.add(vid)
+            from .stylegate import blocked_words
+            word = blocked_words(item_view(item))
+            if word:
+                print(f"Signature {role} candidate rejected ('{word}'): {vid}")
+                continue
             from .video import _coverr_creator_metadata
             name, link = _coverr_creator_metadata(item)
             found.append(Video(vid, "coverr", url=url, title=item.get("title", ""),
@@ -201,9 +213,12 @@ def rank(role: str, candidates: list[Video], workdir: Path) -> list[Video]:
         from PIL import Image
         model, preprocess, tokenizer = clip
         positive, negative = prompts
+        from .stylegate import UNWANTED
         with torch.no_grad():
-            text = torch.nn.functional.normalize(model.encode_text(tokenizer(list(positive + negative))), dim=-1)
+            text = torch.nn.functional.normalize(
+                model.encode_text(tokenizer(list(positive + negative + UNWANTED))), dim=-1)
             scored = []
+            gated = 0
             for i, video in enumerate(candidates[:16]):
                 thumb = download_thumbnail(video.thumb_url, workdir / f"sig_{role}_{i}.jpg")
                 if thumb is None:
@@ -213,10 +228,18 @@ def rank(role: str, candidates: list[Video], workdir: Path) -> list[Video]:
                         model.encode_image(preprocess(img.convert("RGB")).unsqueeze(0)), dim=-1)
                 thumb.unlink(missing_ok=True)
                 sims = (v @ text.T)[0].tolist()
-                score = max(sims[:len(positive)]) - max(sims[len(positive):]) + (0.01 if video.vertical else 0)
+                pos = max(sims[:len(positive)])
+                unwanted = sims[len(positive) + len(negative):]
+                if max(unwanted) > pos:  # cartoon, render, modern supercar … wins → drop
+                    print(f"Signature {role} candidate rejected (style gate): {video.id}")
+                    gated += 1
+                    continue
+                score = pos - max(sims[len(positive):len(positive) + len(negative)]) + (0.01 if video.vertical else 0)
                 scored.append((score, i))
         if not scored:
-            return fallback
+            # Everything failed the style gate → better no clip than a wrong one; no
+            # thumbnails at all → keyword order as before.
+            return [] if gated else fallback
         order = [i for _, i in sorted(scored, key=lambda x: -x[0])]
         return [candidates[i] for i in order]
     except Exception as exc:
@@ -266,7 +289,7 @@ def place_signature_shots(shots, durations: list[float], slots: dict[str, int]):
         return shots
     # v4 footage must stay present (lesson from Creative v5): at most about half of the
     # interior shots become signature shots; skater, friends and woman come first.
-    limit = max(1, (len(shots) - 1) // 2)
+    limit = max(1, int(0.4 * (len(shots) - 2)) + 1)  # ~40 %: the edit must not become a collage
     chosen = sorted(slots.items(), key=lambda kv: PRIORITY.index(kv[0]) if kv[0] in PRIORITY else 9)[:limit]
     taken: set[int] = set()
     for role, source in sorted(chosen, key=lambda kv: SLOT_POSITION.get(kv[0], 0.5)):

@@ -24,7 +24,7 @@ from .history import load_preview_history, pick_preview_track, recent_video_ids
 from .video import download_video, gather_videos, fetch_owned_stock, record_coverr_download
 
 MEMORY_REELS = 30  # clips shown in the last 30 preview mails are avoided (fresh ones first)
-PRELINGER_CLIPS = 4  # public-domain home movies per Reel
+PRELINGER_CLIPS = 2  # public-domain home movies per Reel (4 made the edit a collage)
 
 
 def caption_for(track, videos) -> str:
@@ -127,7 +127,13 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         if fetch_cover(getattr(track, "artwork_url", ""), candidate_cover):
             cover = candidate_cover
     from . import style as style_pkg
-    style_decision = style_pkg.analyze(cover, override=profile.get("style", "auto"), features=features)
+    # Owner's remembered choice for this song (/revise stil …) beats cover and music.
+    from . import songstyle
+    style_override = profile.get("style", "auto")
+    if style_override in ("", "auto") and songstyle.for_track(track.id):
+        style_override = songstyle.for_track(track.id)
+        print(f"Style remembered for this song: {style_override}")
+    style_decision = style_pkg.analyze(cover, override=style_override, features=features)
     style_name = style_decision.get("style")
     style_variant = style_decision.get("variant")
     print(f"Style: {style_pkg.label(style_decision)} ({style_decision.get('basis')})")
@@ -171,7 +177,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     print(f"Clip memory: {len(fresh)} fresh candidates, "
           f"{len(candidates) - len(fresh)} seen in the last {MEMORY_REELS} Reels kept as reserve")
     from .curation import rank_candidates
-    candidates, prerank = rank_candidates(candidates, cover, output_dir / "thumbs", keep=18)
+    style_fit: dict[str, float] = {}
+    candidates, prerank = rank_candidates(candidates, cover, output_dir / "thumbs", keep=18,
+                                          world=style_name, style_fit=style_fit)
     if len(fresh) < 16:  # ranking must not pull stale clips in front of fresh ones
         candidates = ([v for v in candidates if v.id not in long_memory]
                       + [v for v in candidates if v.id in long_memory])
@@ -188,7 +196,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         planned_shots = len(plan_intervals(features, reel_length, style_pkg.pace_for(profile["pace"], style_name)))
     except Exception:
         planned_shots = 14
-    stock_limit = max(6, min(14, planned_shots - 6))  # + up to 7 signature, 4 Prelinger, 2 Wikimedia
+    stock_limit = max(6, min(14, planned_shots - 5))  # + signature shots, 2 Prelinger, 1 Wikimedia
     print(f"Planned shots: {planned_shots}; fetching up to {stock_limit} stock clips")
     landscape_reserve = []  # downloaded landscape clips, used only to fill up
     from .dedupe import Library
@@ -244,7 +252,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                                   max_clips=PRELINGER_CLIPS, attempts=14)
         from .wikimedia import fetch_wikimedia
         archival += fetch_wikimedia(style_name, set(recent_video_ids(previews, limit=30)) | recent,
-                                    output_dir / "wikimedia", run_key=edition)
+                                    output_dir / "wikimedia", run_key=edition, max_clips=1)
     portrait_count = len(paths)
     portrait_paths = set(paths)
     # Landscape only fills up a thin portrait supply, and always after the portrait clips.
@@ -304,6 +312,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     # Strongest clip first: any regular stock clip may open (not archive films, AI or the
     # signature accents added below).
     opening_pool = {i for i, v in enumerate(selected) if v.source in ("coverr", "pexels", "owned")}
+    opening_fit = {i: style_fit[v.id] for i, v in enumerate(selected) if v.id in style_fit}
     # Neither the AI shot nor a centre-cropped landscape clip may open or close the Reel.
     no_bookend = {i for i, v in enumerate(selected) if v.source == "ai"}
     no_bookend |= {i for i, path in enumerate(paths) if path not in portrait_paths and selected[i].source != "ai"}
@@ -381,7 +390,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                               title_card=title_card,
                               style_grade=style_pkg.grade_filters(style_name, style_variant),
                               signature_slots=signature_slots, look=style_pkg.look(style_name),
-                              opening_pool=opening_pool)
+                              opening_pool=opening_pool, opening_fit=opening_fit)
     finally:
         if cover is not None:
             cover.unlink(missing_ok=True)

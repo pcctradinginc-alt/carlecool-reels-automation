@@ -37,6 +37,11 @@ class AudioFeatures:
     hook_at: float = 0.0  # excerpt-relative time of the strongest energy lift
     analyzer: str = "heuristic"
     kicks: tuple[float, ...] = ()  # excerpt-relative audible onsets (cut snapping)
+    # Sound character of the excerpt (style choice): spectral centroid in Hz (dark/warm vs
+    # bright), share of percussive energy (HPSS) and loud/quiet ratio (space, dynamics).
+    timbre_hz: float = 0.0
+    percussive: float = 0.0
+    dynamics: float = 0.0
 
 
 def _decode(path: str, rate: int) -> np.ndarray:
@@ -133,6 +138,22 @@ def _hook_start(beat_times: np.ndarray, downbeat_idx: list[int], beat_energy: np
     return best[1], best[2]
 
 
+def _sound_character(clip: np.ndarray, sr: int) -> tuple[float, float, float]:
+    """(spectral centroid Hz, percussive energy share, 90/10 % loudness ratio); zeros on failure."""
+    try:
+        import librosa
+        if clip.size < sr:
+            return 0.0, 0.0, 0.0
+        centroid = float(np.mean(librosa.feature.spectral_centroid(y=clip, sr=sr)))
+        harmonic, percussive = librosa.effects.hpss(clip)
+        perc = float(np.sum(percussive ** 2) / (np.sum(harmonic ** 2) + np.sum(percussive ** 2) + 1e-9))
+        rms = librosa.feature.rms(y=clip)[0]
+        dyn = float(np.percentile(rms, 90) / (np.percentile(rms, 10) + 1e-6))
+        return round(centroid, 1), round(perc, 3), round(min(dyn, 99.0), 2)
+    except Exception:
+        return 0.0, 0.0, 0.0
+
+
 def _librosa_features(y22: np.ndarray, sr: int, max_seconds: float, genre: str,
                       fixed_start: float | None) -> AudioFeatures:
     import librosa
@@ -191,13 +212,14 @@ def _librosa_features(y22: np.ndarray, sr: int, max_seconds: float, genre: str,
     onset_frames = librosa.onset.onset_detect(onset_envelope=onset_env, sr=sr, hop_length=hop, backtrack=False)
     kick_times = librosa.frames_to_time(onset_frames, sr=sr, hop_length=hop)
     kicks = tuple(round(float(t - start), 4) for t in kick_times if start - 0.05 <= t < end)
+    timbre_hz, percussive, dynamics = _sound_character(clip, sr)
     return AudioFeatures(
         bpm=round(bpm, 1), energy=round(energy, 3), excerpt_start=round(start, 3),
         mood=_mood(genre, energy, bpm), seconds=round(track_seconds, 3),
         beat_phase=rel_beats[0] if rel_beats else 0.0, structure_events=events,
         beats=rel_beats, downbeats=rel_downs, beat_energy=rel_energy,
         reel_length=length, hook_at=round(max(0.0, hook - start), 3), analyzer="librosa",
-        kicks=kicks,
+        kicks=kicks, timbre_hz=timbre_hz, percussive=percussive, dynamics=dynamics,
     )
 
 

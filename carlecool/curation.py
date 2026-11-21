@@ -210,7 +210,8 @@ def score_thumbnails(cover: Path | None, thumbs: list[Path | None], queries: lis
 
 
 def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, *,
-                    keep: int = 7, session=None) -> tuple[list[Video], list[dict]]:
+                    keep: int = 7, session=None, world: str | None = None,
+                    style_fit: dict | None = None) -> tuple[list[Video], list[dict]]:
     """Pick the `keep` best candidates before downloading any full video.
 
     Keeps at least one clip per search lane when possible (variety), then fills by score.
@@ -219,10 +220,41 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
     """
     remote = [c for c in candidates if c.source in ("coverr", "pexels")]
     others = [c for c in candidates if c.source not in ("coverr", "pexels")]
-    if len(remote) <= keep:
-        return candidates, []
+    # Style/content gate first (see stylegate.py): words, then the thumbnail itself.
+    from . import stylegate
+    kept = []
+    for c in remote:
+        word = stylegate.blocked_words(c)
+        if word:
+            print(f"Clip rejected ('{word}'): {c.id} '{c.title[:50]}'")
+        else:
+            kept.append(c)
+    remote = kept
+    gate = world is not None
+    if len(remote) <= keep and not gate:
+        return remote + others, []
     thumbs = [download_thumbnail(c.thumb_url, workdir / f"thumb_{i:02d}.jpg", session=session)
               for i, c in enumerate(remote)]
+    if gate:
+        from .semantic import load_clip, semantic_enabled
+        verdicts = stylegate.clip_verdicts(thumbs, world, load_clip() if semantic_enabled() else None)
+        keep_idx = []
+        for i, verdict in enumerate(verdicts):
+            if stylegate.rejected(verdict):
+                print(f"Clip rejected (looks like {verdict[1]}): {remote[i].id} '{remote[i].title[:50]}'")
+                if thumbs[i] is not None:
+                    thumbs[i].unlink(missing_ok=True)
+            else:
+                keep_idx.append(i)
+                if style_fit is not None and verdict is not None:
+                    style_fit[remote[i].id] = verdict[0]
+        remote = [remote[i] for i in keep_idx]
+        thumbs = [thumbs[i] for i in keep_idx]
+        if len(remote) <= keep:
+            for thumb in thumbs:
+                if thumb is not None:
+                    thumb.unlink(missing_ok=True)
+            return remote + others, []
     scores = score_thumbnails(cover, thumbs, [c.query or c.title for c in remote])
     for thumb in thumbs:
         if thumb is not None:

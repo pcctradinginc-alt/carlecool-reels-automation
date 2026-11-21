@@ -227,12 +227,14 @@ def seal_loop(shots, source_durations: list[float]):
 
 
 def strongest_opening(pool: list[int], motion: list[float], dims: list[tuple[int, int]],
-                      durations: list[float], *, min_seconds: float = 6.0) -> int | None:
+                      durations: list[float], *, min_seconds: float = 6.0,
+                      style_fit: dict[int, float] | None = None) -> int | None:
     """Opening clip: lively, sharp, well matched to the cover — and long enough to also
     close the loop (seal_loop takes the footage just before the opening shot).
 
-    `pool` is in cover-ranking order (best match first). Score = 45 % motion rank +
-    35 % cover rank + 20 % resolution rank.
+    `pool` is in cover-ranking order (best match first). With style-gate scores:
+    40 % style fit + 30 % motion + 15 % cover + 15 % sharpness (a lively clip that misses
+    the style, like "Street in Mexico City", must not open). Without: 45/35/20 as before.
     """
     usable = [i for i in pool if durations[i] >= min_seconds] or list(pool)
     if not usable:
@@ -248,4 +250,8 @@ def strongest_opening(pool: list[int], motion: list[float], dims: list[tuple[int
     cover = {i: 1 - pos / (len(usable) - 1) for pos, i in enumerate(usable)}
     sharp = ranks([float(min(dims[i][0], dims[i][1] * 9 / 16) if dims[i][0] > dims[i][1] else dims[i][0])
                    for i in usable])
+    if style_fit and all(i in style_fit for i in usable):
+        fit = ranks([style_fit[i] for i in usable])
+        return max(usable, key=lambda i: (0.4 * fit[i] + 0.3 * move[i] + 0.15 * cover[i] + 0.15 * sharp[i],
+                                          -usable.index(i)))
     return max(usable, key=lambda i: (0.45 * move[i] + 0.35 * cover[i] + 0.2 * sharp[i], -usable.index(i)))

@@ -111,7 +111,14 @@ def revise(issue_number: int, command: str) -> str:
     # "Feedback memory": learn explicit, interpreted choices for next Reels.
     # The profile file contains only public style weights, never secrets/media.
     profile["revision"] = 0
-    # A style choice (/revise stil night) is for THIS Reel only; future Reels follow their cover.
+    # A style choice (/revise stil rubin) is remembered for THIS SONG (data/song-styles.json);
+    # other songs keep following cover and music.
+    from .creative import STYLE_COMMANDS
+    from . import songstyle
+    chosen = [STYLE_COMMANDS[c] for c in instructions if c in STYLE_COMMANDS]
+    if chosen:
+        songstyle.remember(str(old["track_id"]), chosen[-1])
+        print(f"Style for this song remembered: {chosen[-1]}")
     profile["style"] = "auto"
     # Explicit owner revision after successful delivery is the only signal.
     from .quality_learning import PATH as LEARN_PATH, load as load_learning, observe
@@ -125,11 +132,16 @@ def revise(issue_number: int, command: str) -> str:
         subprocess.run(["git", "config", "user.name", "CarleCool Creative Bot"], check=True)
         subprocess.run(["git", "config", "user.email",
                         "41898282+github-actions[bot]@users.noreply.github.com"], check=True)
-        subprocess.run(["git", "add", str(PROFILE_PATH), str(LEARN_PATH)], check=True)
+        to_add = [str(PROFILE_PATH), str(LEARN_PATH)]
+        if songstyle.PATH.is_file():
+            to_add.append(str(songstyle.PATH))
+        subprocess.run(["git", "add", *to_add], check=True)
         changes = subprocess.run(["git", "diff", "--cached", "--quiet"])
         if changes.returncode:
             subprocess.run(["git", "commit", "-m",
                             "creative: remember owner feedback for future Reels"], check=True)
+            # Other commits (preview history) may have landed meanwhile.
+            subprocess.run(["git", "pull", "--rebase", "origin", "main"], check=True)
             subprocess.run(["git", "push", "origin", "HEAD:main"], check=True)
     except subprocess.SubprocessError:
         print("Warning: New review email succeeded, but style memory was not persisted")

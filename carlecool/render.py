@@ -193,7 +193,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 fit_email: bool = True, title_card: tuple[str, str] | None = None,
                 style_grade: list[str] | None = None,
                 signature_slots: dict[str, int] | None = None,
-                look: dict | None = None, opening_pool: set[int] | None = None) -> dict:
+                look: dict | None = None, opening_pool: set[int] | None = None,
+                opening_fit: dict[int, float] | None = None) -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -230,7 +231,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             except (RuntimeError, ValueError, subprocess.SubprocessError):
                 early_dims.append((0, 0))
         opening = look_mod.strongest_opening(
-            [i for i in base if i in opening_pool], motion, early_dims, source_durations)
+            [i for i in base if i in opening_pool], motion, early_dims, source_durations,
+            style_fit=opening_fit)
         if opening is not None:
             base = [opening] + [i for i in base if i != opening]
             no_bookend = set(no_bookend) - {opening}
