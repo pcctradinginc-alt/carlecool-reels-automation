@@ -63,16 +63,27 @@ def _timeline(seconds=12.0, bpm=120.0, high_from=6.0):
 
 
 @pytest.mark.parametrize("pace", ["slow", "medium", "fast"])
-def test_energy_driven_cuts_sum_exactly_and_cut_faster_at_peaks(pace):
-    beats, downs, energy = _timeline()
-    cuts = plan_cuts_from_beats(12.0, beats, downs, energy, pace=pace, hook_at=6.0)
-    assert math.isclose(sum(cuts), 12.0, abs_tol=1e-3)
-    assert min(cuts) >= 0.42
-    edges = np.cumsum(cuts)[:-1]
-    calm = sum(1 for e in edges if e < 6.0)
-    peak = sum(1 for e in edges if e >= 6.0)
-    assert peak > calm
-    assert any(abs(e - 6.0) < 0.01 for e in edges)  # visual change lands on the hook
+def test_bar_based_cuts_land_on_downbeats_and_breathe_in_calm_parts(pace):
+    beats, downs, energy = _timeline(seconds=16.0)  # 120 BPM → 2 s bars, peak from 8 s
+    cuts = plan_cuts_from_beats(16.0, beats, downs, energy, pace=pace, hook_at=8.0)
+    assert math.isclose(sum(cuts), 16.0, abs_tol=1e-3)
+    assert min(cuts) >= 0.9  # no flicker
+    edges = list(np.cumsum(cuts)[:-1])
+    frame = 1 / FPS
+    # every cut sits on a bar start ("the one"; half-bar only in fast pace), one frame early
+    grid = list(downs) + ([d + 1.0 for d in downs] if pace == "fast" else [])
+    assert all(any(abs(e + frame - d) < 1e-3 for d in grid) for e in edges)
+    assert any(abs(e + frame - 8.0) < 1e-3 for e in edges)  # picture changes on the hook
+    calm = [c for c, start in zip(cuts, [0.0] + edges) if start + c <= 8.0]
+    peak = [c for c, start in zip(cuts, [0.0] + edges) if start >= 8.0 - frame]
+    assert sum(peak) / len(peak) <= sum(calm) / len(calm)
+
+
+def test_fast_song_is_not_cut_every_two_beats():
+    beat = 60 / 152  # live case "luère froid": 152 BPM, loud excerpt
+    beats = tuple(round(i * beat, 4) for i in range(32))
+    cuts = plan_cuts_from_beats(12.6, beats, beats[::4], (0.9,) * 32, pace="medium", hook_at=4 * beat)
+    assert len(cuts) <= 8 and min(cuts) >= 1.4
 
 
 def test_frame_snapping_is_exact_at_24fps():

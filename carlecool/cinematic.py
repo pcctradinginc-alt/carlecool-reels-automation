@@ -70,72 +70,81 @@ def snap_to_frames(durations: list[float], total: float, *, fps: int = FPS) -> l
     return out
 
 
-def _beats_for_energy(level: float, pace: str) -> int:
-    """Shot length in beats: calm passages breathe, peaks cut fast (viral pacing)."""
-    base = 8 if level < 0.35 else 4 if level < 0.7 else 2
+def _bars_for_energy(level: float, pace: str) -> float:
+    """Shot length in BARS. Cuts follow musical phrases, not individual beats.
+
+    Live feedback ("luère froid", 152 BPM): cutting every 2 beats gave 16 identical
+    0.79 s shots — flicker, not editing. Bars keep cuts on the "one".
+    """
     if pace == "slow":
-        base *= 2
-    elif pace == "fast":
-        base = max(1, base // 2)
-    return base
+        return 1.0 if level >= 0.85 else 2.0
+    if pace == "fast":
+        return 0.5 if level >= 0.6 else 1.0
+    return 1.0 if level >= 0.45 else 2.0
 
 
 def plan_cuts_from_beats(duration: float, beats: tuple[float, ...] | list[float],
                          downbeats: tuple[float, ...] | list[float],
                          beat_energy: tuple[float, ...] | list[float], *,
                          pace: str = "medium", hook_at: float = 0.0,
-                         min_shot: float = 0.42) -> list[float]:
-    """Energy-driven cut density on tracked beats.
+                         min_shot: float = 0.9) -> list[float]:
+    """Bar-based, energy-aware cut plan.
 
-    * Low energy → 8 beats per shot, mid → 4, peaks → 2 (pace halves/doubles this).
-    * Long shots (≥4 beats) start on downbeats so phrases and pictures change together.
-    * A cut is forced on the hook so the visual change hits with the musical lift.
-    * Falls back to `plan_cuts` grid when the beat timeline is unusable.
+    * Cuts land on bar starts (downbeats); a half-bar only in `fast` pace at peaks.
+    * Calm bars → 2-bar shots, energetic bars → 1-bar shots (medium pace).
+    * A cut is always placed on the hook's downbeat so picture and drop change together.
+    * Very fast songs (>140 BPM) are treated in half-time: their bars are short anyway.
+    * Each cut is pulled one frame early so the new image registers with the kick.
+    Falls back to the beat grid planner when no usable bar grid exists.
     """
     if pace not in ("slow", "medium", "fast"):
         raise ValueError("Invalid pace")
     if not 0 < duration <= 600 or not math.isfinite(duration):
         raise ValueError("Invalid video duration")
     beats = [float(b) for b in beats if 0 <= b < duration]
-    if len(beats) < 4 or len(beat_energy) < len(beats):
-        span = (beats[1] - beats[0]) if len(beats) > 1 else 0.5
-        return plan_cuts(duration, 60.0 / max(span, 0.3), pace=pace)
-    energy = [float(e) for e in beat_energy[:len(beats)]]
-    downs = {round(float(d), 3) for d in downbeats}
+    if len(beats) < 4:
+        return plan_cuts(duration, 120.0, pace=pace)
+    period = float(sorted(b2 - b1 for b1, b2 in zip(beats, beats[1:]))[len(beats) // 2 - 1])
+    energy = [float(e) for e in list(beat_energy)[:len(beats)]] + [0.5] * max(0, len(beats) - len(beat_energy))
+    bars = sorted({round(float(d), 4) for d in downbeats if 0 <= d < duration})
+    if len(bars) < 2:
+        bars = [beats[i] for i in range(0, len(beats), 4)]
+    bar_len = float(sorted(b2 - b1 for b1, b2 in zip(bars, bars[1:]))[(len(bars) - 1) // 2]) if len(bars) > 1 else 4 * period
+    if bar_len < 1.7:  # >140 BPM: a 2-bar unit is the musical phrase people feel
+        min_shot = max(min_shot, bar_len * 0.95)
+
+    def level_at(t0: float, t1: float) -> float:
+        vals = [e for b, e in zip(beats, energy) if t0 - 1e-6 <= b < t1]
+        return sum(vals) / len(vals) if vals else 0.5
+
+    grid = sorted(set(bars + [bars[-1] + k * bar_len for k in range(1, 64)
+                               if bars[-1] + k * bar_len < duration]))
+    half = sorted(set(grid + [g + bar_len / 2 for g in grid if g + bar_len / 2 < duration]))
+    hook = min(grid, key=lambda g: abs(g - hook_at)) if hook_at > 0 else None
     boundaries = [0.0]
-    i = 0
-    # First cut: on the first downbeat/beat at least `min_shot` in, or on the hook.
-    while i < len(beats):
-        current = beats[i]
-        if current - boundaries[-1] < min_shot:
-            i += 1
-            continue
-        if len(boundaries) > 1 or current > 0:
-            boundaries.append(current)
-        level = max(energy[i:i + 4]) if energy[i:i + 4] else 0.5
-        step = _beats_for_energy(level, pace)
-        nxt = i + step
-        if step >= 4:
-            # Snap long shots to the next downbeat if one is within the shot.
-            for j in range(i + 1, min(len(beats), i + step + 1)):
-                if round(beats[j], 3) in downs and j - i >= max(2, step // 2):
-                    nxt = j
-                    break
-        # Force a cut exactly at the hook if we would otherwise jump over it.
-        if hook_at > boundaries[-1] + min_shot and nxt < len(beats) and beats[nxt] > hook_at + 1e-3:
-            hook_idx = min(range(len(beats)), key=lambda k: abs(beats[k] - hook_at))
-            if beats[hook_idx] - boundaries[-1] >= min_shot and hook_idx > i:
-                nxt = hook_idx
-        i = nxt
-    if duration - boundaries[-1] < min_shot and len(boundaries) > 1:
-        boundaries.pop()
-    boundaries = sorted(set(round(b, 4) for b in boundaries if 0 <= b < duration))
-    if boundaries[0] != 0.0:
-        boundaries.insert(0, 0.0)
-    boundaries.append(float(duration))
-    out = [round(b - a, 4) for a, b in zip(boundaries, boundaries[1:])]
-    out = [x for x in out if x > 0]
+    t = grid[0] if grid[0] >= min_shot else next((g for g in grid if g >= min_shot), duration)
+    if grid[0] > 1e-3 and grid[0] < min_shot:
+        t = grid[0] if grid[0] >= 0.5 else t  # short pickup before the first "one"
+    while t < duration - min_shot * 0.6:
+        if t - boundaries[-1] >= min(min_shot, 0.5) - 1e-6:
+            boundaries.append(t)
+        step = _bars_for_energy(level_at(t, t + bar_len), pace) * bar_len
+        target = t + step
+        pool = half if step < bar_len else grid
+        nxt = min((g for g in pool if g >= target - 1e-3), default=duration)
+        if hook is not None and t + 1e-3 < hook < nxt - 1e-3 and hook - t >= min_shot * 0.9:
+            nxt = hook  # always change picture on the hook
+        if nxt - t < min_shot - 1e-6:
+            nxt = min((g for g in grid if g - t >= min_shot - 1e-6), default=duration)
+        t = nxt
+    frame = 1.0 / FPS
+    edges = [b - frame if b - frame > 0 else b for b in boundaries[1:]]  # one frame early
+    points = [0.0] + [e for e in edges if 0 < e < duration] + [float(duration)]
+    out = [round(b - a, 4) for a, b in zip(points, points[1:]) if b - a > 1e-6]
     out[-1] = round(duration - sum(out[:-1]), 4)
+    if len(out) > 1 and out[-1] < 0.5:
+        out[-2] = round(out[-2] + out[-1], 4)
+        out.pop()
     return out
 
 
