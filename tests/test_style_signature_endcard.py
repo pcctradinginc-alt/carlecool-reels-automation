@@ -274,15 +274,19 @@ def test_loop_seam_is_frame_exact_and_continuous():
     assert not ok and short == exact
 
 
-def test_style_search_words_always_include_a_car_and_the_flag():
+def test_style_search_words_stay_in_their_world_without_forced_cars_or_flags():
     for decision in ({"style": "lana"}, {"style": "rubin"}, {"style": "lana", "variant": "night"}):
         for key in ("a", "b", "c", "d"):
             words = style.search_queries(decision, run_key=key)
-            assert len(words) == 5 and "american flag" in words
-            assert any(w in ("porsche", "land rover", "classic car") for w in words)
+            assert len(words) == 5
+            assert "american flag" not in words and "porsche" not in words
             assert all(len(w.split()) <= 2 for w in words)  # Coverr matches every word
-    ladders = style.search_ladders(["porsche", "motel"])
+            assert set(words) <= set((style.NIGHT_QUERIES if decision.get("variant") == "night"
+                                    else style.SEARCH_QUERIES)[decision["style"]])
+    assert not set(style.SEARCH_QUERIES["lana"]) & set(style.SEARCH_QUERIES["rubin"])
+    ladders = style.search_ladders(["porsche", "motel", "road trip"])
     assert ladders["porsche"][0] == "classic car" and "road" not in ladders["motel"]
+    assert "road" not in ladders["road trip"]
     assert style.search_queries({"style": None}) == []
 
 
