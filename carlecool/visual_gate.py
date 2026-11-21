@@ -85,8 +85,8 @@ class Decision:
 
 
 def enabled() -> bool:
-    """Strict mode is activated for daily production in its GitHub workflow."""
-    return os.getenv("CARLECOOL_VISUAL_STRICT", "false").strip().lower() in {"1", "true", "yes", "on"}
+    """Enabled by default for every main.process() entry point, including revisions."""
+    return os.getenv("CARLECOOL_VISUAL_STRICT", "true").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def judge_frames(frame_scores, *, positive_count: int, minimum: float = MIN_POSITIVE,
