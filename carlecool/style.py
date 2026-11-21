@@ -234,9 +234,8 @@ def motif_queries(decision: dict) -> tuple[str, ...]:
     return MOTIF_QUERIES.get(decision.get("prompt") or "", ())
 
 
-# Fixed Coverr search words per world (owner: motel, diner, roadtrip, friends at night,
-# flag, neon, classic cars — a classic Porsche 911 / 993 or a classic Land Rover Defender
-# rather than generic cars).
+# Conservative world-specific photographic subjects. No forced car or flag motif;
+# overly broad modern-road queries are intentionally not part of the strict search.
 # Short words only: Coverr matches every word of a query.
 SEARCH_QUERIES = {
     "lana": ("motel", "diner", "palm trees", "vintage car", "desert sunset",
