@@ -184,6 +184,7 @@ def build_storyboard(durations: list[float], source_durations: list[float],
     bookend = next((i for i in range(count) if i not in no_bookend), 0)
     second = next((i for i in range(count) if i not in no_bookend and i != bookend), None)
     offsets = [0.0] * count
+    uses = [0] * count
     shots = []
     last = -1
     for index, length in enumerate(durations):
@@ -196,7 +197,12 @@ def build_storyboard(durations: list[float], source_durations: list[float],
                 preferred = bookend
             elif index == 1 and second is not None:
                 preferred = second
-        candidates = [(preferred + k) % count for k in range(count)]
+        rotation = [(preferred + k) % count for k in range(count)]
+        # Never repeat a clip while another one is still unused: least-used first, the
+        # seeded rotation only breaks ties. (The closing shot returns to the opening clip
+        # on purpose: it continues that footage into the loop, see look.seal_loop.)
+        closing = len(durations) >= 3 and count >= 2 and index == len(durations) - 1
+        candidates = rotation if closing else sorted(rotation, key=lambda c: uses[c])
 
         def fits(src):
             return source_durations[src] - offsets[src] >= length - 1e-6 or offsets[src] == 0 and source_durations[src] >= length - 1e-6
@@ -219,6 +225,7 @@ def build_storyboard(durations: list[float], source_durations: list[float],
         room = max(0.0, source_duration - min(length, source_duration))
         offset = min(offsets[choice], room)
         shots.append(Shot(choice, round(offset, 3), length))
+        uses[choice] += 1
         offsets[choice] = offset + max(0.5, length)
         if offsets[choice] >= source_duration:
             offsets[choice] = 0.0

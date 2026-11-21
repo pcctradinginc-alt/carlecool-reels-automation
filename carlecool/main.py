@@ -23,6 +23,8 @@ from .state import load_state
 from .history import load_preview_history, pick_preview_track, recent_video_ids
 from .video import download_video, gather_videos, fetch_owned_stock, record_coverr_download
 
+MEMORY_REELS = 30  # clips shown in the last 30 preview mails are avoided (fresh ones first)
+
 
 def caption_for(track, videos) -> str:
     caption = f"🎧 {song_label(track.title)}\n"
@@ -150,17 +152,50 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         keywords = apply_trend(keywords, trend_signals)
     print(f"Video search phrases: {keywords}")
     candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=32, keywords=keywords)
+    # Across Reels: clips from the last MEMORY_REELS previews are only used when there are
+    # not enough fresh ones (no extra Coverr requests: same search, re-ordered).
+    long_memory = recent_video_ids(previews, limit=MEMORY_REELS)
+    fresh = [v for v in candidates if v.id not in long_memory]
+    if len(fresh) >= 16:
+        candidates = fresh
+    else:
+        candidates = fresh + [v for v in candidates if v.id in long_memory]
+    print(f"Clip memory: {len(fresh)} fresh candidates, "
+          f"{len(candidates) - len(fresh)} seen in the last {MEMORY_REELS} Reels kept as reserve")
     from .curation import rank_candidates
-    candidates, prerank = rank_candidates(candidates, cover, output_dir / "thumbs", keep=14)
+    candidates, prerank = rank_candidates(candidates, cover, output_dir / "thumbs", keep=18)
+    if len(fresh) < 16:  # ranking must not pull stale clips in front of fresh ones
+        candidates = ([v for v in candidates if v.id not in long_memory]
+                      + [v for v in candidates if v.id in long_memory])
     if prerank:
         print(f"Pre-download ranking kept {len(prerank)} of the candidate clips")
     from .render import is_portrait
     from .video import MIN_PORTRAIT_CLIPS, allow_landscape
     selected = []
     paths = []
-    # ~30 s Reels have 12–18 shots: enough distinct clips that none repeats too often.
-    stock_limit = int(round(7 + max(0.0, reel_length - 15) / 4))
+    # Within a Reel: one clip per shot. Count the shots first and fetch enough clips
+    # (signature + archival clips cover ~4–6 of them).
+    from .render import plan_intervals
+    try:
+        planned_shots = len(plan_intervals(features, reel_length, style_pkg.pace_for(profile["pace"], style_name)))
+    except Exception:
+        planned_shots = 14
+    stock_limit = max(7, min(16, planned_shots - 3))
+    print(f"Planned shots: {planned_shots}; fetching up to {stock_limit} stock clips")
     landscape_reserve = []  # downloaded landscape clips, used only to fill up
+    from .dedupe import Library
+    seen_pictures = Library()
+
+    def unique(video, path) -> bool:
+        """False (and file removed) when the clip shows the same picture as one we have."""
+        twin, sig = seen_pictures.duplicate_of(Path(path))
+        if twin is not None:
+            print(f"Clip skipped (same picture as {twin}): {video.id}")
+            if video.source != "owned":
+                Path(path).unlink(missing_ok=True)
+            return False
+        seen_pictures.add(video.id, sig)
+        return True
 
     def accept(video, path):
         if video.source == "coverr":
@@ -174,6 +209,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         try:
             target = output_dir / f"stock_{len(paths) + len(landscape_reserve):02d}.mp4"
             path = fetch_owned_stock(video, target) if video.source == "owned" else download_video(video.url, target)
+            if not unique(video, path):
+                continue
             if is_portrait(path):
                 accept(video, path)
             elif allow_landscape():
@@ -206,6 +243,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     for video, path in landscape_reserve:
         if path not in paths and video.source != "owned":
             path.unlink(missing_ok=True)
+    archival = [v for v in archival if unique(v, Path(v.path))]
     for video in archival:
         selected.append(video)
         paths.append(Path(video.path))
@@ -283,6 +321,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                             print(f"Signature skater {video.id} rejected: visible face ({face:.0%} of frame)")
                             path.unlink(missing_ok=True)
                             continue
+                    if not unique(video, path):
+                        continue
                     record_coverr_download(video.id, config.coverr_key)
                     selected.append(video)
                     paths.append(path)
@@ -301,6 +341,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                                                  run_key=edition, max_clips=1):
                         if signature.largest_face_ratio(Path(video.path)) > signature.FACE_MAX_HEIGHT:
                             print(f"Signature skater {video.id} rejected: visible face")
+                            continue
+                        if not unique(video, Path(video.path)):
                             continue
                         selected.append(video)
                         paths.append(Path(video.path))
