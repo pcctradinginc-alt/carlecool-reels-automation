@@ -92,8 +92,8 @@ jobs:
             ~/.cache/huggingface/hub
             ~/.cache/torch/hub/checkpoints
           key: carlecool-public-openclip-v1-${{ runner.os }}
-      - name: Optional free OpenCLIP model dependencies (safe fallback)
-        if: ${{ vars.CARLECOOL_SEMANTIC != 'off' }}
+      - name: Required free OpenCLIP model dependencies (strict fail-closed)
+        if: ${{ env.CARLECOOL_SEMANTIC == 'on' }}
         continue-on-error: false # required by fail-closed visual gate
         timeout-minutes: 8
         shell: bash
