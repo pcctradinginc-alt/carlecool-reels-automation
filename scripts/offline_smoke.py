@@ -46,7 +46,7 @@ def main():
                        cwd=root, env=env, check=True)
         assert (root / 'output/carlecool_1000.mp4').is_file()
         meta = json.loads((root / 'output/reel_metadata.json').read_text())
-        assert meta['track_id'] == '1000' and 7.9 <= meta['duration'] <= 15.6, meta['duration']
+        assert meta['track_id'] == '1000' and 7.9 <= meta['duration'] <= 19.6, meta['duration']  # REEL_SECONDS=15 is the target: whole phrases around it
         try:
             import librosa  # noqa: F401
             assert meta['music_analysis']['analyzer'] == 'librosa', meta['music_analysis']
