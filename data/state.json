@@ -157,20 +157,66 @@
       "platform_status": {
         "tiktok": "published"
       }
+    },
+    {
+      "track_id": "2391158355",
+      "at": "2026-11-21T22:22:34.748403+00:00",
+      "video_ids": [
+        "FW9uTogtUg",
+        "se6A6GqTIm",
+        "FHbyqqS1VM",
+        "pl-NewOrlea1941",
+        "UsO0kNZFie",
+        "sv4108E4FD",
+        "Zm3V1HRrB9",
+        "MLXh1amZaw",
+        "wm-58c43657189b",
+        "wm-69b37e91de29",
+        "pg9EfqvVl1",
+        "BpCX1Shg1r",
+        "1Yag8YXQOb",
+        "zgOpCt30BQ",
+        "OQn7iT898t",
+        "Sc7hjljgnZ",
+        "WzEDbNUgtT"
+      ],
+      "sha256": "3feb39b6d9f01da54ac3a4501070fbfba980e342b69dfe08583855def2973011",
+      "approval_issue": 38,
+      "provider": "zernio",
+      "target": "tiktok",
+      "provider_post_id": "6b0219ae94cb88ded0551346",
+      "platform_status": {
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 3,
+        "bpm": 112.3,
+        "hashtags": [
+          "#carlecool",
+          "#nightdrive",
+          "#vinyl",
+          "#beatmaker",
+          "#instrumental"
+        ],
+        "length_bucket": "long",
+        "length_s": 25.64,
+        "opening_clip": "se6A6GqTIm",
+        "question": false,
+        "roles": [
+          "flag",
+          "friends",
+          "gear",
+          "skater",
+          "woman"
+        ],
+        "scenes": 12,
+        "style": "lana",
+        "style_basis": "music: 112 BPM, bright and flowing (1906 Hz)",
+        "variant": null
+      }
     }
   ],
-  "pending": {
-    "track_id": "2391158355",
-    "sha256": "3feb39b6d9f01da54ac3a4501070fbfba980e342b69dfe08583855def2973011",
-    "at": "2026-11-21T22:22:34.748403+00:00",
-    "issue_number": 38,
-    "target": "tiktok",
-    "provider": "zernio",
-    "provider_post_id": "6b0219ae94cb88ded0551346",
-    "platform_status": {
-      "tiktok": "uploading"
-    }
-  },
+  "pending": null,
   "reconciled": [
     {
       "track_id": "2373071753",
