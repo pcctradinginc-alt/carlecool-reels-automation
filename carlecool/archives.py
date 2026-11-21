@@ -208,16 +208,22 @@ def cut_segment(url: str, start: float, destination: Path, seconds: float = SEGM
     return destination
 
 
+FRAME_W, FRAME_H = 320, 240
+
+
 def _remote_frame(url: str, at: float):
+    """One frame as raw RGB (no PNG/JPEG encoder needed: the bundled Linux FFmpeg
+    build lacked one, so every frame check failed in CI with margin -1.0)."""
     from PIL import Image
-    import io
     p = subprocess.run(["ffmpeg", "-v", "error", "-ss", f"{at:.2f}", "-i", url, "-frames:v", "1",
-                        "-vf", "scale=320:-2", "-f", "image2pipe", "-vcodec", "png", "-"],
+                        "-vf", f"scale={FRAME_W}:{FRAME_H}:force_original_aspect_ratio=decrease,"
+                               f"pad={FRAME_W}:{FRAME_H}:(ow-iw)/2:(oh-ih)/2",
+                        "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
                        capture_output=True, timeout=90)
-    if not p.stdout:
-        raise ValueError("No frame")
-    with Image.open(io.BytesIO(p.stdout)) as img:
-        return img.convert("RGB")
+    if len(p.stdout) < FRAME_W * FRAME_H * 3:
+        detail = p.stderr.decode("utf-8", "replace").strip().splitlines()[-1:] if p.stderr else []
+        raise ValueError("No frame" + (f": {detail[0][:120]}" if detail else ""))
+    return Image.frombytes("RGB", (FRAME_W, FRAME_H), p.stdout[:FRAME_W * FRAME_H * 3])
 
 
 def frame_margin(image, source: str) -> float:
@@ -238,12 +244,12 @@ def frame_margin(image, source: str) -> float:
 
 
 def segment_ok(path: Path, source: str) -> bool:
-    from .semantic import _frame
     margins = []
     for at in (0.4, SEGMENT_SECONDS / 2, SEGMENT_SECONDS - 0.6):
         try:
-            margins.append(frame_margin(_frame(path, at), source))
-        except (OSError, ValueError, subprocess.SubprocessError):
+            margins.append(frame_margin(_remote_frame(str(path), at), source))
+        except (OSError, ValueError, subprocess.SubprocessError) as exc:
+            print(f"Archive segment frame unavailable: {type(exc).__name__}")
             return False
     return all(m == m and m > 0.0 for m in margins) and sum(margins) / len(margins) >= MIN_MARGIN
 
@@ -260,8 +266,12 @@ def best_offset(url: str, duration: float, source: str, key: str) -> tuple[float
     for at in spots:
         try:
             margin = frame_margin(_remote_frame(url, at + SEGMENT_SECONDS / 2), source)
-        except (OSError, ValueError, subprocess.SubprocessError):
+        except (OSError, ValueError, subprocess.SubprocessError) as exc:
+            print(f"Archive frame unavailable at {at:.0f}s: {type(exc).__name__}: {str(exc)[:140]}")
             continue
+        if margin != margin:
+            print("Archive check needs OpenCLIP; model unavailable")
+            break
         if margin == margin and margin > best[1]:  # skip NaN (no model)
             best = (at, margin)
     return (best[0], best[1]) if best[1] >= MIN_MARGIN else (None, best[1])
