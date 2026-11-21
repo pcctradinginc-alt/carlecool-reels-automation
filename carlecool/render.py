@@ -22,6 +22,8 @@ from .music_structure import align_to_structure
 
 
 FRAMED_UPSCALE_LIMIT = 3.0  # crop upscale beyond this → framed presentation
+LOOP_BRIDGE_SECONDS = 0.38   # cover card fading out at the start (matches the last frame)
+LOOP_CROSSFADE = 0.25        # audio: the end blends into the bar just before the start
 
 
 def _run(args):
@@ -125,11 +127,37 @@ def loudness_filter(audio: Path, start: float, length: float) -> str:
             f"measured_thresh={thresh}:offset={offset}:linear=true")
 
 
+def loop_audio_graph(audio: Path, start: float, length: float) -> str:
+    """Excerpt audio whose end flows straight back into its start (seamless loop).
+
+    The last LOOP_CROSSFADE s are an equal-power crossfade from the music's continuation
+    into the audio just BEFORE the excerpt start. When the platform jumps back to 0:00,
+    the song therefore continues exactly as it would have — no fade-out dip, no click,
+    no gap. Loudness is normalised afterwards (two-pass, −14 LUFS).
+    """
+    norm = loudness_filter(audio, start, length)
+    fade = min(LOOP_CROSSFADE, start, length / 4)
+    end = start + length
+    if fade < 0.02:  # excerpt starts at 0:00 — nothing before it; just avoid clicks
+        return (f"[1:a]atrim=start={start:.4f}:end={end:.4f},asetpts=PTS-STARTPTS,aresample=48000,"
+                f"afade=t=in:d=0.005,afade=t=out:st={length - 0.01:.4f}:d=0.01,{norm},"
+                f"aresample=48000[a]")
+    return (f"[1:a]aresample=48000,asplit=2[s1][s2];"
+            f"[s1]atrim=start={start:.4f}:end={end:.4f},asetpts=PTS-STARTPTS,asplit=2[m1][m2];"
+            f"[m1]atrim=end={length - fade:.4f}[head];"
+            f"[m2]atrim=start={length - fade:.4f},asetpts=PTS-STARTPTS,afade=t=out:d={fade:.4f}:curve=qsin[tail];"
+            f"[s2]atrim=start={start - fade:.4f}:end={start:.4f},asetpts=PTS-STARTPTS,"
+            f"afade=t=in:d={fade:.4f}:curve=qsin[pre];"
+            f"[tail][pre]amix=inputs=2:normalize=0:duration=first[seam];"
+            f"[head][seam]concat=n=2:v=0:a=1,{norm},aresample=48000[a]")
+
+
 def plan_intervals(features: AudioFeatures, length: float, pace: str) -> list[float]:
     beats = getattr(features, "beats", ())
     if beats and getattr(features, "beat_energy", ()):
         intervals = plan_cuts_from_beats(length, beats, features.downbeats, features.beat_energy,
-                                         pace=pace, hook_at=getattr(features, "hook_at", 0.0))
+                                         pace=pace, hook_at=getattr(features, "hook_at", 0.0),
+                                         kicks=getattr(features, "kicks", ()))
     else:
         intervals = plan_cuts(float(length), float(features.bpm), pace=pace,
                               beat_phase=getattr(features, "beat_phase", 0.0))
@@ -172,6 +200,17 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     if signature_slots and len(base) < len(videos):
         from .signature import place_signature_shots
         storyboard = place_signature_shots(storyboard, source_durations, dict(signature_slots))
+    # Picture follows the music: calm clips on quiet passages, moving clips on the loud ones.
+    from . import look as look_mod
+    motion_matched = False
+    if os.getenv("CARLECOOL_MOTION_MATCH", "true").lower() in ("true", "1", "yes", "on") and len(storyboard) > 3:
+        motion = [look_mod.motion_score(p) for p in videos]
+        starts0 = [sum(sh.duration for sh in storyboard[:i]) for i in range(len(storyboard))]
+        energies = [look_mod.shot_energy(features, a, sh.duration) for a, sh in zip(starts0, storyboard)]
+        locked = {0, len(storyboard) - 1} | {i for i, sh in enumerate(storyboard) if sh.source_index in reserved}
+        matched = look_mod.match_motion(storyboard, energies, motion, source_durations, locked)
+        motion_matched = matched != storyboard
+        storyboard = matched
     from .grading import cover_luts
     luts = cover_luts(cover, videos, work)
     level = analog / 100.0
@@ -193,6 +232,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             card = make_title_card(title_card[0], title_card[1], width, height, work / "title_card.png")
             card_seconds = TITLE_SECONDS
     card_start = max(0.0, length - card_seconds) if card is not None else None
+    loop_bridge = (card is not None and card.name == "cover_card.png" and length > 6
+                   and os.getenv("CARLECOOL_LOOP_BRIDGE", "true").lower() in ("true", "1", "yes", "on"))
     # Cover frame for Instagram/TikTok: the end card fully faded in, just before the loop.
     cover_frame_ms = int(round(max(0.0, length - 0.5) * 1000)) if card is not None else None
     # Content-aware 9:16 reframing for landscape sources (decoded once per source).
@@ -208,7 +249,6 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     framed = 0
     files = []
     shot_start = 0.0
-    from . import look as look_mod
     starts = [sum(s.duration for s in storyboard[:i]) for i in range(len(storyboard))]
     shot_look = look_mod.plan_look(look, features, starts, [s.duration for s in storyboard],
                                    seed=str(features.excerpt_start))
@@ -286,6 +326,12 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                              f"format=rgba,{flip}fade=t=in:st=0:d=0.25:alpha=1,fade=t=out:st=0.45:d=0.5:alpha=1",
                              "overlay=0:0"))
             leaks += 1
+        if index == 0 and loop_bridge:
+            # Seamless loop: the Reel ends on the cover card and opens on it too, dissolving
+            # into the first shot — the repeat on TikTok/Instagram shows no jump or gap.
+            overlays.append((["-loop", "1", "-framerate", str(FPS), "-i", str(card)],
+                             f"format=rgba,fade=t=out:st=0.04:d={LOOP_BRIDGE_SECONDS:.2f}:alpha=1",
+                             "overlay=0:0"))
         if card_start is not None and shot_end + tail > card_start + 1e-3:
             # Title card fades in over the last ~2 s, after grain so the text stays crisp.
             local = max(0.0, card_start - shot_start)
@@ -330,14 +376,11 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     else:
         _run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0",
               "-i", str(concat_path), "-c", "copy", str(video_only)])
-    fade_out = min(0.35, length / 10)
     _run([
-        "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(video_only),
-        "-ss", f"{features.excerpt_start:.3f}", "-i", str(audio),
-        "-map", "0:v:0", "-map", "1:a:0", "-t", f"{length:.3f}",
+        "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(video_only), "-i", str(audio),
+        "-filter_complex", loop_audio_graph(audio, features.excerpt_start, length),
+        "-map", "0:v:0", "-map", "[a]", "-t", f"{length:.3f}",
         "-c:v", "copy", "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-ac", "2",
-        "-af", (f"{loudness_filter(audio, features.excerpt_start, length)},afade=t=in:st=0:d=0.05,"
-                f"afade=t=out:st={length - fade_out:.3f}:d={fade_out:.3f}"),
         "-movflags", "+faststart", "-shortest", str(output),
     ])
     compressed_for_email = False
@@ -363,6 +406,9 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "title_card": card is not None,
             "cover_endcard": card is not None and card.name == "cover_card.png",
             "cover_frame_ms": cover_frame_ms,
+            "motion_matched": motion_matched,
+            "seamless_loop": {"audio_crossfade": round(min(LOOP_CROSSFADE, features.excerpt_start, length / 4), 3),
+                              "cover_bridge": loop_bridge},
             "smart_cropped_shots": reframed,
             "dissolves": sum(1 for d in dissolves if d > 0), "slowmo_shots": slowed,
             "light_leaks": leaks, "punch_ins": punched,

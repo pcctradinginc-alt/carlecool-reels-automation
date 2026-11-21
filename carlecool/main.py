@@ -149,16 +149,17 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         trend_signals = fetch_signals()
         keywords = apply_trend(keywords, trend_signals)
     print(f"Video search phrases: {keywords}")
-    candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=24, keywords=keywords)
+    candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=32, keywords=keywords)
     from .curation import rank_candidates
-    candidates, prerank = rank_candidates(candidates, cover, output_dir / "thumbs", keep=10)
+    candidates, prerank = rank_candidates(candidates, cover, output_dir / "thumbs", keep=14)
     if prerank:
         print(f"Pre-download ranking kept {len(prerank)} of the candidate clips")
     from .render import is_portrait
     from .video import MIN_PORTRAIT_CLIPS, allow_landscape
     selected = []
     paths = []
-    stock_limit = 7
+    # ~30 s Reels have 12–18 shots: enough distinct clips that none repeats too often.
+    stock_limit = int(round(7 + max(0.0, reel_length - 15) / 4))
     landscape_reserve = []  # downloaded landscape clips, used only to fill up
 
     def accept(video, path):

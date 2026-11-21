@@ -27,11 +27,14 @@ def _click_track(bpm=120.0, seconds=40, sr=22050, lift_at=20.0):
     return (gain * (0.6 * kick * accent + hat)).astype(np.float32)
 
 
-def test_reel_length_is_whole_bars_between_8_and_15_seconds():
-    for bpm in (70, 90, 120, 128, 140, 174):
+def test_reel_length_is_about_30_seconds_in_whole_phrases():
+    for bpm in (70, 90, 96, 120, 128, 140, 152, 174):
         length, bars = analysis.choose_reel_length(bpm)
-        assert 8 - 1e-6 <= length <= 15 + 1e-6
+        assert 24 - 1e-6 <= length <= 34 + 1e-6
+        assert bars % 4 == 0  # whole 4-bar phrases: the end runs straight into the start
         assert bars and math.isclose(length, bars * 240 / bpm, abs_tol=0.01)
+    assert analysis.choose_reel_length(120) == (32.0, 16)
+    assert analysis.choose_reel_length(96) == (30.0, 12)
 
 
 pytest.importorskip("librosa")
@@ -42,7 +45,7 @@ def test_librosa_features_beats_downbeats_and_early_hook():
     features = analysis._librosa_features(_click_track(), sr, 15, "Electronic", None)
     assert features.analyzer == "librosa"
     assert 112 <= features.bpm <= 128
-    assert 8 <= features.reel_length <= 15
+    assert 9 <= features.reel_length <= 19  # target 15 → whole phrases around it
     assert len(features.beats) == len(features.beat_energy) >= 12
     assert all(b < features.reel_length for b in features.beats)
     # Downbeats every 4 beats, and the energy lift arrives in the first ~3 s.
@@ -249,3 +252,52 @@ def test_slow_song_uses_half_bars_not_five_second_shots():
     beats = tuple(round(i * beat, 4) for i in range(16))
     cuts = plan_cuts_from_beats(10.0, beats, beats[::4], (0.9,) * 16, pace="medium", hook_at=4 * beat)
     assert len(cuts) >= 6 and max(cuts) <= 3.3
+
+
+def test_cuts_snap_to_the_audible_kick():
+    beats, downs, energy = _timeline(seconds=16.0)
+    kicks = [d + 0.03 for d in downs]  # real hit 30 ms after the tracked grid
+    cuts = plan_cuts_from_beats(16.0, beats, downs, energy, pace="medium", hook_at=8.0, kicks=kicks)
+    edges = list(np.cumsum(cuts)[:-1])
+    assert all(any(abs(e + 1 / FPS - k) < 1e-3 for k in kicks) for e in edges)
+    far = [d + 0.1 for d in downs]  # too far away: keep the grid
+    cuts = plan_cuts_from_beats(16.0, beats, downs, energy, pace="medium", hook_at=8.0, kicks=far)
+    assert all(any(abs(e + 1 / FPS - d) < 1e-3 for d in downs) for e in np.cumsum(cuts)[:-1])
+
+
+def test_motion_matching_puts_moving_clips_on_loud_passages():
+    from carlecool.cinematic import Shot
+    from carlecool.look import match_motion
+    shots = [Shot(0, 0, 2), Shot(1, 0, 2), Shot(2, 0, 2), Shot(3, 0, 2), Shot(0, 2, 2)]
+    energies = [0.5, 0.95, 0.1, 0.9, 0.5]
+    motion = [5.0, 1.0, 9.0, 4.0]  # source 2 moves most, source 1 is calm
+    out = match_motion(shots, energies, motion, [20.0] * 4, locked={0, 4})
+    assert out[0] == shots[0] and out[4] == shots[4]
+    assert out[1].source_index == 2 and out[2].source_index == 1 and out[3].source_index == 3
+    assert all(a.source_index != b.source_index for a, b in zip(out, out[1:]))
+    assert match_motion(shots, energies, [-1.0] * 4, [20.0] * 4, locked={0, 4}) == shots
+
+
+def test_audio_end_flows_seamlessly_into_the_start(tmp_path):
+    import subprocess
+    from carlecool.render import loop_audio_graph
+    song = tmp_path / "song.wav"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "sine=f=201.3:d=12:sample_rate=48000",
+                    "-ac", "2", str(song)], check=True)
+    out = tmp_path / "loop.wav"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "color=s=16x16:d=8", "-i", str(song),
+                    "-filter_complex", loop_audio_graph(song, 2.0, 8.0), "-map", "[a]", "-t", "8",
+                    "-ac", "1", "-ar", "48000", str(out)], check=True)
+    pcm = subprocess.run(["ffmpeg", "-v", "error", "-i", str(out), "-f", "s16le", "-ac", "1", "-"],
+                         capture_output=True, check=True).stdout
+    x = np.frombuffer(pcm, dtype=np.int16).astype(np.float64)
+    assert abs(len(x) / 48000 - 8.0) < 0.03
+    rms = lambda a: float(np.sqrt(np.mean(a ** 2)))
+    # No fade-out dip at the end: the last 50 ms are as loud as the middle.
+    assert rms(x[-2400:]) > 0.8 * rms(x[len(x) // 2:len(x) // 2 + 2400])
+    # The end IS the music right before the excerpt start, so the repeat continues it.
+    src = np.frombuffer(subprocess.run(["ffmpeg", "-v", "error", "-i", str(song), "-f", "s16le", "-ac", "1", "-"],
+                                       capture_output=True, check=True).stdout, dtype=np.int16).astype(np.float64)
+    before = src[2 * 48000 - 960:2 * 48000]
+    corr = float(np.dot(x[-960:], before) / (np.linalg.norm(x[-960:]) * np.linalg.norm(before)))
+    assert corr > 0.99

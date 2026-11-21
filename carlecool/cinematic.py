@@ -87,13 +87,14 @@ def plan_cuts_from_beats(duration: float, beats: tuple[float, ...] | list[float]
                          downbeats: tuple[float, ...] | list[float],
                          beat_energy: tuple[float, ...] | list[float], *,
                          pace: str = "medium", hook_at: float = 0.0,
-                         min_shot: float = 0.9) -> list[float]:
+                         min_shot: float = 0.9, kicks: tuple[float, ...] | list[float] = ()) -> list[float]:
     """Bar-based, energy-aware cut plan.
 
     * Cuts land on bar starts (downbeats); a half-bar only in `fast` pace at peaks.
     * Calm bars → 2-bar shots, energetic bars → 1-bar shots (medium pace).
     * A cut is always placed on the hook's downbeat so picture and drop change together.
     * Very fast songs (>140 BPM) are treated in half-time: their bars are short anyway.
+    * A cut snaps to the audible hit (onset) when it is within 40 ms of the tracked grid.
     * Each cut is pulled one frame early so the new image registers with the kick.
     Falls back to the beat grid planner when no usable bar grid exists.
     """
@@ -149,6 +150,13 @@ def plan_cuts_from_beats(duration: float, beats: tuple[float, ...] | list[float]
             nxt = min((g for g in grid if g - t >= min_shot - 1e-6), default=duration)
         t = nxt
     frame = 1.0 / FPS
+    kick_list = sorted(float(k) for k in kicks if 0 < k < duration)
+    if kick_list:
+        snapped = [boundaries[0]]
+        for b in boundaries[1:]:
+            near = min(kick_list, key=lambda k: abs(k - b))
+            snapped.append(near if abs(near - b) <= 0.04 else b)
+        boundaries = snapped
     edges = [b - frame if b - frame > 0 else b for b in boundaries[1:]]  # one frame early
     points = [0.0] + [e for e in edges if 0 < e < duration] + [float(duration)]
     out = [round(b - a, 4) for a, b in zip(points, points[1:]) if b - a > 1e-6]

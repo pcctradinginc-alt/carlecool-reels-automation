@@ -131,3 +131,54 @@ def join_graph(durations: list[float], dissolves: list[float]) -> tuple[str, str
         cur, pos = out, pos + float(durations[i])
     lines.append(f"[{cur}]format=yuv420p[joined]")  # xfade may hand out 4:4:4
     return ";".join(lines), "joined"
+
+
+def motion_score(path: Path, *, seconds: float = 8.0, size: tuple[int, int] = (48, 84)) -> float:
+    """Mean absolute frame difference (0–255) of a tiny greyscale preview; −1 if unknown."""
+    import numpy as np
+    w, h = size
+    try:
+        p = subprocess.run(["ffmpeg", "-v", "error", "-t", f"{seconds:.1f}", "-i", str(path), "-vf",
+                            f"fps=6,scale={w}:{h},format=gray", "-f", "rawvideo", "-pix_fmt", "gray", "-"],
+                           capture_output=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return -1.0
+    count = len(p.stdout) // (w * h)
+    if count < 3:
+        return -1.0
+    frames = np.frombuffer(p.stdout[:count * w * h], dtype=np.uint8).reshape(count, h, w).astype(np.float32)
+    return float(np.mean(np.abs(np.diff(frames, axis=0))))
+
+
+def match_motion(shots, energies: list[float], motion: list[float], source_durations: list[float],
+                 locked: set[int]):
+    """Give the loudest passages the most moving clips and the quiet ones the calm clips.
+
+    Only re-pairs sources among the unlocked interior shots (bookends and signature shots
+    stay); never puts the same source in two adjacent shots; offsets are re-derived so
+    each source still advances through its footage.
+    """
+    from .cinematic import Shot
+    free = [i for i in range(len(shots)) if i not in locked]
+    if len(free) < 2 or any(m < 0 for m in (motion[shots[i].source_index] for i in free)):
+        return list(shots)
+    pool = sorted((shots[i].source_index for i in free), key=lambda src: -motion[src])
+    order = sorted(free, key=lambda i: -energies[i])
+    assigned: dict[int, int] = {}
+    for i in order:
+        neighbours = {shots[j].source_index for j in (i - 1, i + 1) if j in locked and 0 <= j < len(shots)}
+        neighbours |= {assigned[j] for j in (i - 1, i + 1) if j in assigned}
+        pick = next((k for k, src in enumerate(pool) if src not in neighbours), 0)
+        assigned[i] = pool.pop(pick)
+    out = list(shots)
+    used: dict[int, float] = {}
+    for i in range(len(out)):
+        src = assigned.get(i, out[i].source_index)
+        length = out[i].duration
+        if i in assigned:
+            room = max(0.0, source_durations[src] - length)
+            offset = used.get(src, 0.0)
+            offset = offset if offset <= room else 0.0
+            out[i] = Shot(src, round(offset, 3), length)
+        used[src] = out[i].source_offset + max(0.5, length)
+    return out

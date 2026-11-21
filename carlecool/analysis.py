@@ -16,7 +16,8 @@ import numpy as np
 from .music_structure import detect_structure
 
 MIN_REEL = 8.0
-MAX_REEL = 15.0
+MAX_REEL = 40.0
+TARGET_REEL = 30.0  # ~30 s Reels in whole musical phrases
 
 
 @dataclass(frozen=True)
@@ -35,6 +36,7 @@ class AudioFeatures:
     reel_length: float = 0.0  # bar-aligned excerpt length; 0 = caller decides
     hook_at: float = 0.0  # excerpt-relative time of the strongest energy lift
     analyzer: str = "heuristic"
+    kicks: tuple[float, ...] = ()  # excerpt-relative audible onsets (cut snapping)
 
 
 def _decode(path: str, rate: int) -> np.ndarray:
@@ -64,18 +66,23 @@ def _norm(values: np.ndarray) -> np.ndarray:
     return np.clip((values - lo) / (hi - lo), 0.0, 1.0)
 
 
-def choose_reel_length(bpm: float, *, minimum: float = MIN_REEL, maximum: float = MAX_REEL) -> tuple[float, int]:
-    """Longest whole-bar (4/4) length within [minimum, maximum]; prefer even bar counts.
+def choose_reel_length(bpm: float, *, target: float = TARGET_REEL, minimum: float | None = None,
+                       maximum: float | None = None) -> tuple[float, int]:
+    """Whole-bar (4/4) length closest to `target`, preferring whole 4-bar phrases.
 
-    Whole bars make the end land on a downbeat, which loops cleanly into the start.
+    Whole phrases make the end land on the "one" of the next phrase, so when TikTok /
+    Instagram repeat the video the music continues seamlessly into the start.
+    Window: target −6 s … +4 s (24–34 s for the default 30 s).
     """
+    minimum = max(MIN_REEL, target - 6.0) if minimum is None else minimum
+    maximum = min(MAX_REEL, target + 4.0) if maximum is None else maximum
     bar = 4 * 60.0 / max(60.0, min(200.0, bpm))
     options = [n for n in range(1, 64) if minimum - 1e-6 <= n * bar <= maximum + 1e-6]
     if not options:
         # Extremely slow tempo: one bar is longer than the window; use the window.
         return float(maximum), 0
-    even = [n for n in options if n % 2 == 0]
-    bars = max(even or options)
+    phrases = [n for n in options if n % 4 == 0] or [n for n in options if n % 2 == 0] or options
+    bars = min(phrases, key=lambda n: (abs(n * bar - target), -n))
     return round(bars * bar, 3), bars
 
 
@@ -155,9 +162,13 @@ def _librosa_features(y22: np.ndarray, sr: int, max_seconds: float, genre: str,
     per_beat = np.array([float(np.mean(rms[a:b])) if b > a else float(rms[min(a, len(rms) - 1)])
                          for a, b in zip(beat_frames, list(beat_frames[1:]) + [len(rms)])])
     beat_energy = _norm(per_beat)
-    length, _bars = choose_reel_length(bpm, maximum=max_seconds)
-    if length > track_seconds:
-        raise ValueError(f"Track shorter than {length}s")
+    length, _bars = choose_reel_length(bpm, target=max_seconds)
+    if length > track_seconds - 1.0:
+        # Short track: the longest whole-phrase length that still fits.
+        length, _bars = choose_reel_length(bpm, target=track_seconds - 2.0, minimum=MIN_REEL,
+                                           maximum=max(MIN_REEL, track_seconds - 1.0))
+        if length > track_seconds:
+            raise ValueError(f"Track shorter than {length}s")
     if fixed_start is not None:
         # "Beginning" mode: first downbeat at/after the requested start.
         later = [float(beat_times[i]) for i in downbeat_idx if beat_times[i] >= fixed_start]
@@ -174,12 +185,19 @@ def _librosa_features(y22: np.ndarray, sr: int, max_seconds: float, genre: str,
     clip = y22[int(start * sr):int(end * sr)]
     energy = float(np.clip(np.mean(np.abs(clip)) * 8, 0, 1)) if clip.size else 0.0
     events = detect_structure(clip, sr)
+    # Audible hits (excerpt-relative onsets, same envelope as the beat tracker): cuts snap
+    # onto these when the tracked grid drifts a few ms. (A bass-only detector was tried and
+    # fired 1–2 frames early on the real songs.)
+    onset_frames = librosa.onset.onset_detect(onset_envelope=onset_env, sr=sr, hop_length=hop, backtrack=False)
+    kick_times = librosa.frames_to_time(onset_frames, sr=sr, hop_length=hop)
+    kicks = tuple(round(float(t - start), 4) for t in kick_times if start - 0.05 <= t < end)
     return AudioFeatures(
         bpm=round(bpm, 1), energy=round(energy, 3), excerpt_start=round(start, 3),
         mood=_mood(genre, energy, bpm), seconds=round(track_seconds, 3),
         beat_phase=rel_beats[0] if rel_beats else 0.0, structure_events=events,
         beats=rel_beats, downbeats=rel_downs, beat_energy=rel_energy,
         reel_length=length, hook_at=round(max(0.0, hook - start), 3), analyzer="librosa",
+        kicks=kicks,
     )
 
 
@@ -222,7 +240,7 @@ def _heuristic_features(y: np.ndarray, reel_seconds: float, genre: str) -> Audio
 
 def analyze_audio(path: str, reel_seconds: float, genre: str = "", *,
                   fixed_start: float | None = None) -> AudioFeatures:
-    """Analyze a track; `reel_seconds` is the MAXIMUM Reel length (8–15 s for librosa)."""
+    """Analyze a track; `reel_seconds` is the TARGET Reel length (whole phrases around it)."""
     try:
         import librosa  # noqa: F401
     except ImportError:
