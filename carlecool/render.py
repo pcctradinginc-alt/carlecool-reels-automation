@@ -173,7 +173,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 fit_email: bool = True, title_card: tuple[str, str] | None = None,
                 style_grade: list[str] | None = None,
                 signature_slots: dict[str, int] | None = None,
-                look: dict | None = None) -> dict:
+                look: dict | None = None, opening_pool: set[int] | None = None) -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -197,6 +197,23 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     # rotation and placed exactly once in an interior shot.
     reserved = set((signature_slots or {}).values())
     base = [i for i in range(len(videos)) if i not in reserved] or list(range(len(videos)))
+    from . import look as look_mod
+    motion: list[float] | None = None
+    opening = None
+    if opening_pool:
+        # Strongest clip first: the first second decides whether people keep watching.
+        motion = [look_mod.motion_score(p) for p in videos]
+        early_dims = []
+        for path in videos:
+            try:
+                early_dims.append(probe_dimensions(path))
+            except (RuntimeError, ValueError, subprocess.SubprocessError):
+                early_dims.append((0, 0))
+        opening = look_mod.strongest_opening(
+            [i for i in base if i in opening_pool], motion, early_dims, source_durations)
+        if opening is not None:
+            base = [opening] + [i for i in base if i != opening]
+            no_bookend = set(no_bookend) - {opening}
     storyboard = build_storyboard(intervals, [source_durations[i] for i in base],
                                   seed=str(features.excerpt_start),
                                   no_bookend={base.index(i) for i in no_bookend if i in base})
@@ -206,10 +223,10 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         from .signature import place_signature_shots
         storyboard = place_signature_shots(storyboard, source_durations, dict(signature_slots))
     # Picture follows the music: calm clips on quiet passages, moving clips on the loud ones.
-    from . import look as look_mod
     motion_matched = False
     if os.getenv("CARLECOOL_MOTION_MATCH", "true").lower() in ("true", "1", "yes", "on") and len(storyboard) > 3:
-        motion = [look_mod.motion_score(p) for p in videos]
+        if motion is None:
+            motion = [look_mod.motion_score(p) for p in videos]
         starts0 = [sum(sh.duration for sh in storyboard[:i]) for i in range(len(storyboard))]
         energies = [look_mod.shot_energy(features, a, sh.duration) for a, sh in zip(starts0, storyboard)]
         locked = {0, len(storyboard) - 1} | {i for i, sh in enumerate(storyboard) if sh.source_index in reserved}
@@ -437,7 +454,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "title_card": card is not None,
             "cover_endcard": card is not None and card.name == "cover_card.png",
             "cover_frame_ms": cover_frame_ms,
-            "motion_matched": motion_matched, "loop_sealed": loop_sealed,
+            "motion_matched": motion_matched, "loop_sealed": loop_sealed, "opening_clip": opening,
             "seamless_loop": {"audio_crossfade": round(min(LOOP_CROSSFADE, features.excerpt_start, length / 4), 3),
                               "cover_bridge": loop_bridge},
             "smart_cropped_shots": reframed,

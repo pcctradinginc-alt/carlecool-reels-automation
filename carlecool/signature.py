@@ -28,9 +28,12 @@ import numpy as np
 from .video import Video, _coverr_request, _is_portrait
 
 MEMORY_REELS = 30
-SLOT_POSITION = {"friends": 0.3, "motif": 0.22, "americana": 0.55, "skater": 0.45, "woman": 0.72}
-PRIORITY = ("skater", "friends", "woman", "americana", "motif")
-MAX_ROLES = 4  # searched/downloaded roles per Reel (placement cap is ~half the interior)
+# Owner: more room for friends and Americana; always a US flag; cars = classic Porsche
+# (911 / 993 era) rather than generic cars.
+SLOT_POSITION = {"friends": 0.25, "motif": 0.15, "flag": 0.38, "skater": 0.5, "car": 0.62,
+                 "woman": 0.72, "americana": 0.82, "friends2": 0.9}
+PRIORITY = ("skater", "friends", "flag", "woman", "car", "americana", "friends2", "motif")
+MAX_ROLES = 7  # searched/downloaded roles per Reel (placement cap is ~half the shots)
 
 SKATER_QUERIES = {
     "lana": ("skateboard sunset", "skater silhouette", "skateboard road"),
@@ -45,10 +48,22 @@ FRIENDS_QUERIES = {
     None: ("friends laughing", "friends walking", "friends together"),
 }
 AMERICANA_QUERIES = {
-    "lana": ("neon sign", "motel", "american flag", "vintage car", "diner", "palm trees"),
-    "rubin": ("american flag", "pickup truck", "basketball court", "diner", "empty road", "gas station"),
-    "night": ("neon sign", "motel night", "gas station night", "diner night"),
-    None: ("american flag", "vintage car", "diner"),
+    "lana": ("neon sign", "motel", "diner", "palm trees", "gas station", "jukebox"),
+    "rubin": ("basketball court", "diner", "empty road", "gas station", "parking lot"),
+    "night": ("neon sign", "motel", "gas station", "diner"),
+    None: ("motel", "diner", "neon sign"),
+}
+FLAG_QUERIES = {
+    "lana": ("american flag", "usa flag", "flag waving"),
+    "rubin": ("american flag", "usa flag", "flag"),
+    "night": ("american flag", "usa flag", "flag night"),
+    None: ("american flag", "usa flag", "flag"),
+}
+CAR_QUERIES = {  # a classic Porsche first, then other classics
+    "lana": ("porsche", "porsche 911", "classic car"),
+    "rubin": ("porsche", "classic car", "vintage car"),
+    "night": ("porsche", "classic car", "car night"),
+    None: ("porsche", "classic car", "vintage car"),
 }
 WOMAN_QUERIES = {
     "lana": ("woman field sunset", "woman hair wind", "woman summer"),
@@ -60,7 +75,8 @@ WOMAN_QUERIES = {
 
 def queries_for(role: str, style: str | None, variant: str | None = None) -> tuple[str, ...]:
     table = {"skater": SKATER_QUERIES, "woman": WOMAN_QUERIES, "friends": FRIENDS_QUERIES,
-             "americana": AMERICANA_QUERIES}[role]
+             "friends2": FRIENDS_QUERIES, "americana": AMERICANA_QUERIES, "flag": FLAG_QUERIES,
+             "car": CAR_QUERIES}[role]
     key = "night" if variant == "night" else style
     return tuple(table.get(key, table.get(style, table[None])))
 PROMPTS = {
@@ -96,8 +112,21 @@ PROMPTS = {
         ("a brand logo or an advertisement", "a political rally or a parade with crowds",
          "soldiers or military", "text or a document"),
     ),
+    "flag": (
+        ("an american flag waving in the wind", "a faded us flag on a porch or a pole",
+         "an american flag against the sky at sunset"),
+        ("a political rally or a protest", "soldiers or military", "a crowd at a parade",
+         "a flag of another country", "text or a document"),
+    ),
+    "car": (
+        ("a classic porsche 911 sports car", "a vintage sports car on an open road",
+         "a classic car driving at sunset"),
+        ("a modern suv or minivan", "a car crash or an accident", "a car dealership or showroom",
+         "a traffic jam", "a race track with crowds"),
+    ),
     "motif": None,
 }
+PROMPTS["friends2"] = PROMPTS["friends"]
 FACE_MAX_HEIGHT = 0.12  # frontal face taller than 12 % of the frame → skater rejected
 
 
@@ -146,7 +175,8 @@ def search_slot(api_key: str, queries, *, exclude: set[str], session=None,
 def rank(role: str, candidates: list[Video], workdir: Path) -> list[Video]:
     """Order by CLIP (positive − negative prompt similarity); keyword fallback."""
     prompts = PROMPTS.get(role)
-    keyword = {"skater": "skate", "woman": "woman", "friends": "friend"}.get(role, "")
+    keyword = {"skater": "skate", "woman": "woman", "friends": "friend", "friends2": "friend",
+               "flag": "flag", "car": "porsche"}.get(role, "")
     fallback = sorted(candidates, key=lambda v: (keyword not in " ".join(v.tags + (v.title.lower(),)),
                                                  not v.vertical))
     if not prompts or not candidates:

@@ -234,6 +234,52 @@ def motif_queries(decision: dict) -> tuple[str, ...]:
     return MOTIF_QUERIES.get(decision.get("prompt") or "", ())
 
 
+# Fixed Coverr search words per world (owner: motel, diner, roadtrip, friends at night,
+# flag, neon, classic cars — a classic Porsche 911 / 993 rather than generic cars).
+# Short words only: Coverr matches every word of a query.
+SEARCH_QUERIES = {
+    "lana": ("motel", "diner", "road trip", "friends night", "american flag", "neon sign",
+             "porsche", "classic car", "convertible", "palm trees", "gas station",
+             "summer friends", "desert road", "sunset drive", "jukebox", "retro"),
+    "rubin": ("friends walking", "basketball court", "parking lot", "empty road", "american flag",
+              "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
+              "golden hour", "friends talking", "street"),
+}
+NIGHT_QUERIES = {
+    "lana": ("neon sign", "motel", "diner", "night drive", "friends night", "gas station",
+             "porsche", "city lights", "american flag", "neon"),
+    "rubin": ("friends night", "parking lot", "gas station", "night drive", "street night",
+              "american flag", "porsche", "basketball court"),
+}
+SEARCH_LANES = 5
+# Fallback when a style word finds nothing on Coverr (style words never broaden into
+# generic lane words such as "road" or "nature").
+SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("vintage car",),
+                   "jukebox": ("retro",), "convertible": ("classic car",), "motel": ("motel sign",),
+                   "neon sign": ("neon",), "friends night": ("friends",), "summer friends": ("friends",),
+                   "pickup truck": ("truck",), "american flag": ("flag",), "road trip": ("road",),
+                   "gas station": ("gas station night",), "diner": ("retro diner",)}
+
+
+def search_ladders(words: list[str]) -> dict[str, tuple[str, ...]]:
+    return {w: SEARCH_FALLBACK.get(w, ()) for w in words}
+
+
+def search_queries(decision: dict, run_key: str = "", lanes: int = SEARCH_LANES) -> list[str]:
+    """`lanes` style words for this run, rotated so consecutive Reels search differently;
+    always one car (Porsche / classic car) and the flag in the mix."""
+    import hashlib
+    world = decision.get("style")
+    if world not in SEARCH_QUERIES:
+        return []
+    pool = list((NIGHT_QUERIES if decision.get("variant") == "night" else SEARCH_QUERIES)[world])
+    start = int.from_bytes(hashlib.sha256(f"{run_key}|search".encode()).digest()[:2], "big") % len(pool)
+    pool = pool[start:] + pool[:start]
+    must = [q for q in pool if q in ("porsche", "classic car")][:1] + ["american flag"]
+    rest = [q for q in pool if q not in must and q not in ("porsche", "classic car")]
+    return (must + rest)[:lanes]
+
+
 # Text for the optional AI shot (no artist names, no celebrity likeness, no logos).
 AI_DIRECTION = {
     "lana": ("Small group of European friends aged 18 to 25 in 2026, baggy denim and thrifted "

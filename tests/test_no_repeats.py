@@ -46,3 +46,16 @@ def test_unreadable_clip_is_never_called_a_duplicate(tmp_path):
     bad.write_bytes(b"not a video")
     assert dedupe.signature(bad) is None
     assert not dedupe.same_picture(None, dedupe.Signature([0, 0, 0]))
+
+
+
+def test_strongest_clip_opens_and_can_close_the_loop():
+    from carlecool.look import strongest_opening
+    pool = [0, 1, 2, 3]                      # cover-ranking order
+    motion = [1.0, 9.0, 8.0, 0.5]
+    dims = [(1920, 1080), (3840, 2160), (1280, 720), (1080, 1920)]
+    durations = [12.0, 15.0, 9.0, 20.0]
+    assert strongest_opening(pool, motion, dims, durations) == 1   # lively + sharp
+    durations[1] = 3.0                                              # too short to seal the loop
+    assert strongest_opening(pool, motion, dims, durations) == 0   # best cover match, still lively
+    assert strongest_opening([], motion, dims, durations) is None

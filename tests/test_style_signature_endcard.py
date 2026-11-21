@@ -157,7 +157,9 @@ def test_friends_and_americana_queries_follow_world_and_night():
     assert "friends laughing" in signature.queries_for("friends", "lana")
     assert "friends walking" in signature.queries_for("friends", "rubin")
     assert "friends night" in signature.queries_for("friends", "rubin", "night")
-    assert "american flag" in signature.queries_for("americana", "rubin")
+    assert signature.queries_for("flag", "rubin")[0] == "american flag"
+    assert signature.queries_for("car", "lana")[0] == "porsche"  # classic Porsche first
+    assert "motel" in signature.queries_for("americana", "lana")
     assert "neon sign" in signature.queries_for("americana", "lana", "night")
 
 
@@ -270,3 +272,24 @@ def test_loop_seam_is_frame_exact_and_continuous():
     assert abs(sealed[-1].source_offset + sealed[-1].duration - sealed[0].source_offset) < 1e-3
     short, ok = look.seal_loop(exact, [2.0, 8.0, 8.0])
     assert not ok and short == exact
+
+
+def test_style_search_words_always_include_a_car_and_the_flag():
+    for decision in ({"style": "lana"}, {"style": "rubin"}, {"style": "lana", "variant": "night"}):
+        for key in ("a", "b", "c", "d"):
+            words = style.search_queries(decision, run_key=key)
+            assert len(words) == 5 and "american flag" in words
+            assert any(w in ("porsche", "classic car") for w in words)
+            assert all(len(w.split()) <= 2 for w in words)  # Coverr matches every word
+    ladders = style.search_ladders(["porsche", "motel"])
+    assert ladders["porsche"][0] == "classic car" and "road" not in ladders["motel"]
+    assert style.search_queries({"style": None}) == []
+
+
+def test_more_signature_room_but_bookends_stay():
+    shots = [Shot(i % 2, 0.0, 1.6) for i in range(17)]
+    slots = {"skater": 2, "friends": 3, "flag": 4, "woman": 5, "car": 6, "americana": 7, "friends2": 8}
+    placed = signature.place_signature_shots(shots, [10.0] * 9, slots)
+    used = {s.source_index for s in placed}
+    assert set(slots.values()) <= used  # 7 signature shots fit into 17
+    assert placed[0].source_index < 2 and placed[-1].source_index < 2

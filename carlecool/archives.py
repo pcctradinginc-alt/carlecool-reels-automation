@@ -41,7 +41,7 @@ NASA_QUERIES = {
 }
 PRELINGER_QUERIES = {
     # Amateur films only: real summers, roads and beaches; no ads, no propaganda.
-    "lana": ("amateur film", "home movie"),
+    "lana": ("amateur film", "home movie", "home movies"),
 }
 NASA_EXCLUDE = ("briefing", "conference", "interview", "news", "media", "talk", "lecture",
                 "panel", "podcast", "this week", "live", "tour", "event", "award", "ceremony",
@@ -133,7 +133,7 @@ def nasa_media_url(item: dict, *, session=None) -> str:
     raise ValueError("No usable NASA video rendition")
 
 
-def search_prelinger(queries, exclude: set[str], *, session=None, rows: int = 60) -> list[dict]:
+def search_prelinger(queries, exclude: set[str], *, session=None, rows: int = 150) -> list[dict]:
     session = session or requests.Session()
     terms = " OR ".join(f'title:"{q}"' for q in queries)
     r = session.get(IA_SEARCH, timeout=25, params={

@@ -101,8 +101,9 @@ def _style_line(metadata: dict) -> str:
     if style.get("basis"):
         parts.append(str(style["basis"]))
     signature = metadata.get("signature") or {}
-    for role, name in (("skater", "Skater"), ("friends", "Freunde"), ("woman", "Frau"),
-                       ("americana", "Americana"), ("motif", "Cover-Motiv")):
+    for role, name in (("skater", "Skater"), ("friends", "Freunde"), ("flag", "Flagge"),
+                       ("woman", "Frau"), ("car", "Porsche/Klassiker"), ("americana", "Americana"),
+                       ("motif", "Cover-Motiv")):
         parts.append(f"{name} {'✓' if role in signature else '–'}")
     return " · ".join(parts) + "  (ändern: /revise stil lana|rubin|night|auto)"
 

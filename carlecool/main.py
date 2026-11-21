@@ -24,6 +24,7 @@ from .history import load_preview_history, pick_preview_track, recent_video_ids
 from .video import download_video, gather_videos, fetch_owned_stock, record_coverr_download
 
 MEMORY_REELS = 30  # clips shown in the last 30 preview mails are avoided (fresh ones first)
+PRELINGER_CLIPS = 4  # public-domain home movies per Reel
 
 
 def caption_for(track, videos) -> str:
@@ -150,8 +151,15 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         from .trend_signals import fetch_signals, apply_trend
         trend_signals = fetch_signals()
         keywords = apply_trend(keywords, trend_signals)
+    # Fixed style word lists lead the search (the cover-derived phrases often matched
+    # nothing, e.g. "guitar wood grain notebook paper", and drifted off-style); one
+    # cover/profile phrase stays as the fifth+1 lane.
+    style_words = style_pkg.search_queries(style_decision, run_key=edition)
+    if style_words:
+        keywords = style_words + [k for k in keywords if k not in style_words][:1]
     print(f"Video search phrases: {keywords}")
-    candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=32, keywords=keywords)
+    candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=32, keywords=keywords,
+                               max_lanes=len(keywords), exact=style_pkg.search_ladders(style_words))
     # Across Reels: clips from the last MEMORY_REELS previews are only used when there are
     # not enough fresh ones (no extra Coverr requests: same search, re-ordered).
     long_memory = recent_video_ids(previews, limit=MEMORY_REELS)
@@ -180,7 +188,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         planned_shots = len(plan_intervals(features, reel_length, style_pkg.pace_for(profile["pace"], style_name)))
     except Exception:
         planned_shots = 14
-    stock_limit = max(7, min(16, planned_shots - 3))
+    stock_limit = max(6, min(14, planned_shots - 6))  # + up to 7 signature, 4 Prelinger, 2 Wikimedia
     print(f"Planned shots: {planned_shots}; fetching up to {stock_limit} stock clips")
     landscape_reserve = []  # downloaded landscape clips, used only to fill up
     from .dedupe import Library
@@ -229,8 +237,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         prompt = style_decision.get("prompt") or ""
         archive_key = ("rubin" if style_name == "rubin" and any(w in prompt for w in ("planet", "space", "earth"))
                        else "lana")
-        archival = fetch_archival(archive_key, set(recent_video_ids(previews, limit=30)) | recent,
-                                  output_dir / "archive", run_key=edition)
+        # Owner: the Prelinger home movies are a highlight → up to 4 films per Reel (one
+        # segment each); films from the last 12 Reels are skipped so the pool lasts.
+        archival = fetch_archival(archive_key, set(recent_video_ids(previews, limit=12)) | recent,
+                                  output_dir / "archive", run_key=edition,
+                                  max_clips=PRELINGER_CLIPS, attempts=14)
         from .wikimedia import fetch_wikimedia
         archival += fetch_wikimedia(style_name, set(recent_video_ids(previews, limit=30)) | recent,
                                     output_dir / "wikimedia", run_key=edition)
@@ -290,6 +301,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                     "model": semantic["model"], "scores": semantic["scores"],
                     "themes": semantic["themes"]}
                 print("OpenCLIP semantic cover/frame matching applied")
+    # Strongest clip first: any regular stock clip may open (not archive films, AI or the
+    # signature accents added below).
+    opening_pool = {i for i, v in enumerate(selected) if v.source in ("coverr", "pexels", "owned")}
     # Neither the AI shot nor a centre-cropped landscape clip may open or close the Reel.
     no_bookend = {i for i, v in enumerate(selected) if v.source == "ai"}
     no_bookend |= {i for i, path in enumerate(paths) if path not in portrait_paths and selected[i].source != "ai"}
@@ -303,12 +317,14 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         # Gen Z friends + Americana belong to both style worlds; priority order, and the
         # search stops once enough roles are filled (Coverr allows ~50 requests/hour).
         roles = [(role, signature.queries_for(role, style_name, style_variant))
-                 for role in ("skater", "friends", "woman", "americana")]
+                 for role in ("skater", "friends", "flag", "woman", "car", "americana", "friends2")]
         roles.append(("motif", style_pkg.motif_queries(style_decision)))
         for role, queries in roles:
             if not queries or len(signature_slots) >= signature.MAX_ROLES:
                 continue
-            ordered = queries if role == "motif" else signature._rotate(tuple(queries), f"{edition}|{role}")
+            # Fixed order where the first query matters (flag, Porsche), rotated otherwise.
+            ordered = (list(queries) if role in ("motif", "flag", "car")
+                       else signature._rotate(tuple(queries), f"{edition}|{role}"))
             found = signature.rank(role, signature.search_slot(config.coverr_key, ordered, exclude=exclude,
                                                                role=role), output_dir / "thumbs")
             for video in found[:3]:
@@ -363,7 +379,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                               no_bookend=no_bookend, fit_email=not masterstore.configured(),
                               title_card=title_card,
                               style_grade=style_pkg.grade_filters(style_name, style_variant),
-                              signature_slots=signature_slots, look=style_pkg.look(style_name))
+                              signature_slots=signature_slots, look=style_pkg.look(style_name),
+                              opening_pool=opening_pool)
     finally:
         if cover is not None:
             cover.unlink(missing_ok=True)
@@ -386,6 +403,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "output": str(out), "sha256": hashlib.sha256(out.read_bytes()).hexdigest(), **details,
     }
     (output_dir / "reel_metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
+    if details.get("opening_clip") is not None:
+        print(f"Opening clip (strongest): {selected[details['opening_clip']].id}"
+              f" '{selected[details['opening_clip']].title[:50]}'")
     print(f"Rendered preview: {out} ({details['scenes']} beat-aligned scenes)")
     print("Preview mode: no Instagram API call, no state change")
 

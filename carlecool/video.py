@@ -234,7 +234,8 @@ def _coverr_request(session, key: str, query: str, page_size: int):
 
 
 def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8, *,
-                  keywords=None, page_size: int = 40, per_lane_minimum: int = 4) -> list[Video]:
+                  keywords=None, page_size: int = 40, per_lane_minimum: int = 4,
+                  max_lanes: int = 3, exact: dict[str, tuple[str, ...]] | None = None) -> list[Video]:
     """Search Coverr with the real art-direction phrase, portrait clips only.
 
     Per lane: full phrase, then its 1–2 word core, then the broad lane word — each
@@ -247,11 +248,14 @@ def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8,
     seen = set()
     per_lane = []
     stop = False
-    for editorial in (keywords if keywords is not None else select_keywords(mood))[:3]:
+    for editorial in (keywords if keywords is not None else select_keywords(mood))[:max_lanes]:
         if stop:
             break
         lane = []
-        for attempt, query in enumerate(query_ladder(editorial)):
+        # Style search terms are already Coverr words: no broad fallback ("motel" must not
+        # turn into generic "road" clips).
+        ladder = [editorial, *exact[editorial]] if exact and editorial in exact else query_ladder(editorial)
+        for attempt, query in enumerate(ladder):
             # Stop descending once this lane has enough on-style material.
             if attempt and (sum(1 for v in lane if v.vertical) >= per_lane_minimum
                             or len(lane) >= 2 * per_lane_minimum):
@@ -327,7 +331,8 @@ def fallback_videos(recent: set[str]) -> list[Video]:
     return sorted(videos, key=lambda v: v.id in recent)
 
 
-def gather_videos(key: str, mood: str, recent: set[str], wanted=8, *, keywords=None) -> list[Video]:
+def gather_videos(key: str, mood: str, recent: set[str], wanted=8, *, keywords=None,
+                  max_lanes: int = 3, exact: dict[str, tuple[str, ...]] | None = None) -> list[Video]:
     """Pexels portrait clips first (if PEXELS_API_KEY is set), then Coverr, then owned stock."""
     from . import pexels
     phrases = list(keywords if keywords is not None else select_keywords(mood))
@@ -339,7 +344,8 @@ def gather_videos(key: str, mood: str, recent: set[str], wanted=8, *, keywords=N
         except (requests.RequestException, RuntimeError, ValueError) as exc:
             print(f"Pexels unavailable; continuing with Coverr: {type(exc).__name__}")
     try:
-        selected += search_coverr(key, mood, recent, wanted=wanted, keywords=phrases)
+        selected += search_coverr(key, mood, recent, wanted=wanted, keywords=phrases,
+                                  max_lanes=max_lanes, exact=exact)
     except (requests.RequestException, RuntimeError, ValueError) as exc:
         print(f"Coverr unavailable; using licensed local fallback: {type(exc).__name__}")
     # Keep fallback candidates even if providers return metadata but downloads fail.

@@ -224,3 +224,28 @@ def seal_loop(shots, source_durations: list[float]):
     out[0] = Shot(first.source_index, round(start, 4), first.duration)
     out[-1] = Shot(first.source_index, round(start - last.duration, 4), last.duration)
     return out, True
+
+
+def strongest_opening(pool: list[int], motion: list[float], dims: list[tuple[int, int]],
+                      durations: list[float], *, min_seconds: float = 6.0) -> int | None:
+    """Opening clip: lively, sharp, well matched to the cover — and long enough to also
+    close the loop (seal_loop takes the footage just before the opening shot).
+
+    `pool` is in cover-ranking order (best match first). Score = 45 % motion rank +
+    35 % cover rank + 20 % resolution rank.
+    """
+    usable = [i for i in pool if durations[i] >= min_seconds] or list(pool)
+    if not usable:
+        return None
+    if len(usable) == 1:
+        return usable[0]
+
+    def ranks(values: list[float]) -> dict[int, float]:
+        order = sorted(range(len(usable)), key=lambda k: values[k])
+        return {usable[k]: pos / (len(usable) - 1) for pos, k in enumerate(order)}
+
+    move = ranks([max(0.0, motion[i]) for i in usable])
+    cover = {i: 1 - pos / (len(usable) - 1) for pos, i in enumerate(usable)}
+    sharp = ranks([float(min(dims[i][0], dims[i][1] * 9 / 16) if dims[i][0] > dims[i][1] else dims[i][0])
+                   for i in usable])
+    return max(usable, key=lambda i: (0.45 * move[i] + 0.35 * cover[i] + 0.2 * sharp[i], -usable.index(i)))
