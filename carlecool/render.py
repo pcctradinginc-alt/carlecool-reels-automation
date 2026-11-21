@@ -24,6 +24,7 @@ from .music_structure import align_to_structure
 FRAMED_UPSCALE_LIMIT = 3.0  # crop upscale beyond this → framed presentation
 LOOP_BRIDGE_SECONDS = 0.38   # cover card fading out at the start (matches the last frame)
 LOOP_CROSSFADE = 0.25        # audio: the end blends into the bar just before the start
+CARD_OUT = 0.4               # cover card fades out before the end → last frame = clean footage
 
 
 def _run(args):
@@ -136,12 +137,13 @@ def loop_audio_graph(audio: Path, start: float, length: float) -> str:
     no gap. Loudness is normalised afterwards (two-pass, −14 LUFS).
     """
     norm = loudness_filter(audio, start, length)
+    samples = int(round(length * 48000))  # sample-exact: 2000 samples per 24 fps frame
     fade = min(LOOP_CROSSFADE, start, length / 4)
     end = start + length
     if fade < 0.02:  # excerpt starts at 0:00 — nothing before it; just avoid clicks
         return (f"[1:a]atrim=start={start:.4f}:end={end:.4f},asetpts=PTS-STARTPTS,aresample=48000,"
                 f"afade=t=in:d=0.005,afade=t=out:st={length - 0.01:.4f}:d=0.01,{norm},"
-                f"aresample=48000[a]")
+                f"aresample=48000,apad=whole_len={samples},atrim=end_sample={samples}[a]")
     return (f"[1:a]aresample=48000,asplit=2[s1][s2];"
             f"[s1]atrim=start={start:.4f}:end={end:.4f},asetpts=PTS-STARTPTS,asplit=2[m1][m2];"
             f"[m1]atrim=end={length - fade:.4f}[head];"
@@ -149,7 +151,7 @@ def loop_audio_graph(audio: Path, start: float, length: float) -> str:
             f"[s2]atrim=start={start - fade:.4f}:end={start:.4f},asetpts=PTS-STARTPTS,"
             f"afade=t=in:d={fade:.4f}:curve=qsin[pre];"
             f"[tail][pre]amix=inputs=2:normalize=0:duration=first[seam];"
-            f"[head][seam]concat=n=2:v=0:a=1,{norm},aresample=48000[a]")
+            f"[head][seam]concat=n=2:v=0:a=1,{norm},aresample=48000,apad=whole_len={samples},atrim=end_sample={samples}[a]")
 
 
 def plan_intervals(features: AudioFeatures, length: float, pace: str) -> list[float]:
@@ -183,7 +185,10 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         raise ValueError('Only 1080x1920 production or 270x480 offline test rendering permitted')
     if pace not in ("slow", "medium", "fast") or type(analog) is not int or not 0 <= analog <= 100:
         raise ValueError("Invalid creative editing controls")
-    length = float(length)
+    # Frame-exact length: picture and sound end on the same sample (2000 samples/frame at
+    # 48 kHz), so the loop point has no freeze and no silent gap.
+    total_frames = max(1, int(round(float(length) * FPS)))
+    length = total_frames / FPS
     intervals = plan_intervals(features, length, pace)
     source_durations = [probe_duration(path) for path in videos]
     if any(d < 1.0 for d in source_durations):
@@ -211,6 +216,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         matched = look_mod.match_motion(storyboard, energies, motion, source_durations, locked)
         motion_matched = matched != storyboard
         storyboard = matched
+    storyboard = look_mod.frame_exact(storyboard, total_frames, FPS)
+    storyboard, loop_sealed = look_mod.seal_loop(storyboard, source_durations)
     from .grading import cover_luts
     luts = cover_luts(cover, videos, work)
     level = analog / 100.0
@@ -237,8 +244,13 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     # bridge is opt-in (CARLECOOL_LOOP_BRIDGE=on).
     loop_bridge = (card is not None and card.name == "cover_card.png" and length > 6
                    and os.getenv("CARLECOOL_LOOP_BRIDGE", "off").lower() in ("true", "1", "yes", "on"))
-    # Cover frame for Instagram/TikTok: the end card fully faded in, just before the loop.
-    cover_frame_ms = int(round(max(0.0, length - 0.5) * 1000)) if card is not None else None
+    # Preview image on Instagram/TikTok. Owner feedback: with the cover frame as preview the
+    # platforms showed the cover BEFORE the video started. Default: the first image.
+    thumbnail = os.getenv("CARLECOOL_THUMBNAIL", "start").strip().lower()
+    if thumbnail == "cover" and card is not None:
+        cover_frame_ms = int(round(max(0.0, length - CARD_OUT - 0.6) * 1000))
+    else:
+        cover_frame_ms = 0
     # Content-aware 9:16 reframing for landscape sources (decoded once per source).
     from . import reframe
     dims = []
@@ -283,7 +295,15 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             try:
                 if shot.source_index not in samples:
                     samples[shot.source_index] = reframe.FrameSamples.decode(source, src_w, src_h)
-                crop = reframe.plan_crop(samples[shot.source_index], shot.source_offset, shot.duration)
+                if loop_sealed and index in (0, len(storyboard) - 1):
+                    # One fixed window for both halves of the loop seam (no jump in framing).
+                    last, first = storyboard[-1], storyboard[0]
+                    span = reframe.plan_crop(samples[shot.source_index], last.source_offset,
+                                             last.duration + first.duration)
+                    x = (span.x_start + span.x_end) // 2
+                    crop = reframe.Crop(span.width, x, x)
+                else:
+                    crop = reframe.plan_crop(samples[shot.source_index], shot.source_offset, shot.duration)
                 smart = [reframe.crop_filter(crop, src_h, shot.duration),
                          f"scale={width}:{height}:flags=lanczos"]
                 reframed += 1
@@ -339,6 +359,11 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             # Title card fades in over the last ~2 s, after grain so the text stays crisp.
             local = max(0.0, card_start - shot_start)
             fade = "" if card_start < shot_start - 1e-3 else f",fade=t=in:st={local:.3f}:d=0.35:alpha=1"
+            out_at = length - CARD_OUT - shot_start
+            if out_at < shot_end + tail - shot_start and length > 6:
+                # Cover only at the end, and gone again by the last frame: the final image is
+                # the footage that continues straight into 0:00.
+                fade += f",fade=t=out:st={max(0.0, out_at):.3f}:d={CARD_OUT - 0.05:.3f}:alpha=1"
             overlays.append((["-loop", "1", "-framerate", str(FPS), "-i", str(card)],
                              f"format=rgba{fade}", f"overlay=0:0:enable='gte(t,{local:.3f})'"))
         if overlays:
@@ -382,9 +407,12 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     _run([
         "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(video_only), "-i", str(audio),
         "-filter_complex", loop_audio_graph(audio, features.excerpt_start, length),
-        "-map", "0:v:0", "-map", "[a]", "-t", f"{length:.3f}",
+        # Exact frame count, no "-t": a rounded -t dropped the last frame (video 1 frame
+        # shorter than the audio → a hitch at the loop point). The audio graph is trimmed
+        # to exactly the same length.
+        "-map", "0:v:0", "-map", "[a]", "-frames:v", str(total_frames),
         "-c:v", "copy", "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-ac", "2",
-        "-movflags", "+faststart", "-shortest", str(output),
+        "-movflags", "+faststart", str(output),
     ])
     compressed_for_email = False
     if fit_email:
@@ -409,7 +437,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "title_card": card is not None,
             "cover_endcard": card is not None and card.name == "cover_card.png",
             "cover_frame_ms": cover_frame_ms,
-            "motion_matched": motion_matched,
+            "motion_matched": motion_matched, "loop_sealed": loop_sealed,
             "seamless_loop": {"audio_crossfade": round(min(LOOP_CROSSFADE, features.excerpt_start, length / 4), 3),
                               "cover_bridge": loop_bridge},
             "smart_cropped_shots": reframed,

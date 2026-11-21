@@ -63,6 +63,9 @@ def plan_look(look: dict | None, features, starts: list[float], durations: list[
             plan[i]["brightness"] = round((byte / 255.0 * 2 - 1) * jitter, 4)
         if look.get("light_leaks") and i % 3 == 1:
             plan[i]["leak"] = True
+    # The bookends form the loop seam (see seal_loop): keep them untouched, real-time.
+    for i in {0, n - 1}:
+        plan[i].update(slowmo=1.0, leak=False, punch_in=False, brightness=0.0)
     return plan
 
 
@@ -182,3 +185,42 @@ def match_motion(shots, energies: list[float], motion: list[float], source_durat
             out[i] = Shot(src, round(offset, 3), length)
         used[src] = out[i].source_offset + max(0.5, length)
     return out
+
+
+def frame_exact(shots, total_frames: int, fps: int):
+    """Shot durations as whole frames that add up EXACTLY to the Reel length.
+
+    Rounding each shot separately lost up to a few frames (video 95 ms shorter than the
+    audio in a 31.6 s test), which shows as a freeze at the loop point.
+    """
+    from .cinematic import Shot
+    edges, t = [0], 0.0
+    for shot in shots[:-1]:
+        t += shot.duration
+        edges.append(min(total_frames - (len(shots) - len(edges)), max(edges[-1] + 1, round(t * fps))))
+    edges.append(total_frames)
+    return [Shot(s.source_index, s.source_offset, (b - a) / fps) for s, a, b in zip(shots, edges, edges[1:])]
+
+
+def seal_loop(shots, source_durations: list[float]):
+    """Last shot = the footage directly BEFORE the first shot (same clip).
+
+    When TikTok/Instagram jump from the end back to 0:00 the motion simply continues:
+    no visible cut at the loop point. Returns (shots, sealed).
+    """
+    from .cinematic import Shot
+    if len(shots) < 3:
+        return list(shots), False
+    first, last = shots[0], shots[-1]
+    # The storyboard may have moved the closing shot to another clip (bookend clip used
+    # up); the loop needs the opening clip there, unless it would sit next to itself.
+    if first.source_index != last.source_index and shots[-2].source_index == first.source_index:
+        return list(shots), False
+    dur = source_durations[first.source_index]
+    if dur < first.duration + last.duration + 0.05:
+        return list(shots), False
+    start = min(max(first.source_offset, last.duration), dur - first.duration)
+    out = list(shots)
+    out[0] = Shot(first.source_index, round(start, 4), first.duration)
+    out[-1] = Shot(first.source_index, round(start - last.duration, 4), last.duration)
+    return out, True

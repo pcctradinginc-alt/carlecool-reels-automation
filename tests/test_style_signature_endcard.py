@@ -223,12 +223,14 @@ def test_look_plan_follows_the_music():
     lana = look.plan_look(style.look("lana"), f, starts, durs)
     assert lana[1]["dissolve_in"] > 0            # quiet passage: soft dissolve
     assert lana[2]["dissolve_in"] == 0           # the hook stays a hard cut on the beat
-    assert lana[0]["slowmo"] > 1 and lana[3]["slowmo"] == 1
+    assert lana[1]["slowmo"] > 1 and lana[3]["slowmo"] == 1
+    assert lana[0]["slowmo"] == 1 and lana[4]["slowmo"] == 1  # loop seam stays real-time
     assert lana[1]["leak"] and not lana[0]["leak"]
     rubin = look.plan_look(style.look("rubin"), f, starts, durs, seed="x")
     assert all(p["dissolve_in"] == 0 for p in rubin)
     assert rubin[3]["punch_in"] and not rubin[1]["punch_in"] and not rubin[4]["punch_in"]  # loudest interior shot
     assert any(p["brightness"] for p in rubin) and all(abs(p["brightness"]) <= 0.02 for p in rubin)
+    assert rubin[0]["brightness"] == 0 and rubin[4]["brightness"] == 0
     assert look.slowmo_factor(1.25, 30.0, 24) == 1.25 and look.slowmo_factor(1.25, 25.0, 24) == 1.0
     graph, out = look.join_graph([2.0, 2.0, 2.0], [0.0, 0.5, 0.0])
     assert "xfade=transition=fade:duration=0.500:offset=2.000" in graph and "concat=n=2" in graph
@@ -243,13 +245,28 @@ def test_lana_look_renders_with_dissolves_slowmo_and_leaks(tmp_path, monkeypatch
     a, b = tmp_path / "a.mp4", tmp_path / "b.mp4"
     audio = tmp_path / "a.mp3"
     run = lambda *x: subprocess.run(["ffmpeg", "-v", "error", "-y", *x], check=True)
-    run("-f", "lavfi", "-i", "testsrc2=s=360x640:r=30:d=8", "-pix_fmt", "yuv420p", str(a))
-    run("-f", "lavfi", "-i", "testsrc=s=360x640:r=30:d=8", "-pix_fmt", "yuv420p", str(b))
-    run("-f", "lavfi", "-i", "sine=f=220:d=8", str(audio))
-    beats = tuple(i * 0.5 for i in range(14))
-    f = AudioFeatures(120.0, 1.0, 0.0, "cinematic", 7.0, beats=beats, downbeats=beats[::4],
+    run("-f", "lavfi", "-i", "testsrc2=s=360x640:r=30:d=14", "-pix_fmt", "yuv420p", str(a))
+    run("-f", "lavfi", "-i", "testsrc=s=360x640:r=30:d=14", "-pix_fmt", "yuv420p", str(b))
+    run("-f", "lavfi", "-i", "sine=f=220:d=14", str(audio))
+    beats = tuple(i * 0.5 for i in range(22))
+    f = AudioFeatures(120.0, 1.0, 0.0, "cinematic", 12.0, beats=beats, downbeats=beats[::4],
                       beat_energy=tuple(0.9 if t < 3 else 0.3 for t in beats), hook_at=0.0)  # hard cuts, then dissolves
-    d = render_reel(audio, [a, b], f, tmp_path / "out/r.mp4", 6.0, fit_email=False,
+    d = render_reel(audio, [a, b], f, tmp_path / "out/r.mp4", 10.0, fit_email=False,
                     look=style.look("lana"), style_grade=style.grade_filters("lana"))
     assert d["dissolves"] >= 1 and d["slowmo_shots"] >= 1 and d["light_leaks"] >= 1
-    assert abs(probe_duration(tmp_path / "out/r.mp4") - 6.0) < 0.15  # length unchanged
+    assert abs(probe_duration(tmp_path / "out/r.mp4") - 10.0) < 0.05  # length unchanged
+    assert d["loop_sealed"] and d["cover_frame_ms"] == 0
+
+
+def test_loop_seam_is_frame_exact_and_continuous():
+    from carlecool import look
+    shots = [Shot(0, 0.0, 1.21), Shot(1, 0.0, 1.62), Shot(2, 0.0, 2.04), Shot(1, 2.0, 1.71)]
+    exact = look.frame_exact(shots, total_frames=158, fps=24)
+    assert sum(round(s.duration * 24) for s in exact) == 158
+    assert all(abs(s.duration * 24 - round(s.duration * 24)) < 1e-9 for s in exact)
+    sealed, ok = look.seal_loop(exact, [8.0, 8.0, 8.0])
+    assert ok and sealed[-1].source_index == sealed[0].source_index == 0
+    # the closing shot ends exactly where the opening shot begins
+    assert abs(sealed[-1].source_offset + sealed[-1].duration - sealed[0].source_offset) < 1e-3
+    short, ok = look.seal_loop(exact, [2.0, 8.0, 8.0])
+    assert not ok and short == exact
