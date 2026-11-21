@@ -30,10 +30,11 @@ from .video import Video, _coverr_request, _is_portrait
 MEMORY_REELS = 30
 # Owner: more room for friends and Americana; always a US flag; cars = classic Porsche
 # (911 / 993 era) rather than generic cars.
-SLOT_POSITION = {"friends": 0.25, "motif": 0.15, "flag": 0.38, "skater": 0.5, "car": 0.62,
+SLOT_POSITION = {"friends": 0.25, "motif": 0.15, "flag": 0.38, "gear": 0.44, "skater": 0.5, "car": 0.62,
                  "woman": 0.72, "americana": 0.82, "friends2": 0.9}
-PRIORITY = ("skater", "friends", "flag", "woman", "car", "americana", "friends2", "motif")
-MAX_ROLES = 7  # searched/downloaded roles per Reel (placement cap is ~half the shots)
+PRIORITY = ("skater", "friends", "flag", "gear", "woman", "car", "americana", "friends2", "motif")
+MAX_ROLES = 8  # searched/downloaded roles per Reel (placement cap is ~40 % of the shots)
+STRICT_ROLES = ("gear", "car", "flag")  # role negatives are specific → negative score = reject
 
 SKATER_QUERIES = {
     "lana": ("skateboard sunset", "skater silhouette", "skateboard road"),
@@ -58,6 +59,14 @@ FLAG_QUERIES = {
     "rubin": ("american flag", "usa flag", "flag"),
     "night": ("american flag", "usa flag", "flag night"),
     None: ("american flag", "usa flag", "flag"),
+}
+# Owner: analog music gear in both worlds (Vestax mixer, Technics 1210 turntables, MPC 2000 …)
+# — Lana: warm, vinyl at golden hour / neon; Rubin: wooden studio, hands, stillness.
+GEAR_QUERIES = {
+    "lana": ("turntable", "vinyl record", "dj mixer", "drum machine", "record player"),
+    "rubin": ("turntable", "recording studio", "synthesizer", "vinyl", "drum machine"),
+    "night": ("turntable", "dj mixer", "vinyl record", "synthesizer"),
+    None: ("turntable", "vinyl record", "dj mixer"),
 }
 CAR_QUERIES = {  # owner: classic Porsche (993 era) or a classic Land Rover Defender
     "lana": ("porsche", "land rover", "porsche 911", "defender", "classic car"),
@@ -84,7 +93,7 @@ WOMAN_QUERIES = {
 def queries_for(role: str, style: str | None, variant: str | None = None) -> tuple[str, ...]:
     table = {"skater": SKATER_QUERIES, "woman": WOMAN_QUERIES, "friends": FRIENDS_QUERIES,
              "friends2": FRIENDS_QUERIES, "americana": AMERICANA_QUERIES, "flag": FLAG_QUERIES,
-             "car": CAR_QUERIES}[role]
+             "car": CAR_QUERIES, "gear": GEAR_QUERIES}[role]
     key = "night" if variant == "night" else style
     return tuple(table.get(key, table.get(style, table[None])))
 PROMPTS = {
@@ -132,6 +141,14 @@ PROMPTS = {
          "a classic car driving at sunset"),
         ("a modern suv or minivan", "a car crash or an accident", "a car dealership or showroom",
          "a traffic jam", "a race track with crowds"),
+    ),
+    "gear": (
+        ("a dj turntable with a spinning vinyl record", "hands on a dj mixer with faders and knobs",
+         "a vintage drum machine or sampler with rubber pads", "an analog synthesizer with knobs",
+         "a record player needle on vinyl in warm light"),
+        ("a laptop with dj software on the screen", "a kitchen mixer or blender",
+         "a crowded nightclub with stage lights", "a mixing console in a large concert hall",
+         "a toy or a cartoon"),
     ),
     "motif": None,
 }
@@ -201,7 +218,8 @@ def rank(role: str, candidates: list[Video], workdir: Path) -> list[Video]:
     prompts = PROMPTS.get(role)
     keywords = {"skater": ("skate",), "woman": ("woman",), "friends": ("friend",),
                 "friends2": ("friend",), "flag": ("flag",),
-                "car": ("porsche", "land rover", "defender")}.get(role, ("",))
+                "car": ("porsche", "land rover", "defender"),
+                "gear": ("turntable", "vinyl", "mixer", "record", "synth", "drum")}.get(role, ("",))
     fallback = sorted(candidates, key=lambda v: (not any(k in " ".join(v.tags + (v.title.lower(),))
                                                          for k in keywords), not v.vertical))
     if not prompts or not candidates:
@@ -238,6 +256,11 @@ def rank(role: str, candidates: list[Video], workdir: Path) -> list[Video]:
                     gated += 1
                     continue
                 score = pos - max(sims[len(positive):len(positive) + len(negative)]) + (0.01 if video.vertical else 0)
+                if role in STRICT_ROLES and score < 0:
+                    # e.g. a laptop DJ setup for "gear", a modern SUV for "car": drop, don't rank last
+                    print(f"Signature {role} candidate rejected (looks off-brief): {video.id}")
+                    gated += 1
+                    continue
                 scored.append((score, i))
         if not scored:
             # Everything failed the style gate → better no clip than a wrong one; no

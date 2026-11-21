@@ -103,3 +103,18 @@ def test_coverr_block_is_detected_and_stops_further_requests():
     other = MagicMock(status_code=404, url="https://cdn.example.org/x.mp4")
     assert video.describe_error(requests.HTTPError(response=other)) == "HTTPError 404"
     assert video.coverr_blocked() is None
+
+
+
+def test_analog_gear_belongs_to_both_worlds():
+    from carlecool import signature
+    for world in ("lana", "rubin"):
+        qs = signature.queries_for("gear", world)
+        assert "turntable" in qs and all(len(q.split()) <= 2 for q in qs)
+        assert any("turntable" in w for w in stylegate.WANTED[world])
+    assert "gear" in signature.PRIORITY and "gear" in signature.STRICT_ROLES
+    assert "turntable" in style.SEARCH_QUERIES["lana"] and "turntable" in style.SEARCH_QUERIES["rubin"]
+    v = lambda t: Video("x", "coverr", title=t)
+    assert stylegate.blocked_words(v("DJ mixing on a laptop")) == "laptop"
+    assert stylegate.blocked_words(v("Kitchen mixer whisking cream"))
+    assert stylegate.blocked_words(v("Vinyl record on a turntable")) is None

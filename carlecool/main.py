@@ -357,7 +357,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         # Gen Z friends + Americana belong to both style worlds; priority order, and the
         # search stops once enough roles are filled (Coverr allows ~50 requests/hour).
         roles = [(role, signature.queries_for(role, style_name, style_variant))
-                 for role in ("skater", "friends", "flag", "woman", "car", "americana", "friends2")]
+                 for role in ("skater", "friends", "flag", "gear", "woman", "car", "americana", "friends2")]
         roles.append(("motif", style_pkg.motif_queries(style_decision)))
         for role, queries in roles:
             if not queries or len(signature_slots) >= signature.MAX_ROLES:

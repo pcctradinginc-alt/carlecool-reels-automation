@@ -29,6 +29,8 @@ BLOCK_WORDS = (
     "thailand", "india", "sweden", "iceland", "tokyo",
     # signage with words, office/ad looks
     "hi there", "welcome sign", "office", "business meeting", "advertisement", "product shot",
+    # gear: analog only — no kitchen mixers, no laptop/controller DJ setups
+    "kitchen", "blender", "laptop", "dj controller", "ipad",
 )
 UNWANTED = (
     "a cartoon or an animated film", "a 3d computer rendering", "an ai generated cartoon character",
@@ -36,6 +38,7 @@ UNWANTED = (
     "a tropical volcano or jungle", "a busy street in latin america", "an office or a business meeting",
     "a product advertisement", "a screen with text or a user interface",
     "a modern porsche 911 from the 2020s with wide wheels",
+    "a kitchen appliance", "a laptop computer with software on the screen",
 )
 WANTED = {
     "lana": ("young friends together outdoors at golden hour", "a neon motel or diner sign at dusk",
@@ -43,14 +46,16 @@ WANTED = {
              "a classic land rover defender",
              "a road trip on an empty american highway", "palm trees and a pale summer sky",
              "a skateboarder on a street", "a woman in natural light", "a vintage color home movie",
-             "a city street at night with lights", "a sunset over a calm landscape"),
+             "a city street at night with lights", "a sunset over a calm landscape",
+             "a dj turntable with a vinyl record", "a vintage dj mixer or drum machine"),
     "rubin": ("young friends sitting together in silence", "an empty parking lot at dusk",
               "an american flag on a fence", "a classic land rover defender",
               "a classic air-cooled porsche 911 from the 1990s", "a neon diner or motel sign at night",
               "an american diner interior", "palm trees against a pale sky",
               "a basketball court in evening light", "a quiet street in a european city",
               "a skateboarder seen from behind", "a woman by a window in natural light",
-              "a vintage color home movie", "an empty road under an overcast sky", "a calm landscape"),
+              "a vintage color home movie", "an empty road under an overcast sky", "a calm landscape",
+              "a turntable or analog synthesizer in a wooden studio", "a vintage drum machine or sampler"),
 }
 MARGIN = 0.0
 

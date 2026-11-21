@@ -260,14 +260,15 @@ def motif_queries(decision: dict) -> tuple[str, ...]:
 SEARCH_QUERIES = {
     "lana": ("motel", "diner", "road trip", "friends night", "american flag", "neon sign",
              "porsche", "land rover", "classic car", "convertible", "palm trees", "gas station",
-             "summer friends", "desert road", "sunset drive", "jukebox", "retro"),
+             "summer friends", "desert road", "sunset drive", "jukebox", "retro",
+             "turntable", "vinyl record", "dj mixer"),
     "rubin": ("friends walking", "basketball court", "parking lot", "empty road", "american flag",
               "land rover", "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
-              "golden hour", "friends talking", "street"),
+              "golden hour", "friends talking", "street", "turntable", "recording studio", "synthesizer"),
 }
 NIGHT_QUERIES = {
     "lana": ("neon sign", "motel", "diner", "night drive", "friends night", "gas station",
-             "porsche", "city lights", "american flag", "neon"),
+             "porsche", "city lights", "american flag", "neon", "turntable", "dj mixer"),
     "rubin": ("friends night", "parking lot", "gas station", "night drive", "street night",
               "american flag", "porsche", "basketball court"),
 }
@@ -279,7 +280,9 @@ SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("v
                    "jukebox": ("retro",), "convertible": ("classic car",), "motel": ("motel sign",),
                    "neon sign": ("neon",), "friends night": ("friends",), "summer friends": ("friends",),
                    "pickup truck": ("truck",), "american flag": ("flag",), "road trip": ("road",),
-                   "gas station": ("gas station night",), "diner": ("retro diner",)}
+                   "gas station": ("gas station night",), "diner": ("retro diner",),
+                   "dj mixer": ("dj",), "vinyl record": ("vinyl",), "recording studio": ("studio",),
+                   "synthesizer": ("synth",)}
 
 
 def search_ladders(words: list[str]) -> dict[str, tuple[str, ...]]:
