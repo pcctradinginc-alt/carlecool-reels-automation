@@ -27,6 +27,16 @@ on:
         options:
           - dry-run
           - review
+      style:
+        description: 'Cover style: auto = detect from cover; lana / rubin / night = force for this run'
+        type: choice
+        required: false
+        default: auto
+        options:
+          - auto
+          - lana
+          - rubin
+          - night
 concurrency:
   group: carlecool-daily-reel
   cancel-in-progress: false
@@ -47,6 +57,7 @@ jobs:
       CARLECOOL_AI_VIDEO: 'one'
       CARLECOOL_TRENDS: 'true'
       CARLECOOL_COVER_MATCH: 'true' # Creative v3: enable safe, local album-art palette ranking
+      CARLECOOL_STYLE: ${{ inputs.style || vars.CARLECOOL_STYLE || 'auto' }}
       CARLECOOL_SEMANTIC: ${{ vars.CARLECOOL_SEMANTIC == 'off' && 'off' || 'on' }}
       SC_ALLOW_OFFICIAL_DOWNLOADS: ${{ vars.SC_ALLOW_OFFICIAL_DOWNLOADS }}
       AUDIO_S3_BUCKET: ${{ vars.AUDIO_S3_BUCKET }}
