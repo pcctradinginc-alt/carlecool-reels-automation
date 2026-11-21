@@ -23,7 +23,7 @@ What changed and why:
 
 - **Cuts follow bars, not every second beat:** shots are 1–2 bars (calm → 2, energetic → 1; half-bar only with `fast` pace), every cut on a downbeat and one frame early; the hook cut is kept. Fixes the flickery 0.8 s cuts on fast songs (e.g. "luère froid", 152 BPM: 16 → 7 shots).
 - **Wikimedia Commons** (category-based): FSA/OWI 1939–44 Kodachrome photos as slow Ken-Burns shots plus horse/sunset videos for Lana, sunset time-lapses for Rubin, and skateboarding videos as **skater fallback** when Coverr finds nothing or is throttled. Licences: public domain, CC0, CC BY only (no BY-SA/NC/ND, nothing with personality/trademark restrictions); ≥720p; same OpenCLIP content gate as the archives; CC BY credits in the caption (enforced by the rights check).
-- **Wikimedia requires an identifiable User-Agent with a contact**; anonymous clients get HTTP 429. Set repository variable `WIKIMEDIA_USER_AGENT`, e.g. `CarleCoolReels/1.0 (https://github.com/<you>/<repo>; you@example.com)`. Without it the module just skips. Off: `CARLECOOL_WIKIMEDIA=false`.
+- **Wikimedia requires an identifiable User-Agent with a contact**; anonymous clients get HTTP 429. Set the secret (or variable) `WIKIMEDIA_USER_AGENT`, e.g. `CarleCoolReels/1.0 (https://github.com/<you>/<repo>; you@example.com)`. Without it the module just skips. Off: `CARLECOOL_WIKIMEDIA=false`.
 - Library of Congress (loc.gov) blocks automated clients with a bot challenge, so the FSA photos come from their Commons copies.
 
 ### Free archival footage: NASA and Prelinger (2026-11-21)

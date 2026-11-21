@@ -66,7 +66,6 @@ jobs:
       MASTER_S3_BUCKET: ${{ vars.MASTER_S3_BUCKET }}
       S3_ENDPOINT_URL: ${{ vars.S3_ENDPOINT_URL }}
       AWS_DEFAULT_REGION: ${{ vars.S3_REGION || 'auto' }}
-      WIKIMEDIA_USER_AGENT: ${{ vars.WIKIMEDIA_USER_AGENT }}
       APPROVAL_BASE_URL: ${{ vars.APPROVAL_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
@@ -115,6 +114,7 @@ jobs:
       - name: Render a balanced random Reel (no Instagram calls)
         env:
           COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+          WIKIMEDIA_USER_AGENT: ${{ secrets.WIKIMEDIA_USER_AGENT || vars.WIKIMEDIA_USER_AGENT }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}

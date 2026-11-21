@@ -25,7 +25,6 @@ jobs:
       MASTER_S3_BUCKET: ${{ vars.MASTER_S3_BUCKET }}
       S3_ENDPOINT_URL: ${{ vars.S3_ENDPOINT_URL }}
       AWS_DEFAULT_REGION: ${{ vars.S3_REGION || 'auto' }}
-      WIKIMEDIA_USER_AGENT: ${{ vars.WIKIMEDIA_USER_AGENT }}
       APPROVAL_BASE_URL: ${{ vars.APPROVAL_BASE_URL }}
       SC_USE_RSS_AUDIO: 'true'
       PUBLISH_ENABLED: 'false'
@@ -51,6 +50,7 @@ jobs:
           SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
           SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
           COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+          WIKIMEDIA_USER_AGENT: ${{ secrets.WIKIMEDIA_USER_AGENT || vars.WIKIMEDIA_USER_AGENT }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
