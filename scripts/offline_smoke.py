@@ -41,6 +41,7 @@ def main():
         env.update({'REEL_SECONDS': '15', 'REEL_WIDTH': '270', 'REEL_HEIGHT': '480',
                     'COVERR_API_KEY': '', 'SOUNDCLOUD_CLIENT_ID': '',
                     'SOUNDCLOUD_CLIENT_SECRET': '', 'PUBLISH_ENABLED': 'false',
+                    'CARLECOOL_VISUAL_STRICT': 'false',  # synthetic footage tests v4, not vision
                     'PYTHONPATH': str(Path(__file__).resolve().parents[1])})
         subprocess.run([sys.executable, '-m', 'carlecool.main', '--mode', 'preview'],
                        cwd=root, env=env, check=True)

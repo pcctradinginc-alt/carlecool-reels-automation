@@ -34,4 +34,8 @@ jobs:
           node --check approval-worker/src/index.js
           node --test approval-worker/tests/*.test.mjs
       - name: Offline FFmpeg dry run (test music + test footage, never publish)
+        # Synthetic renderer smoke deliberately has no OpenCLIP or real imagery;
+        # strict source admission is tested separately by test_visual_gate.py.
+        env:
+          CARLECOOL_VISUAL_STRICT: 'false'
         run: python scripts/offline_smoke.py

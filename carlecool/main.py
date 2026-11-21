@@ -136,6 +136,10 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     style_decision = style_pkg.analyze(cover, override=style_override, features=features)
     style_name = style_decision.get("style")
     style_variant = style_decision.get("variant")
+    from . import visual_gate
+    strict_visual = visual_gate.enabled()
+    if strict_visual and style_name not in visual_gate.WORLDS:
+        raise RuntimeError("Strict cinematic mode requires a Lana or Rubin style; style=off is not allowed")
     print(f"Style: {style_pkg.label(style_decision)} ({style_decision.get('basis')})")
     # Styles only nudge v4: lane weights blended 50/50 with the owner's profile.
     style_profile = validate_profile(dict(profile, weights=style_pkg.blended_weights(
@@ -272,7 +276,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         raise RuntimeError("No licensed clips available; add assets/stock and manifest.json as fallback")
     # Optional AI shot: appended LAST and excluded from the opening/closing shot,
     # because it is short (2 s) and low resolution (512×768).
-    if profile["ai_video"] and os.getenv("CARLECOOL_AI_VIDEO", "off") == "one":
+    if not strict_visual and profile["ai_video"] and os.getenv("CARLECOOL_AI_VIDEO", "off") == "one":
         try:
             from .ai_video import generate_one
             ai_path = generate_one(style_pkg.AI_DIRECTION.get(style_name, keywords[0]),
@@ -325,8 +329,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         exclude = set(memory) | set(recent) | {v.id for v in selected}
         # Gen Z friends + Americana belong to both style worlds; priority order, and the
         # search stops once enough roles are filled (Coverr allows ~50 requests/hour).
+        role_names = (("friends", "woman", "skater", "americana") if style_name == "lana"
+                      else ("friends", "woman", "skater")) if strict_visual else (
+                          "skater", "friends", "flag", "woman", "car", "americana", "friends2")
         roles = [(role, signature.queries_for(role, style_name, style_variant))
-                 for role in ("skater", "friends", "flag", "woman", "car", "americana", "friends2")]
+                 for role in role_names]
         roles.append(("motif", style_pkg.motif_queries(style_decision)))
         for role, queries in roles:
             if not queries or len(signature_slots) >= signature.MAX_ROLES:
@@ -378,6 +385,23 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                         print(f"Signature skater: {video.id} (Wikimedia)")
                 if role not in signature_slots:
                     print(f"Signature {role}: no suitable clip this time")
+    visual_gate_report = {"mode": "disabled"}
+    if strict_visual:
+        approved_indices, visual_gate_report = visual_gate.gate_clips(
+            paths, selected, style_name, reel_length=reel_length)
+        if not any(index in opening_pool for index in approved_indices):
+            raise RuntimeError("Strict visual gate: no approved real stock clip for the opening")
+        new_index = {old: i for i, old in enumerate(approved_indices)}
+        selected = [selected[i] for i in approved_indices]
+        paths = [paths[i] for i in approved_indices]
+        opening_pool = {new_index[i] for i in opening_pool if i in new_index}
+        no_bookend = {new_index[i] for i in no_bookend if i in new_index}
+        signature_slots = {role: new_index[i] for role, i in signature_slots.items()
+                           if i in new_index}
+        signature_info = {role: info for role, info in signature_info.items()
+                          if role in signature_slots}
+        print(f"Strict visual gate: {len(approved_indices)} approved, "
+              f"{len(visual_gate_report['rejected'])} rejected; world={style_name}")
     from . import masterstore
     from .naming import artist_name
     from .titlecard import enabled as title_card_enabled
@@ -402,6 +426,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "caption": caption_for(track, selected), "search_keywords": keywords,
         "visual_direction": editorial_brief(features.mood, features.energy, features.bpm),
         "creative_profile": profile,
+        "visual_gate": visual_gate_report,
         "cover_matching": cover_matching,
         "style": {"name": style_name, "label": style_pkg.label(style_decision),
                   **{k: v for k, v in style_decision.items() if k != "style"}},

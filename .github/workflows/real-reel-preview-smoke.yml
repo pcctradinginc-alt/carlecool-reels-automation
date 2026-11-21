@@ -25,6 +25,9 @@ jobs:
       REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
       SC_USE_RSS_AUDIO: 'true'
       PUBLISH_ENABLED: 'false'
+      CARLECOOL_SEMANTIC: 'on'
+      CARLECOOL_VISUAL_STRICT: 'true'
+      CARLECOOL_AI_VIDEO: 'off'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,7 +38,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
-          pip install -r requirements.txt
+          pip install -r requirements.txt 'open_clip_torch>=3,<4'
       - name: Render from artist-published SoundCloud RSS plus licensed Coverr footage
         run: python -m carlecool.main --mode preview
       - name: Send exactly one private Gmail video preview (no issue or Instagram)

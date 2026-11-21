@@ -71,7 +71,10 @@ def test_daily_pipeline_ai_is_strictly_opt_in():
     content = Path(".github/workflows/daily-reel.yml").read_text()
     assert type(load_profile()["ai_video"]) is bool
     assert default_profile()["ai_video"] is False
-    assert "CARLECOOL_AI_VIDEO: 'one'" in content
+    # Strict production cannot use uninspected synthetic footage; explicit local
+    # AI experiments remain available outside the main/revision render pipeline.
+    assert "CARLECOOL_AI_VIDEO: 'off'" in content
+    assert "CARLECOOL_VISUAL_STRICT: 'true'" in content
     assert apply_commands(load_profile(), ["ai_video"])["ai_video"] is True
     assert apply_commands(apply_commands(load_profile(), ["ai_video"]),
                           ["coverr_only"])["ai_video"] is False
