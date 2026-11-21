@@ -38,7 +38,8 @@ def main():
             'license_confirmed': True, 'commercial_social_allowed': True
         }]}))
         env = os.environ.copy()
-        env.update({'REEL_SECONDS': '15', 'REEL_WIDTH': '270', 'REEL_HEIGHT': '480',
+        env.update({'CARLECOOL_MIN_QUALITY': 'off',  # one synthetic clip on purpose
+                    'REEL_SECONDS': '15', 'REEL_WIDTH': '270', 'REEL_HEIGHT': '480',
                     'COVERR_API_KEY': '', 'SOUNDCLOUD_CLIENT_ID': '',
                     'SOUNDCLOUD_CLIENT_SECRET': '', 'PUBLISH_ENABLED': 'false',
                     'PYTHONPATH': str(Path(__file__).resolve().parents[1])})

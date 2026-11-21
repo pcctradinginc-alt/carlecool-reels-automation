@@ -167,7 +167,10 @@ def search_slot(api_key: str, queries, *, exclude: set[str], session=None,
         try:
             hits = _coverr_request(session, api_key, query, per_query)
         except (requests.RequestException, RuntimeError, ValueError) as exc:
-            print(f"Signature {role} '{query}' failed: {type(exc).__name__}")
+            from .video import coverr_blocked, describe_error
+            print(f"Signature {role} '{query}' failed: {describe_error(exc)}")
+            if coverr_blocked():
+                break
             continue
         for item in hits:
             vid = str(item.get("id", ""))

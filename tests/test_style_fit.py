@@ -69,3 +69,37 @@ def test_opening_prefers_style_fit_over_pure_motion():
     fit = {0: -0.01, 1: 0.12, 2: 0.05}
     assert strongest_opening(pool, motion, dims, durations) == 0
     assert strongest_opening(pool, motion, dims, durations, style_fit=fit) == 1
+
+
+def test_quality_minimum_stops_thin_reels(monkeypatch):
+    import pytest
+    from carlecool import main, video
+    video.COVERR_BLOCK["status"] = None
+    main.check_quality([f"c{i}.mp4" for i in range(10)], 13, {})          # 10 ≥ 10 → ok
+    with pytest.raises(main.QualityTooLow, match="too few suitable clips"):
+        main.check_quality([f"c{i}.mp4" for i in range(7)] + ["c0.mp4"], 13, {"skater": 7})
+    video.COVERR_BLOCK["status"] = 403
+    with pytest.raises(main.QualityTooLow, match="HTTP 403"):
+        main.check_quality(["a.mp4"] * 3, 13, {})
+    monkeypatch.setenv("CARLECOOL_MIN_QUALITY", "off")
+    main.check_quality(["a.mp4"], 13, {})
+    video.COVERR_BLOCK["status"] = None
+
+
+def test_coverr_block_is_detected_and_stops_further_requests():
+    from unittest.mock import MagicMock
+    import pytest
+    import requests
+    from carlecool import video
+    video.COVERR_BLOCK["status"] = None
+    resp = MagicMock(status_code=403, url="https://api.coverr.co/videos/x/stats/downloads")
+    assert video.describe_error(requests.HTTPError(response=resp)) == "HTTPError 403"
+    assert video.coverr_blocked() == 403
+    session = MagicMock()
+    with pytest.raises(RuntimeError, match="blocked earlier"):
+        video._coverr_request(session, "k", "motel", 10)
+    session.get.assert_not_called()
+    video.COVERR_BLOCK["status"] = None
+    other = MagicMock(status_code=404, url="https://cdn.example.org/x.mp4")
+    assert video.describe_error(requests.HTTPError(response=other)) == "HTTPError 404"
+    assert video.coverr_blocked() is None

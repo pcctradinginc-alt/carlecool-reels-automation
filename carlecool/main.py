@@ -52,6 +52,29 @@ def caption_for(track, videos) -> str:
     return caption.rstrip() + "\n\n#carlecool #instrumental #electronic #rap #producer"
 
 
+class QualityTooLow(RuntimeError):
+    """Not enough distinct footage: no review mail rather than a thin, repetitive Reel."""
+
+
+def check_quality(paths, planned_shots: int, signature_slots: dict) -> None:
+    """Minimum before rendering: distinct clips for ~75 % of the shots (each repeated clip
+    is visible in a 30 s Reel). Reel #37 had 7 clips for 13 shots after Coverr stopped
+    answering. CARLECOOL_MIN_QUALITY=off disables the check."""
+    if os.getenv("CARLECOOL_MIN_QUALITY", "on").strip().lower() in ("off", "false", "0", "no"):
+        return
+    import math
+    from .video import coverr_blocked
+    distinct = len({str(p) for p in paths})
+    needed = max(6, math.ceil(0.75 * planned_shots))
+    if distinct >= needed:
+        return
+    reason = (f"Coverr refused requests (HTTP {coverr_blocked()}, hourly limit) — try again in about an hour"
+              if coverr_blocked() else "too few suitable clips after the style filter")
+    raise QualityTooLow(f"Quality minimum not met: {distinct} distinct clips for {planned_shots} shots "
+                        f"(need {needed}); signature shots: {len(signature_slots)}. {reason}. "
+                        "No review mail sent.")
+
+
 def fill_up(reserve, accept, full) -> None:
     """Accept landscape fill-in clips one by one; a failing clip is skipped, never fatal.
 
@@ -64,10 +87,13 @@ def fill_up(reserve, accept, full) -> None:
         try:
             accept(video, path)
         except Exception as exc:
-            print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}")
+            from .video import describe_error
+            print(f"Clip unavailable (skipped): {video.id}: {describe_error(exc)}")
 
 
 def process(publish: bool, *, track_id: str | None = None, creative_profile: dict | None = None) -> None:
+    from .video import COVERR_BLOCK
+    COVERR_BLOCK["status"] = None  # fresh for every Reel (also for revisions in one process)
     if publish:
         raise RuntimeError("Direct publication is disabled; use the human-approved Gmail workflow")
     config = Settings()
@@ -219,8 +245,12 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         selected.append(video)
         paths.append(path)
 
+    from .video import coverr_blocked
     for video in candidates:
         if len(paths) >= stock_limit:
+            break
+        if coverr_blocked() and video.source == "coverr":
+            print(f"Coverr {coverr_blocked()} — remaining Coverr candidates skipped")
             break
         try:
             target = output_dir / f"stock_{len(paths) + len(landscape_reserve):02d}.mp4"
@@ -236,7 +266,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                 if video.source != "owned":
                     path.unlink(missing_ok=True)
         except Exception as exc:
-            print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}")
+            from .video import describe_error
+            print(f"Clip unavailable (skipped): {video.id}: {describe_error(exc)}")
     # Free archival footage: public-domain Prelinger home movies (analog Americana) for
     # both worlds; NASA only when a Rubin cover clearly shows space. Never a bookend.
     archival = []
@@ -331,6 +362,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         for role, queries in roles:
             if not queries or len(signature_slots) >= signature.MAX_ROLES:
                 continue
+            if coverr_blocked() and role != "skater":
+                print(f"Signature {role}: skipped (Coverr {coverr_blocked()})")
+                continue
             # Fixed order where the first query matters (flag, Porsche), rotated otherwise.
             ordered = (list(queries) if role in ("motif", "flag")
                        else signature.car_order(queries, edition) if role == "car"
@@ -378,6 +412,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                         print(f"Signature skater: {video.id} (Wikimedia)")
                 if role not in signature_slots:
                     print(f"Signature {role}: no suitable clip this time")
+    check_quality(paths, planned_shots, signature_slots)
     from . import masterstore
     from .naming import artist_name
     from .titlecard import enabled as title_card_enabled

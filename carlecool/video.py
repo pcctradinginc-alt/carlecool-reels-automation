@@ -110,6 +110,28 @@ def _coverr_creator_metadata(item: dict) -> tuple[str, str]:
     return name[:100], url
 
 
+# Coverr refusing this API key for the rest of the run (hourly limit 429, or 403 on the
+# search / download-stats endpoints). Once seen, further Coverr calls are skipped instead of
+# burning more requests, and the quality check before the review mail knows why.
+COVERR_BLOCK: dict[str, int | None] = {"status": None}
+
+
+def coverr_blocked() -> int | None:
+    return COVERR_BLOCK["status"]
+
+
+def describe_error(exc: Exception) -> str:
+    """'HTTPError 403' etc.; marks Coverr as blocked on 403/429 from api.coverr.co."""
+    response = getattr(exc, "response", None)
+    status = getattr(response, "status_code", None)
+    url = str(getattr(response, "url", "") or getattr(getattr(exc, "request", None), "url", "") or "")
+    if status is None and "429" in str(exc) and "Coverr" in str(exc):
+        status = 429
+    if status in (403, 429) and ("coverr" in url or "Coverr" in str(exc)):
+        COVERR_BLOCK["status"] = status
+    return f"{type(exc).__name__}{f' {status}' if status else ''}"
+
+
 def record_coverr_download(video_id: str, api_key: str, *, session=None):
     """Report selected clip to Coverr stats; never transmit signed media URLs."""
     if not re.fullmatch(r"[A-Za-z0-9_-]{3,80}", video_id):
@@ -221,14 +243,17 @@ def _is_portrait(item: dict) -> bool:
 
 
 def _coverr_request(session, key: str, query: str, page_size: int):
+    if coverr_blocked():
+        raise RuntimeError(f"Coverr {coverr_blocked()}: blocked earlier in this run; request skipped")
     r = session.get(
         "https://api.coverr.co/videos",
         headers={"x-api-key": key},
         params={"query": query, "page_size": page_size, "sort": "popular", "urls": "true"},
         timeout=30,
     )
-    if r.status_code == 429:
-        raise RuntimeError("Coverr 429: rate limit hit; try cached licensed assets or later schedule")
+    if r.status_code in (403, 429):
+        COVERR_BLOCK["status"] = r.status_code
+        raise RuntimeError(f"Coverr {r.status_code}: request limit reached; try again later")
     r.raise_for_status()
     return r.json().get("hits", [])
 
