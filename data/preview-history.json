@@ -513,6 +513,23 @@
         "zgM1Ah9ngg"
       ],
       "sha256": "d5ff2744f26a2d82184df279b873f511d223d34e39eed3ceed7ddd798536bf10"
+    },
+    {
+      "at": "2026-11-21T19:17:18+00:00",
+      "kind": "daily",
+      "run_id": 44939452638,
+      "track_id": "2437525050",
+      "video_ids": [
+        "j9ZtGgPrC6",
+        "QuqR0i6QYr",
+        "11HBktj6GE",
+        "sS432VW1xf",
+        "OieHsqGTIL",
+        "wm-af6b354b7d01",
+        "s73ov6lXzt",
+        "wm-e43316b3b9ea"
+      ],
+      "sha256": "81979ae877146fb4993430613d062d0e5272a7af074bca191d395d6c434643de"
     }
   ]
 }
