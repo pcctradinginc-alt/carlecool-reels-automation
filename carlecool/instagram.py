@@ -58,7 +58,8 @@ class Instagram:
         self.user_id = self.verified_account["id"]
         return self.verified_account
 
-    def create_and_upload(self, video: Path, caption: str, *, audio_name: str = "") -> str:
+    def create_and_upload(self, video: Path, caption: str, *, audio_name: str = "",
+                          thumb_offset_ms: int | None = None) -> str:
         if self.verified_account is None:
             self.verify_access()
         data = {"media_type": "REELS", "upload_type": "resumable", "caption": caption,
@@ -66,6 +67,9 @@ class Instagram:
         if audio_name:
             # Replaces "Original audio" with e.g. "carl e cool - nastro azzuro" (set once, at creation).
             data["audio_name"] = audio_name
+        if isinstance(thumb_offset_ms, int) and thumb_offset_ms >= 0:
+            # Reel cover = end card with the song artwork (shown in the profile grid).
+            data["thumb_offset"] = str(thumb_offset_ms)
         payload = self._request("POST", f"{self.user_id}/media", data=data)
         container_id = str(payload["id"])
         upload_url = payload.get("uri") or f"https://rupload.facebook.com/ig-api-upload/{self.api_version}/{container_id}"

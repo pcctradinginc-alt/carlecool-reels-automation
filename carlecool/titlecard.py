@@ -82,3 +82,56 @@ def make_title_card(artist: str, title: str, width: int, height: int, destinatio
     destination.parent.mkdir(parents=True, exist_ok=True)
     canvas.save(destination, "PNG")
     return destination
+
+
+COVER_CARD_SECONDS = 2.6
+
+
+def make_cover_card(cover: Path, artist: str, title: str, width: int, height: int,
+                    destination: Path) -> Path | None:
+    """End card with the song's own artwork: the recognisable "this is carl e cool" frame.
+
+    Layout (transparent PNG over the last ~2.6 s):
+    * a dark scrim over the whole video so the artwork stands out on any footage,
+    * the square cover (~64 % of the width) slightly above centre, with soft shadow,
+    * tracked artist line and song title underneath.
+    The same frame is used as the Instagram/TikTok cover image (thumbnail).
+    Returns None (→ text-only card) if Pillow or the artwork are unavailable.
+    """
+    try:
+        from PIL import Image, ImageDraw, ImageFilter, ImageOps
+    except ImportError:
+        return None
+    try:
+        with Image.open(cover) as raw:
+            art = ImageOps.exif_transpose(raw).convert("RGB")
+    except (OSError, ValueError):
+        return None
+    artist = " ".join(str(artist).split()).lower()
+    title = " ".join(str(title).split())
+    side = int(width * 0.64)
+    art = ImageOps.fit(art, (side, side), method=Image.LANCZOS)
+    canvas = Image.new("RGBA", (width, height), (8, 8, 10, 120))
+    left = (width - side) // 2
+    top = int(height * 0.40) - side // 2
+    shadow = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    ImageDraw.Draw(shadow).rectangle([left + 6, top + 14, left + side + 6, top + side + 14],
+                                     fill=(0, 0, 0, 170))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(radius=max(4, width // 60)))
+    canvas = Image.alpha_composite(canvas, shadow)
+    canvas.paste(art, (left, top))
+    draw = ImageDraw.Draw(canvas)
+    max_width = int(width * 0.82)
+    spaced = " ".join(artist)
+    artist_font = _fit(draw, spaced, int(width * 0.03), max_width)
+    title_font = _fit(draw, title, int(width * 0.06), max_width)
+    y = top + side + int(height * 0.035)
+    for text, font, fill in ((spaced, artist_font, (255, 255, 255, 210)),
+                             (title, title_font, (255, 255, 255, 245))):
+        box = draw.textbbox((0, 0), text, font=font)
+        x = (width - (box[2] - box[0])) // 2 - box[0]
+        draw.text((x, y - box[1]), text, font=font, fill=fill)
+        y += (box[3] - box[1]) + int(height * 0.014)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    canvas.save(destination, "PNG")
+    return destination

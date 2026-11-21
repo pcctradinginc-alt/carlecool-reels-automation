@@ -59,6 +59,12 @@ def ensure_target_ready(target: str) -> None:
         )
 
 
+def _cover_frame(approval: dict) -> int | None:
+    """Reviewed cover frame (end card with artwork) in ms, if the Reel has one."""
+    value = approval.get('cover_frame_ms')
+    return value if type(value) is int and 0 <= value <= 120_000 else None
+
+
 def verify_artifact(issue: dict, metadata: dict, video: Path, *, run_id: int) -> dict:
     if issue.get('state') != 'open':
         raise ValueError('Review issue is not open')
@@ -147,6 +153,7 @@ def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
         ai_generated=any(item.get('provider') == 'ai' for item in approval['footage_sources']),
         sha256=approval['sha256'], issue_number=issue_number,
         audio_name=str(approval.get('song_label') or ''),
+        cover_frame_ms=_cover_frame(approval),
     )
     post = response.get('post') or {}
     post_id = str(post.get('_id', ''))
@@ -240,7 +247,8 @@ def publish(issue_number: int, run_id: int, directory: Path, *, target: str = 'i
     save_state(state)
     commit_state(f'journal: reserve human approved reel {issue_number}')
     container_id = client.create_and_upload(video, approval['caption'],
-                                            audio_name=str(approval.get('song_label') or ''))
+                                            audio_name=str(approval.get('song_label') or ''),
+                                            thumb_offset_ms=_cover_frame(approval))
     state['pending']['container_id'] = container_id
     save_state(state)
     commit_state(f'journal: created container for review {issue_number}')

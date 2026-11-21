@@ -148,7 +148,7 @@ class Zernio:
     def publish(self, *, media_url: str, caption: str, target: str,
                 instagram_id: str, tiktok_id: str,
                 ai_generated: bool, sha256: str, issue_number: int,
-                audio_name: str = "") -> dict:
+                audio_name: str = "", cover_frame_ms: int | None = None) -> dict:
         media_url = _check_media_url(media_url, upload=False)
         requested = {
             "instagram": ["instagram"], "tiktok": ["tiktok"],
@@ -176,12 +176,16 @@ class Zernio:
                 "express_consent_given": True,
                 "video_made_with_ai": bool(ai_generated),
             }
+            if isinstance(cover_frame_ms, int) and cover_frame_ms >= 0:
+                body["tiktokSettings"]["video_cover_timestamp_ms"] = cover_frame_ms
         for platform in platforms:
             if platform["platform"] != "instagram":
                 continue
             data = {}
             if ai_generated:
                 data["isAiGenerated"] = True
+            if isinstance(cover_frame_ms, int) and cover_frame_ms >= 0:
+                data["thumbOffset"] = cover_frame_ms  # end card with the song artwork
             if audio_name:
                 # Zernio: "Renames the Reel's own audio (replaces 'Original Audio')".
                 # TikTok has no equivalent API field; its sound keeps the account name.

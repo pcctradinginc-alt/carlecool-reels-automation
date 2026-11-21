@@ -94,6 +94,18 @@ def _safe_public_link(url: str, *, host: str) -> str:
     return url
 
 
+def _style_line(metadata: dict) -> str:
+    """'Lana / Americana · cover: a rider … · Skater ✓ · Frau ✓' for the review mail."""
+    style = metadata.get("style") or {}
+    parts = [str(style.get("label") or "v4 default")]
+    if style.get("basis"):
+        parts.append(str(style["basis"]))
+    signature = metadata.get("signature") or {}
+    for role, name in (("motif", "Cover-Motiv"), ("skater", "Skater"), ("woman", "Frau")):
+        parts.append(f"{name} {'✓' if role in signature else '–'}")
+    return " · ".join(parts) + "  (ändern: /revise stil lana|rubin|night|auto)"
+
+
 def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | None = None) -> str:
     """Copy-friendly alternatives to HTML mail, never publish on link open."""
     title = str(metadata.get("song_label") or metadata.get("title", "Neuer Track"))
@@ -145,6 +157,7 @@ def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | No
         "dann den nächsten Schritt auswählen.\n\n"
         + actions + "\n"
         f"FOOTAGE: {footage_label}\n"
+        f"STIL: {_style_line(metadata)}\n"
         f"LOOK: {profile.get('preset', 'Rubin / Analog / Americana / Skate')}\n"
         f"SCHNITT: {profile.get('pace', 'medium')}   "
         f"ANALOG: {profile.get('analog', 65)}%\n\n"
@@ -256,6 +269,7 @@ def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = N
         ' style="background:#f8f6f2;border:1px solid #efebe5;border-radius:10px">'
         '<tr><td style="padding:16px 18px;font-size:12px;color:#687281">'
         f'<b style="color:#202b36">REEL</b> &nbsp;{duration} s · 9:16 · MP4<br>'
+        f'<b style="color:#202b36">STIL</b> &nbsp;{h(_style_line(metadata))}<br>'
         f'<b style="color:#202b36">LOOK</b> &nbsp;{h(preset)}<br>'
         f'<b style="color:#202b36">BILDER</b> &nbsp;{h(footage_label)}<br>'
         f'<b style="color:#202b36">SCHNITT</b> &nbsp;{h(pace)}'
@@ -334,6 +348,7 @@ def create_review(metadata: dict, *, run_id: int, token: str, repo: str,
                'creative_profile': metadata.get('creative_profile'),
                'master_storage': metadata.get('master_storage'),
                'song_label': metadata.get('song_label'),
+               'cover_frame_ms': metadata.get('cover_frame_ms'),
                'revision_number': metadata.get('creative_profile', {}).get('revision', 0)}
     name = 'carlecool-review'
     try:

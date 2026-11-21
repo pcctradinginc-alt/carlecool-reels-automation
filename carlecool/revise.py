@@ -111,6 +111,8 @@ def revise(issue_number: int, command: str) -> str:
     # "Feedback memory": learn explicit, interpreted choices for next Reels.
     # The profile file contains only public style weights, never secrets/media.
     profile["revision"] = 0
+    # A style choice (/revise stil night) is for THIS Reel only; future Reels follow their cover.
+    profile["style"] = "auto"
     # Explicit owner revision after successful delivery is the only signal.
     from .quality_learning import PATH as LEARN_PATH, load as load_learning, observe
     updated_learning = observe(load_learning(), instructions)

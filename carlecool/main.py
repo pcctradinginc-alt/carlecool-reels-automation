@@ -108,19 +108,26 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     # Local/manual runs also get a fresh seed, while tests can pass a fixed seed.
     import secrets
     edition = os.getenv("GITHUB_RUN_ID") or secrets.token_hex(8)
-    profile_queries = choose_shots(profile, track_id=track.id, mood=features.mood,
-                                   energy=features.energy, limit=3, run_key=edition)
-    # The album cover comes FIRST: it decides what we search for, how candidates
-    # are ranked before download and how every clip is colour graded.
+    # The album cover comes FIRST: it picks the style package, what we search for,
+    # how candidates are ranked before download and how every clip is graded.
     cover = None
-    cover_choice = {"method": "disabled", "queries": [], "lanes": []}
     if os.getenv("CARLECOOL_COVER_MATCH", "true").lower() in ("true", "1", "yes"):
         from .cover_visual import fetch_cover
         candidate_cover = output_dir / "public_cover"
         if fetch_cover(getattr(track, "artwork_url", ""), candidate_cover):
             cover = candidate_cover
-            from .curation import cover_queries
-            cover_choice = cover_queries(cover, profile["weights"], run_key=edition)
+    from . import style as style_pkg
+    style_decision = style_pkg.analyze(cover, override=profile.get("style", "auto"))
+    style_name = style_decision.get("style")
+    print(f"Style: {style_pkg.LABELS.get(style_name, 'v4 default')} ({style_decision.get('basis')})")
+    # Styles only nudge v4: lane weights blended 50/50 with the owner's profile.
+    style_profile = validate_profile(dict(profile, weights=style_pkg.blended_weights(profile["weights"], style_name)))
+    profile_queries = choose_shots(style_profile, track_id=track.id, mood=features.mood,
+                                   energy=features.energy, limit=3, run_key=edition)
+    cover_choice = {"method": "disabled", "queries": [], "lanes": []}
+    if cover is not None:
+        from .curation import cover_queries
+        cover_choice = cover_queries(cover, style_profile["weights"], run_key=edition)
     if cover_choice.get("queries"):
         from .curation import merge_queries
         keywords = merge_queries(cover_choice, profile_queries)
@@ -220,6 +227,45 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     # Neither the AI shot nor a centre-cropped landscape clip may open or close the Reel.
     no_bookend = {i for i, v in enumerate(selected) if v.source == "ai"}
     no_bookend |= {i for i, path in enumerate(paths) if path not in portrait_paths and selected[i].source != "ai"}
+    # Signature shots ADDED on top of the v4 footage (never replacing it).
+    signature_slots: dict[str, int] = {}
+    signature_info: dict[str, dict] = {}
+    from . import signature
+    if signature.enabled() and config.coverr_key:
+        memory = recent_video_ids(previews, limit=signature.MEMORY_REELS)
+        exclude = set(memory) | set(recent) | {v.id for v in selected}
+        roles = [("motif", style_pkg.motif_queries(style_decision)),
+                 ("skater", signature.SKATER_QUERIES.get(style_name, signature.SKATER_QUERIES[None])),
+                 ("woman", signature.WOMAN_QUERIES.get(style_name, signature.WOMAN_QUERIES[None]))]
+        for role, queries in roles:
+            if not queries:
+                continue
+            ordered = queries if role == "motif" else signature._rotate(tuple(queries), f"{edition}|{role}")
+            found = signature.rank(role, signature.search_slot(config.coverr_key, ordered, exclude=exclude,
+                                                               role=role), output_dir / "thumbs")
+            for video in found[:3]:
+                target = output_dir / f"sig_{role}.mp4"
+                try:
+                    path = download_video(video.url, target)
+                    if role == "skater":
+                        face = signature.largest_face_ratio(path)
+                        if face > signature.FACE_MAX_HEIGHT:
+                            print(f"Signature skater {video.id} rejected: visible face ({face:.0%} of frame)")
+                            path.unlink(missing_ok=True)
+                            continue
+                    record_coverr_download(video.id, config.coverr_key)
+                    selected.append(video)
+                    paths.append(path)
+                    signature_slots[role] = len(paths) - 1
+                    no_bookend.add(len(paths) - 1)
+                    signature_info[role] = {"id": video.id, "query": video.query}
+                    print(f"Signature {role}: {video.id} ('{video.query}')")
+                    break
+                except Exception as exc:
+                    print(f"Signature {role} clip skipped: {video.id}: {type(exc).__name__}")
+            else:
+                if role not in signature_slots:
+                    print(f"Signature {role}: no suitable clip this time")
     from . import masterstore
     from .naming import artist_name
     from .titlecard import enabled as title_card_enabled
@@ -227,9 +273,10 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     out = output_dir / f"carlecool_{track.id}.mp4"
     try:
         details = render_reel(audio, paths, features, out, reel_length,
-                              pace=profile["pace"], analog=profile["analog"], cover=cover,
+                              pace=style_pkg.pace_for(profile["pace"], style_name), analog=profile["analog"], cover=cover,
                               no_bookend=no_bookend, fit_email=not masterstore.configured(),
-                              title_card=title_card)
+                              title_card=title_card, style_grade=style_pkg.grade_filters(style_name),
+                              signature_slots=signature_slots)
     finally:
         if cover is not None:
             cover.unlink(missing_ok=True)
@@ -242,6 +289,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "visual_direction": editorial_brief(features.mood, features.energy, features.bpm),
         "creative_profile": profile,
         "cover_matching": cover_matching,
+        "style": {"name": style_name, "label": style_pkg.LABELS.get(style_name, "v4 default"),
+                  **{k: v for k, v in style_decision.items() if k != "style"}},
+        "signature": signature_info,
         "music_analysis": {"analyzer": features.analyzer, "reel_length": reel_length,
                            "hook_at": features.hook_at, "beats": len(features.beats),
                            "downbeats": len(features.downbeats)},

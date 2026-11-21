@@ -137,7 +137,9 @@ def plan_intervals(features: AudioFeatures, length: float, pace: str) -> list[fl
 def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output: Path,
                 length: float = 30, *, pace="medium", analog=65, cover: Path | None = None,
                 no_bookend: set[int] | frozenset[int] = frozenset(),
-                fit_email: bool = True, title_card: tuple[str, str] | None = None) -> dict:
+                fit_email: bool = True, title_card: tuple[str, str] | None = None,
+                style_grade: list[str] | None = None,
+                signature_slots: dict[str, int] | None = None) -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -154,8 +156,18 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     source_durations = [probe_duration(path) for path in videos]
     if any(d < 1.0 for d in source_durations):
         raise ValueError("Video too short")
-    storyboard = build_storyboard(intervals, source_durations,
-                                 seed=str(features.excerpt_start), no_bookend=set(no_bookend))
+    # Signature clips (cover motif, skater, woman) are accents: excluded from the normal
+    # rotation and placed exactly once in an interior shot.
+    reserved = set((signature_slots or {}).values())
+    base = [i for i in range(len(videos)) if i not in reserved] or list(range(len(videos)))
+    storyboard = build_storyboard(intervals, [source_durations[i] for i in base],
+                                  seed=str(features.excerpt_start),
+                                  no_bookend={base.index(i) for i in no_bookend if i in base})
+    from .cinematic import Shot
+    storyboard = [Shot(base[s.source_index], s.source_offset, s.duration) for s in storyboard]
+    if signature_slots and len(base) < len(videos):
+        from .signature import place_signature_shots
+        storyboard = place_signature_shots(storyboard, source_durations, dict(signature_slots))
     from .grading import cover_luts
     luts = cover_luts(cover, videos, work)
     level = analog / 100.0
@@ -163,10 +175,20 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     contrast = 1.0 - 0.07 * level
     grain = int(round(6 * level))
     card = None
+    card_seconds = 0.0
     if title_card is not None:
-        from .titlecard import TITLE_SECONDS, make_title_card
-        card = make_title_card(title_card[0], title_card[1], width, height, work / "title_card.png")
-    card_start = max(0.0, length - TITLE_SECONDS) if card is not None else None
+        from .titlecard import (COVER_CARD_SECONDS, TITLE_SECONDS, make_cover_card,
+                                make_title_card)
+        if cover is not None and os.getenv("CARLECOOL_COVER_ENDCARD", "true").lower() in ("true", "1", "yes", "on"):
+            card = make_cover_card(Path(cover), title_card[0], title_card[1], width, height,
+                                   work / "cover_card.png")
+            card_seconds = COVER_CARD_SECONDS if card is not None else 0.0
+        if card is None:
+            card = make_title_card(title_card[0], title_card[1], width, height, work / "title_card.png")
+            card_seconds = TITLE_SECONDS
+    card_start = max(0.0, length - card_seconds) if card is not None else None
+    # Cover frame for Instagram/TikTok: the end card fully faded in, just before the loop.
+    cover_frame_ms = int(round(max(0.0, length - 0.5) * 1000)) if card is not None else None
     # Content-aware 9:16 reframing for landscape sources (decoded once per source).
     from . import reframe
     dims = []
@@ -200,6 +222,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         if lut is not None:
             chain.append(f"lut3d=file={_filter_path(lut)}:interp=tetrahedral")
         chain.append(f"eq=saturation={saturation:.3f}:contrast={contrast:.3f}:gamma=1.015")
+        chain.extend(style_grade or [])
         if grain:
             chain.append(f"noise=alls={grain}:allf=t")
         part = work / f"clip_{index:03}.mp4"
@@ -265,7 +288,11 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "resolution": f"{width}x{height}", "fps": FPS, "pace": pace, "analog": analog,
             "cover_graded": sum(1 for lut in luts if lut is not None),
             "title_card": card is not None,
+            "cover_endcard": card is not None and card.name == "cover_card.png",
+            "cover_frame_ms": cover_frame_ms,
             "smart_cropped_shots": reframed,
+            "signature_shots": {role: sum(1 for sh in storyboard if sh.source_index == idx)
+                                for role, idx in (signature_slots or {}).items()},
             "compressed_for_email": compressed_for_email,
             "edit_plan": [{"source_index": s.source_index,
                            "source_offset": s.source_offset,

@@ -19,6 +19,14 @@ What changed and why:
 | AI shot | Opened and closed the Reel (weakest clip as hook) | Appended last and never used as first/last shot |
 | Encoding | 30 fps, bicubic, CRF 22, 128k AAC, forced 2.5 Mbit/s for Gmail | 24 fps, Lanczos, CRF 18 (`-tune grain`), ≤16 Mbit/s, 256k AAC, two-pass −14 LUFS |
 
+### Cover style, cover end card and signature shots (v4.1, 2026-11-21)
+
+Built **on top of** v4 (the reverted Creative v5 replaced the v4 search lanes and looked clearly worse):
+
+- **End card with the artwork:** the last ~2.6 s show the song cover (square, centred) with "carl e cool" + title over a dark scrim. The same frame is the **Instagram and TikTok cover image** (`thumb_offset` / Zernio `thumbOffset` / `video_cover_timestamp_ms`), so the profile grid shows the song covers. Off: variable `CARLECOOL_COVER_ENDCARD=false`.
+- **Style from the cover (OpenCLIP):** Lana/Americana (rider, flag, horse, vintage car, motel…), Rick Rubin/Minimal (planet, space, sphere, calm ocean…), Night (dark cover, brightness < 0.24). Unclear covers keep v4 unchanged. A style only nudges: lane weights 50/50 with the profile, a mild extra grade after the cover LUT, Rubin slows cuts only if pace is "medium". Shown in the review mail; one-off override `/revise stil lana|rubin|night|auto`; variable `CARLECOOL_STYLE` (`auto`, a style, or `off`).
+- **Signature shots (added, never replacing v4 clips):** a skater (face not visible: feet/wheels/silhouette queries, CLIP "seen from behind", OpenCV rejects large frontal faces), a natural-looking woman (CLIP prefers candid over posed/glamour) and a cover motif echo (horse riding, planet …). Each appears exactly once in an interior shot; at most half of the interior shots, skater and woman first. Clips used in the last 30 previews are never reused for these slots. Off: `CARLECOOL_SIGNATURE=false`.
+
 ### Portrait footage from Pexels, song naming and end title card
 
 - **Pexels (portrait 9:16):** live runs showed Coverr returns 0 portrait clips. With the secret `PEXELS_API_KEY` (free key from https://www.pexels.com/api/) Pexels is searched first with `orientation=portrait` (full phrase, then its core words; ≤ 6 requests, limit 200/hour), files closest to 1080×1920 are used, and the caption credits Pexels and each creator. Without the key Coverr remains the source.

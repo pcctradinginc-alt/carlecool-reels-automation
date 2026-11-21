@@ -93,7 +93,13 @@ TEXT_ALIASES = {
     "erste 30 sekunden": "first_30_seconds",
     "ki-video": "ai_video", "ki video": "ai_video",
     "mehr ki": "ai_video", "ohne ki": "coverr_only",
+    "stil lana": "style_lana", "lana stil": "style_lana", "americana stil": "style_lana",
+    "stil rubin": "style_rubin", "rubin stil": "style_rubin",
+    "stil night": "style_night", "night stil": "style_night", "nacht": "style_night",
+    "stil auto": "style_auto",
 }
+STYLE_COMMANDS = {"style_lana": "lana", "style_rubin": "rubin", "style_night": "night",
+                  "style_auto": "auto"}
 
 
 def default_profile() -> dict:
@@ -141,8 +147,11 @@ def validate_profile(profile: dict) -> dict:
         type(raw[k]) is not int or raw[k] < 0 or raw[k] > 100 for k in LANES
     ):
         raise ValueError("Invalid creative lane weights")
+    if profile.get("style", "auto") not in ("auto", "lana", "rubin", "night"):
+        raise ValueError("Style must be auto, lana, rubin or night")
     result = dict(profile)
     result["ai_video"] = profile.get("ai_video", False)
+    result["style"] = profile.get("style", "auto")
     result["weights"] = _normalize(raw)
     return result
 
@@ -174,6 +183,8 @@ def apply_commands(profile: dict, commands: list[str]) -> dict:
             out["pace"] = "slow" if name == "slower_cuts" else "fast"
         elif name == "first_30_seconds":
             out["music"] = "beginning"
+        elif name in STYLE_COMMANDS:
+            out["style"] = STYLE_COMMANDS[name]
         else:
             raise ValueError("Unsupported creative command: " + name)
         out["weights"] = _normalize(out["weights"])
@@ -189,7 +200,8 @@ def interpret_revision(comment: str) -> list[str]:
         raise ValueError("Revision instructions must be 1..500 characters on one line")
     pieces = [p.strip() for p in raw.replace(",", " ").split()]
     if len(pieces) == 1 and (pieces[0] in DELTA or pieces[0] in
-                              ("slower_cuts", "faster_cuts", "first_30_seconds", "ai_video", "coverr_only")
+                              ("slower_cuts", "faster_cuts", "first_30_seconds", "ai_video", "coverr_only",
+                               *STYLE_COMMANDS)
                               or pieces[0].startswith("preset_") and pieces[0][7:] in PRESETS):
         return pieces
     found = []
