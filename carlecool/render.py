@@ -142,7 +142,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 no_bookend: set[int] | frozenset[int] = frozenset(),
                 fit_email: bool = True, title_card: tuple[str, str] | None = None,
                 style_grade: list[str] | None = None,
-                signature_slots: dict[str, int] | None = None) -> dict:
+                signature_slots: dict[str, int] | None = None,
+                look: dict | None = None) -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -177,6 +178,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     saturation = 1.0 - 0.25 * level
     contrast = 1.0 - 0.07 * level
     grain = int(round(6 * level))
+    if look and grain:
+        grain += int(look.get("grain_boost") or 0)  # 35 mm texture is part of both style worlds
     card = None
     card_seconds = 0.0
     if title_card is not None:
@@ -205,7 +208,21 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     framed = 0
     files = []
     shot_start = 0.0
+    from . import look as look_mod
+    starts = [sum(s.duration for s in storyboard[:i]) for i in range(len(storyboard))]
+    shot_look = look_mod.plan_look(look, features, starts, [s.duration for s in storyboard],
+                                   seed=str(features.excerpt_start))
+    for item in shot_look:  # frame-exact transitions keep the cuts on the beat grid
+        item["dissolve_in"] = round(item["dissolve_in"] * FPS) / FPS
+    leak = None
+    if any(item["leak"] for item in shot_look):
+        leak = look_mod.make_light_leak(width, height, work / "light_leak.png")
+    fps_cache: dict[int, float] = {}
+    slowed = 0
+    punched = 0
+    leaks = 0
     for index, shot in enumerate(storyboard):
+        styling = shot_look[index]
         source = videos[shot.source_index]
         src_w, src_h = dims[shot.source_index]
         smart = None
@@ -229,33 +246,65 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 reframed += 1
             except (OSError, ValueError, subprocess.SubprocessError) as exc:
                 print("Smart crop unavailable; centre crop:", type(exc).__name__)
-        chain = (smart or [f"scale={width}:{height}:force_original_aspect_ratio=increase:flags=lanczos",
-                           f"crop={width}:{height}"]) + ["setsar=1", f"fps={FPS}"]
+        chain = list(smart or [f"scale={width}:{height}:force_original_aspect_ratio=increase:flags=lanczos",
+                               f"crop={width}:{height}"])
+        if styling["punch_in"] and not (src_w > src_h > 0 and chain and chain[0].startswith("split")):
+            # Rubin: peaks get closer, not busier.
+            chain += [f"crop=iw*0.9:ih*0.9", f"scale={width}:{height}:flags=lanczos"]
+            punched += 1
+        chain.append("setsar=1")
+        speed = 1.0
+        if styling["slowmo"] > 1.0:
+            if shot.source_index not in fps_cache:
+                fps_cache[shot.source_index] = look_mod.probe_fps(source)
+            speed = look_mod.slowmo_factor(styling["slowmo"], fps_cache[shot.source_index], FPS)
+            if speed > 1.0:
+                chain.append(f"setpts={speed}*PTS")
+                slowed += 1
+        chain.append(f"fps={FPS}")
         lut = luts[shot.source_index]
         if lut is not None:
             chain.append(f"lut3d=file={_filter_path(lut)}:interp=tetrahedral")
-        chain.append(f"eq=saturation={saturation:.3f}:contrast={contrast:.3f}:gamma=1.015")
+        chain.append(f"eq=saturation={saturation:.3f}:contrast={contrast:.3f}:gamma=1.015"
+                     + (f":brightness={styling['brightness']:.4f}" if styling["brightness"] else ""))
         chain.extend(style_grade or [])
         if grain:
             chain.append(f"noise=alls={grain}:allf=t")
+        # Outgoing shot runs on under the next shot's dissolve (total length unchanged).
+        tail = shot_look[index + 1]["dissolve_in"] if index + 1 < len(storyboard) else 0.0
         part = work / f"clip_{index:03}.mp4"
         # Seek before input; -stream_loop is only a last resort for sources shorter than the shot.
-        loop = ["-stream_loop", "-1"] if source_durations[shot.source_index] - shot.source_offset < shot.duration else []
+        needed = (shot.duration + tail) / speed
+        loop = ["-stream_loop", "-1"] if source_durations[shot.source_index] - shot.source_offset < needed else []
         inputs = [*loop, "-ss", f"{shot.source_offset:.3f}", "-i", str(source)]
         shot_end = shot_start + shot.duration
-        if card_start is not None and shot_end > card_start + 1e-3:
+        overlays = []  # (input args, per-input filter, overlay options)
+        if styling["leak"] and leak is not None:
+            # Warm light leak blooming in and out at the start of the shot (Lana).
+            flip = "hflip," if index % 2 else ""
+            overlays.append((["-loop", "1", "-framerate", str(FPS), "-i", str(leak)],
+                             f"format=rgba,{flip}fade=t=in:st=0:d=0.25:alpha=1,fade=t=out:st=0.45:d=0.5:alpha=1",
+                             "overlay=0:0"))
+            leaks += 1
+        if card_start is not None and shot_end + tail > card_start + 1e-3:
             # Title card fades in over the last ~2 s, after grain so the text stays crisp.
             local = max(0.0, card_start - shot_start)
             fade = "" if card_start < shot_start - 1e-3 else f",fade=t=in:st={local:.3f}:d=0.35:alpha=1"
-            inputs += ["-loop", "1", "-framerate", str(FPS), "-i", str(card)]
-            graph = (f"[0:v]{','.join(chain)}[base];[1:v]format=rgba{fade}[card];"
-                     f"[base][card]overlay=0:0:shortest=1:enable='gte(t,{local:.3f})',format=yuv420p[out]")
-            video_args = ["-filter_complex", graph, "-map", "[out]"]
+            overlays.append((["-loop", "1", "-framerate", str(FPS), "-i", str(card)],
+                             f"format=rgba{fade}", f"overlay=0:0:enable='gte(t,{local:.3f})'"))
+        if overlays:
+            graph = [f"[0:v]{','.join(chain)}[b0]"]
+            for k, (args, prep, how) in enumerate(overlays, start=1):
+                inputs += args
+                graph.append(f"[{k}:v]{prep}[o{k}]")
+                graph.append(f"[b{k - 1}][o{k}]{how}[b{k}]")
+            graph.append(f"[b{len(overlays)}]format=yuv420p[out]")
+            video_args = ["-filter_complex", ";".join(graph), "-map", "[out]"]
         else:
             video_args = ["-vf", ",".join(chain + ["format=yuv420p"])]
         _run([
             "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *inputs,
-            "-frames:v", str(max(1, round(shot.duration * FPS))),
+            "-frames:v", str(max(1, round((shot.duration + tail) * FPS))),
             *video_args,
             "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "18",
             "-tune", "grain" if grain else "film", "-profile:v", "high",
@@ -268,8 +317,19 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     # FFmpeg concat demuxer does not parse shell quoting; enforce simple generated filenames.
     concat_path.write_text("".join(f"file '{p.name}'\n" for p in files), encoding="utf-8")
     video_only = work / "joined.mp4"
-    _run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0",
-          "-i", str(concat_path), "-c", "copy", str(video_only)])
+    dissolves = [item["dissolve_in"] for item in shot_look]
+    if any(d > 0 for d in dissolves):
+        graph, label = look_mod.join_graph([s.duration for s in storyboard], dissolves)
+        _run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+              *[arg for f in files for arg in ("-i", str(f))],
+              "-filter_complex", graph, "-map", f"[{label}]", "-an",
+              "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+              "-tune", "grain" if grain else "film", "-profile:v", "high",
+              "-maxrate", "16M", "-bufsize", "24M", "-g", str(FPS * 2), "-r", str(FPS),
+              "-video_track_timescale", str(FPS * 1000), str(video_only)])
+    else:
+        _run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0",
+              "-i", str(concat_path), "-c", "copy", str(video_only)])
     fade_out = min(0.35, length / 10)
     _run([
         "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(video_only),
@@ -304,6 +364,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "cover_endcard": card is not None and card.name == "cover_card.png",
             "cover_frame_ms": cover_frame_ms,
             "smart_cropped_shots": reframed,
+            "dissolves": sum(1 for d in dissolves if d > 0), "slowmo_shots": slowed,
+            "light_leaks": leaks, "punch_ins": punched,
             "framed_shots": framed,
             "signature_shots": {role: sum(1 for sh in storyboard if sh.source_index == idx)
                                 for role, idx in (signature_slots or {}).items()},

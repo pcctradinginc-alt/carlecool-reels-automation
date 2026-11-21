@@ -124,11 +124,13 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         if fetch_cover(getattr(track, "artwork_url", ""), candidate_cover):
             cover = candidate_cover
     from . import style as style_pkg
-    style_decision = style_pkg.analyze(cover, override=profile.get("style", "auto"))
+    style_decision = style_pkg.analyze(cover, override=profile.get("style", "auto"), features=features)
     style_name = style_decision.get("style")
-    print(f"Style: {style_pkg.LABELS.get(style_name, 'v4 default')} ({style_decision.get('basis')})")
+    style_variant = style_decision.get("variant")
+    print(f"Style: {style_pkg.label(style_decision)} ({style_decision.get('basis')})")
     # Styles only nudge v4: lane weights blended 50/50 with the owner's profile.
-    style_profile = validate_profile(dict(profile, weights=style_pkg.blended_weights(profile["weights"], style_name)))
+    style_profile = validate_profile(dict(profile, weights=style_pkg.blended_weights(
+        profile["weights"], style_name, style_variant)))
     profile_queries = choose_shots(style_profile, track_id=track.id, mood=features.mood,
                                    energy=features.energy, limit=3, run_key=edition)
     cover_choice = {"method": "disabled", "queries": [], "lanes": []}
@@ -181,12 +183,15 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                     path.unlink(missing_ok=True)
         except Exception as exc:
             print(f"Clip unavailable (skipped): {video.id}: {type(exc).__name__}")
-    # Free archival footage matching the cover style (NASA for Rubin/Night,
-    # public-domain Prelinger films for Lana); landscape, so never a bookend.
+    # Free archival footage: public-domain Prelinger home movies (analog Americana) for
+    # both worlds; NASA only when a Rubin cover clearly shows space. Never a bookend.
     archival = []
     if style_name:
         from .archives import fetch_archival
-        archival = fetch_archival(style_name, set(recent_video_ids(previews, limit=30)) | recent,
+        prompt = style_decision.get("prompt") or ""
+        archive_key = ("rubin" if style_name == "rubin" and any(w in prompt for w in ("planet", "space", "earth"))
+                       else "lana")
+        archival = fetch_archival(archive_key, set(recent_video_ids(previews, limit=30)) | recent,
                                   output_dir / "archive", run_key=edition)
         from .wikimedia import fetch_wikimedia
         archival += fetch_wikimedia(style_name, set(recent_video_ids(previews, limit=30)) | recent,
@@ -212,7 +217,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     if profile["ai_video"] and os.getenv("CARLECOOL_AI_VIDEO", "off") == "one":
         try:
             from .ai_video import generate_one
-            ai_path = generate_one(keywords[0], output_dir / "ai_experiment.mp4")
+            ai_path = generate_one(style_pkg.AI_DIRECTION.get(style_name, keywords[0]),
+                                   output_dir / "ai_experiment.mp4")
             selected.append(Video(id="hf-ltx23-" + track.id, source="ai",
                                   title="LTX 2.3 original AI footage", path=str(ai_path)))
             paths.append(ai_path)
@@ -255,11 +261,13 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     if signature.enabled() and config.coverr_key:
         memory = recent_video_ids(previews, limit=signature.MEMORY_REELS)
         exclude = set(memory) | set(recent) | {v.id for v in selected}
-        roles = [("motif", style_pkg.motif_queries(style_decision)),
-                 ("skater", signature.SKATER_QUERIES.get(style_name, signature.SKATER_QUERIES[None])),
-                 ("woman", signature.WOMAN_QUERIES.get(style_name, signature.WOMAN_QUERIES[None]))]
+        # Gen Z friends + Americana belong to both style worlds; priority order, and the
+        # search stops once enough roles are filled (Coverr allows ~50 requests/hour).
+        roles = [(role, signature.queries_for(role, style_name, style_variant))
+                 for role in ("skater", "friends", "woman", "americana")]
+        roles.append(("motif", style_pkg.motif_queries(style_decision)))
         for role, queries in roles:
-            if not queries:
+            if not queries or len(signature_slots) >= signature.MAX_ROLES:
                 continue
             ordered = queries if role == "motif" else signature._rotate(tuple(queries), f"{edition}|{role}")
             found = signature.rank(role, signature.search_slot(config.coverr_key, ordered, exclude=exclude,
@@ -310,8 +318,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         details = render_reel(audio, paths, features, out, reel_length,
                               pace=style_pkg.pace_for(profile["pace"], style_name), analog=profile["analog"], cover=cover,
                               no_bookend=no_bookend, fit_email=not masterstore.configured(),
-                              title_card=title_card, style_grade=style_pkg.grade_filters(style_name),
-                              signature_slots=signature_slots)
+                              title_card=title_card,
+                              style_grade=style_pkg.grade_filters(style_name, style_variant),
+                              signature_slots=signature_slots, look=style_pkg.look(style_name))
     finally:
         if cover is not None:
             cover.unlink(missing_ok=True)
@@ -324,7 +333,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "visual_direction": editorial_brief(features.mood, features.energy, features.bpm),
         "creative_profile": profile,
         "cover_matching": cover_matching,
-        "style": {"name": style_name, "label": style_pkg.LABELS.get(style_name, "v4 default"),
+        "style": {"name": style_name, "label": style_pkg.label(style_decision),
                   **{k: v for k, v in style_decision.items() if k != "style"}},
         "signature": signature_info,
         "music_analysis": {"analyzer": features.analyzer, "reel_length": reel_length,

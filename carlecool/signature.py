@@ -1,4 +1,5 @@
-"""Signature shots ADDED on top of the v4 footage: cover motif, a skater, a woman.
+"""Signature shots ADDED on top of the v4 footage: Gen Z friends, a skater, a woman,
+an Americana detail and the cover motif.
 
 Unlike the reverted Creative v5 (which replaced the v4 lanes with these subjects),
 the proven v4 clips stay untouched; each signature clip is one extra interior shot.
@@ -8,6 +9,10 @@ the proven v4 clips stay untouched; each signature clip is one extra interior sh
   frontal face.
 * woman: candid, natural — CLIP prefers "candid, natural light" over "posed fashion
   model / heavy make-up".
+* friends: small groups of young friends (18–25) together in real places; CLIP prefers
+  candid laughter / walking / sitting together over ads, posing and crowds.
+* americana: sparse symbolic detail (faded flag, motel/diner neon, old car, gas station);
+  Lana leans on the dreamy roadside motifs, Rubin on quiet everyday ones.
 * variety: clips used in the last 30 previews are never reused for these slots.
 Every failure (quota, no hits, no model) just leaves the slot empty.
 """
@@ -23,8 +28,9 @@ import numpy as np
 from .video import Video, _coverr_request, _is_portrait
 
 MEMORY_REELS = 30
-SLOT_POSITION = {"motif": 0.22, "skater": 0.45, "woman": 0.7}
-PRIORITY = ("skater", "woman", "motif")
+SLOT_POSITION = {"friends": 0.3, "motif": 0.22, "americana": 0.55, "skater": 0.45, "woman": 0.72}
+PRIORITY = ("skater", "friends", "woman", "americana", "motif")
+MAX_ROLES = 4  # searched/downloaded roles per Reel (placement cap is ~half the interior)
 
 SKATER_QUERIES = {
     "lana": ("skateboard sunset", "skater silhouette", "skateboard road"),
@@ -32,12 +38,31 @@ SKATER_QUERIES = {
     "night": ("skateboard night", "skater night", "skateboard street"),
     None: ("skateboard feet", "skater silhouette", "skateboarding"),
 }
+FRIENDS_QUERIES = {
+    "lana": ("friends laughing", "friends summer", "friends rooftop", "friends road trip"),
+    "rubin": ("friends walking", "friends talking", "friends sitting", "friends park"),
+    "night": ("friends night", "friends city night", "friends walking night"),
+    None: ("friends laughing", "friends walking", "friends together"),
+}
+AMERICANA_QUERIES = {
+    "lana": ("neon sign", "motel", "american flag", "vintage car", "diner", "palm trees"),
+    "rubin": ("american flag", "pickup truck", "basketball court", "diner", "empty road", "gas station"),
+    "night": ("neon sign", "motel night", "gas station night", "diner night"),
+    None: ("american flag", "vintage car", "diner"),
+}
 WOMAN_QUERIES = {
     "lana": ("woman field sunset", "woman hair wind", "woman summer"),
     "rubin": ("woman beach morning", "woman walking nature", "woman window"),
     "night": ("woman city night", "woman neon", "woman night"),
     None: ("woman walking sunset", "woman nature", "woman walking"),
 }
+
+
+def queries_for(role: str, style: str | None, variant: str | None = None) -> tuple[str, ...]:
+    table = {"skater": SKATER_QUERIES, "woman": WOMAN_QUERIES, "friends": FRIENDS_QUERIES,
+             "americana": AMERICANA_QUERIES}[role]
+    key = "night" if variant == "night" else style
+    return tuple(table.get(key, table.get(style, table[None])))
 PROMPTS = {
     "skater": (
         ("a skateboarder seen from behind, face not visible",
@@ -54,6 +79,22 @@ PROMPTS = {
         ("a glamorous posed fashion model in a studio",
          "a heavy make-up beauty close-up",
          "a man", "an empty landscape without people"),
+    ),
+    "friends": (
+        ("a small group of young friends laughing together outdoors, candid",
+         "young friends walking side by side on a city street",
+         "friends sitting close together on a curb or rooftop at sunset",
+         "young people hugging, natural documentary photo"),
+        ("an advertisement with models posing for the camera",
+         "a crowd at a concert or a party", "a business meeting in an office",
+         "a single person alone", "an empty street without people"),
+    ),
+    "americana": (
+        ("a faded american flag moving in the wind",
+         "a neon motel or diner sign at dusk", "an old american car parked on a roadside",
+         "an old gas station or an empty highway at sunset"),
+        ("a brand logo or an advertisement", "a political rally or a parade with crowds",
+         "soldiers or military", "text or a document"),
     ),
     "motif": None,
 }
@@ -105,7 +146,7 @@ def search_slot(api_key: str, queries, *, exclude: set[str], session=None,
 def rank(role: str, candidates: list[Video], workdir: Path) -> list[Video]:
     """Order by CLIP (positive − negative prompt similarity); keyword fallback."""
     prompts = PROMPTS.get(role)
-    keyword = {"skater": "skate", "woman": "woman"}.get(role, "")
+    keyword = {"skater": "skate", "woman": "woman", "friends": "friend"}.get(role, "")
     fallback = sorted(candidates, key=lambda v: (keyword not in " ".join(v.tags + (v.title.lower(),)),
                                                  not v.vertical))
     if not prompts or not candidates:
@@ -183,9 +224,9 @@ def place_signature_shots(shots, durations: list[float], slots: dict[str, int]):
     shots = list(shots)
     if len(shots) < 3:
         return shots
-    # v4 footage must stay dominant (lesson from Creative v5): at most half of the
-    # interior shots become signature shots; skater and woman before the cover motif.
-    limit = max(1, (len(shots) - 2) // 2)
+    # v4 footage must stay present (lesson from Creative v5): at most about half of the
+    # interior shots become signature shots; skater, friends and woman come first.
+    limit = max(1, (len(shots) - 1) // 2)
     chosen = sorted(slots.items(), key=lambda kv: PRIORITY.index(kv[0]) if kv[0] in PRIORITY else 9)[:limit]
     taken: set[int] = set()
     for role, source in sorted(chosen, key=lambda kv: SLOT_POSITION.get(kv[0], 0.5)):

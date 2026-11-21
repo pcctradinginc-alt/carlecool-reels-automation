@@ -27,16 +27,15 @@ class AIUnavailable(RuntimeError):
 
 def storyboard_prompt(direction: str) -> str:
     """Keep the request independent of artist identities and copyrighted footage."""
-    direction = " ".join(str(direction).split())[:180]
+    direction = " ".join(str(direction).split())[:420]
     if not direction or any(c in direction for c in "\x00\r\n"):
         raise ValueError("A scene direction is required")
     return (
-        "Two-second original 9:16 cinematic shot for an independent electronic music "
-        "artist. " + direction + ". Restrained Rick Rubin-like studio calm, "
-        "authentic hand-held 1990s California photography, melancholic nostalgic "
-        "American coast, Super 8 film grain, natural light and warm shadows. "
-        "Slow camera move, photorealistic, no text, no logos, no celebrity faces "
-        "or recreations, no known music-video frames. Vertical portrait format. "
+        "Two-second original 9:16 cinematic shot for an independent music artist. "
+        + direction + ". Beautifully unpolished, emotionally genuine, natural light. "
+        "Slow camera move, photorealistic, no commercial posing, no glossy ad look, "
+        "no plastic skin, no text, no logos, no subtitles, no celebrity faces or "
+        "recreations, no known music-video frames. Vertical portrait format. "
         "Generate video only; final soundtrack will be the artist's own music."
     )[:800]
 

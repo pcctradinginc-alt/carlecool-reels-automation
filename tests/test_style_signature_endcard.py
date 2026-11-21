@@ -12,35 +12,50 @@ from carlecool.video import Video
 
 # ---------- style packages ----------
 
-def test_dark_cover_is_night_regardless_of_motif():
-    d = style.decide({"lana": (0.31, "an american flag waving in the wind")}, brightness=0.12)
-    assert d["style"] == "night" and "dark cover" in d["basis"]
+class _Music:
+    def __init__(self, bpm=128.0, mood="nightdrive", beat_energy=(0.7, 0.8, 0.6)):
+        self.bpm, self.mood, self.beat_energy = bpm, mood, beat_energy
 
 
-def test_clear_motif_wins_and_unclear_falls_back_to_v4():
+def test_dark_cover_adds_night_variant_to_the_recognised_world():
+    d = style.decide({"lana": (0.31, "an american flag waving in the wind"), "rubin": (0.2, "x")},
+                     brightness=0.12)
+    assert d["style"] == "lana" and d["variant"] == "night" and "night" in d["basis"]
+    assert style.label(d).endswith("Night")
+
+
+def test_clear_cover_wins_otherwise_the_music_decides():
     rider = "a rider on a horse with an american flag"
-    clear = style.decide({"lana": (0.29, rider), "rubin": (0.22, "x"), "night": (0.2, "y")}, 0.5)
+    clear = style.decide({"lana": (0.29, rider), "rubin": (0.22, "x")}, 0.5, _Music(bpm=90))
     assert clear["style"] == "lana" and style.motif_queries(clear)[0] == "horse riding"
-    planet = style.decide({"lana": (0.2, "a"), "rubin": (0.3, "a planet floating in outer space"),
-                           "night": (0.21, "b")}, 0.5)
+    planet = style.decide({"lana": (0.2, "a"), "rubin": (0.3, "a planet floating in outer space")}, 0.5)
     assert planet["style"] == "rubin" and "planet" in style.motif_queries(planet)
-    unclear = style.decide({"lana": (0.241, "a"), "rubin": (0.238, "b"), "night": (0.2, "c")}, 0.5)
-    assert unclear["style"] is None
+    unclear = {"lana": (0.241, "a"), "rubin": (0.238, "b")}
+    assert style.decide(unclear, 0.5, _Music(bpm=96))["style"] == "rubin"       # slow → Rubin
+    assert style.decide(unclear, 0.5, _Music(bpm=152))["style"] == "lana"       # flowing → Lana
+    assert style.decide(unclear, 0.5, _Music(bpm=130, beat_energy=(0.2, 0.3, 0.4)))["style"] == "rubin"
+    assert style.decide({}, None, _Music(mood="calm"))["style"] == "rubin"
+    assert style.decide({}, None, None)["style"] == "lana"  # always one of the two worlds
 
 
 def test_style_only_nudges_v4():
     weights = {"nature": 28, "studio": 22, "americana": 20, "skate": 18, "y2k": 7, "night": 5}
     lana = style.blended_weights(weights, "lana")
-    assert lana["americana"] == 40 and lana["skate"] > 0  # 50/50, never replaced
+    assert lana["americana"] == 35 and lana["skate"] > 0  # 50/50, never replaced
+    assert style.blended_weights(weights, "lana", "night")["night"] > lana["night"]
     assert style.blended_weights(weights, None) == weights
     assert style.pace_for("medium", "rubin") == "slow"
     assert style.pace_for("fast", "rubin") == "fast"  # owner choice kept
     assert style.pace_for("medium", "lana") == "medium"
-    assert style.grade_filters(None) == [] and style.grade_filters("night")
+    assert style.grade_filters(None) == [] and style.grade_filters("lana", "night") != style.grade_filters("lana")
+    assert style.look("lana")["dissolve"] > 0 and style.look("rubin")["dissolve"] == 0
+    assert style.look(None) is None
 
 
 def test_manual_override_and_off(monkeypatch):
-    assert style.analyze(None, override="night")["style"] == "night"
+    assert style.analyze(None, override="rubin")["style"] == "rubin"
+    forced = style.analyze(None, override="night", features=_Music(bpm=90))
+    assert forced["style"] == "rubin" and forced["variant"] == "night"
     monkeypatch.setenv("CARLECOOL_STYLE", "off")
     assert style.analyze(Path("x.jpg"))["style"] is None
 
@@ -128,19 +143,29 @@ def test_cover_frame_reaches_instagram_and_tiktok():
 
 
 def test_signature_never_dominates_short_edits():
-    shots = [Shot(i % 2, 0.0, 1.5) for i in range(7)]  # calm Rubin edit: 5 interior shots
-    placed = signature.place_signature_shots(shots, [10.0, 10.0, 8.0, 8.0, 8.0],
-                                             {"motif": 2, "skater": 3, "woman": 4})
+    shots = [Shot(i % 2, 0.0, 1.5) for i in range(7)]  # 5 interior shots → at most 3 signature
+    placed = signature.place_signature_shots(shots, [10.0, 10.0, 8.0, 8.0, 8.0, 8.0, 8.0],
+                                             {"motif": 2, "skater": 3, "woman": 4, "friends": 5,
+                                              "americana": 6})
     used = {s.source_index for s in placed}
-    assert {3, 4} <= used and 2 not in used  # skater + woman kept, motif dropped
-    assert sum(1 for s in placed if s.source_index >= 2) == 2
+    assert {3, 4, 5} <= used and not {2, 6} & used  # skater, friends, woman first
+    assert sum(1 for s in placed if s.source_index >= 2) == 3
+    assert placed[0].source_index < 2 and placed[-1].source_index < 2  # bookends stay v4
+
+
+def test_friends_and_americana_queries_follow_world_and_night():
+    assert "friends laughing" in signature.queries_for("friends", "lana")
+    assert "friends walking" in signature.queries_for("friends", "rubin")
+    assert "friends night" in signature.queries_for("friends", "rubin", "night")
+    assert "american flag" in signature.queries_for("americana", "rubin")
+    assert "neon sign" in signature.queries_for("americana", "lana", "night")
 
 
 def test_no_motif_when_style_unclear_or_manual():
     unclear = style.decide({"lana": (0.241, "a rider on a horse with an american flag"),
-                            "rubin": (0.238, "b"), "night": (0.2, "c")}, 0.5)
-    assert unclear["style"] is None and style.motif_queries(unclear) == ()
-    assert style.motif_queries({"style": "night", "basis": "manual", "prompt": ""}) == ()
+                            "rubin": (0.238, "b")}, 0.5)
+    assert unclear["style"] and unclear["prompt"] == "" and style.motif_queries(unclear) == ()
+    assert style.motif_queries({"style": "lana", "basis": "manual", "prompt": ""}) == ()
 
 
 def test_low_resolution_landscape_is_framed_not_cropped(tmp_path, monkeypatch):
@@ -186,3 +211,45 @@ def test_cover_is_fetched_in_the_largest_soundcloud_size(tmp_path):
 
     assert fetch_cover(url, tmp_path / "c.jpg", session=Session())
     assert [u.rsplit("-", 1)[1] for u in tried] == ["t3000x3000.jpg", "original.jpg", "t500x500.jpg"]
+
+
+def test_look_plan_follows_the_music():
+    from carlecool import look
+    from carlecool.analysis import AudioFeatures
+    beats = tuple(i * 0.5 for i in range(24))
+    energy = tuple(0.2 if t < 4 else 0.95 for t in beats)  # quiet verse, loud hook at 4 s
+    f = AudioFeatures(120.0, 1.0, 0.0, "cinematic", 12.0, beats=beats, beat_energy=energy, hook_at=4.0)
+    starts, durs = [0.0, 2.0, 4.0, 6.0, 8.0], [2.0] * 5
+    lana = look.plan_look(style.look("lana"), f, starts, durs)
+    assert lana[1]["dissolve_in"] > 0            # quiet passage: soft dissolve
+    assert lana[2]["dissolve_in"] == 0           # the hook stays a hard cut on the beat
+    assert lana[0]["slowmo"] > 1 and lana[3]["slowmo"] == 1
+    assert lana[1]["leak"] and not lana[0]["leak"]
+    rubin = look.plan_look(style.look("rubin"), f, starts, durs, seed="x")
+    assert all(p["dissolve_in"] == 0 for p in rubin)
+    assert rubin[3]["punch_in"] and not rubin[1]["punch_in"] and not rubin[4]["punch_in"]  # loudest interior shot
+    assert any(p["brightness"] for p in rubin) and all(abs(p["brightness"]) <= 0.02 for p in rubin)
+    assert look.slowmo_factor(1.25, 30.0, 24) == 1.25 and look.slowmo_factor(1.25, 25.0, 24) == 1.0
+    graph, out = look.join_graph([2.0, 2.0, 2.0], [0.0, 0.5, 0.0])
+    assert "xfade=transition=fade:duration=0.500:offset=2.000" in graph and "concat=n=2" in graph
+
+
+def test_lana_look_renders_with_dissolves_slowmo_and_leaks(tmp_path, monkeypatch):
+    import subprocess
+    from carlecool.analysis import AudioFeatures
+    from carlecool.render import probe_duration, render_reel
+    monkeypatch.setenv("REEL_WIDTH", "270")
+    monkeypatch.setenv("REEL_HEIGHT", "480")
+    a, b = tmp_path / "a.mp4", tmp_path / "b.mp4"
+    audio = tmp_path / "a.mp3"
+    run = lambda *x: subprocess.run(["ffmpeg", "-v", "error", "-y", *x], check=True)
+    run("-f", "lavfi", "-i", "testsrc2=s=360x640:r=30:d=8", "-pix_fmt", "yuv420p", str(a))
+    run("-f", "lavfi", "-i", "testsrc=s=360x640:r=30:d=8", "-pix_fmt", "yuv420p", str(b))
+    run("-f", "lavfi", "-i", "sine=f=220:d=8", str(audio))
+    beats = tuple(i * 0.5 for i in range(14))
+    f = AudioFeatures(120.0, 1.0, 0.0, "cinematic", 7.0, beats=beats, downbeats=beats[::4],
+                      beat_energy=tuple(0.9 if t < 3 else 0.3 for t in beats), hook_at=0.0)  # hard cuts, then dissolves
+    d = render_reel(audio, [a, b], f, tmp_path / "out/r.mp4", 6.0, fit_email=False,
+                    look=style.look("lana"), style_grade=style.grade_filters("lana"))
+    assert d["dissolves"] >= 1 and d["slowmo_shots"] >= 1 and d["light_leaks"] >= 1
+    assert abs(probe_duration(tmp_path / "out/r.mp4") - 6.0) < 0.15  # length unchanged
