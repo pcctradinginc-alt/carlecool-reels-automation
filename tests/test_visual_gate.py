@@ -109,12 +109,14 @@ def test_failed_frame_inspection_is_never_treated_as_approval():
     assert report["rejected"][0]["reason"] == "inspection_failed_ValueError"
 
 
-def test_production_workflow_requires_style_gate_and_disables_ai():
-    from pathlib import Path
-    workflow = Path(".github/workflows/daily-reel.yml").read_text(encoding="utf-8")
-    assert "CARLECOOL_VISUAL_STRICT: 'true'" in workflow
-    assert "CARLECOOL_AI_VIDEO: 'off'" in workflow
-    assert "CARLECOOL_SEMANTIC: 'on'" in workflow
+def test_all_render_workflows_require_visual_gate_and_disable_ai():
+    for name in ("daily-reel.yml", "revise-reel.yml", "real-reel-preview-smoke.yml",
+                 "creative-v2-probe-mail.yml"):
+        workflow = Path(".github/workflows", name).read_text(encoding="utf-8")
+        assert "CARLECOOL_VISUAL_STRICT: 'true'" in workflow
+        assert "CARLECOOL_AI_VIDEO: 'off'" in workflow
+        assert "CARLECOOL_SEMANTIC: 'on'" in workflow
+        assert "open_clip_torch" in workflow
 
 
 def test_worlds_have_distinct_content_descriptions():
