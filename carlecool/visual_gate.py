@@ -123,8 +123,10 @@ def _model_scorer(world: str):
     try:
         import torch
         model, preprocess, tokenizer = clip
-        labels = [f"A real photographic frame of {s}." for s in POSITIVE[world]]
-        labels.extend(f"An image of {s}." for s in HARD_NEGATIVES)
+        # Use the same sentence template for both classes, or model prompt
+        # wording itself could bias the decision in favour of either class.
+        labels = [f"A frame from a video showing {s}."
+                  for s in (*POSITIVE[world], *HARD_NEGATIVES)]
         with torch.no_grad():
             reference = torch.nn.functional.normalize(
                 model.encode_text(tokenizer(labels)), dim=-1)
