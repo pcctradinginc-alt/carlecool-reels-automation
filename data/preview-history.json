@@ -429,6 +429,30 @@
         "HkfxGAIYxD"
       ],
       "sha256": "b98b910ca5905c1ca6d2e786b3bfed95a4707dbccf069ec3f2cf2178c0ba343f"
+    },
+    {
+      "at": "2026-11-21T11:39:22+00:00",
+      "kind": "daily",
+      "run_id": 44899530106,
+      "track_id": "2437525047",
+      "video_ids": [
+        "8J7JwQBREF",
+        "54fLNcRPbR",
+        "l7HI6QKese",
+        "paCpjcpTIL",
+        "pl-amateur_northwest",
+        "4tbfSMx3LY",
+        "pl-WathenCo48",
+        "HWWW4ekCVQ",
+        "qFAdpnkjwA",
+        "vbqukqXfz5",
+        "fwwKKUlRGF",
+        "urEkq8g1f3",
+        "6YboHw6kBi",
+        "t0RVccgJfW",
+        "iYPyDjkeQV"
+      ],
+      "sha256": "7687127c479f9cb71f2c9e678868acc810466e5b897cac6eb492ca5c04e53442"
     }
   ]
 }
