@@ -54,11 +54,12 @@ jobs:
     # Only non-secret configuration here. Secrets are passed to the two steps that
     # use them, never to dependency installation steps.
     env:
-      CARLECOOL_AI_VIDEO: 'one'
+      CARLECOOL_AI_VIDEO: 'off' # strict mode: do not generate unverified synthetic video
       CARLECOOL_TRENDS: 'true'
       CARLECOOL_COVER_MATCH: 'true' # Creative v3: enable safe, local album-art palette ranking
       CARLECOOL_STYLE: ${{ inputs.style || vars.CARLECOOL_STYLE || 'auto' }}
-      CARLECOOL_SEMANTIC: ${{ vars.CARLECOOL_SEMANTIC == 'off' && 'off' || 'on' }}
+      CARLECOOL_SEMANTIC: 'on' # mandatory; if loading fails, fail closed
+      CARLECOOL_VISUAL_STRICT: 'true' # five-frame check of every selected clip
       SC_ALLOW_OFFICIAL_DOWNLOADS: ${{ vars.SC_ALLOW_OFFICIAL_DOWNLOADS }}
       AUDIO_S3_BUCKET: ${{ vars.AUDIO_S3_BUCKET }}
       STOCK_S3_BUCKET: ${{ vars.STOCK_S3_BUCKET }}
