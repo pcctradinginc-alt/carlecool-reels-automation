@@ -100,8 +100,9 @@ def validate_footage_rights(approval: dict) -> None:
         raise RuntimeError('Missing footage provenance; no publication')
     providers = {str(entry.get('provider', '')) for entry in sources
                  if isinstance(entry, dict)}
-    if len(providers) == 0 or len(providers) > 6 or any(
-            name not in ('coverr', 'pexels', 'nasa', 'prelinger', 'owned', 'ai') for name in providers):
+    if len(providers) == 0 or len(providers) > 7 or any(
+            name not in ('coverr', 'pexels', 'nasa', 'prelinger', 'wikimedia', 'owned', 'ai')
+            for name in providers):
         raise RuntimeError('Unknown footage source; no publication')
     caption = str(approval.get('caption', ''))
     if 'coverr' in providers and ('Footage by Coverr' not in caption
@@ -113,6 +114,8 @@ def validate_footage_rights(approval: dict) -> None:
         raise RuntimeError('NASA archive credit missing from approved caption')
     if 'prelinger' in providers and 'Prelinger Archives' not in caption:
         raise RuntimeError('Prelinger credit missing from approved caption')
+    if 'wikimedia' in providers and 'Wikimedia Commons' not in caption:
+        raise RuntimeError('Wikimedia Commons credit missing from approved caption')
 
 
 def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,

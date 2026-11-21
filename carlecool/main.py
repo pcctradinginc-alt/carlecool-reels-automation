@@ -41,6 +41,9 @@ def caption_for(track, videos) -> str:
             caption += f"Video by {name} on Pexels\n"
     if any(v.source == "nasa" for v in videos):
         caption += "🎬 Archive footage: NASA (images.nasa.gov)\n"
+    wiki = list(dict.fromkeys(v.creator_name for v in videos if v.source == "wikimedia" and v.creator_name))
+    if wiki:
+        caption += "🎬 " + "; ".join(wiki) + "\n"
     if any(v.source == "prelinger" for v in videos):
         caption += "🎬 Archive footage: Prelinger Archives, public domain (archive.org)\n"
     return caption.rstrip() + "\n\n#carlecool #instrumental #electronic #rap #producer"
@@ -185,6 +188,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         from .archives import fetch_archival
         archival = fetch_archival(style_name, set(recent_video_ids(previews, limit=30)) | recent,
                                   output_dir / "archive", run_key=edition)
+        from .wikimedia import fetch_wikimedia
+        archival += fetch_wikimedia(style_name, set(recent_video_ids(previews, limit=30)) | recent,
+                                    output_dir / "wikimedia", run_key=edition)
     portrait_count = len(paths)
     portrait_paths = set(paths)
     # Landscape only fills up a thin portrait supply, and always after the portrait clips.
@@ -279,6 +285,20 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                 except Exception as exc:
                     print(f"Signature {role} clip skipped: {video.id}: {type(exc).__name__}")
             else:
+                if role == "skater" and role not in signature_slots:
+                    # Coverr empty or throttled: free Wikimedia skateboarding footage.
+                    from .wikimedia import fetch_wikimedia
+                    for video in fetch_wikimedia("skater", exclude, output_dir / "wikimedia",
+                                                 run_key=edition, max_clips=1):
+                        if signature.largest_face_ratio(Path(video.path)) > signature.FACE_MAX_HEIGHT:
+                            print(f"Signature skater {video.id} rejected: visible face")
+                            continue
+                        selected.append(video)
+                        paths.append(Path(video.path))
+                        signature_slots[role] = len(paths) - 1
+                        no_bookend.add(len(paths) - 1)
+                        signature_info[role] = {"id": video.id, "query": video.query}
+                        print(f"Signature skater: {video.id} (Wikimedia)")
                 if role not in signature_slots:
                     print(f"Signature {role}: no suitable clip this time")
     from . import masterstore

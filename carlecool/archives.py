@@ -176,9 +176,13 @@ def prelinger_media(item: dict, *, session=None) -> tuple[str, float]:
     return f"https://archive.org/download/{item['identifier']}/{quote(best[1])}", best[2]
 
 
-def remote_info(url: str) -> tuple[float, int, int]:
+def _ua(user_agent: str | None) -> list[str]:
+    return ["-user_agent", user_agent] if user_agent else []
+
+
+def remote_info(url: str, user_agent: str | None = None) -> tuple[float, int, int]:
     """(duration, width, height) via FFmpeg's input inspection (one ranged request)."""
-    p = subprocess.run(["ffmpeg", "-hide_banner", "-i", url], capture_output=True, text=True,
+    p = subprocess.run(["ffmpeg", "-hide_banner", *_ua(user_agent), "-i", url], capture_output=True, text=True,
                        encoding="utf-8", errors="replace", timeout=60)
     dur = re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)", p.stderr)
     size = re.search(r"Video:.*?(?<![0-9a-fA-Fx])(\d{2,5})x(\d{2,5})(?![0-9])", p.stderr)
@@ -211,11 +215,12 @@ def cut_segment(url: str, start: float, destination: Path, seconds: float = SEGM
 FRAME_W, FRAME_H = 320, 240
 
 
-def _remote_frame(url: str, at: float):
+def _remote_frame(url: str, at: float, user_agent: str | None = None):
     """One frame as raw RGB (no PNG/JPEG encoder needed: the bundled Linux FFmpeg
     build lacked one, so every frame check failed in CI with margin -1.0)."""
     from PIL import Image
-    p = subprocess.run(["ffmpeg", "-v", "error", "-ss", f"{at:.2f}", "-i", url, "-frames:v", "1",
+    p = subprocess.run(["ffmpeg", "-v", "error", "-ss", f"{at:.2f}",
+                        *(_ua(user_agent) if url.startswith("http") else []), "-i", url, "-frames:v", "1",
                         "-vf", f"scale={FRAME_W}:{FRAME_H}:force_original_aspect_ratio=decrease,"
                                f"pad={FRAME_W}:{FRAME_H}:(ow-iw)/2:(oh-ih)/2",
                         "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
@@ -224,6 +229,58 @@ def _remote_frame(url: str, at: float):
         detail = p.stderr.decode("utf-8", "replace").strip().splitlines()[-1:] if p.stderr else []
         raise ValueError("No frame" + (f": {detail[0][:120]}" if detail else ""))
     return Image.frombytes("RGB", (FRAME_W, FRAME_H), p.stdout[:FRAME_W * FRAME_H * 3])
+
+
+def margin_for(image, positive, negative) -> float:
+    """max(positive) − max(negative) CLIP similarity for free prompt lists (NaN: no model)."""
+    from .semantic import load_clip, semantic_enabled
+    clip = load_clip() if semantic_enabled() else None
+    if clip is None:
+        return float("nan")
+    import torch
+    model, preprocess, tokenizer = clip
+    pos, neg = tuple(positive), tuple(negative)
+    with torch.no_grad():
+        img = torch.nn.functional.normalize(model.encode_image(preprocess(image).unsqueeze(0)), dim=-1)
+        txt = torch.nn.functional.normalize(
+            model.encode_text(tokenizer([f"a photo of {t}" for t in pos + neg])), dim=-1)
+        sims = (img @ txt.T)[0].tolist()
+    return round(max(sims[:len(pos)]) - max(sims[len(pos):]), 4)
+
+
+def frame_margin_custom(path_or_url, at: float, positive, negative, user_agent: str | None = None) -> float:
+    try:
+        return margin_for(_remote_frame(str(path_or_url), at, user_agent), positive, negative)
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return float("nan")
+
+
+def sample_best(url: str, duration: float, positive, negative, key: str,
+                seconds: float = SEGMENT_SECONDS, user_agent: str | None = None) -> tuple[float | None, float]:
+    """Best of 3 spots in the middle of a remote video passing the content gate."""
+    base = segment_start(duration, key)
+    spots = sorted({max(0.0, min(duration - seconds - 1, base + d))
+                    for d in (0.0, duration * 0.17, -duration * 0.17)})
+    best = (None, -1.0)
+    for at in spots:
+        margin = frame_margin_custom(url, at + seconds / 2, positive, negative, user_agent)
+        if margin == margin and margin > best[1]:
+            best = (at, margin)
+    return (best[0], best[1]) if best[1] >= MIN_MARGIN else (None, best[1])
+
+
+def cut_segment_any(url: str, start: float, destination: Path, seconds: float,
+                    *, allowed: tuple[str, ...], user_agent: str | None = None) -> Path:
+    if urlparse(url).scheme != "https" or (urlparse(url).hostname or "").lower() not in allowed:
+        raise ValueError("Segment host not allowed")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["ffmpeg", "-v", "error", "-y", *_ua(user_agent), "-reconnect", "1", "-reconnect_streamed", "1",
+                    "-ss", f"{start:.2f}", "-i", url, "-t", f"{seconds:.2f}", "-an",
+                    "-c:v", "libx264", "-preset", "veryfast", "-crf", "16", "-pix_fmt", "yuv420p",
+                    str(destination)], check=True, capture_output=True, timeout=180)
+    if destination.stat().st_size < 10_000:
+        raise ValueError("Segment too small")
+    return destination
 
 
 def frame_margin(image, source: str) -> float:
