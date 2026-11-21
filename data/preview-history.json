@@ -302,6 +302,22 @@
         "Wy7HYV5tys"
       ],
       "sha256": "144420abe8434d064b38b9b9c0084c67ebcaa6e8130c172e06be9dc237ed9139"
+    },
+    {
+      "at": "2026-11-21T00:10:35+00:00",
+      "kind": "daily",
+      "run_id": 44841576673,
+      "track_id": "2437525056",
+      "video_ids": [
+        "l7HI6QKese",
+        "ObawmzmnXB",
+        "4tbfSMx3LY",
+        "vbqukqXfz5",
+        "q05vGxUamw",
+        "mSka7XfWvd",
+        "LyBjJvw6i0"
+      ],
+      "sha256": "bfd9c375cda1a625663362a24b89f8fb6fede7b25c356d3a56bc7edbef16c555"
     }
   ]
 }
