@@ -323,7 +323,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
             if not queries or len(signature_slots) >= signature.MAX_ROLES:
                 continue
             # Fixed order where the first query matters (flag, Porsche), rotated otherwise.
-            ordered = (list(queries) if role in ("motif", "flag", "car")
+            ordered = (list(queries) if role in ("motif", "flag")
+                       else signature.car_order(queries, edition) if role == "car"
                        else signature._rotate(tuple(queries), f"{edition}|{role}"))
             found = signature.rank(role, signature.search_slot(config.coverr_key, ordered, exclude=exclude,
                                                                role=role), output_dir / "thumbs")

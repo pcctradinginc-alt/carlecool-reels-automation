@@ -59,12 +59,20 @@ FLAG_QUERIES = {
     "night": ("american flag", "usa flag", "flag night"),
     None: ("american flag", "usa flag", "flag"),
 }
-CAR_QUERIES = {  # a classic Porsche first, then other classics
-    "lana": ("porsche", "porsche 911", "classic car"),
-    "rubin": ("porsche", "classic car", "vintage car"),
-    "night": ("porsche", "classic car", "car night"),
-    None: ("porsche", "classic car", "vintage car"),
+CAR_QUERIES = {  # owner: classic Porsche (993 era) or a classic Land Rover Defender
+    "lana": ("porsche", "land rover", "porsche 911", "defender", "classic car"),
+    "rubin": ("land rover", "porsche", "defender", "porsche 911", "classic car"),
+    "night": ("porsche", "land rover", "porsche 911", "classic car"),
+    None: ("porsche", "land rover", "classic car"),
 }
+
+
+def car_order(queries, run_key: str) -> list[str]:
+    """Alternate Porsche-first / Land-Rover-first between Reels; the rest keep their order."""
+    q = list(queries)
+    if len(q) >= 2 and hashlib.sha256(f"{run_key}|car".encode()).digest()[0] % 2:
+        q[0], q[1] = q[1], q[0]
+    return q
 WOMAN_QUERIES = {
     "lana": ("woman field sunset", "woman hair wind", "woman summer"),
     "rubin": ("woman beach morning", "woman walking nature", "woman window"),
@@ -119,7 +127,8 @@ PROMPTS = {
          "a flag of another country", "text or a document"),
     ),
     "car": (
-        ("a classic porsche 911 sports car", "a vintage sports car on an open road",
+        ("a classic porsche 911 sports car", "a classic land rover defender off-road vehicle",
+         "a vintage sports car on an open road",
          "a classic car driving at sunset"),
         ("a modern suv or minivan", "a car crash or an accident", "a car dealership or showroom",
          "a traffic jam", "a race track with crowds"),
@@ -175,10 +184,11 @@ def search_slot(api_key: str, queries, *, exclude: set[str], session=None,
 def rank(role: str, candidates: list[Video], workdir: Path) -> list[Video]:
     """Order by CLIP (positive − negative prompt similarity); keyword fallback."""
     prompts = PROMPTS.get(role)
-    keyword = {"skater": "skate", "woman": "woman", "friends": "friend", "friends2": "friend",
-               "flag": "flag", "car": "porsche"}.get(role, "")
-    fallback = sorted(candidates, key=lambda v: (keyword not in " ".join(v.tags + (v.title.lower(),)),
-                                                 not v.vertical))
+    keywords = {"skater": ("skate",), "woman": ("woman",), "friends": ("friend",),
+                "friends2": ("friend",), "flag": ("flag",),
+                "car": ("porsche", "land rover", "defender")}.get(role, ("",))
+    fallback = sorted(candidates, key=lambda v: (not any(k in " ".join(v.tags + (v.title.lower(),))
+                                                         for k in keywords), not v.vertical))
     if not prompts or not candidates:
         return fallback
     from .semantic import load_clip, semantic_enabled

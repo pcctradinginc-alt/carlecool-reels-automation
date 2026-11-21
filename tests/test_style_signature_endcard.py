@@ -279,7 +279,7 @@ def test_style_search_words_always_include_a_car_and_the_flag():
         for key in ("a", "b", "c", "d"):
             words = style.search_queries(decision, run_key=key)
             assert len(words) == 5 and "american flag" in words
-            assert any(w in ("porsche", "classic car") for w in words)
+            assert any(w in ("porsche", "land rover", "classic car") for w in words)
             assert all(len(w.split()) <= 2 for w in words)  # Coverr matches every word
     ladders = style.search_ladders(["porsche", "motel"])
     assert ladders["porsche"][0] == "classic car" and "road" not in ladders["motel"]
@@ -293,3 +293,9 @@ def test_more_signature_room_but_bookends_stay():
     used = {s.source_index for s in placed}
     assert set(slots.values()) <= used  # 7 signature shots fit into 17
     assert placed[0].source_index < 2 and placed[-1].source_index < 2
+
+
+def test_cars_alternate_porsche_and_land_rover():
+    firsts = {signature.car_order(signature.queries_for("car", "lana"), str(k))[0] for k in range(12)}
+    assert firsts == {"porsche", "land rover"}
+    assert style.search_ladders(["land rover"])["land rover"][0] == "defender"

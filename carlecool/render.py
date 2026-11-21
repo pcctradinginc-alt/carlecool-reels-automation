@@ -22,6 +22,10 @@ from .music_structure import align_to_structure
 
 
 FRAMED_UPSCALE_LIMIT = 3.0  # crop upscale beyond this → framed presentation
+# Picture clean-up and grain (see grain_filter).
+CLEAN_UP = os.getenv("CARLECOOL_CLEANUP", "on").strip().lower() not in ("off", "false", "0", "no")
+DENOISE = "hqdn3d=1.2:0.9:4:3"
+SHARPEN = "unsharp=5:5:0.45:5:5:0.0"
 LOOP_BRIDGE_SECONDS = 0.38   # cover card fading out at the start (matches the last frame)
 LOOP_CROSSFADE = 0.25        # audio: the end blends into the bar just before the start
 CARD_OUT = 0.4               # cover card fades out before the end → last frame = clean footage
@@ -126,6 +130,22 @@ def loudness_filter(audio: Path, start: float, length: float) -> str:
     i, tp, lra, thresh, offset = values
     return (f"loudnorm={LOUDNESS}:measured_I={i}:measured_TP={tp}:measured_LRA={lra}:"
             f"measured_thresh={thresh}:offset={offset}:linear=true")
+
+
+def grain_filter(level: int, index: int) -> str:
+    """Coarse, weak 35 mm-style grain.
+
+    Fine per-pixel noise (the old `noise=alls=N`) is exactly what Instagram's and TikTok's
+    re-encode smear into block patterns. Here the grain is generated at half resolution
+    (≈ 2 px grains), scaled up softly and laid over the picture in overlay mode at low
+    opacity — it survives the platform encode as texture instead of turning into blocks.
+    """
+    opacity = min(0.2, 0.02 * max(0, int(level)))
+    return (f"split=2[gb{index}][gn{index}];"
+            f"[gn{index}]scale=iw/2:ih/2,format=gray,lutyuv=y=128,noise=c0s=70:c0f=t,"
+            f"scale=iw*2:ih*2:flags=bicubic,format=yuv420p[gg{index}];"
+            f"[gb{index}]format=yuv420p[gp{index}];"
+            f"[gp{index}][gg{index}]blend=all_mode=overlay:all_opacity={opacity:.3f}:c1_opacity=0:c2_opacity=0")
 
 
 def loop_audio_graph(audio: Path, start: float, length: float) -> str:
@@ -342,14 +362,20 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 chain.append(f"setpts={speed}*PTS")
                 slowed += 1
         chain.append(f"fps={FPS}")
+        if CLEAN_UP:
+            # Light spatial + temporal denoise BEFORE the look: removes the stock clips'
+            # compression noise/blocking, so the film grain is not stacked on artefacts.
+            chain.append(DENOISE)
         lut = luts[shot.source_index]
         if lut is not None:
             chain.append(f"lut3d=file={_filter_path(lut)}:interp=tetrahedral")
         chain.append(f"eq=saturation={saturation:.3f}:contrast={contrast:.3f}:gamma=1.015"
                      + (f":brightness={styling['brightness']:.4f}" if styling["brightness"] else ""))
         chain.extend(style_grade or [])
+        if CLEAN_UP:
+            chain.append(SHARPEN)  # gentle, luma only, after the grade
         if grain:
-            chain.append(f"noise=alls={grain}:allf=t")
+            chain.append(grain_filter(grain, index))
         # Outgoing shot runs on under the next shot's dissolve (total length unchanged).
         tail = shot_look[index + 1]["dissolve_in"] if index + 1 < len(storyboard) else 0.0
         part = work / f"clip_{index:03}.mp4"

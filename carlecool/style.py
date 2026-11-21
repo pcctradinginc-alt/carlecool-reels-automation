@@ -235,14 +235,15 @@ def motif_queries(decision: dict) -> tuple[str, ...]:
 
 
 # Fixed Coverr search words per world (owner: motel, diner, roadtrip, friends at night,
-# flag, neon, classic cars — a classic Porsche 911 / 993 rather than generic cars).
+# flag, neon, classic cars — a classic Porsche 911 / 993 or a classic Land Rover Defender
+# rather than generic cars).
 # Short words only: Coverr matches every word of a query.
 SEARCH_QUERIES = {
     "lana": ("motel", "diner", "road trip", "friends night", "american flag", "neon sign",
-             "porsche", "classic car", "convertible", "palm trees", "gas station",
+             "porsche", "land rover", "classic car", "convertible", "palm trees", "gas station",
              "summer friends", "desert road", "sunset drive", "jukebox", "retro"),
     "rubin": ("friends walking", "basketball court", "parking lot", "empty road", "american flag",
-              "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
+              "land rover", "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
               "golden hour", "friends talking", "street"),
 }
 NIGHT_QUERIES = {
@@ -255,6 +256,7 @@ SEARCH_LANES = 5
 # Fallback when a style word finds nothing on Coverr (style words never broaden into
 # generic lane words such as "road" or "nature").
 SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("vintage car",),
+                   "land rover": ("defender", "off road"),
                    "jukebox": ("retro",), "convertible": ("classic car",), "motel": ("motel sign",),
                    "neon sign": ("neon",), "friends night": ("friends",), "summer friends": ("friends",),
                    "pickup truck": ("truck",), "american flag": ("flag",), "road trip": ("road",),
@@ -275,8 +277,9 @@ def search_queries(decision: dict, run_key: str = "", lanes: int = SEARCH_LANES)
     pool = list((NIGHT_QUERIES if decision.get("variant") == "night" else SEARCH_QUERIES)[world])
     start = int.from_bytes(hashlib.sha256(f"{run_key}|search".encode()).digest()[:2], "big") % len(pool)
     pool = pool[start:] + pool[:start]
-    must = [q for q in pool if q in ("porsche", "classic car")][:1] + ["american flag"]
-    rest = [q for q in pool if q not in must and q not in ("porsche", "classic car")]
+    cars = ("porsche", "land rover", "classic car")
+    must = [q for q in pool if q in cars][:1] + ["american flag"]
+    rest = [q for q in pool if q not in must and q not in cars]
     return (must + rest)[:lanes]
 
 
