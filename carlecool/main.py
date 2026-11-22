@@ -104,7 +104,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     config.validate()
     state = load_state()
     previews = load_preview_history()
-    tracks = fetch_tracks(config)
+    from . import songpool
+    pool = songpool.load()
+    tracks = fetch_tracks(config, pool=pool)
     if not tracks:
         raise RuntimeError("No public SoundCloud tracks found")
     profile = validate_profile(creative_profile) if creative_profile is not None else load_profile()
@@ -113,6 +115,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     destination = output_dir / "original.mp3"
     if track_id is not None:
         track = next((t for t in tracks if t.id == str(track_id)), None)
+        if track is None and pool.get("mode") != "all":
+            # Revision of a Reel made before the song pool was limited: look in the newest uploads.
+            track = next((t for t in fetch_tracks(config) if t.id == str(track_id)), None)
         if track is None:
             raise ValueError('Revision track no longer appears in latest 20 SoundCloud uploads')
         audio = locate_original(track, destination)

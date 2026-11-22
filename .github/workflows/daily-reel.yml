@@ -58,6 +58,8 @@ jobs:
       CARLECOOL_TRENDS: 'true'
       CARLECOOL_COVER_MATCH: 'true' # Creative v3: enable safe, local album-art palette ranking
       CARLECOOL_STYLE: ${{ inputs.style || vars.CARLECOOL_STYLE || 'auto' }}
+      # Song pool override without a commit: repo variable CARLECOOL_SONG_POOL=all (see data/song-pool.json)
+      CARLECOOL_SONG_POOL: ${{ vars.CARLECOOL_SONG_POOL || '' }}
       CARLECOOL_SEMANTIC: ${{ vars.CARLECOOL_SEMANTIC == 'off' && 'off' || 'on' }}
       SC_ALLOW_OFFICIAL_DOWNLOADS: ${{ vars.SC_ALLOW_OFFICIAL_DOWNLOADS }}
       AUDIO_S3_BUCKET: ${{ vars.AUDIO_S3_BUCKET }}

@@ -50,8 +50,9 @@ def _get(session, url, *, token, params=None):
     return r.json()
 
 
-def fetch_tracks(config: Settings, session=None) -> list[Track]:
-    """Return 20 newest uploaded public tracks sorted by creation date."""
+def fetch_tracks(config: Settings, session=None, pool: dict | None = None) -> list[Track]:
+    """Return 20 newest uploaded public tracks sorted by creation date — or, with a
+    playlist song pool (songpool.py), the owner's public tracks of that set."""
     fixture = Path("data/tracks.json")
     if not (config.sc_client_id and config.sc_client_secret):
         if not fixture.exists():
@@ -73,6 +74,8 @@ def fetch_tracks(config: Settings, session=None) -> list[Track]:
     owner_id = str(user.get("id") or str(user.get("urn") or "").split(":")[-1])
     if not owner_id.isdecimal():
         raise RuntimeError("Resolved SoundCloud artist has no numeric user ID")
+    if pool and pool.get("mode") == "playlist":
+        return _playlist_tracks(session, token, pool, owner_id)
     raw_tracks = []
     next_url = f"https://api.soundcloud.com/users/{user_urn}/tracks"
     params = {"limit": 50, "linked_partitioning": "true"}
@@ -92,3 +95,33 @@ def fetch_tracks(config: Settings, session=None) -> list[Track]:
         raise RuntimeError("Track uploader differs from resolved CarleCool profile")
     tracks = [replace(t, uploader_id=owner_id) for t in tracks]
     return sorted(tracks, key=lambda t: t.created_at, reverse=True)[:20]
+
+
+def _playlist_tracks(session, token: str, pool: dict, owner_id: str) -> list[Track]:
+    """Public tracks of one of the owner's sets, in set order; fails closed when empty."""
+    playlist = _get(session, "https://api.soundcloud.com/resolve", token=token,
+                    params={"url": pool["playlist_url"]})
+    if str(playlist.get("kind") or "playlist") not in ("playlist", "system-playlist"):
+        raise RuntimeError("Song pool URL is not a SoundCloud set")
+    pl_owner = str((playlist.get("user") or {}).get("id")
+                   or str((playlist.get("user") or {}).get("urn") or "").split(":")[-1])
+    if pl_owner and pl_owner != owner_id:
+        raise RuntimeError("Song pool set belongs to another SoundCloud account")
+    items = playlist.get("tracks") or []
+    if not items or any("title" not in t for t in items):
+        urn = playlist.get("urn") or f"soundcloud:playlists:{playlist.get('id')}"
+        payload = _get(session, f"https://api.soundcloud.com/playlists/{urn}/tracks", token=token,
+                       params={"limit": 100, "linked_partitioning": "true"})
+        items = payload.get("collection", []) if isinstance(payload, dict) else payload
+    tracks = []
+    for t in items:
+        if not t.get("title") or t.get("sharing", "public") != "public":
+            continue
+        track = Track.parse(t)
+        if track.uploader_id and track.uploader_id != owner_id:
+            continue  # reposts by others in the set are never used
+        tracks.append(replace(track, uploader_id=owner_id))
+    if not tracks:
+        raise RuntimeError(f"Song pool '{pool.get('label') or pool['playlist_url']}' has no public tracks of the owner")
+    print(f"Song pool: {len(tracks)} tracks from '{pool.get('label') or pool['playlist_url']}'")
+    return tracks
