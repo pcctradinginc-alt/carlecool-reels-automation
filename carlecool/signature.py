@@ -255,7 +255,10 @@ def rank(role: str, candidates: list[Video], workdir: Path, world: str | None = 
         from .stylegate import UNWANTED, load_references
         # Cars: best match to any owner car profile (Land/Range Rover, Porsche 993);
         # other roles: the style world's references.
-        refs = (load_references("car") if role == "car" else []) or load_references(world)[:1]
+        people_roles = ("woman", "friends", "friends2", "skater")
+        refs = ((load_references("car") if role == "car" else [])
+                or ((load_references("people") + load_references(world)[:1]) if role in people_roles else [])
+                or load_references(world)[:1])
         ref_t = (torch.nn.functional.normalize(torch.tensor(refs, dtype=torch.float32), dim=-1)
                  if refs else None)
         with torch.no_grad():

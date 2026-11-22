@@ -231,3 +231,12 @@ def test_singer_911_and_owner_people_style():
     assert "friends festival" in signature.queries_for("friends", "lana")
     assert any("wellington" in w for w in stylegate.WANTED["lana"])
     assert any("waxed field jacket" in p for p in signature.PROMPTS["woman"][0])
+
+
+
+def test_people_profile_is_style_only_and_stored_without_images():
+    import json
+    from pathlib import Path
+    doc = json.loads(Path("data/style-refs/people.json").read_text())
+    assert doc["count"] == 13 and len(doc["embedding"]) == 512 and "RANKING by style only" in doc["note"]
+    assert len(stylegate.load_references("people")) == 1
