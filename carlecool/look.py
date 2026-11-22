@@ -33,8 +33,8 @@ def plan_look(look: dict | None, features, starts: list[float], durations: list[
               seed: str = "") -> list[dict]:
     """Per shot: dissolve_in (s), slowmo factor, leak, punch_in, brightness offset."""
     n = len(starts)
-    plan = [{"dissolve_in": 0.0, "slowmo": 1.0, "leak": False, "punch_in": False, "brightness": 0.0}
-            for _ in range(n)]
+    plan = [{"dissolve_in": 0.0, "slowmo": 1.0, "leak": False, "punch_in": False, "brightness": 0.0,
+             "bw": False} for _ in range(n)]
     if not look or n == 0:
         return plan
     hook = float(getattr(features, "hook_at", 0.0) or 0.0)
@@ -63,6 +63,14 @@ def plan_look(look: dict | None, features, starts: list[float], durations: list[
             plan[i]["brightness"] = round((byte / 255.0 * 2 - 1) * jitter, 4)
         if look.get("light_leaks") and i % 3 == 1:
             plan[i]["leak"] = True
+    # Black-and-white moments (Lana references): the quietest interior shots, cut in and
+    # out hard (a dissolve between colour and B/W looks like a mistake).
+    bw = int(look.get("bw_shots") or 0)
+    if bw and n > 4:
+        for i in sorted(range(1, n - 1), key=lambda k: rank[k])[:bw]:
+            plan[i].update(bw=True, leak=False, slowmo=1.0, dissolve_in=0.0)
+            if i + 1 < n:
+                plan[i + 1]["dissolve_in"] = 0.0
     # The bookends form the loop seam (see seal_loop): keep them untouched, real-time.
     for i in {0, n - 1}:
         plan[i].update(slowmo=1.0, leak=False, punch_in=False, brightness=0.0)

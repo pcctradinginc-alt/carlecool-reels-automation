@@ -14,6 +14,7 @@ No model → only the word check. Never raises.
 """
 from __future__ import annotations
 
+from pathlib import Path
 import re
 
 BLOCK_WORDS = (
@@ -56,7 +57,12 @@ WANTED = {
              "a road trip on an empty american highway", "palm trees and a pale summer sky",
              "a skateboarder on a street", "a woman in natural light", "a vintage color home movie",
              "a city street at night with lights", "a sunset over a calm landscape",
-             "a dj turntable with a vinyl record", "a vintage dj mixer or drum machine"),
+             "a dj turntable with a vinyl record", "a vintage dj mixer or drum machine",
+             # owner's references: 1960s New England sailing, Kodachrome summer, Hollywood glamour
+             "a couple on a sailboat on a sunny day", "white sails against a blue sky and the sea",
+             "a 1960s kodachrome color photo of people on a boat", "a woman with sunglasses and a headscarf",
+             "a convertible car in california sunshine", "a swimming pool with palm trees",
+             "a black and white documentary photo of two people"),
     "rubin": ("young friends sitting together in silence", "an empty parking lot at dusk",
               "an american flag on a fence", "a classic land rover defender",
               "a classic air-cooled porsche 911 from the 1990s", "a neon diner or motel sign at night",
@@ -126,3 +132,49 @@ def clip_verdicts(images, world: str | None, clip) -> list[tuple[float, str] | N
 
 def rejected(verdict: tuple[float, str] | None) -> bool:
     return verdict is not None and verdict[0] < MARGIN
+
+
+# ---------------------------------------------------------------- owner reference images
+REF_DIR = Path(__file__).resolve().parent.parent / "data" / "style-refs"
+REF_WEIGHT = 2.0  # ranking bonus per unit of similarity above the candidates' median
+
+
+def load_reference(world: str | None):
+    """Mean OpenCLIP embedding of the owner's reference images for a world (or None)."""
+    import json
+    try:
+        doc = json.loads((REF_DIR / f"{world}.json").read_text(encoding="utf-8"))
+        vec = doc.get("embedding")
+        return vec if isinstance(vec, list) and len(vec) >= 64 else None
+    except (OSError, ValueError, TypeError):
+        return None
+
+
+def reference_similarity(images, world: str | None, clip) -> list[float | None]:
+    """Cosine similarity of each thumbnail to the owner's references (None = unscored).
+
+    Used for RANKING only (closer to the owner's examples = earlier), never as a hard gate:
+    the references show the look (era, light, colour, setting), the gate keeps out content.
+    """
+    ref = load_reference(world)
+    if ref is None or clip is None or not images:
+        return [None] * len(images)
+    try:
+        import torch
+        from PIL import Image
+        model, preprocess, _tok = clip
+        ref_t = torch.nn.functional.normalize(torch.tensor(ref, dtype=torch.float32), dim=-1)
+        out = []
+        with torch.no_grad():
+            for image in images:
+                if image is None:
+                    out.append(None)
+                    continue
+                with Image.open(image) as img:
+                    v = torch.nn.functional.normalize(
+                        model.encode_image(preprocess(img.convert("RGB")).unsqueeze(0)), dim=-1)[0]
+                out.append(float(v @ ref_t))
+        return out
+    except Exception as exc:
+        print("Reference similarity unavailable:", type(exc).__name__)
+        return [None] * len(images)

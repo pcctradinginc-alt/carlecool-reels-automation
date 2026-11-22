@@ -237,9 +237,12 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
         return remote + others, []
     thumbs = [download_thumbnail(c.thumb_url, workdir / f"thumb_{i:02d}.jpg", session=session)
               for i, c in enumerate(remote)]
+    ref_sims: list = [None] * len(remote)
     if gate:
         from .semantic import load_clip, semantic_enabled
-        verdicts = stylegate.clip_verdicts(thumbs, world, load_clip() if semantic_enabled() else None)
+        clip_model = load_clip() if semantic_enabled() else None
+        verdicts = stylegate.clip_verdicts(thumbs, world, clip_model)
+        ref_all = stylegate.reference_similarity(thumbs, world, clip_model)
         keep_idx = []
         for i, verdict in enumerate(verdicts):
             if stylegate.rejected(verdict):
@@ -252,6 +255,13 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
                     style_fit[remote[i].id] = verdict[0]
         remote = [remote[i] for i in keep_idx]
         thumbs = [thumbs[i] for i in keep_idx]
+        ref_sims = [ref_all[i] for i in keep_idx]
+        known = sorted(x for x in ref_sims if x is not None)
+        if known and style_fit is not None:
+            mid = known[len(known) // 2]
+            for c, sim in zip(remote, ref_sims):  # owner's references also steer the opening clip
+                if sim is not None:
+                    style_fit[c.id] = style_fit.get(c.id, 0.0) + (sim - mid)
         if len(remote) <= keep:
             for thumb in thumbs:
                 if thumb is not None:
@@ -265,7 +275,11 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
         # No thumbnail could be scored: keep discovery order, never lose all stock.
         return remote[:keep] + others, []
     # Portrait clips always rank ahead of landscape fill-ins (which need a 9:16 crop).
-    rank = [scores[i] + (1.0 if remote[i].vertical else 0.0) for i in range(len(remote))]
+    known = sorted(x for x in ref_sims if x is not None)
+    ref_mid = known[len(known) // 2] if known else 0.0
+    rank = [scores[i] + (1.0 if remote[i].vertical else 0.0)
+            + (stylegate.REF_WEIGHT * (ref_sims[i] - ref_mid) if ref_sims[i] is not None else 0.0)
+            for i in range(len(remote))]
     order = sorted(range(len(remote)), key=lambda i: (-rank[i], i))
     chosen: list[int] = []
     for lane in dict.fromkeys(c.query for c in remote):

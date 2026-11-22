@@ -222,7 +222,7 @@ def test_look_plan_follows_the_music():
     energy = tuple(0.2 if t < 4 else 0.95 for t in beats)  # quiet verse, loud hook at 4 s
     f = AudioFeatures(120.0, 1.0, 0.0, "cinematic", 12.0, beats=beats, beat_energy=energy, hook_at=4.0)
     starts, durs = [0.0, 2.0, 4.0, 6.0, 8.0], [2.0] * 5
-    lana = look.plan_look(style.look("lana"), f, starts, durs)
+    lana = look.plan_look(dict(style.look("lana"), bw_shots=0), f, starts, durs)  # B/W tested separately
     assert lana[1]["dissolve_in"] > 0            # quiet passage: soft dissolve
     assert lana[2]["dissolve_in"] == 0           # the hook stays a hard cut on the beat
     assert lana[1]["slowmo"] > 1 and lana[3]["slowmo"] == 1

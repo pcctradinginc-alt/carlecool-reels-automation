@@ -50,7 +50,7 @@ FRIENDS_QUERIES = {
     None: ("friends laughing", "friends walking", "friends together"),
 }
 AMERICANA_QUERIES = {
-    "lana": ("neon sign", "motel", "diner", "palm trees", "gas station", "jukebox"),
+    "lana": ("sailing", "sailboat", "neon sign", "motel", "diner", "palm trees", "pool", "jukebox"),
     "rubin": ("basketball court", "diner", "empty road", "gas station", "parking lot"),
     "night": ("neon sign", "motel", "gas station", "diner"),
     None: ("motel", "diner", "neon sign"),
@@ -84,7 +84,7 @@ def car_order(queries, run_key: str) -> list[str]:
         q[0], q[1] = q[1], q[0]
     return q
 WOMAN_QUERIES = {
-    "lana": ("woman field sunset", "woman hair wind", "woman summer"),
+    "lana": ("woman sunglasses", "woman hair wind", "woman boat", "woman summer", "woman field sunset"),
     "rubin": ("woman beach morning", "woman walking nature", "woman window"),
     "night": ("woman city night", "woman neon", "woman night"),
     None: ("woman walking sunset", "woman nature", "woman walking"),

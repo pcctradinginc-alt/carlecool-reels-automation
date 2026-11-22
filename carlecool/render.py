@@ -313,6 +313,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         leak = look_mod.make_light_leak(width, height, work / "light_leak.png")
     fps_cache: dict[int, float] = {}
     slowed = 0
+    bw_shots = 0
     punched = 0
     leaks = 0
     for index, shot in enumerate(storyboard):
@@ -374,6 +375,10 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         chain.append(f"eq=saturation={saturation:.3f}:contrast={contrast:.3f}:gamma=1.015"
                      + (f":brightness={styling['brightness']:.4f}" if styling["brightness"] else ""))
         chain.extend(style_grade or [])
+        if styling.get("bw"):
+            # Documentary black-and-white moment (Lana references): neutral grey, a touch of contrast.
+            chain += ["hue=s=0", "eq=contrast=1.08:brightness=0.01"]
+            bw_shots += 1
         if CLEAN_UP:
             chain.append(SHARPEN)  # gentle, luma only, after the grade
         if grain:
@@ -487,7 +492,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                               "cover_bridge": loop_bridge},
             "smart_cropped_shots": reframed,
             "dissolves": sum(1 for d in dissolves if d > 0), "slowmo_shots": slowed,
-            "light_leaks": leaks, "punch_ins": punched,
+            "light_leaks": leaks, "punch_ins": punched, "bw_shots": bw_shots,
             "framed_shots": framed,
             "signature_shots": {role: sum(1 for sh in storyboard if sh.source_index == idx)
                                 for role, idx in (signature_slots or {}).items()},

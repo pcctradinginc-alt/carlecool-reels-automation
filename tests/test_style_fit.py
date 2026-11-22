@@ -142,3 +142,30 @@ def test_wikimedia_credit_shows_a_name_not_a_link():
     assert wikimedia.artist_name("Jane Doe https://example.org/jane") == "Jane Doe"
     assert wikimedia.credit_line({"license": "CC BY 3.0", "artist": "https://www.youtube.com/user/93galas"}) \
         == "93galas / Wikimedia Commons (CC BY 3.0)"
+
+
+def test_lana_reference_profile_is_stored_without_images():
+    import json
+    from pathlib import Path
+    doc = json.loads(Path("data/style-refs/lana.json").read_text())
+    assert doc["count"] == 20 and len(doc["embedding"]) == 512
+    assert doc["palette_target"]["shadow_a"] > 5           # rose shadows
+    assert not list(Path("data/style-refs").glob("*.jpg")) and not list(Path("data/style-refs").glob("*.png"))
+    assert stylegate.load_reference("lana") is not None and stylegate.load_reference("nope") is None
+    grade = " ".join(style.grade_filters("lana"))
+    assert "vignette" not in grade and "saturation=1.12" in grade
+
+
+def test_lana_gets_one_black_and_white_moment_on_a_clean_cut():
+    from carlecool import look
+    from carlecool.analysis import AudioFeatures
+    beats = tuple(i * 0.5 for i in range(40))
+    f = AudioFeatures(120.0, 1.0, 0.0, "cinematic", 20.0, beats=beats,
+                      beat_energy=tuple(0.2 + 0.02 * (i % 9) for i in range(40)), hook_at=8.0)
+    starts, durs = [0, 2, 4, 6, 8, 10, 12, 14], [2.0] * 8
+    plan = look.plan_look(style.look("lana"), f, starts, durs)
+    bw = [i for i, p in enumerate(plan) if p["bw"]]
+    assert len(bw) == 1 and bw[0] not in (0, 7)
+    i = bw[0]
+    assert plan[i]["dissolve_in"] == 0 and plan[i + 1]["dissolve_in"] == 0 and not plan[i]["leak"]
+    assert not any(p["bw"] for p in look.plan_look(style.look("rubin"), f, starts, durs))
