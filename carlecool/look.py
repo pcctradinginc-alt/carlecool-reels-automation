@@ -134,7 +134,7 @@ def join_graph(durations: list[float], dissolves: list[float]) -> tuple[str, str
     Part i is expected to be durations[i] + dissolves[i+1] long. Returns (graph, out label).
     """
     n = len(durations)
-    lines = [f"[{i}:v]settb=AVTB,setpts=PTS-STARTPTS,fps=24,settb=1/24,format=yuv420p[p{i}]" for i in range(n)]
+    lines = [f"[{i}:v]settb=AVTB,setpts=PTS-STARTPTS,fps=24,settb=1/24,setsar=1,format=yuv420p[p{i}]" for i in range(n)]
     cur, pos = "p0", float(durations[0])
     for i in range(1, n):
         out = f"j{i}"

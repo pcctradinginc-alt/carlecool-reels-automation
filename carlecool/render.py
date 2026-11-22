@@ -380,7 +380,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             ph = index * 2.3
             chain += [f"crop=iw*0.985:ih*0.985:'(iw-ow)/2+(iw-ow)/2*sin(t*5.3+{ph:.1f})*0.8'"
                       f":'(ih-oh)/2+(ih-oh)/2*sin(t*3.7+{ph:.1f})*0.8'",
-                      f"scale={width}:{height}:flags=lanczos"]
+                      f"scale={width}:{height}:flags=lanczos", "setsar=1"]
         if look and look.get("home_movie_flicker") and not styling.get("bw"):
             # Gentle Super 8 exposure flicker (two incommensurate sines, phase per shot).
             ph = index * 1.7
