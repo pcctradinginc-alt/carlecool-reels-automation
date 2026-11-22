@@ -222,7 +222,11 @@
     "at": "2026-11-22T19:11:45.196093+00:00",
     "issue_number": 40,
     "target": "tiktok",
-    "provider": "zernio"
+    "provider": "zernio",
+    "provider_post_id": "6b033e73f483a61307483b51",
+    "platform_status": {
+      "tiktok": "uploading"
+    }
   },
   "reconciled": [
     {
