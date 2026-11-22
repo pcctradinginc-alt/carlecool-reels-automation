@@ -103,7 +103,7 @@ LOOKS = {
     # flickering Super 8 / VHS exposure, found-footage feel → longer dissolves on more cuts,
     # a little more slow motion, gentle exposure flicker, more public-domain home movies.
     "lana": {"dissolve": 0.7, "dissolve_below": 0.6,    # soft crossfades in quiet passages
-             "bw_share": 0.15,  # owner's references: 16 of 54 are B/W → ~15 % of the shots, at least 1
+             "bw_share": 0.2,  # 16/54 stills B/W + "West Coast" (mostly B/W) → ~20 % of the shots
              "bw_contrast": 1.08,
              "slowmo": 1.25, "slowmo_below": 0.45,          # subtle slow motion when it breathes
              "home_movie_flicker": True, "archive_films": 3,
@@ -245,7 +245,9 @@ def blended_weights(profile_weights: dict, style: str | None, variant: str | Non
 
 
 def pace_for(profile_pace: str, style: str | None) -> str:
-    return "slow" if style == "rubin" and profile_pace == "medium" else profile_pace
+    """Both worlds cut calmly when the owner left pace at "medium": the owner's video
+    references (Video Games, West Coast, Ride, National Anthem, Tough) all use long takes."""
+    return "slow" if style in ("rubin", "lana") and profile_pace == "medium" else profile_pace
 
 
 def grade_filters(style: str | None, variant: str | None = None) -> list[str]:
@@ -277,6 +279,7 @@ SEARCH_QUERIES = {
     "lana": ("motel", "diner", "road trip", "friends night", "american flag", "neon sign",
              "sailing", "sailboat", "ocean", "pool", "sunglasses", "beach", "harbor", "picket fence",
              "beach house", "sand dunes", "beach umbrellas", "lighthouse",
+             "motorcycle", "desert highway", "horse", "porch", "pickup truck",
              "porsche", "land rover", "range rover", "classic car", "convertible", "palm trees", "gas station",
              "summer friends", "desert road", "sunset drive", "jukebox", "retro",
              "turntable", "vinyl record", "dj mixer"),

@@ -84,7 +84,12 @@ WANTED = {
              "a woman in a white t-shirt and denim with gold jewelry and long wavy hair",
              "a 1990s black and white portrait of a young woman with slicked-back hair",
              "a young woman in a tank top and jeans, 1990s documentary photo",
-             "a woman swimming in a calm lake, black and white photo"),
+             "a woman swimming in a calm lake, black and white photo",
+             # owner's video references: Ride, West Coast, National Anthem, Tough, Video Games
+             "bikers on motorcycles on an open desert highway at golden hour",
+             "black and white slow motion of waves on a beach", "a 1960s super 8 home movie of a family on a lawn",
+             "a horse, a pickup truck and a wooden porch in the countryside at sunset",
+             "a woman on a porch swing in warm evening light"),
     "rubin": ("young friends sitting together in silence", "an empty parking lot at dusk",
               "an american flag on a fence", "a classic land rover defender",
               "a classic air-cooled porsche 911 from the 1990s", "a neon diner or motel sign at night",

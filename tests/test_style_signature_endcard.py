@@ -46,7 +46,8 @@ def test_style_only_nudges_v4():
     assert style.blended_weights(weights, None) == weights
     assert style.pace_for("medium", "rubin") == "slow"
     assert style.pace_for("fast", "rubin") == "fast"  # owner choice kept
-    assert style.pace_for("medium", "lana") == "medium"
+    assert style.pace_for("medium", "lana") == "slow"   # video references: long takes
+    assert style.pace_for("fast", "lana") == "fast"
     assert style.grade_filters(None) == [] and style.grade_filters("lana", "night") != style.grade_filters("lana")
     assert style.look("lana")["dissolve"] > 0 and style.look("rubin")["dissolve"] == 0
     assert style.look(None) is None

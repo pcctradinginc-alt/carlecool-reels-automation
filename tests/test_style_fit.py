@@ -165,7 +165,7 @@ def test_lana_gets_one_black_and_white_moment_on_a_clean_cut():
     starts, durs = [0, 2, 4, 6, 8, 10, 12, 14], [2.0] * 8
     plan = look.plan_look(style.look("lana"), f, starts, durs)
     bw = [i for i, p in enumerate(plan) if p["bw"]]
-    assert len(bw) == 1 and bw[0] not in (0, 7)   # 15 % of 8 shots → 1
+    assert len(bw) == 2 and 0 not in bw and 7 not in bw   # 20 % of 8 shots → 2
     i = bw[0]
     assert plan[i]["dissolve_in"] == 0 and plan[i + 1]["dissolve_in"] == 0 and not plan[i]["leak"]
     rubin = look.plan_look(style.look("rubin"), f, starts, durs)
