@@ -377,7 +377,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         chain.extend(style_grade or [])
         if styling.get("bw"):
             # Documentary black-and-white moment (Lana references): neutral grey, a touch of contrast.
-            chain += ["hue=s=0", "eq=contrast=1.08:brightness=0.01"]
+            chain += ["hue=s=0", f"eq=contrast={styling.get('bw_contrast', 1.08):.2f}:brightness=0.01"]
             bw_shots += 1
         if CLEAN_UP:
             chain.append(SHARPEN)  # gentle, luma only, after the grade

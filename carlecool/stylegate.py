@@ -78,7 +78,14 @@ WANTED = {
               "a basketball court in evening light", "a quiet street in a european city",
               "a skateboarder seen from behind", "a woman by a window in natural light",
               "a vintage color home movie", "an empty road under an overcast sky", "a calm landscape",
-              "a turntable or analog synthesizer in a wooden studio", "a vintage drum machine or sampler"),
+              "a turntable or analog synthesizer in a wooden studio", "a vintage drum machine or sampler",
+              # owner's references: Rubin's house and studios, 90s hip-hop studios
+              "a minimal white room with sunlight stripes through a window",
+              "a large analog mixing console in a recording studio", "studio monitor speakers on a wooden wall",
+              "a vintage organ or piano by a window with palm trees", "an acoustic guitar in a bright living room",
+              "a black and white portrait of a bearded musician", "a 1990s hip hop studio with turntables and a sampler",
+              "a bare wooden staircase in a white room", "a man walking on a beach in black and white",
+              "a long wooden table in an empty white room"),
 }
 MARGIN = 0.0
 

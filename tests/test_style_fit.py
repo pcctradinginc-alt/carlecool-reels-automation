@@ -168,4 +168,18 @@ def test_lana_gets_one_black_and_white_moment_on_a_clean_cut():
     assert len(bw) == 1 and bw[0] not in (0, 7)   # 15 % of 8 shots → 1
     i = bw[0]
     assert plan[i]["dissolve_in"] == 0 and plan[i + 1]["dissolve_in"] == 0 and not plan[i]["leak"]
-    assert not any(p["bw"] for p in look.plan_look(style.look("rubin"), f, starts, durs))
+    rubin = look.plan_look(style.look("rubin"), f, starts, durs)
+    assert sum(p["bw"] for p in rubin) == 2 and all(p.get("bw_contrast", 0) > 1.1 for p in rubin if p["bw"])
+
+
+def test_rubin_reference_profile_and_look():
+    import json
+    from pathlib import Path
+    doc = json.loads(Path("data/style-refs/rubin.json").read_text())
+    assert doc["count"] == 20 and len(doc["embedding"]) == 512
+    grade = " ".join(style.grade_filters("rubin"))
+    assert "vignette" not in grade and "saturation=0.6" in grade       # muted, deep blacks
+    assert style.look("rubin")["bw_share"] == 0.2 and style.look("rubin")["bw_contrast"] > 1.1
+    assert "mixing console" in style.SEARCH_QUERIES["rubin"]
+    from carlecool import signature
+    assert signature.queries_for("gear", "rubin")[0] == "mixing console"

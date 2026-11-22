@@ -66,7 +66,8 @@ FLAG_QUERIES = {
 # — Lana: warm, vinyl at golden hour / neon; Rubin: wooden studio, hands, stillness.
 GEAR_QUERIES = {
     "lana": ("turntable", "vinyl record", "dj mixer", "drum machine", "record player"),
-    "rubin": ("turntable", "recording studio", "synthesizer", "vinyl", "drum machine"),
+    "rubin": ("mixing console", "turntable", "recording studio", "piano", "synthesizer", "vinyl",
+              "studio monitors", "drum machine"),
     "night": ("turntable", "dj mixer", "vinyl record", "synthesizer"),
     None: ("turntable", "vinyl record", "dj mixer"),
 }
@@ -147,6 +148,7 @@ PROMPTS = {
     "gear": (
         ("a dj turntable with a spinning vinyl record", "hands on a dj mixer with faders and knobs",
          "a vintage drum machine or sampler with rubber pads", "an analog synthesizer with knobs",
+         "a large analog mixing console with many faders", "a piano or organ by a bright window",
          "a record player needle on vinyl in warm light"),
         ("a laptop with dj software on the screen", "a kitchen mixer or blender",
          "a crowded nightclub with stage lights", "a mixing console in a large concert hall",

@@ -79,8 +79,12 @@ GRADES = {
              "curves=r='0/0.075 0.5/0.62 1/0.97':g='0/0.055 0.5/0.605 1/0.965':b='0/0.085 0.5/0.60 1/0.97'",
              "eq=saturation=1.28"],
     # Warm ivory, faded denim, concrete grey: restrained, honest, lightly lifted.
-    "rubin": ["colortemperature=temperature=6100:mix=0.25", "eq=saturation=0.86:contrast=0.97",
-              "curves=all='0/0.04 0.5/0.5 1/0.96'", "vignette=angle=PI/6"],
+    # Calibrated on the owner's 20 Rubin reference images (2026-11-22): muted colour
+    # (saturation ≈0.20), deep blacks (≈5/100, no fade), warm wood/amber shadows and
+    # highlights, bright white rooms (whites ≈90); no vignette. 7/20 are B/W.
+    "rubin": ["colortemperature=temperature=5800:mix=0.15",
+              "curves=r='0/0.06 0.5/0.61 1/0.955':g='0/0.025 0.5/0.58 1/0.945':b='0/0.03 0.5/0.565 1/0.935'",
+              "eq=saturation=0.6"],
 }
 NIGHT_GRADES = {
     # Dusky blue shadows, amber night light, neon kept but not glossy.
@@ -93,14 +97,16 @@ NIGHT_GRADES = {
 # Editing language, applied by render.py per shot (with the music's beat energy).
 LOOKS = {
     "lana": {"dissolve": 0.42, "dissolve_below": 0.5,   # soft cuts in quiet passages
-             "bw_share": 0.15,  # owner's references: 13 of 40 are B/W → ~15 % of the shots, at least 1
+             "bw_share": 0.15,  # owner's references: 16 of 54 are B/W → ~15 % of the shots, at least 1
+             "bw_contrast": 1.08,
              "slowmo": 1.25, "slowmo_below": 0.34,          # subtle slow motion when it breathes
              "light_leaks": True, "grain_boost": 2, "punch_in_above": None, "exposure_jitter": 0.0},
     "rubin": {"dissolve": 0.0, "dissolve_below": 0.0,      # hard, restrained cuts
               "slowmo": 1.0, "slowmo_below": 0.0,
               "light_leaks": False, "grain_boost": 1,
               "punch_in_above": 0.75,                        # peaks: closer, not busier
-              "exposure_jitter": 0.018},
+              "exposure_jitter": 0.018,
+              "bw_share": 0.2, "bw_contrast": 1.15},  # references: 7/20 B/W, punchy documentary B/W
 }
 DARK_BRIGHTNESS = 0.24
 MIN_SCORE = 0.20
@@ -269,7 +275,8 @@ SEARCH_QUERIES = {
              "turntable", "vinyl record", "dj mixer"),
     "rubin": ("friends walking", "basketball court", "parking lot", "empty road", "american flag",
               "land rover", "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
-              "golden hour", "friends talking", "street", "turntable", "recording studio", "synthesizer"),
+              "golden hour", "friends talking", "street", "turntable", "recording studio", "synthesizer",
+              "mixing console", "piano", "acoustic guitar", "white room", "wooden interior", "sunlight window"),
 }
 NIGHT_QUERIES = {
     "lana": ("neon sign", "motel", "diner", "night drive", "friends night", "gas station",
@@ -289,7 +296,10 @@ SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("v
                    "dj mixer": ("dj",), "vinyl record": ("vinyl",), "recording studio": ("studio",),
                    "synthesizer": ("synth",), "sailboat": ("sailing", "boat"), "sailing": ("boat",),
                    "sunglasses": ("woman sunglasses",), "pool": ("swimming pool",),
-                   "beach house": ("house beach",), "sand dunes": ("dunes",), "beach umbrellas": ("beach umbrella",)}
+                   "beach house": ("house beach",), "sand dunes": ("dunes",), "beach umbrellas": ("beach umbrella",),
+                   "mixing console": ("mixer", "studio"), "white room": ("minimal interior",),
+                   "wooden interior": ("wood interior",), "sunlight window": ("window light",),
+                   "acoustic guitar": ("guitar",)}
 
 
 def search_ladders(words: list[str]) -> dict[str, tuple[str, ...]]:

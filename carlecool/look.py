@@ -70,7 +70,8 @@ def plan_look(look: dict | None, features, starts: list[float], durations: list[
         bw = max(1, round(float(look["bw_share"]) * n))
     if bw and n > 4:
         for i in sorted(range(1, n - 1), key=lambda k: rank[k])[:bw]:
-            plan[i].update(bw=True, leak=False, slowmo=1.0, dissolve_in=0.0)
+            plan[i].update(bw=True, leak=False, slowmo=1.0, dissolve_in=0.0,
+                           bw_contrast=float(look.get("bw_contrast") or 1.08))
             if i + 1 < n:
                 plan[i + 1]["dissolve_in"] = 0.0
     # The bookends form the loop seam (see seal_loop): keep them untouched, real-time.
