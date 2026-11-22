@@ -45,15 +45,15 @@ SKATER_QUERIES = {
     None: ("skateboard feet", "skater silhouette", "skateboarding"),
 }
 FRIENDS_QUERIES = {  # timeless-classic (owner, 22 Nov): couples and friends, not trendy youth content
-    "lana": ("couple walking beach", "couple countryside", "friends beach", "couple sailing",
-             "friends summer", "friends road trip"),
+    "lana": ("family picnic", "family lawn", "couple porch", "couple sailing", "couple countryside",
+             "friends countryside", "couple walking beach"),
     "rubin": ("friends walking", "couple walking", "friends talking", "friends sitting", "friends beach"),
     "night": ("friends night", "couple night", "friends walking night"),
     None: ("couple walking", "friends walking", "friends together"),
 }
 AMERICANA_QUERIES = {
-    "lana": ("sailing", "sailboat", "beach house", "sand dunes", "motorcycle", "horse", "porch",
-             "neon sign", "motel", "diner", "palm trees", "pool", "lighthouse", "jukebox"),
+    "lana": ("porch", "horse", "pickup truck", "farm", "barn", "lawn", "sailing", "picket fence",
+             "beach house", "sand dunes"),
     "rubin": ("basketball court", "diner", "empty road", "gas station", "parking lot"),
     "night": ("neon sign", "motel", "gas station", "diner"),
     None: ("motel", "diner", "neon sign"),
@@ -89,8 +89,8 @@ def car_order(queries, run_key: str) -> list[str]:
         q = q[k:3] + q[:k] + q[3:]
     return q
 WOMAN_QUERIES = {
-    "lana": ("woman sunglasses", "woman hair wind", "woman boat", "woman countryside", "woman rain boots",
-             "woman festival", "woman summer", "woman field sunset"),
+    "lana": ("woman porch", "woman horse", "woman countryside", "woman sunglasses", "woman boat",
+             "woman hair wind", "woman field sunset", "woman rain boots"),
     "rubin": ("woman beach morning", "woman walking nature", "woman window"),
     "night": ("woman city night", "woman neon", "woman night"),
     None: ("woman walking sunset", "woman nature", "woman walking"),

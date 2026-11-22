@@ -106,7 +106,7 @@ LOOKS = {
              "bw_share": 0.2,  # 16/54 stills B/W + "West Coast" (mostly B/W) → ~20 % of the shots
              "bw_contrast": 1.08,
              "slowmo": 1.25, "slowmo_below": 0.45,          # subtle slow motion when it breathes
-             "home_movie_flicker": True, "archive_films": 3,
+             "home_movie_flicker": True, "archive_films": 4, "gate_weave": True,
              "light_leaks": True, "grain_boost": 2, "punch_in_above": None, "exposure_jitter": 0.0},
     "rubin": {"dissolve": 0.0, "dissolve_below": 0.0,      # hard, restrained cuts
               "slowmo": 1.0, "slowmo_below": 0.0,
@@ -276,13 +276,13 @@ def motif_queries(decision: dict) -> tuple[str, ...]:
 # rather than generic cars).
 # Short words only: Coverr matches every word of a query.
 SEARCH_QUERIES = {
-    "lana": ("motel", "diner", "road trip", "friends night", "american flag", "neon sign",
-             "sailing", "sailboat", "ocean", "pool", "sunglasses", "beach", "harbor", "picket fence",
-             "beach house", "sand dunes", "beach umbrellas", "lighthouse",
-             "motorcycle", "desert highway", "horse", "porch", "pickup truck",
-             "porsche", "land rover", "range rover", "classic car", "convertible", "palm trees", "gas station",
-             "summer friends", "desert road", "sunset drive", "jukebox", "retro",
-             "turntable", "vinyl record", "dj mixer"),
+    # Owner focus (22 Nov): "National Anthem" (60s Super 8 home movies, Kennedy era: flag,
+    # lawn, family scenes, sailing) and "Tough" (rural Americana: porch, pickup, horses,
+    # warm evening light, film look).
+    "lana": ("american flag", "family picnic", "lawn", "garden party", "sailing", "sailboat",
+             "porch", "pickup truck", "horse", "farm", "barn", "countryside sunset", "picket fence",
+             "beach house", "summer family", "vintage", "land rover", "range rover", "porsche",
+             "classic car", "convertible", "ocean"),
     "rubin": ("friends walking", "basketball court", "parking lot", "empty road", "american flag",
               "land rover", "range rover", "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
               "golden hour", "friends talking", "street", "turntable", "recording studio", "synthesizer",
@@ -301,6 +301,8 @@ SEARCH_LANES = 5
 SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("vintage car",),
                    "land rover": ("defender", "off road"), "range rover": ("land rover",),
                    "classic porsche": ("porsche",),
+                   "family picnic": ("picnic",), "garden party": ("garden",),
+                   "countryside sunset": ("countryside",), "summer family": ("family",),
                    "jukebox": ("retro",), "convertible": ("classic car",), "motel": ("motel sign",),
                    "neon sign": ("neon",), "friends night": ("friends",), "summer friends": ("friends",),
                    "pickup truck": ("truck",), "american flag": ("flag",), "road trip": ("road",),

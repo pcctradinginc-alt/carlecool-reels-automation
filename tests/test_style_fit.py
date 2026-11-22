@@ -113,7 +113,7 @@ def test_analog_gear_belongs_to_both_worlds():
         assert "turntable" in qs and all(len(q.split()) <= 2 for q in qs)
         assert any("turntable" in w for w in stylegate.WANTED[world])
     assert "gear" in signature.PRIORITY and "gear" in signature.STRICT_ROLES
-    assert "turntable" in style.SEARCH_QUERIES["lana"] and "turntable" in style.SEARCH_QUERIES["rubin"]
+    assert "turntable" in style.SEARCH_QUERIES["rubin"]  # Lana: gear comes via the gear role
     v = lambda t: Video("x", "coverr", title=t)
     assert stylegate.blocked_words(v("DJ mixing on a laptop")) == "laptop"
     assert stylegate.blocked_words(v("Kitchen mixer whisking cream"))

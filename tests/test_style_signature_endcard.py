@@ -160,7 +160,7 @@ def test_friends_and_americana_queries_follow_world_and_night():
     assert "friends night" in signature.queries_for("friends", "rubin", "night")
     assert signature.queries_for("flag", "rubin")[0] == "american flag"
     assert signature.queries_for("car", "lana")[:3] == ("land rover", "range rover", "porsche")
-    assert "motel" in signature.queries_for("americana", "lana")
+    assert "porch" in signature.queries_for("americana", "lana")  # Tough / National Anthem focus
     assert "neon sign" in signature.queries_for("americana", "lana", "night")
 
 
