@@ -375,6 +375,10 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         chain.append(f"eq=saturation={saturation:.3f}:contrast={contrast:.3f}:gamma=1.015"
                      + (f":brightness={styling['brightness']:.4f}" if styling["brightness"] else ""))
         chain.extend(style_grade or [])
+        if look and look.get("home_movie_flicker") and not styling.get("bw"):
+            # Gentle Super 8 exposure flicker (two incommensurate sines, phase per shot).
+            ph = index * 1.7
+            chain.append(f"eq=brightness='0.012*sin(t*37+{ph:.1f})+0.008*sin(t*13.7+{ph:.1f})':eval=frame")
         if styling.get("bw"):
             # Documentary black-and-white moment (Lana references): neutral grey, a touch of contrast.
             chain += ["hue=s=0", f"eq=contrast={styling.get('bw_contrast', 1.08):.2f}:brightness=0.01"]

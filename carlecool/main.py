@@ -294,7 +294,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         # segment each); films from the last 12 Reels are skipped so the pool lasts.
         archival = fetch_archival(archive_key, set(recent_video_ids(previews, limit=12)) | recent,
                                   output_dir / "archive", run_key=edition,
-                                  max_clips=PRELINGER_CLIPS, attempts=14)
+                                  max_clips=int((style_pkg.look(style_name) or {}).get("archive_films") or PRELINGER_CLIPS),
+                                  attempts=14)
         from .wikimedia import fetch_wikimedia
         archival += fetch_wikimedia(style_name, set(recent_video_ids(previews, limit=30)) | recent,
                                     output_dir / "wikimedia", run_key=edition, max_clips=1)

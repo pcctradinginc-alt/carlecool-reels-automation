@@ -99,10 +99,14 @@ NIGHT_GRADES = {
 }
 # Editing language, applied by render.py per shot (with the music's beat energy).
 LOOKS = {
-    "lana": {"dissolve": 0.42, "dissolve_below": 0.5,   # soft cuts in quiet passages
+    # Owner's video reference "Video Games" (2011): home-movie collage, slow crossfades,
+    # flickering Super 8 / VHS exposure, found-footage feel → longer dissolves on more cuts,
+    # a little more slow motion, gentle exposure flicker, more public-domain home movies.
+    "lana": {"dissolve": 0.7, "dissolve_below": 0.6,    # soft crossfades in quiet passages
              "bw_share": 0.15,  # owner's references: 16 of 54 are B/W → ~15 % of the shots, at least 1
              "bw_contrast": 1.08,
-             "slowmo": 1.25, "slowmo_below": 0.34,          # subtle slow motion when it breathes
+             "slowmo": 1.25, "slowmo_below": 0.45,          # subtle slow motion when it breathes
+             "home_movie_flicker": True, "archive_films": 3,
              "light_leaks": True, "grain_boost": 2, "punch_in_above": None, "exposure_jitter": 0.0},
     "rubin": {"dissolve": 0.0, "dissolve_below": 0.0,      # hard, restrained cuts
               "slowmo": 1.0, "slowmo_below": 0.0,
