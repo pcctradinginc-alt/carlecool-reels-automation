@@ -162,7 +162,7 @@ def rejected(verdict: tuple[float, str] | None) -> bool:
 
 # ---------------------------------------------------------------- owner reference images
 REF_DIR = Path(__file__).resolve().parent.parent / "data" / "style-refs"
-REF_WEIGHT = 2.0  # ranking bonus per unit of similarity above the candidates' median
+REF_WEIGHT = 3.0  # ranking bonus per unit of similarity above the candidates' median (owner: closer to the examples)
 
 
 def load_reference(world: str | None):

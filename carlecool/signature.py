@@ -35,7 +35,8 @@ SLOT_POSITION = {"friends": 0.25, "motif": 0.15, "flag": 0.38, "gear": 0.44, "sk
 PRIORITY = ("skater", "friends", "flag", "gear", "woman", "car", "americana", "friends2", "motif")
 DEFAULT_PRIORITY = PRIORITY  # performance.role_priority() reorders a copy per Reel
 MAX_ROLES = 8  # searched/downloaded roles per Reel (placement cap is ~40 % of the shots)
-STRICT_ROLES = ("gear", "car", "flag")  # role negatives are specific → negative score = reject
+STRICT_ROLES = ("gear", "car", "flag")
+REF_WEIGHT = 0.5  # reference similarity vs prompt score (owner: "people like in the example images")  # role negatives are specific → negative score = reject
 
 SKATER_QUERIES = {
     "lana": ("skateboard sunset", "skater silhouette", "skateboard road"),
@@ -220,8 +221,9 @@ def search_slot(api_key: str, queries, *, exclude: set[str], session=None,
     return found
 
 
-def rank(role: str, candidates: list[Video], workdir: Path) -> list[Video]:
-    """Order by CLIP (positive − negative prompt similarity); keyword fallback."""
+def rank(role: str, candidates: list[Video], workdir: Path, world: str | None = None) -> list[Video]:
+    """Order by CLIP (positive − negative prompt similarity) plus closeness to the owner's
+    reference images of the style world (people, wardrobe, era, light); keyword fallback."""
     prompts = PROMPTS.get(role)
     keywords = {"skater": ("skate",), "woman": ("woman",), "friends": ("friend",),
                 "friends2": ("friend",), "flag": ("flag",),
@@ -241,7 +243,9 @@ def rank(role: str, candidates: list[Video], workdir: Path) -> list[Video]:
         from PIL import Image
         model, preprocess, tokenizer = clip
         positive, negative = prompts
-        from .stylegate import UNWANTED
+        from .stylegate import UNWANTED, load_reference
+        ref = load_reference(world)
+        ref_t = torch.nn.functional.normalize(torch.tensor(ref, dtype=torch.float32), dim=-1) if ref else None
         with torch.no_grad():
             text = torch.nn.functional.normalize(
                 model.encode_text(tokenizer(list(positive + negative + UNWANTED))), dim=-1)
@@ -268,6 +272,8 @@ def rank(role: str, candidates: list[Video], workdir: Path) -> list[Video]:
                     print(f"Signature {role} candidate rejected (looks off-brief): {video.id}")
                     gated += 1
                     continue
+                if ref_t is not None:  # look like the owner's example images (styling, era, light)
+                    score += REF_WEIGHT * float(v[0] @ ref_t)
                 scored.append((score, i))
         if not scored:
             # Everything failed the style gate → better no clip than a wrong one; no

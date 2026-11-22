@@ -387,7 +387,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                        else signature.car_order(queries, edition) if role == "car"
                        else signature._rotate(tuple(queries), f"{edition}|{role}"))
             found = signature.rank(role, signature.search_slot(config.coverr_key, ordered, exclude=exclude,
-                                                               role=role), output_dir / "thumbs")
+                                                               role=role), output_dir / "thumbs",
+                                    world=style_name)
             for video in found[:3]:
                 target = output_dir / f"sig_{role}.mp4"
                 try:
