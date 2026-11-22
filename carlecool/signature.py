@@ -245,9 +245,12 @@ def rank(role: str, candidates: list[Video], workdir: Path, world: str | None = 
         from PIL import Image
         model, preprocess, tokenizer = clip
         positive, negative = prompts
-        from .stylegate import UNWANTED, load_reference
-        ref = load_reference("car") if role == "car" and load_reference("car") else load_reference(world)
-        ref_t = torch.nn.functional.normalize(torch.tensor(ref, dtype=torch.float32), dim=-1) if ref else None
+        from .stylegate import UNWANTED, load_references
+        # Cars: best match to any owner car profile (Land/Range Rover, Porsche 993);
+        # other roles: the style world's references.
+        refs = (load_references("car") if role == "car" else []) or load_references(world)[:1]
+        ref_t = (torch.nn.functional.normalize(torch.tensor(refs, dtype=torch.float32), dim=-1)
+                 if refs else None)
         with torch.no_grad():
             text = torch.nn.functional.normalize(
                 model.encode_text(tokenizer(list(positive + negative + UNWANTED))), dim=-1)
@@ -275,7 +278,7 @@ def rank(role: str, candidates: list[Video], workdir: Path, world: str | None = 
                     gated += 1
                     continue
                 if ref_t is not None:  # look like the owner's example images (styling, era, light)
-                    score += REF_WEIGHT * float(v[0] @ ref_t)
+                    score += REF_WEIGHT * float((ref_t @ v[0]).max())
                 scored.append((score, i))
         if not scored:
             # Everything failed the style gate → better no clip than a wrong one; no

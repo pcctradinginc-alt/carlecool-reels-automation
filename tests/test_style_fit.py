@@ -213,3 +213,11 @@ def test_cars_follow_the_owners_car_references():
     assert style.search_ladders(["range rover"])["range rover"] == ("land rover",)
     assert not any("suv" in n for n in signature.PROMPTS["car"][1])   # modern Range Rover allowed
     assert signature.queries_for("car", "rubin")[:2] == ("land rover", "range rover")
+
+
+
+def test_car_profiles_cover_rovers_and_porsche_993():
+    refs = stylegate.load_references("car")
+    assert len(refs) == 2 and all(len(r) == 512 for r in refs)
+    assert stylegate.load_reference("car") is not None and stylegate.load_references("nope") == []
+    assert len(stylegate.load_references("lana")) == 1

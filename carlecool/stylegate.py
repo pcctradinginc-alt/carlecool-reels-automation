@@ -174,10 +174,22 @@ def load_reference(world: str | None):
     import json
     try:
         doc = json.loads((REF_DIR / f"{world}.json").read_text(encoding="utf-8"))
-        vec = doc.get("embedding")
+        vec = doc.get("embedding") or next(iter((doc.get("profiles") or {}).values()), None)
         return vec if isinstance(vec, list) and len(vec) >= 64 else None
     except (OSError, ValueError, TypeError):
         return None
+
+
+def load_references(name: str | None) -> list[list[float]]:
+    """All reference vectors of a profile: several sub-profiles (e.g. car: Land/Range Rover
+    and Porsche 993) or the single mean embedding."""
+    import json
+    try:
+        doc = json.loads((REF_DIR / f"{name}.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        return []
+    vecs = list((doc.get("profiles") or {}).values()) or ([doc["embedding"]] if doc.get("embedding") else [])
+    return [v for v in vecs if isinstance(v, list) and len(v) >= 64]
 
 
 def reference_similarity(images, world: str | None, clip) -> list[float | None]:
