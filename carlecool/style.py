@@ -82,8 +82,10 @@ GRADES = {
     # Calibrated on the owner's 20 Rubin reference images (2026-11-22): muted colour
     # (saturation ≈0.20), deep blacks (≈5/100, no fade), warm wood/amber shadows and
     # highlights, bright white rooms (whites ≈90); no vignette. 7/20 are B/W.
-    "rubin": ["colortemperature=temperature=5800:mix=0.15",
-              "curves=r='0/0.06 0.5/0.61 1/0.955':g='0/0.025 0.5/0.58 1/0.945':b='0/0.03 0.5/0.565 1/0.935'",
+    # Re-checked with 36 unique Rubin references (90s hip-hop studios added): warmer,
+    # slightly amber highlights.
+    "rubin": ["colortemperature=temperature=5300:mix=0.25",
+              "curves=r='0/0.06 0.5/0.60 1/0.96':g='0/0.025 0.5/0.57 1/0.945':b='0/0.03 0.5/0.55 1/0.92'",
               "eq=saturation=0.6"],
 }
 NIGHT_GRADES = {
@@ -106,7 +108,7 @@ LOOKS = {
               "light_leaks": False, "grain_boost": 1,
               "punch_in_above": 0.75,                        # peaks: closer, not busier
               "exposure_jitter": 0.018,
-              "bw_share": 0.2, "bw_contrast": 1.15},  # references: 7/20 B/W, punchy documentary B/W
+              "bw_share": 0.25, "bw_contrast": 1.15},  # 15/36 references B/W  # references: 7/20 B/W, punchy documentary B/W
 }
 DARK_BRIGHTNESS = 0.24
 MIN_SCORE = 0.20
@@ -276,7 +278,8 @@ SEARCH_QUERIES = {
     "rubin": ("friends walking", "basketball court", "parking lot", "empty road", "american flag",
               "land rover", "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
               "golden hour", "friends talking", "street", "turntable", "recording studio", "synthesizer",
-              "mixing console", "piano", "acoustic guitar", "white room", "wooden interior", "sunlight window"),
+              "mixing console", "piano", "acoustic guitar", "white room", "wooden interior", "sunlight window",
+              "vinyl records", "beat making", "record store"),
 }
 NIGHT_QUERIES = {
     "lana": ("neon sign", "motel", "diner", "night drive", "friends night", "gas station",

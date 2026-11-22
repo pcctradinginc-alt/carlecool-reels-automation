@@ -176,10 +176,10 @@ def test_rubin_reference_profile_and_look():
     import json
     from pathlib import Path
     doc = json.loads(Path("data/style-refs/rubin.json").read_text())
-    assert doc["count"] == 20 and len(doc["embedding"]) == 512
+    assert doc["count"] == 36 and len(doc["embedding"]) == 512
     grade = " ".join(style.grade_filters("rubin"))
     assert "vignette" not in grade and "saturation=0.6" in grade       # muted, deep blacks
-    assert style.look("rubin")["bw_share"] == 0.2 and style.look("rubin")["bw_contrast"] > 1.1
+    assert style.look("rubin")["bw_share"] == 0.25 and style.look("rubin")["bw_contrast"] > 1.1
     assert "mixing console" in style.SEARCH_QUERIES["rubin"]
     from carlecool import signature
     assert signature.queries_for("gear", "rubin")[0] == "mixing console"
