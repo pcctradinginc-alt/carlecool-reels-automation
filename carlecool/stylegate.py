@@ -91,7 +91,12 @@ WANTED = {
              "a horse, a pickup truck and a wooden porch in the countryside at sunset",
              "a woman on a porch swing in warm evening light",
              "a family picnic on a lawn in a 1960s home movie", "a garden party on a summer lawn with a flag",
-             "horses in a field at golden hour", "a red barn and a farmhouse at sunset"),
+             "horses in a field at golden hour", "a red barn and a farmhouse at sunset",
+             # owner's night references (night variant of either world)
+             "a neon-lit american diner at blue hour", "a lonely late-night diner seen through a window",
+             "palm trees against a deep blue evening sky", "car light trails on a city freeway at night",
+             "an elevated train viaduct lit at night", "brownstones and lit apartment windows at night",
+             "an american flag at night with city lights", "a starry sky over a beach fence"),
     "rubin": ("young friends sitting together in silence", "an empty parking lot at dusk",
               "an american flag on a fence", "a classic land rover defender",
               "a classic air-cooled porsche 911 from the 1990s", "a neon diner or motel sign at night",
@@ -106,7 +111,12 @@ WANTED = {
               "a vintage organ or piano by a window with palm trees", "an acoustic guitar in a bright living room",
               "a black and white portrait of a bearded musician", "a 1990s hip hop studio with turntables and a sampler",
               "a bare wooden staircase in a white room", "a man walking on a beach in black and white",
-              "a long wooden table in an empty white room"),
+              "a long wooden table in an empty white room",
+              # owner's night references (night variant of either world)
+              "a neon-lit american diner at blue hour", "a lonely late-night diner seen through a window",
+              "palm trees against a deep blue evening sky", "car light trails on a city freeway at night",
+              "an elevated train viaduct lit at night", "brownstones and lit apartment windows at night",
+              "an american flag at night with city lights", "a starry sky over a beach fence"),
 }
 MARGIN = 0.0
 

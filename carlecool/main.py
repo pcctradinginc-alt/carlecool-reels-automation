@@ -219,7 +219,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     from .curation import rank_candidates
     style_fit: dict[str, float] = {}
     candidates, prerank = rank_candidates(candidates, cover, output_dir / "thumbs", keep=18,
-                                          world=style_name, style_fit=style_fit)
+                                          world=style_name, style_fit=style_fit,
+                                          ref_world="night" if style_variant == "night" else style_name)
     if len(fresh) < 16:  # ranking must not pull stale clips in front of fresh ones
         candidates = ([v for v in candidates if v.id not in long_memory]
                       + [v for v in candidates if v.id in long_memory])
@@ -389,7 +390,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                        else signature._rotate(tuple(queries), f"{edition}|{role}"))
             found = signature.rank(role, signature.search_slot(config.coverr_key, ordered, exclude=exclude,
                                                                role=role), output_dir / "thumbs",
-                                    world=style_name)
+                                    world="night" if style_variant == "night" else style_name)
             for video in found[:3]:
                 target = output_dir / f"sig_{role}.mp4"
                 try:

@@ -211,7 +211,7 @@ def score_thumbnails(cover: Path | None, thumbs: list[Path | None], queries: lis
 
 def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, *,
                     keep: int = 7, session=None, world: str | None = None,
-                    style_fit: dict | None = None) -> tuple[list[Video], list[dict]]:
+                    style_fit: dict | None = None, ref_world: str | None = None) -> tuple[list[Video], list[dict]]:
     """Pick the `keep` best candidates before downloading any full video.
 
     Keeps at least one clip per search lane when possible (variety), then fills by score.
@@ -242,7 +242,7 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
         from .semantic import load_clip, semantic_enabled
         clip_model = load_clip() if semantic_enabled() else None
         verdicts = stylegate.clip_verdicts(thumbs, world, clip_model)
-        ref_all = stylegate.reference_similarity(thumbs, world, clip_model)
+        ref_all = stylegate.reference_similarity(thumbs, ref_world or world, clip_model)
         keep_idx = []
         for i, verdict in enumerate(verdicts):
             if stylegate.rejected(verdict):

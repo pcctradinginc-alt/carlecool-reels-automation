@@ -240,3 +240,13 @@ def test_people_profile_is_style_only_and_stored_without_images():
     doc = json.loads(Path("data/style-refs/people.json").read_text())
     assert doc["count"] == 13 and len(doc["embedding"]) == 512 and "RANKING by style only" in doc["note"]
     assert len(stylegate.load_references("people")) == 1
+
+
+
+def test_night_profile_and_look():
+    assert stylegate.load_reference("night") is not None
+    grade = " ".join(style.grade_filters("lana", "night"))
+    assert "vignette" not in grade and "saturation=1.2" in grade
+    q = style.search_queries({"style": "lana", "variant": "night"}, run_key="x")
+    assert "american flag" in q and len(q) == 5
+    assert any("blue hour" in w for w in stylegate.WANTED["lana"]) and any("blue hour" in w for w in stylegate.WANTED["rubin"])

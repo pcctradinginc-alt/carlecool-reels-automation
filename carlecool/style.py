@@ -90,10 +90,11 @@ GRADES = {
               "eq=saturation=0.6"],
 }
 NIGHT_GRADES = {
-    # Dusky blue shadows, amber night light, neon kept but not glossy.
-    "lana": ["colorbalance=bs=0.06:rh=0.05:gh=0.02:bh=-0.04",
-             "curves=all='0/0.05 0.5/0.49 1/0.95'", "eq=saturation=0.95:gamma=0.97",
-             "vignette=angle=PI/4.5"],
+    # Owner's 16 night references (22 Nov): deep blue-hour skies and cool shadows against
+    # warm amber / sodium and saturated neon (diner signs, light trails, lit windows,
+    # Hopper's "Nighthawks"); deep blacks (≈4/100), saturation ≈0.5 — no fade, no vignette.
+    "lana": ["colorbalance=bs=0.06:rh=0.06:gh=0.025:bh=-0.05",
+             "curves=all='0/0.015 0.5/0.49 1/0.96'", "eq=saturation=1.2:gamma=0.97"],
     "rubin": ["colorbalance=bs=0.04:rh=0.04:bh=-0.03", "eq=saturation=0.84:gamma=0.96",
               "curves=all='0/0.04 1/0.95'", "vignette=angle=PI/5"],
 }
@@ -290,8 +291,9 @@ SEARCH_QUERIES = {
               "vinyl records", "beat making", "record store"),
 }
 NIGHT_QUERIES = {
-    "lana": ("neon sign", "motel", "diner", "night drive", "friends night", "gas station",
-             "porsche", "city lights", "american flag", "neon", "turntable", "dj mixer"),
+    "lana": ("diner night", "neon sign", "blue hour", "palm trees night", "light trails", "freeway night",
+             "city lights", "american flag", "elevated train", "brownstone", "apartment windows",
+             "night street", "starry sky", "gas station", "porsche", "land rover"),
     "rubin": ("friends night", "parking lot", "gas station", "night drive", "street night",
               "american flag", "porsche", "basketball court"),
 }
@@ -300,7 +302,9 @@ SEARCH_LANES = 5
 # generic lane words such as "road" or "nature").
 SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("vintage car",),
                    "land rover": ("defender", "off road"), "range rover": ("land rover",),
-                   "classic porsche": ("porsche",),
+                   "classic porsche": ("porsche",), "diner night": ("diner",),
+                   "palm trees night": ("palm trees",), "freeway night": ("highway night",),
+                   "elevated train": ("subway",), "apartment windows": ("windows night",),
                    "family picnic": ("picnic",), "garden party": ("garden",),
                    "countryside sunset": ("countryside",), "summer family": ("family",),
                    "jukebox": ("retro",), "convertible": ("classic car",), "motel": ("motel sign",),
