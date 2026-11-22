@@ -72,12 +72,12 @@ NIGHT_SHIFT = {"night": 20, "nature": -10, "studio": -5, "americana": -5}
 
 # Extra grade AFTER the cover LUT; deliberately mild.
 GRADES = {
-    # Calibrated on the owner's 40 Lana reference images (2026-11-22): bright (L≈59),
-    # lifted black point (~10/100), softly rose shadows (not blue), near-neutral highlights,
-    # moderate Kodachrome saturation (sky/sea blue next to warm skin and red); no vignette.
-    "lana": ["colortemperature=temperature=5900:mix=0.1",
-             "curves=r='0/0.11 0.5/0.62 1/0.97':g='0/0.08 0.5/0.60 1/0.96':b='0/0.12 0.5/0.60 1/0.96'",
-             "eq=saturation=1.2"],
+    # Calibrated on the owner's 54 Lana reference images (2026-11-22): bright (L≈58),
+    # gently lifted black point (~9/100), softly rose shadows (not blue), neutral highlights,
+    # Kodachrome saturation with clear East-Coast sky blue next to warm skin/red; no vignette.
+    "lana": ["colortemperature=temperature=6000:mix=0.1",
+             "curves=r='0/0.075 0.5/0.62 1/0.97':g='0/0.055 0.5/0.605 1/0.965':b='0/0.085 0.5/0.60 1/0.97'",
+             "eq=saturation=1.28"],
     # Warm ivory, faded denim, concrete grey: restrained, honest, lightly lifted.
     "rubin": ["colortemperature=temperature=6100:mix=0.25", "eq=saturation=0.86:contrast=0.97",
               "curves=all='0/0.04 0.5/0.5 1/0.96'", "vignette=angle=PI/6"],
@@ -263,6 +263,7 @@ def motif_queries(decision: dict) -> tuple[str, ...]:
 SEARCH_QUERIES = {
     "lana": ("motel", "diner", "road trip", "friends night", "american flag", "neon sign",
              "sailing", "sailboat", "ocean", "pool", "sunglasses", "beach", "harbor", "picket fence",
+             "beach house", "sand dunes", "beach umbrellas", "lighthouse",
              "porsche", "land rover", "classic car", "convertible", "palm trees", "gas station",
              "summer friends", "desert road", "sunset drive", "jukebox", "retro",
              "turntable", "vinyl record", "dj mixer"),
@@ -287,7 +288,8 @@ SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("v
                    "gas station": ("gas station night",), "diner": ("retro diner",),
                    "dj mixer": ("dj",), "vinyl record": ("vinyl",), "recording studio": ("studio",),
                    "synthesizer": ("synth",), "sailboat": ("sailing", "boat"), "sailing": ("boat",),
-                   "sunglasses": ("woman sunglasses",), "pool": ("swimming pool",)}
+                   "sunglasses": ("woman sunglasses",), "pool": ("swimming pool",),
+                   "beach house": ("house beach",), "sand dunes": ("dunes",), "beach umbrellas": ("beach umbrella",)}
 
 
 def search_ladders(words: list[str]) -> dict[str, tuple[str, ...]]:

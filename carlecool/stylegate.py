@@ -65,7 +65,12 @@ WANTED = {
              "a black and white documentary photo of two people",
              "a woman on a swing in golden backlight by a white picket fence",
              "an american flag against a pale teal sky", "a black and white street photo from the 1970s",
-             "a classic black sedan parked on a street", "a backstage mirror with bulbs at night"),
+             "a classic black sedan parked on a street", "a backstage mirror with bulbs at night",
+             # third set: Hamptons / Cape Cod summer, preppy East-Coast style
+             "an american flag on a pole above sand dunes and a beach fence",
+             "a weathered shingled beach house by the ocean", "a white colonial house with a flag and a lawn",
+             "blue beach umbrellas under a clear blue sky", "a preppy outfit with a sweater over the shoulders",
+             "a 1950s college group photo in black and white"),
     "rubin": ("young friends sitting together in silence", "an empty parking lot at dusk",
               "an american flag on a fence", "a classic land rover defender",
               "a classic air-cooled porsche 911 from the 1990s", "a neon diner or motel sign at night",

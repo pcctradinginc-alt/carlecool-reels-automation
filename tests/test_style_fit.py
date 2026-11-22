@@ -148,12 +148,12 @@ def test_lana_reference_profile_is_stored_without_images():
     import json
     from pathlib import Path
     doc = json.loads(Path("data/style-refs/lana.json").read_text())
-    assert doc["count"] == 40 and len(doc["embedding"]) == 512
+    assert doc["count"] == 54 and len(doc["embedding"]) == 512
     assert doc["palette_target"]["shadow_a"] > 3           # softly rose shadows
     assert not list(Path("data/style-refs").glob("*.jpg")) and not list(Path("data/style-refs").glob("*.png"))
     assert stylegate.load_reference("lana") is not None and stylegate.load_reference("nope") is None
     grade = " ".join(style.grade_filters("lana"))
-    assert "vignette" not in grade and "saturation=1.2" in grade
+    assert "vignette" not in grade and "saturation=1.28" in grade
 
 
 def test_lana_gets_one_black_and_white_moment_on_a_clean_cut():

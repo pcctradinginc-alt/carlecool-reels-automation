@@ -50,7 +50,8 @@ FRIENDS_QUERIES = {
     None: ("friends laughing", "friends walking", "friends together"),
 }
 AMERICANA_QUERIES = {
-    "lana": ("sailing", "sailboat", "neon sign", "motel", "diner", "palm trees", "pool", "jukebox"),
+    "lana": ("sailing", "sailboat", "beach house", "sand dunes", "neon sign", "motel", "diner",
+             "palm trees", "pool", "lighthouse", "jukebox"),
     "rubin": ("basketball court", "diner", "empty road", "gas station", "parking lot"),
     "night": ("neon sign", "motel", "gas station", "diner"),
     None: ("motel", "diner", "neon sign"),
