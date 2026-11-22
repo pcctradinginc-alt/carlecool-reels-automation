@@ -27,7 +27,8 @@ import os
 from pathlib import Path
 
 STYLES = ("lana", "rubin")
-LABELS = {"lana": "Lana × Gen Z × Americana", "rubin": "Rick Rubin × Gen Z × Americana"}
+# Owner, 22 Nov: "zeitlos-klassisch" instead of Gen Z (the references are 1950s–90s icons).
+LABELS = {"lana": "Lana × Americana (zeitlos-klassisch)", "rubin": "Rick Rubin × Americana (zeitlos-klassisch)"}
 
 PROMPTS = {
     "lana": (
@@ -328,12 +329,10 @@ def search_queries(decision: dict, run_key: str = "", lanes: int = SEARCH_LANES)
 
 # Text for the optional AI shot (no artist names, no celebrity likeness, no logos).
 AI_DIRECTION = {
-    "lana": ("Small group of European friends aged 18 to 25 in 2026, baggy denim and thrifted "
-             "jackets, laughing on a curb outside a neon motel diner, faded weathered American "
-             "flag in the background, golden hour, dreamy nostalgic Americana, pastel faded red "
-             "and dusty blue, 35mm grain, light leak, soft contrast, candid handheld"),
-    "rubin": ("Two young European friends aged 18 to 25 sitting in silence on a parking lot at "
-              "dusk, old pickup truck and sun-faded American flag on a fence far behind, "
-              "documentary realism, static frame with negative space, warm ivory and concrete "
-              "grey, fine 35mm grain, natural skin texture, restrained"),
+    "lana": ("A couple in timeless summer clothes, white shirt and denim, on the deck of a wooden "
+             "sailboat, faded American flag moving in the wind, East Coast summer light, 1960s "
+             "Kodachrome colours, soft rose shadows, 35mm grain, candid, unposed"),
+    "rubin": ("Two friends in plain white t-shirts sitting quietly in a sunlit white room with a "
+              "wooden floor and an analog mixing console, a sun-faded American flag on the wall, "
+              "muted warm tones, documentary realism, static frame, fine 35mm grain"),
 }

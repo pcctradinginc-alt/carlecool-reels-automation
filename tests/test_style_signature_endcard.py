@@ -154,7 +154,7 @@ def test_signature_never_dominates_short_edits():
 
 
 def test_friends_and_americana_queries_follow_world_and_night():
-    assert "friends laughing" in signature.queries_for("friends", "lana")
+    assert "couple sailing" in signature.queries_for("friends", "lana")  # timeless-classic
     assert "friends walking" in signature.queries_for("friends", "rubin")
     assert "friends night" in signature.queries_for("friends", "rubin", "night")
     assert signature.queries_for("flag", "rubin")[0] == "american flag"

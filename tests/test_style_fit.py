@@ -228,7 +228,7 @@ def test_singer_911_and_owner_people_style():
     from carlecool import signature
     assert "classic porsche" in signature.queries_for("car", "lana")
     assert "woman rain boots" in signature.queries_for("woman", "lana")
-    assert "friends festival" in signature.queries_for("friends", "lana")
+    assert "couple walking beach" in signature.queries_for("friends", "lana")
     assert any("wellington" in w for w in stylegate.WANTED["lana"])
     assert any("waxed field jacket" in p for p in signature.PROMPTS["woman"][0])
 

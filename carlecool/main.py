@@ -368,7 +368,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     if signature.enabled() and config.coverr_key:
         memory = recent_video_ids(previews, limit=signature.MEMORY_REELS)
         exclude = set(memory) | set(recent) | {v.id for v in selected}
-        # Gen Z friends + Americana belong to both style worlds; priority order, and the
+        # Friends/couples, flag, car and Americana belong to BOTH worlds (owner: also in Rubin); priority order, and the
         # search stops once enough roles are filled (Coverr allows ~50 requests/hour).
         # Learned from platform numbers: roles that clearly help come first (also for the
         # ~40 % placement cap), roles that clearly hurt come last.

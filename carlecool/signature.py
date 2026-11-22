@@ -1,4 +1,4 @@
-"""Signature shots ADDED on top of the v4 footage: Gen Z friends, a skater, a woman,
+"""Signature shots ADDED on top of the v4 footage: friends / couples, a skater, a woman,
 an Americana detail and the cover motif.
 
 Unlike the reverted Creative v5 (which replaced the v4 lanes with these subjects),
@@ -44,12 +44,12 @@ SKATER_QUERIES = {
     "night": ("skateboard night", "skater night", "skateboard street"),
     None: ("skateboard feet", "skater silhouette", "skateboarding"),
 }
-FRIENDS_QUERIES = {
-    "lana": ("friends laughing", "friends festival", "couple walking beach", "couple countryside",
+FRIENDS_QUERIES = {  # timeless-classic (owner, 22 Nov): couples and friends, not trendy youth content
+    "lana": ("couple walking beach", "couple countryside", "friends beach", "couple sailing",
              "friends summer", "friends road trip"),
-    "rubin": ("friends walking", "friends talking", "friends sitting", "friends park"),
-    "night": ("friends night", "friends city night", "friends walking night"),
-    None: ("friends laughing", "friends walking", "friends together"),
+    "rubin": ("friends walking", "couple walking", "friends talking", "friends sitting", "friends beach"),
+    "night": ("friends night", "couple night", "friends walking night"),
+    None: ("couple walking", "friends walking", "friends together"),
 }
 AMERICANA_QUERIES = {
     "lana": ("sailing", "sailboat", "beach house", "sand dunes", "neon sign", "motel", "diner",

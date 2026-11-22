@@ -53,6 +53,7 @@ UNWANTED = (
     "christmas decorations, a christmas tree or gift bags", "a bottle or can of a soft drink brand",
     "construction workers at a building site", "a person on a video call",
     "a fashion model posing in a photo studio in front of a colored backdrop",
+    "a person taking a selfie or filming with a smartphone",  # timeless, not trendy social-media content
 )
 WANTED = {
     "lana": ("young friends together outdoors at golden hour", "a neon motel or diner sign at dusk",
