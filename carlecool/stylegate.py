@@ -102,17 +102,28 @@ OTHER_FLAGS = ("pride flag", "rainbow flag", "rainbow", "pride", "lgbt flag", "c
 
 
 def flag_mismatch(video) -> str | None:
-    text = _norm(" ".join([getattr(video, "title", "") or "", *(getattr(video, "tags", ()) or ())]))
-    return next((w for w in OTHER_FLAGS if _norm(w) in text), None)
+    """Only the TITLE, and only when it is about a flag: tags such as "pride" on a clip of a
+    couple must never exclude people (run 45057960429 dropped "A gay couple holding hands")."""
+    title = _norm(getattr(video, "title", "") or "")
+    if " flag " not in title and " flags " not in title:
+        return None
+    return next((w for w in OTHER_FLAGS if _norm(w) in title), None)
+
+
+# Coverr tags are broad ("santa monica", "jungle", "laptop", "valentine" on harmless clips),
+# so tags only block clearly synthetic looks; everything else is judged on the title.
+TAG_BLOCK = ("anthropomorphic", "animated", "animation", "cartoon", "3d", "cgi", "render", "rendered",
+             "ai generated", "ai-generated", "illustration", "motion graphic", "claymation", "anime")
 
 
 def blocked_words(video) -> str | None:
-    """The first block word found in title/tags (whole words), else None."""
-    text = _norm(" ".join([getattr(video, "title", "") or "", *(getattr(video, "tags", ()) or ())]))
+    """The first block word in the title (any list) or in the tags (synthetic looks only)."""
+    title = _norm(getattr(video, "title", "") or "")
     for word in BLOCK_WORDS:
-        if _norm(word) in text:
+        if _norm(word) in title:
             return word
-    return None
+    tags = _norm(" ".join(getattr(video, "tags", ()) or ()))
+    return next((w for w in TAG_BLOCK if _norm(w) in tags), None)
 
 
 def clip_verdicts(images, world: str | None, clip) -> list[tuple[float, str] | None]:

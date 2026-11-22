@@ -183,3 +183,14 @@ def test_rubin_reference_profile_and_look():
     assert "mixing console" in style.SEARCH_QUERIES["rubin"]
     from carlecool import signature
     assert signature.queries_for("gear", "rubin")[0] == "mixing console"
+
+
+def test_tags_do_not_exclude_harmless_clips_or_people():
+    v = lambda t, tags=(): Video("x", "coverr", title=t, tags=tuple(tags))
+    assert stylegate.blocked_words(v("Skate park by the beach", ["santa monica", "beach"])) is None
+    assert stylegate.blocked_words(v("Hands on a Land Rover steering wheel", ["jungle", "car"])) is None
+    assert stylegate.blocked_words(v("Best friends walking to class", ["laptop", "school"])) is None
+    assert stylegate.blocked_words(v("Couple kissing during golden hour", ["valentine"])) is None
+    assert stylegate.flag_mismatch(v("A gay couple holding hands", ["pride", "lgbt"])) is None
+    assert stylegate.flag_mismatch(v("Running with a pride flag")) == "pride flag"
+    assert stylegate.blocked_words(v("City drive", ["cartoon"])) == "cartoon"   # synthetic looks still via tags
