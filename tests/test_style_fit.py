@@ -118,3 +118,27 @@ def test_analog_gear_belongs_to_both_worlds():
     assert stylegate.blocked_words(v("DJ mixing on a laptop")) == "laptop"
     assert stylegate.blocked_words(v("Kitchen mixer whisking cream"))
     assert stylegate.blocked_words(v("Vinyl record on a turntable")) is None
+
+
+def test_reel_39_offbrief_clips_are_blocked_and_people_are_not_judged():
+    v = lambda t, q="": Video("x", "coverr", title=t, query=q)
+    for title in ("Pouring a glass of Coca-Cola", "Video calling near the Christmas tree",
+                  "Women with Christmas gift bags", "Construction workers in the city",
+                  "Man pours glasses of champagne"):
+        assert stylegate.blocked_words(v(title)), title
+    # other flags are kept out of the US-flag motif only
+    for title in ("Throwing a pride flag", "Running with a pride flag ", "Gay couple wrapped in a pride flag"):
+        assert stylegate.flag_mismatch(v(title))
+    assert stylegate.flag_mismatch(v("US Flag near the Chrysler Building")) is None
+    # couples / friends are never filtered for who they are
+    assert stylegate.blocked_words(v("Gay couple representing LGBT community")) is None
+    assert stylegate.blocked_words(v("Friends meeting at a cafe")) is None
+    assert stylegate.blocked_words(v("Summer holiday road trip")) is None
+
+
+def test_wikimedia_credit_shows_a_name_not_a_link():
+    from carlecool import wikimedia
+    assert wikimedia.artist_name("https://www.youtube.com/user/93galas") == "93galas"
+    assert wikimedia.artist_name("Jane Doe https://example.org/jane") == "Jane Doe"
+    assert wikimedia.credit_line({"license": "CC BY 3.0", "artist": "https://www.youtube.com/user/93galas"}) \
+        == "93galas / Wikimedia Commons (CC BY 3.0)"

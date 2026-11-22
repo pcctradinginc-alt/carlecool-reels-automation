@@ -31,6 +31,13 @@ BLOCK_WORDS = (
     "hi there", "welcome sign", "office", "business meeting", "advertisement", "product shot",
     # gear: analog only — no kitchen mixers, no laptop/controller DJ setups
     "kitchen", "blender", "laptop", "dj controller", "ipad",
+    # holidays / seasons that date a Reel (Reel #39: two Christmas clips)
+    "christmas", "xmas", "santa", "christmas tree", "gift bags", "new year", "halloween",
+    "easter", "valentine",
+    # brand products / ad looks (Reel #39: Coca-Cola, champagne)
+    "coca cola", "coca-cola", "coke", "pepsi", "champagne", "starbucks", "mcdonald", "red bull",
+    # work / everyday scenes outside the brief (Reel #39: construction workers, video call)
+    "construction", "workers", "video call", "video calling", "zoom call", "warehouse",
 )
 UNWANTED = (
     "a cartoon or an animated film", "a 3d computer rendering", "an ai generated cartoon character",
@@ -39,6 +46,8 @@ UNWANTED = (
     "a product advertisement", "a screen with text or a user interface",
     "a modern porsche 911 from the 2020s with wide wheels",
     "a kitchen appliance", "a laptop computer with software on the screen",
+    "christmas decorations, a christmas tree or gift bags", "a bottle or can of a soft drink brand",
+    "construction workers at a building site", "a person on a video call",
 )
 WANTED = {
     "lana": ("young friends together outdoors at golden hour", "a neon motel or diner sign at dusk",
@@ -62,6 +71,18 @@ MARGIN = 0.0
 
 def _norm(text: str) -> str:
     return " " + re.sub(r"[^a-z0-9]+", " ", (text or "").lower()) + " "
+
+
+# The flag slot is about the faded US flag of the Americana brief: other flags (pride /
+# rainbow, national flags of other countries) are a different motif, so they are kept out
+# of the FLAG slot and the "american flag" search lane — people in a clip are never judged.
+OTHER_FLAGS = ("pride flag", "rainbow flag", "rainbow", "pride", "lgbt flag", "canadian flag",
+               "uk flag", "union jack", "mexican flag", "eu flag", "german flag")
+
+
+def flag_mismatch(video) -> str | None:
+    text = _norm(" ".join([getattr(video, "title", "") or "", *(getattr(video, "tags", ()) or ())]))
+    return next((w for w in OTHER_FLAGS if _norm(w) in text), None)
 
 
 def blocked_words(video) -> str | None:

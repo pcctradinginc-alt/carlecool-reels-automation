@@ -134,7 +134,7 @@ PROMPTS = {
         ("an american flag waving in the wind", "a faded us flag on a porch or a pole",
          "an american flag against the sky at sunset"),
         ("a political rally or a protest", "soldiers or military", "a crowd at a parade",
-         "a flag of another country", "text or a document"),
+         "a flag of another country", "a rainbow flag", "text or a document"),
     ),
     "car": (
         ("a classic porsche 911 sports car", "a classic land rover defender off-road vehicle",
@@ -201,6 +201,9 @@ def search_slot(api_key: str, queries, *, exclude: set[str], session=None,
             exclude.add(vid)
             from .stylegate import blocked_words
             word = blocked_words(item_view(item))
+            if not word and role == "flag":
+                from .stylegate import flag_mismatch
+                word = flag_mismatch(item_view(item))
             if word:
                 print(f"Signature {role} candidate rejected ('{word}'): {vid}")
                 continue

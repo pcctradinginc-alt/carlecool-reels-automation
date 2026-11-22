@@ -139,9 +139,20 @@ def category_files(category: str, *, session=None, limit: int = 60, pause: float
     return out
 
 
+def artist_name(raw: str) -> str:
+    """Readable author for the caption: a bare URL becomes its account name
+    ("https://www.youtube.com/user/93galas" → "93galas"); other links are dropped."""
+    text = (raw or "").strip()
+    url = re.fullmatch(r"https?://\S+", text)
+    if url:
+        parts = [p for p in urlparse(text).path.split("/") if p and p not in ("user", "channel", "c", "wiki")]
+        return parts[-1][:60] if parts else ""
+    return re.sub(r"\s*https?://\S+", "", text).strip(" ,;/")[:80]
+
+
 def credit_line(item: dict) -> str:
     if item["license"].lower().startswith("cc by"):
-        who = item["artist"] or "Unknown author"
+        who = artist_name(item["artist"]) or "Unknown author"
         return f"{who} / Wikimedia Commons ({item['license']})"
     return "Wikimedia Commons (public domain)"
 

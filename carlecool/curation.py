@@ -225,6 +225,8 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
     kept = []
     for c in remote:
         word = stylegate.blocked_words(c)
+        if not word and "flag" in (c.query or ""):
+            word = stylegate.flag_mismatch(c)
         if word:
             print(f"Clip rejected ('{word}'): {c.id} '{c.title[:50]}'")
         else:
