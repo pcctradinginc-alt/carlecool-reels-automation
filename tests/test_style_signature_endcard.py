@@ -158,7 +158,7 @@ def test_friends_and_americana_queries_follow_world_and_night():
     assert "friends walking" in signature.queries_for("friends", "rubin")
     assert "friends night" in signature.queries_for("friends", "rubin", "night")
     assert signature.queries_for("flag", "rubin")[0] == "american flag"
-    assert signature.queries_for("car", "lana")[0] == "porsche"  # classic Porsche first
+    assert signature.queries_for("car", "lana")[:3] == ("land rover", "range rover", "porsche")
     assert "motel" in signature.queries_for("americana", "lana")
     assert "neon sign" in signature.queries_for("americana", "lana", "night")
 
@@ -279,7 +279,7 @@ def test_style_search_words_always_include_a_car_and_the_flag():
         for key in ("a", "b", "c", "d"):
             words = style.search_queries(decision, run_key=key)
             assert len(words) == 5 and "american flag" in words
-            assert any(w in ("porsche", "land rover", "classic car") for w in words)
+            assert any(w in ("porsche", "land rover", "range rover", "classic car") for w in words)
             assert all(len(w.split()) <= 2 for w in words)  # Coverr matches every word
     ladders = style.search_ladders(["porsche", "motel"])
     assert ladders["porsche"][0] == "classic car" and "road" not in ladders["motel"]
@@ -296,6 +296,6 @@ def test_more_signature_room_but_bookends_stay():
 
 
 def test_cars_alternate_porsche_and_land_rover():
-    firsts = {signature.car_order(signature.queries_for("car", "lana"), str(k))[0] for k in range(12)}
-    assert firsts == {"porsche", "land rover"}
+    firsts = {signature.car_order(signature.queries_for("car", "lana"), str(k))[0] for k in range(30)}
+    assert firsts == {"porsche", "land rover", "range rover"}
     assert style.search_ladders(["land rover"])["land rover"][0] == "defender"

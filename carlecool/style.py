@@ -272,11 +272,11 @@ SEARCH_QUERIES = {
     "lana": ("motel", "diner", "road trip", "friends night", "american flag", "neon sign",
              "sailing", "sailboat", "ocean", "pool", "sunglasses", "beach", "harbor", "picket fence",
              "beach house", "sand dunes", "beach umbrellas", "lighthouse",
-             "porsche", "land rover", "classic car", "convertible", "palm trees", "gas station",
+             "porsche", "land rover", "range rover", "classic car", "convertible", "palm trees", "gas station",
              "summer friends", "desert road", "sunset drive", "jukebox", "retro",
              "turntable", "vinyl record", "dj mixer"),
     "rubin": ("friends walking", "basketball court", "parking lot", "empty road", "american flag",
-              "land rover", "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
+              "land rover", "range rover", "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
               "golden hour", "friends talking", "street", "turntable", "recording studio", "synthesizer",
               "mixing console", "piano", "acoustic guitar", "white room", "wooden interior", "sunlight window",
               "vinyl records", "beat making", "record store"),
@@ -291,7 +291,7 @@ SEARCH_LANES = 5
 # Fallback when a style word finds nothing on Coverr (style words never broaden into
 # generic lane words such as "road" or "nature").
 SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("vintage car",),
-                   "land rover": ("defender", "off road"),
+                   "land rover": ("defender", "off road"), "range rover": ("land rover",),
                    "jukebox": ("retro",), "convertible": ("classic car",), "motel": ("motel sign",),
                    "neon sign": ("neon",), "friends night": ("friends",), "summer friends": ("friends",),
                    "pickup truck": ("truck",), "american flag": ("flag",), "road trip": ("road",),
@@ -319,7 +319,7 @@ def search_queries(decision: dict, run_key: str = "", lanes: int = SEARCH_LANES)
     pool = list((NIGHT_QUERIES if decision.get("variant") == "night" else SEARCH_QUERIES)[world])
     start = int.from_bytes(hashlib.sha256(f"{run_key}|search".encode()).digest()[:2], "big") % len(pool)
     pool = pool[start:] + pool[:start]
-    cars = ("porsche", "land rover", "classic car")
+    cars = ("porsche", "land rover", "range rover", "classic car")
     must = [q for q in pool if q in cars][:1] + ["american flag"]
     rest = [q for q in pool if q not in must and q not in cars]
     return (must + rest)[:lanes]

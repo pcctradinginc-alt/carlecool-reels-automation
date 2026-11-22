@@ -72,19 +72,20 @@ GEAR_QUERIES = {
     "night": ("turntable", "dj mixer", "vinyl record", "synthesizer"),
     None: ("turntable", "vinyl record", "dj mixer"),
 }
-CAR_QUERIES = {  # owner: classic Porsche (993 era) or a classic Land Rover Defender
-    "lana": ("porsche", "land rover", "porsche 911", "defender", "classic car"),
-    "rubin": ("land rover", "porsche", "defender", "porsche 911", "classic car"),
-    "night": ("porsche", "land rover", "porsche 911", "classic car"),
-    None: ("porsche", "land rover", "classic car"),
+CAR_QUERIES = {  # owner: Land Rover Defender, Range Rover (classic + modern), classic Porsche 993
+    "lana": ("land rover", "range rover", "porsche", "defender", "porsche 911", "classic car"),
+    "rubin": ("land rover", "range rover", "porsche", "defender", "classic car"),
+    "night": ("range rover", "land rover", "porsche", "classic car"),
+    None: ("land rover", "range rover", "porsche", "classic car"),
 }
 
 
 def car_order(queries, run_key: str) -> list[str]:
-    """Alternate Porsche-first / Land-Rover-first between Reels; the rest keep their order."""
+    """Rotate Land Rover / Range Rover / Porsche to the front between Reels; rest keep order."""
     q = list(queries)
-    if len(q) >= 2 and hashlib.sha256(f"{run_key}|car".encode()).digest()[0] % 2:
-        q[0], q[1] = q[1], q[0]
+    if len(q) >= 3:
+        k = hashlib.sha256(f"{run_key}|car".encode()).digest()[0] % 3
+        q = q[k:3] + q[:k] + q[3:]
     return q
 WOMAN_QUERIES = {
     "lana": ("woman sunglasses", "woman hair wind", "woman boat", "woman summer", "woman field sunset"),
@@ -141,9 +142,10 @@ PROMPTS = {
     ),
     "car": (
         ("a classic porsche 911 sports car", "a classic land rover defender off-road vehicle",
+         "a range rover on a country road", "a land rover in the british countryside",
          "a vintage sports car on an open road",
          "a classic car driving at sunset"),
-        ("a modern suv or minivan", "a car crash or an accident", "a car dealership or showroom",
+        ("a minivan or a small city car", "a car crash or an accident", "a car dealership or showroom",
          "a traffic jam", "a race track with crowds"),
     ),
     "gear": (
@@ -227,7 +229,7 @@ def rank(role: str, candidates: list[Video], workdir: Path, world: str | None = 
     prompts = PROMPTS.get(role)
     keywords = {"skater": ("skate",), "woman": ("woman",), "friends": ("friend",),
                 "friends2": ("friend",), "flag": ("flag",),
-                "car": ("porsche", "land rover", "defender"),
+                "car": ("porsche", "land rover", "range rover", "defender"),
                 "gear": ("turntable", "vinyl", "mixer", "record", "synth", "drum")}.get(role, ("",))
     fallback = sorted(candidates, key=lambda v: (not any(k in " ".join(v.tags + (v.title.lower(),))
                                                          for k in keywords), not v.vertical))
@@ -244,7 +246,7 @@ def rank(role: str, candidates: list[Video], workdir: Path, world: str | None = 
         model, preprocess, tokenizer = clip
         positive, negative = prompts
         from .stylegate import UNWANTED, load_reference
-        ref = load_reference(world)
+        ref = load_reference("car") if role == "car" and load_reference("car") else load_reference(world)
         ref_t = torch.nn.functional.normalize(torch.tensor(ref, dtype=torch.float32), dim=-1) if ref else None
         with torch.no_grad():
             text = torch.nn.functional.normalize(

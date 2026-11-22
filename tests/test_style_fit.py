@@ -204,3 +204,12 @@ def test_studio_fashion_portraits_are_blocked():
         assert stylegate.blocked_words(v(title)), title
     assert stylegate.blocked_words(v("Woman walking on a sunny street")) is None
     assert any("photo studio" in u for u in stylegate.UNWANTED)
+
+
+
+def test_cars_follow_the_owners_car_references():
+    from carlecool import signature
+    assert stylegate.load_reference("car") is not None
+    assert style.search_ladders(["range rover"])["range rover"] == ("land rover",)
+    assert not any("suv" in n for n in signature.PROMPTS["car"][1])   # modern Range Rover allowed
+    assert signature.queries_for("car", "rubin")[:2] == ("land rover", "range rover")
