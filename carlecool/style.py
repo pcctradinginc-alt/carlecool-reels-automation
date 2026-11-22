@@ -72,12 +72,12 @@ NIGHT_SHIFT = {"night": 20, "nature": -10, "studio": -5, "americana": -5}
 
 # Extra grade AFTER the cover LUT; deliberately mild.
 GRADES = {
-    # Calibrated on the owner's 20 Lana reference images (2026-11-22): bright and airy,
-    # lifted black point (~11/100) with ROSE shadows (not blue), near-neutral highlights,
+    # Calibrated on the owner's 40 Lana reference images (2026-11-22): bright (L≈59),
+    # lifted black point (~10/100), softly rose shadows (not blue), near-neutral highlights,
     # moderate Kodachrome saturation (sky/sea blue next to warm skin and red); no vignette.
     "lana": ["colortemperature=temperature=5900:mix=0.1",
-             "curves=r='0/0.12 0.5/0.63 1/0.97':g='0/0.07 0.5/0.60 1/0.96':b='0/0.12 0.5/0.60 1/0.96'",
-             "eq=saturation=1.12"],
+             "curves=r='0/0.11 0.5/0.62 1/0.97':g='0/0.08 0.5/0.60 1/0.96':b='0/0.12 0.5/0.60 1/0.96'",
+             "eq=saturation=1.2"],
     # Warm ivory, faded denim, concrete grey: restrained, honest, lightly lifted.
     "rubin": ["colortemperature=temperature=6100:mix=0.25", "eq=saturation=0.86:contrast=0.97",
               "curves=all='0/0.04 0.5/0.5 1/0.96'", "vignette=angle=PI/6"],
@@ -93,7 +93,7 @@ NIGHT_GRADES = {
 # Editing language, applied by render.py per shot (with the music's beat energy).
 LOOKS = {
     "lana": {"dissolve": 0.42, "dissolve_below": 0.5,   # soft cuts in quiet passages
-             "bw_shots": 1,  # owner's references: 3 of 20 are black-and-white documentary photos
+             "bw_share": 0.15,  # owner's references: 13 of 40 are B/W → ~15 % of the shots, at least 1
              "slowmo": 1.25, "slowmo_below": 0.34,          # subtle slow motion when it breathes
              "light_leaks": True, "grain_boost": 2, "punch_in_above": None, "exposure_jitter": 0.0},
     "rubin": {"dissolve": 0.0, "dissolve_below": 0.0,      # hard, restrained cuts
@@ -262,7 +262,7 @@ def motif_queries(decision: dict) -> tuple[str, ...]:
 # Short words only: Coverr matches every word of a query.
 SEARCH_QUERIES = {
     "lana": ("motel", "diner", "road trip", "friends night", "american flag", "neon sign",
-             "sailing", "sailboat", "ocean", "pool", "sunglasses", "beach",
+             "sailing", "sailboat", "ocean", "pool", "sunglasses", "beach", "harbor", "picket fence",
              "porsche", "land rover", "classic car", "convertible", "palm trees", "gas station",
              "summer friends", "desert road", "sunset drive", "jukebox", "retro",
              "turntable", "vinyl record", "dj mixer"),

@@ -66,6 +66,8 @@ def plan_look(look: dict | None, features, starts: list[float], durations: list[
     # Black-and-white moments (Lana references): the quietest interior shots, cut in and
     # out hard (a dissolve between colour and B/W looks like a mistake).
     bw = int(look.get("bw_shots") or 0)
+    if look.get("bw_share"):
+        bw = max(1, round(float(look["bw_share"]) * n))
     if bw and n > 4:
         for i in sorted(range(1, n - 1), key=lambda k: rank[k])[:bw]:
             plan[i].update(bw=True, leak=False, slowmo=1.0, dissolve_in=0.0)
