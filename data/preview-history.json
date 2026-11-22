@@ -614,6 +614,24 @@
       ],
       "sha256": "a0a9744066c3386acd443f216fddcd30fb0983254cb8e265957674d2884fe7c6",
       "length_bucket": "short"
+    },
+    {
+      "at": "2026-11-22T19:17:15+00:00",
+      "kind": "daily",
+      "run_id": 45059307026,
+      "track_id": "2437525053",
+      "video_ids": [
+        "WEKimmVDdB",
+        "wm-96ab6839124a",
+        "PiBfpdhVOX",
+        "JO5A2W0cSo",
+        "dxGlxHirvB",
+        "Hl27yfoSND",
+        "CWkWxe6PCw",
+        "4uisgTwDx1"
+      ],
+      "sha256": "0c3e3e4bd205501a3920a8fca53bf3d56747171e68a3f629b2ac2b53af2f4582",
+      "length_bucket": "short"
     }
   ]
 }
