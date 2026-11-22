@@ -10,7 +10,7 @@ name: CarleCool — make and review Reel
 on:
   schedule:
     # Daily 19:30 Europe/Berlin (CET/CEST), delayed starts possible. Always REVIEW, never auto-publish.
-    - cron: '30 19 * * *'
+    - cron: '30 16 * * *'   # 16:30 UTC = 17:30 CET; GitHub often starts late, mail usually by ~19:30
       timezone: 'Europe/Berlin'
   # One-off, opt-in test run: editing this workflow starts a REAL approval email,
   # never a social publication. The rendered video still needs owner approval.

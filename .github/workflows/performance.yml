@@ -3,7 +3,7 @@ name: CarleCool — collect performance and learn (read-only on platforms)
 # data/performance.json and the learned data/performance-model.json. Never posts anything.
 on:
   schedule:
-    - cron: '0 17 * * *'   # daily, before the 19:30 Reel so it uses fresh numbers
+    - cron: '0 15 * * *'   # daily, before the Reel (16:30 UTC) so it uses fresh numbers
   workflow_dispatch:
   push:
     branches: [main]
