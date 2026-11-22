@@ -214,20 +214,62 @@
         "style_basis": "music: 112 BPM, bright and flowing (1906 Hz)",
         "variant": null
       }
+    },
+    {
+      "track_id": "2437525041",
+      "at": "2026-11-22T19:11:45.196093+00:00",
+      "video_ids": [
+        "wm-0187764d6535",
+        "Fa1GhUWb97",
+        "9vamDDcnAf",
+        "SAyTG0ellJ",
+        "uXeyeqgVKS",
+        "BxLxwvKDDY",
+        "jAsTo0XGIn",
+        "90I54JKrU6",
+        "BTfchszCId",
+        "9KbJO2s4HD",
+        "ndLslybmEo",
+        "WLXM8WwaKl",
+        "HruP2FwK9p",
+        "amyDkHO5tj",
+        "CAzTdQZZHI"
+      ],
+      "sha256": "a0a9744066c3386acd443f216fddcd30fb0983254cb8e265957674d2884fe7c6",
+      "approval_issue": 40,
+      "provider": "zernio",
+      "target": "tiktok",
+      "provider_post_id": "6b033e73f483a61307483b51",
+      "platform_status": {
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 1,
+        "bpm": 123.0,
+        "hashtags": [
+          "#carlecool",
+          "#producer",
+          "#minimalmusic",
+          "#analogsynth",
+          "#studiolife"
+        ],
+        "length_bucket": "short",
+        "length_s": 15.6,
+        "opening_clip": "Fa1GhUWb97",
+        "question": false,
+        "roles": [
+          "flag",
+          "friends",
+          "skater"
+        ],
+        "scenes": 7,
+        "style": "rubin",
+        "style_basis": "music: lots of space (dynamics 3.7)",
+        "variant": null
+      }
     }
   ],
-  "pending": {
-    "track_id": "2437525041",
-    "sha256": "a0a9744066c3386acd443f216fddcd30fb0983254cb8e265957674d2884fe7c6",
-    "at": "2026-11-22T19:11:45.196093+00:00",
-    "issue_number": 40,
-    "target": "tiktok",
-    "provider": "zernio",
-    "provider_post_id": "6b033e73f483a61307483b51",
-    "platform_status": {
-      "tiktok": "uploading"
-    }
-  },
+  "pending": null,
   "reconciled": [
     {
       "track_id": "2373071753",
