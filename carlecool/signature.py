@@ -45,7 +45,8 @@ SKATER_QUERIES = {
     None: ("skateboard feet", "skater silhouette", "skateboarding"),
 }
 FRIENDS_QUERIES = {
-    "lana": ("friends laughing", "friends summer", "friends rooftop", "friends road trip"),
+    "lana": ("friends laughing", "friends festival", "couple walking beach", "couple countryside",
+             "friends summer", "friends road trip"),
     "rubin": ("friends walking", "friends talking", "friends sitting", "friends park"),
     "night": ("friends night", "friends city night", "friends walking night"),
     None: ("friends laughing", "friends walking", "friends together"),
@@ -73,8 +74,8 @@ GEAR_QUERIES = {
     None: ("turntable", "vinyl record", "dj mixer"),
 }
 CAR_QUERIES = {  # owner: Land Rover Defender, Range Rover (classic + modern), classic Porsche 993
-    "lana": ("land rover", "range rover", "porsche", "defender", "porsche 911", "classic car"),
-    "rubin": ("land rover", "range rover", "porsche", "defender", "classic car"),
+    "lana": ("land rover", "range rover", "porsche", "defender", "classic porsche", "porsche 911", "classic car"),
+    "rubin": ("land rover", "range rover", "porsche", "defender", "classic porsche", "classic car"),
     "night": ("range rover", "land rover", "porsche", "classic car"),
     None: ("land rover", "range rover", "porsche", "classic car"),
 }
@@ -88,7 +89,8 @@ def car_order(queries, run_key: str) -> list[str]:
         q = q[k:3] + q[:k] + q[3:]
     return q
 WOMAN_QUERIES = {
-    "lana": ("woman sunglasses", "woman hair wind", "woman boat", "woman summer", "woman field sunset"),
+    "lana": ("woman sunglasses", "woman hair wind", "woman boat", "woman countryside", "woman rain boots",
+             "woman festival", "woman summer", "woman field sunset"),
     "rubin": ("woman beach morning", "woman walking nature", "woman window"),
     "night": ("woman city night", "woman neon", "woman night"),
     None: ("woman walking sunset", "woman nature", "woman walking"),
@@ -113,6 +115,10 @@ PROMPTS = {
     "woman": (
         ("a candid natural photo of a woman outdoors in natural light",
          "a woman walking, documentary style, no posing",
+         "a woman in a waxed field jacket and rubber boots in the countryside",
+         "a woman at a muddy music festival in wellington boots",
+         "a woman in a white t-shirt and denim with gold hoop earrings and long wavy hair",
+         "a black and white portrait of a woman with long dark wavy hair",
          "a woman with hair blowing in the wind"),
         ("a glamorous posed fashion model in a studio",
          "a heavy make-up beauty close-up",
@@ -143,6 +149,7 @@ PROMPTS = {
     "car": (
         ("a classic porsche 911 sports car", "a classic land rover defender off-road vehicle",
          "a range rover on a country road", "a land rover in the british countryside",
+         "a restored classic porsche 911 with round headlights on a mountain road",
          "a vintage sports car on an open road",
          "a classic car driving at sunset"),
         ("a minivan or a small city car", "a car crash or an accident", "a car dealership or showroom",

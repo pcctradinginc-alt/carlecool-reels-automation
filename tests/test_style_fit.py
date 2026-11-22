@@ -218,6 +218,16 @@ def test_cars_follow_the_owners_car_references():
 
 def test_car_profiles_cover_rovers_and_porsche_993():
     refs = stylegate.load_references("car")
-    assert len(refs) == 2 and all(len(r) == 512 for r in refs)
+    assert len(refs) == 3 and all(len(r) == 512 for r in refs)
     assert stylegate.load_reference("car") is not None and stylegate.load_references("nope") == []
     assert len(stylegate.load_references("lana")) == 1
+
+
+
+def test_singer_911_and_owner_people_style():
+    from carlecool import signature
+    assert "classic porsche" in signature.queries_for("car", "lana")
+    assert "woman rain boots" in signature.queries_for("woman", "lana")
+    assert "friends festival" in signature.queries_for("friends", "lana")
+    assert any("wellington" in w for w in stylegate.WANTED["lana"])
+    assert any("waxed field jacket" in p for p in signature.PROMPTS["woman"][0])

@@ -292,6 +292,7 @@ SEARCH_LANES = 5
 # generic lane words such as "road" or "nature").
 SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("vintage car",),
                    "land rover": ("defender", "off road"), "range rover": ("land rover",),
+                   "classic porsche": ("porsche",),
                    "jukebox": ("retro",), "convertible": ("classic car",), "motel": ("motel sign",),
                    "neon sign": ("neon",), "friends night": ("friends",), "summer friends": ("friends",),
                    "pickup truck": ("truck",), "american flag": ("flag",), "road trip": ("road",),
