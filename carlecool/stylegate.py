@@ -39,6 +39,9 @@ BLOCK_WORDS = (
     "coca cola", "coca-cola", "coke", "pepsi", "champagne", "starbucks", "mcdonald", "red bull",
     # work / everyday scenes outside the brief (Reel #39: construction workers, video call)
     "construction", "workers", "video call", "video calling", "zoom call", "warehouse",
+    # studio fashion shoots (Reel #41 opened on "Chic Studio Fashion Portrait with Unique Backdrop")
+    "fashion portrait", "fashion shoot", "photo shoot", "photoshoot", "studio portrait", "backdrop",
+    "model posing", "lookbook", "catwalk", "runway",
 )
 UNWANTED = (
     "a cartoon or an animated film", "a 3d computer rendering", "an ai generated cartoon character",
@@ -49,6 +52,7 @@ UNWANTED = (
     "a kitchen appliance", "a laptop computer with software on the screen",
     "christmas decorations, a christmas tree or gift bags", "a bottle or can of a soft drink brand",
     "construction workers at a building site", "a person on a video call",
+    "a fashion model posing in a photo studio in front of a colored backdrop",
 )
 WANTED = {
     "lana": ("young friends together outdoors at golden hour", "a neon motel or diner sign at dusk",

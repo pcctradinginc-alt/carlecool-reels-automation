@@ -194,3 +194,13 @@ def test_tags_do_not_exclude_harmless_clips_or_people():
     assert stylegate.flag_mismatch(v("A gay couple holding hands", ["pride", "lgbt"])) is None
     assert stylegate.flag_mismatch(v("Running with a pride flag")) == "pride flag"
     assert stylegate.blocked_words(v("City drive", ["cartoon"])) == "cartoon"   # synthetic looks still via tags
+
+
+
+def test_studio_fashion_portraits_are_blocked():
+    v = lambda t: Video("x", "coverr", title=t)
+    for title in ("Chic Studio Fashion Portrait with Unique Backdrop", "Model posing in a photoshoot",
+                  "Stylish Duo: Fashion Meets Colorful Backdrop"):
+        assert stylegate.blocked_words(v(title)), title
+    assert stylegate.blocked_words(v("Woman walking on a sunny street")) is None
+    assert any("photo studio" in u for u in stylegate.UNWANTED)
