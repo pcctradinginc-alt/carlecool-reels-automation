@@ -52,3 +52,16 @@ def test_foreign_or_empty_set_fails_closed():
                                _resp({"collection": []})]
     with pytest.raises(RuntimeError, match="no public tracks"):
         _playlist_tracks(session, "t", pool, "7")
+
+
+def test_manual_song_pick_by_title_or_id():
+    import pytest
+    from types import SimpleNamespace
+    from carlecool.main import pick_song
+    tracks = [SimpleNamespace(id="1", title="carl e cool - donkey (eah)"),
+              SimpleNamespace(id="2437525044", title="carl e cool - hardcorevibes")]
+    assert pick_song(tracks, "") is None
+    assert pick_song(tracks, "HardcoreVibes") == "2437525044"
+    assert pick_song(tracks, "1") == "1"
+    with pytest.raises(ValueError):
+        pick_song(tracks, "unknown song")

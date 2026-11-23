@@ -31,7 +31,7 @@ def test_length_test_alternates_per_song_and_follows_a_learned_winner(monkeypatc
     monkeypatch.delenv("CARLECOOL_LENGTH_TEST", raising=False)
     prev = [{"track_id": "1", "length_bucket": "long"}, {"track_id": "2", "length_bucket": "short"}]
     assert performance.choose_length("1", prev, 30, "r")["bucket"] == "short"
-    assert performance.choose_length("1", prev, 30, "r")["target"] == 12.0
+    assert performance.choose_length("1", prev, 30, "r")["target"] == 18.0
     prev.append({"track_id": "1", "length_bucket": "short"})
     prev.append({"track_id": "1", "length_bucket": "short"})
     assert performance.choose_length("1", prev, 30, "r")["bucket"] == "long"

@@ -42,6 +42,12 @@ BLOCK_WORDS = (
     # studio fashion shoots (Reel #41 opened on "Chic Studio Fashion Portrait with Unique Backdrop")
     "fashion portrait", "fashion shoot", "photo shoot", "photoshoot", "studio portrait", "backdrop",
     "model posing", "lookbook", "catwalk", "runway",
+    # owner 23 Nov (Reel #43): no Dutch houses, no flower / butterfly close-ups
+    "dutch", "netherlands", "holland", "amsterdam", "windmill", "tulip", "canal house",
+    "flower", "flowers", "blossom", "butterfly", "butterflies", "bouquet",
+    # owner 23 Nov: no pride / rainbow flags anywhere (the flag motif is the US flag only).
+    # Only the flag object — never a reason to drop a clip because of who is in it.
+    "pride flag", "rainbow flag", "pride parade", "lgbt flag", "lgbtq flag",
 )
 UNWANTED = (
     "a cartoon or an animated film", "a 3d computer rendering", "an ai generated cartoon character",
@@ -54,6 +60,9 @@ UNWANTED = (
     "construction workers at a building site", "a person on a video call",
     "a fashion model posing in a photo studio in front of a colored backdrop",
     "a person taking a selfie or filming with a smartphone",  # timeless, not trendy social-media content
+    # owner 23 Nov (Reel #43)
+    "a dutch brick house with gabled roofs or a canal", "a close-up of flowers or butterflies in a field",
+    "a rainbow pride flag",  # the flag object only (owner 23 Nov)
 )
 WANTED = {
     "lana": ("young friends together outdoors at golden hour", "a neon motel or diner sign at dusk",

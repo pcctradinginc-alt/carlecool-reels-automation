@@ -11,7 +11,7 @@
    owner's own posts on that platform (no absolute targets).
 3. Learn (data/performance-model.json): variants are compared only when BOTH sides have
    at least MIN_POSTS posts and differ by at least MIN_LIFT. Learned:
-     * Reel length (short ≈12 s vs long ≈30 s) → used by the length test,
+     * Reel length (short ≈15–20 s vs long ≈24–30 s) → used by the length test,
      * signature roles (gear, friends, flag, car …) → placement priority,
      * caption question yes/no → how often a question is asked.
    Style worlds are only REPORTED: the owner's rules (cover/music/song memory) decide.
@@ -34,7 +34,7 @@ MODEL_PATH = Path("data/performance-model.json")
 CHECKPOINTS = (("d2", 2), ("d7", 7), ("d28", 28))
 MIN_POSTS = 4          # per variant before anything is adjusted
 MIN_LIFT = 0.15        # +15 % median score difference
-SHORT_TARGET = 12.0
+SHORT_TARGET = 18.0   # owner 23 Nov: never shorter than 15 s
 METRICS = ("views", "impressions", "reach", "likes", "comments", "shares", "saves", "reposts",
            "igReelsAvgWatchTime", "completionRate", "replays", "videoDurationSeconds", "engagementRate")
 

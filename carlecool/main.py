@@ -95,6 +95,19 @@ def fill_up(reserve, accept, full) -> None:
             print(f"Clip unavailable (skipped): {video.id}: {describe_error(exc)}")
 
 
+def pick_song(tracks, wanted: str) -> str | None:
+    """Manual run for one song (workflow input `song`): SoundCloud track id or part of the title."""
+    wanted = (wanted or "").strip().lower()
+    if not wanted:
+        return None
+    hit = next((t for t in tracks if t.id == wanted), None) or \
+        next((t for t in tracks if wanted in (t.title or "").lower()), None)
+    if hit is None:
+        raise ValueError(f"Song '{wanted}' not found in the song pool")
+    print(f"Song chosen manually: {hit.title}")
+    return hit.id
+
+
 def process(publish: bool, *, track_id: str | None = None, creative_profile: dict | None = None) -> None:
     from .video import COVERR_BLOCK
     COVERR_BLOCK["status"] = None  # fresh for every Reel (also for revisions in one process)
@@ -113,6 +126,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
     destination = output_dir / "original.mp3"
+    if track_id is None:
+        track_id = pick_song(tracks, os.getenv("CARLECOOL_SONG", ""))
     if track_id is not None:
         track = next((t for t in tracks if t.id == str(track_id)), None)
         if track is None and pool.get("mode") != "all":

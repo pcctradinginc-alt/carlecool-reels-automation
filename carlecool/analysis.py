@@ -15,8 +15,8 @@ import numpy as np
 
 from .music_structure import detect_structure
 
-MIN_REEL = 8.0
-MAX_REEL = 40.0
+MIN_REEL = 15.0  # owner 23 Nov: Reels between 15 and 30 s
+MAX_REEL = 30.0
 TARGET_REEL = 30.0  # ~30 s Reels in whole musical phrases
 
 
@@ -77,9 +77,10 @@ def choose_reel_length(bpm: float, *, target: float = TARGET_REEL, minimum: floa
 
     Whole phrases make the end land on the "one" of the next phrase, so when TikTok /
     Instagram repeat the video the music continues seamlessly into the start.
-    Window: target −6 s … +4 s (24–34 s for the default 30 s).
+    Window: target −10 s … +4 s, clamped to 15–30 s (20–30 s for the default 30 s, so a
+    whole 4-bar phrase always fits).
     """
-    minimum = max(MIN_REEL, target - 6.0) if minimum is None else minimum
+    minimum = max(MIN_REEL, target - 10.0) if minimum is None else minimum
     maximum = min(MAX_REEL, target + 4.0) if maximum is None else maximum
     bar = 4 * 60.0 / max(60.0, min(200.0, bpm))
     options = [n for n in range(1, 64) if minimum - 1e-6 <= n * bar <= maximum + 1e-6]

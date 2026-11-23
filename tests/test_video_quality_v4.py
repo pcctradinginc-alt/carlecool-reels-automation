@@ -30,11 +30,14 @@ def _click_track(bpm=120.0, seconds=40, sr=22050, lift_at=20.0):
 def test_reel_length_is_about_30_seconds_in_whole_phrases():
     for bpm in (70, 90, 96, 120, 128, 140, 152, 174):
         length, bars = analysis.choose_reel_length(bpm)
-        assert 24 - 1e-6 <= length <= 34 + 1e-6
+        assert 20 - 1e-6 <= length <= 30 + 1e-6
         assert bars % 4 == 0  # whole 4-bar phrases: the end runs straight into the start
         assert bars and math.isclose(length, bars * 240 / bpm, abs_tol=0.01)
-    assert analysis.choose_reel_length(120) == (32.0, 16)
+    assert analysis.choose_reel_length(120) == (24.0, 12)
     assert analysis.choose_reel_length(96) == (30.0, 12)
+    for bpm in (60, 76, 90, 99.4, 120, 140, 174):  # owner: never shorter than 15 s
+        short, sbars = analysis.choose_reel_length(bpm, target=18.0)
+        assert 15 - 1e-6 <= short <= 22 + 1e-6 and sbars % 2 == 0  # slow songs: 2-bar phrases
 
 
 pytest.importorskip("librosa")
