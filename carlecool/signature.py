@@ -55,7 +55,8 @@ AMERICANA_QUERIES = {
     "lana": ("porch", "horse", "pickup truck", "farm", "barn", "lawn", "sailing", "picket fence",
              "beach house", "sand dunes"),
     "rubin": ("basketball court", "diner", "empty road", "gas station", "parking lot"),
-    "night": ("diner night", "neon sign", "palm trees night", "light trails", "gas station", "brownstone"),
+    "night": ("diner night", "neon sign", "palm trees night", "light trails", "driving night",
+              "night drive", "gas station", "brownstone", "street lights"),
     None: ("motel", "diner", "neon sign"),
 }
 FLAG_QUERIES = {

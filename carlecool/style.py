@@ -90,11 +90,12 @@ GRADES = {
               "eq=saturation=0.6"],
 }
 NIGHT_GRADES = {
-    # Owner's 16 night references (22 Nov): deep blue-hour skies and cool shadows against
-    # warm amber / sodium and saturated neon (diner signs, light trails, lit windows,
-    # Hopper's "Nighthawks"); deep blacks (≈4/100), saturation ≈0.5 — no fade, no vignette.
-    "lana": ["colorbalance=bs=0.06:rh=0.06:gh=0.025:bh=-0.05",
-             "curves=all='0/0.015 0.5/0.49 1/0.96'", "eq=saturation=1.2:gamma=0.97"],
+    # Owner's 37 night references (22/23 Nov): blue-hour skies, diner neon, light trails,
+    # Hopper's "Nighthawks" and the "Drive" (2011) stills — near-black blacks (≈2-3/100),
+    # teal-neutral shadows (not blue), warm amber / sodium highlights, saturation ≈0.5,
+    # no fade, no vignette.
+    "lana": ["colorbalance=bs=0.04:gs=0.015:rs=-0.01:rh=0.07:gh=0.03:bh=-0.065",
+             "curves=all='0/0.008 0.5/0.48 1/0.95'", "eq=saturation=1.2:gamma=0.97"],
     "rubin": ["colorbalance=bs=0.04:rh=0.04:bh=-0.03", "eq=saturation=0.84:gamma=0.96",
               "curves=all='0/0.04 1/0.95'", "vignette=angle=PI/5"],
 }
@@ -293,9 +294,13 @@ SEARCH_QUERIES = {
 NIGHT_QUERIES = {
     "lana": ("diner night", "neon sign", "blue hour", "palm trees night", "light trails", "freeway night",
              "city lights", "american flag", "elevated train", "brownstone", "apartment windows",
-             "night street", "starry sky", "gas station", "porsche", "land rover"),
+             "night street", "starry sky", "gas station", "porsche", "land rover",
+             # "Drive" (2011): car interior at night, rearview mirror, sodium street lights,
+             # garage, city view from a window
+             "night drive", "driving night", "rearview mirror", "street lights",
+             "parking garage", "city view"),
     "rubin": ("friends night", "parking lot", "gas station", "night drive", "street night",
-              "american flag", "porsche", "basketball court"),
+              "american flag", "porsche", "basketball court", "driving night", "street lights"),
 }
 SEARCH_LANES = 5
 # Fallback when a style word finds nothing on Coverr (style words never broaden into
@@ -305,6 +310,9 @@ SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("v
                    "classic porsche": ("porsche",), "diner night": ("diner",),
                    "palm trees night": ("palm trees",), "freeway night": ("highway night",),
                    "elevated train": ("subway",), "apartment windows": ("windows night",),
+                   "driving night": ("night drive", "car night"), "rearview mirror": ("car mirror",),
+                   "street lights": ("street lamp",), "parking garage": ("garage",),
+                   "city view": ("city lights",), "night drive": ("driving night",),
                    "family picnic": ("picnic",), "garden party": ("garden",),
                    "countryside sunset": ("countryside",), "summer family": ("family",),
                    "jukebox": ("retro",), "convertible": ("classic car",), "motel": ("motel sign",),

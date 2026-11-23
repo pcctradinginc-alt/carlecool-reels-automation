@@ -96,7 +96,12 @@ WANTED = {
              "a neon-lit american diner at blue hour", "a lonely late-night diner seen through a window",
              "palm trees against a deep blue evening sky", "car light trails on a city freeway at night",
              "an elevated train viaduct lit at night", "brownstones and lit apartment windows at night",
-             "an american flag at night with city lights", "a starry sky over a beach fence"),
+             "an american flag at night with city lights", "a starry sky over a beach fence",
+             # "Drive" (2011) stills
+             "the inside of a car driving at night with city lights outside",
+             "a driver's eyes in a rearview mirror at night", "an empty road under sodium street lights",
+             "a night city skyline seen from an apartment window", "a dim garage with a classic car",
+             "a man in a warm-lit hallway at night"),
     "rubin": ("young friends sitting together in silence", "an empty parking lot at dusk",
               "an american flag on a fence", "a classic land rover defender",
               "a classic air-cooled porsche 911 from the 1990s", "a neon diner or motel sign at night",
@@ -116,7 +121,12 @@ WANTED = {
               "a neon-lit american diner at blue hour", "a lonely late-night diner seen through a window",
               "palm trees against a deep blue evening sky", "car light trails on a city freeway at night",
               "an elevated train viaduct lit at night", "brownstones and lit apartment windows at night",
-              "an american flag at night with city lights", "a starry sky over a beach fence"),
+              "an american flag at night with city lights", "a starry sky over a beach fence",
+             # "Drive" (2011) stills
+             "the inside of a car driving at night with city lights outside",
+             "a driver's eyes in a rearview mirror at night", "an empty road under sodium street lights",
+             "a night city skyline seen from an apartment window", "a dim garage with a classic car",
+             "a man in a warm-lit hallway at night"),
 }
 MARGIN = 0.0
 
