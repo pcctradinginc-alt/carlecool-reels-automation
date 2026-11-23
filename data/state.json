@@ -275,7 +275,12 @@
     "at": "2026-11-23T19:44:50.551264+00:00",
     "issue_number": 42,
     "target": "both",
-    "provider": "zernio"
+    "provider": "zernio",
+    "provider_post_id": "6b0497b5fb25be015e55e8a3",
+    "platform_status": {
+      "instagram": "processing",
+      "tiktok": "uploading"
+    }
   },
   "reconciled": [
     {
