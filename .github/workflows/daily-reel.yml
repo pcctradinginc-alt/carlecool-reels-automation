@@ -9,10 +9,10 @@ name: CarleCool — make and review Reel
 # Owner-requested review verification with bundled FFmpeg and authorized-audio fallback; no auto-publish.
 on:
   schedule:
-    # Daily 13:00 Europe/Berlin (owner, 23 Nov: mail before the evening). GitHub often
-    # starts scheduled runs hours late (19-22 Nov: 6-8 h, one slot dropped).
+    # Daily 09:00 Europe/Berlin (owner, 23 Nov: mail before the evening even when GitHub
+    # starts scheduled runs hours late — 19-22 Nov: 6-8 h, one slot dropped).
     # Always REVIEW, never auto-publish.
-    - cron: '0 13 * * *'
+    - cron: '0 9 * * *'
       timezone: 'Europe/Berlin'
   # One-off, opt-in test run: editing this workflow starts a REAL approval email,
   # never a social publication. The rendered video still needs owner approval.
