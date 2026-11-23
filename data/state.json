@@ -267,21 +267,64 @@
         "style_basis": "music: lots of space (dynamics 3.7)",
         "variant": null
       }
+    },
+    {
+      "track_id": "2437525059",
+      "at": "2026-11-23T19:44:50.551264+00:00",
+      "video_ids": [
+        "ppURFfx7lL",
+        "yKrVajyZsW",
+        "R6BGM7SKxS",
+        "PsT3MK42MI",
+        "pl-colachi_home_movies_1",
+        "wm-d907f71d7588",
+        "KaCV6dl3Tt",
+        "O03cqFnwaO",
+        "s0MKqrDjq0",
+        "sR1WiwknNL",
+        "dEPKxTfTkB",
+        "THQlC54QQj",
+        "9btKS8aDTs",
+        "tyP74Pk7nd"
+      ],
+      "sha256": "bce75415389591cb267b3f28b260d60cb89bed2f083ad27bac1419cacb5340f3",
+      "approval_issue": 42,
+      "provider": "zernio",
+      "target": "both",
+      "provider_post_id": "6b0497b5fb25be015e55e8a3",
+      "platform_status": {
+        "instagram": "published",
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 2,
+        "bpm": 76.0,
+        "hashtags": [
+          "#carlecool",
+          "#studiolife",
+          "#instrumental",
+          "#beatmaker",
+          "#ambientmusic"
+        ],
+        "length_bucket": "short",
+        "length_s": 12.63,
+        "opening_clip": "ppURFfx7lL",
+        "question": true,
+        "roles": [
+          "friends",
+          "skater"
+        ],
+        "scenes": 6,
+        "style": "rubin",
+        "style_basis": "music: slow (76 BPM)",
+        "variant": null
+      },
+      "platform_post_urls": {
+        "instagram": "https://www.instagram.com/reel/DgGKU-Pig1x/"
+      }
     }
   ],
-  "pending": {
-    "track_id": "2437525059",
-    "sha256": "bce75415389591cb267b3f28b260d60cb89bed2f083ad27bac1419cacb5340f3",
-    "at": "2026-11-23T19:44:50.551264+00:00",
-    "issue_number": 42,
-    "target": "both",
-    "provider": "zernio",
-    "provider_post_id": "6b0497b5fb25be015e55e8a3",
-    "platform_status": {
-      "instagram": "processing",
-      "tiktok": "uploading"
-    }
-  },
+  "pending": null,
   "reconciled": [
     {
       "track_id": "2373071753",
