@@ -254,3 +254,15 @@ def test_night_profile_and_look():
     q = style.search_queries({"style": "lana", "variant": "night"}, run_key="x")
     assert "american flag" in q and len(q) == 5
     assert any("blue hour" in w for w in stylegate.WANTED["lana"]) and any("blue hour" in w for w in stylegate.WANTED["rubin"])
+
+
+def test_reference_neighbors_are_stored_and_used():
+    import torch
+    for world in ("lana", "rubin", "night"):
+        nb = stylegate.load_neighbors(world)
+        assert nb is not None and nb.shape[1] == 512 and nb.shape[0] >= 30
+        # a reference image itself scores far above the floor
+        assert stylegate.neighbor_score(nb[0], nb) > 0.6
+    assert 0.2 <= stylegate.REF_FLOOR <= 0.3
+    assert stylegate.is_car_query("land rover") and stylegate.is_car_query("classic car")
+    assert not stylegate.is_car_query("wooden boat")

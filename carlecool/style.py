@@ -281,15 +281,20 @@ SEARCH_QUERIES = {
     # Owner focus (22 Nov): "National Anthem" (60s Super 8 home movies, Kennedy era: flag,
     # lawn, family scenes, sailing) and "Tough" (rural Americana: porch, pickup, horses,
     # warm evening light, film look).
-    "lana": ("american flag", "family picnic", "lawn", "garden party", "sailing", "sailboat",
-             "porch", "pickup truck", "horse", "farm", "barn", "countryside sunset", "picket fence",
+    "lana": ("american flag", "family picnic", "lawn", "garden party", "classic sailboat", "wooden boat",
+             "porch", "pickup truck", "horse", "picket fence",
              "beach house", "summer family", "vintage", "land rover", "range rover", "porsche",
-             "classic car", "convertible", "ocean"),
-    "rubin": ("friends walking", "basketball court", "parking lot", "empty road", "american flag",
+             "classic car", "convertible", "ocean",
+             # 24 Nov: words closest to the owner's 54 Lana images (CLIP text vs reference
+             # neighbours) instead of farm / barn / countryside sunset, which ranked lowest
+             "white dress", "boardwalk", "sunset beach", "home movie"),
+    "rubin": ("friends walking", "empty road", "american flag",
               "land rover", "range rover", "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
               "golden hour", "friends talking", "street", "turntable", "recording studio", "synthesizer",
               "mixing console", "piano", "acoustic guitar", "white room", "wooden interior", "sunlight window",
-              "vinyl records", "beat making", "record store"),
+              "vinyl records", "beat making", "record store",
+              # 24 Nov: closest to the owner's Rubin images (analog gear, warm interiors)
+              "record player", "tape recorder", "cassette"),
 }
 NIGHT_QUERIES = {
     "lana": ("diner night", "neon sign", "blue hour", "palm trees night", "light trails", "freeway night",
@@ -320,7 +325,12 @@ SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("v
                    "pickup truck": ("truck",), "american flag": ("flag",), "road trip": ("road",),
                    "gas station": ("gas station night",), "diner": ("retro diner",),
                    "dj mixer": ("dj",), "vinyl record": ("vinyl",), "recording studio": ("studio",),
-                   "synthesizer": ("synth",), "sailboat": ("sailing", "boat"), "sailing": ("boat",),
+                   "synthesizer": ("synth",), "sailboat": ("sailing",), "sailing": ("sailboat",),
+                   # Reel #46: "sailboat" brought speedboats and jet skis → classic boats only
+                   "classic sailboat": ("sailboat", "sailing"), "wooden boat": ("rowing boat", "sailboat"),
+                   "white dress": ("woman dress",), "boardwalk": ("pier",), "sunset beach": ("beach",),
+                   "home movie": ("vintage",), "record player": ("turntable",),
+                   "tape recorder": ("cassette",), "cassette": ("tape",),
                    "sunglasses": ("woman sunglasses",), "pool": ("swimming pool",),
                    "beach house": ("house beach",), "sand dunes": ("dunes",), "beach umbrellas": ("beach umbrella",),
                    "mixing console": ("mixer", "studio"), "white room": ("minimal interior",),

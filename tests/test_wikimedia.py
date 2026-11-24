@@ -145,3 +145,12 @@ def test_video_download_refuses_big_unknown_or_foreign_files(tmp_path):
     session.get.return_value = _Resp(200, b"x", url="https://evil.example.org/x.webm")
     with pytest.raises(ValueError, match="foreign"):
         wikimedia.download_video({"url": base, "bytes": 10}, tmp_path / "v.webm", session=session)
+
+
+def test_lana_wikimedia_only_us_motifs():
+    assert all("horses" not in c for c, _k in wikimedia.CATEGORIES["lana"])
+    assert wikimedia.in_usa("Sunset on Halfdome timelapse Yosemite CA 2023-07-15.webm")
+    assert wikimedia.in_usa("Sunset over Malibu beach.webm")
+    assert not wikimedia.in_usa("Sunset timelapse in Funchal - 2014.webm")
+    assert not wikimedia.in_usa("Glasgow sunset.webm")
+    assert not wikimedia.in_usa("2022-03-12 IZLIV SOČE kamarški konji 2.webm")

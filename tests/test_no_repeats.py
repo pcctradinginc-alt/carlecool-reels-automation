@@ -59,3 +59,17 @@ def test_strongest_clip_opens_and_can_close_the_loop():
     durations[1] = 3.0                                              # too short to seal the loop
     assert strongest_opening(pool, motion, dims, durations) == 0   # best cover match, still lively
     assert strongest_opening([], motion, dims, durations) is None
+
+
+def test_at_most_two_clips_per_motif_and_opening_must_fit_the_style():
+    from carlecool.main import MAX_PER_MOTIF, motif_of
+    from carlecool.video import Video
+    from carlecool.look import strongest_opening
+    assert MAX_PER_MOTIF == 2
+    assert motif_of(Video("a", "coverr", query="Sailboat ")) == "sailboat"
+    assert motif_of(Video("b", "owned", query="x")) == ""
+    # Reel #46: a lively, sharp speedboat (index 0) with the worst style fit must not open
+    pool, motion = [0, 1, 2, 3, 4, 5], [0.9, 0.3, 0.3, 0.2, 0.2, 0.1]
+    dims, durations = [(1080, 1920)] * 6, [10.0] * 6
+    fit = {0: -0.05, 1: 0.30, 2: 0.25, 3: 0.10, 4: 0.05, 5: 0.0}
+    assert strongest_opening(pool, motion, dims, durations, style_fit=fit) in (1, 2)

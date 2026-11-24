@@ -40,8 +40,10 @@ MAX_VIDEO_BYTES = 120 * 1024 * 1024
 PHOTO_SECONDS = 5.0
 
 CATEGORIES = {
+    # Reel #46: "Videos of horses" brought Slovenian horses → Lana: US Kodachromes, and
+    # sunsets only when the title names a US place (US_ONLY below).
     "lana": [("Color photographs from the Farm Security Administration", "photo"),
-             ("Videos of horses", "video"), ("Time-lapse videos of sunsets", "video")],
+             ("Time-lapse videos of sunsets", "video")],
     "rubin": [("Time-lapse videos of sunsets", "video")],
     "skater": [("Videos of skateboarding", "video")],
 }
@@ -64,6 +66,23 @@ SENSITIVE = ("slave", "lynch", "klan", "segregat", "internment", "camp", "relief
 NEGATIVE = ("a portrait of a person looking at the camera", "a document, map or text",
             "a black and white photo", "a logo or graphic", "a black or blank screen",
             "a crowd at an event", "a car crash or an accident")
+
+
+# Categories without a country: a file is used only when its title names a US place.
+US_ONLY = ("Time-lapse videos of sunsets",)
+US_PLACES = ("usa", "u.s.", "united states", "california", "yosemite", "arizona",
+             "nevada", "utah", "texas", "florida", "new york", "hawaii", "oregon", "washington",
+             "colorado", "montana", "wyoming", "new mexico", "louisiana", "georgia", "carolina",
+             "maine", "massachusetts", "michigan", "illinois", "chicago", "los angeles",
+             "san francisco", "san diego", "malibu", "miami", "las vegas", "seattle", "boston",
+             "grand canyon", "route 66", "big sur", "monument valley", "death valley", "cape cod",
+             "nantucket", "hamptons", "key west", "santa monica", "venice beach", "half dome")
+
+
+def in_usa(title: str) -> bool:
+    text = " " + re.sub(r"[^a-z0-9.]+", " ", str(title or "").lower()) + " "
+    text = text.replace(" ca ", " california ")  # "Yosemite CA 2023 …"
+    return any(" " + p + " " in text or (" " + p) in text and p.endswith(".") for p in US_PLACES)
 
 
 def enabled() -> bool:
@@ -231,7 +250,8 @@ def fetch_wikimedia(role: str, exclude: set[str], workdir: Path, *, run_key: str
     try:
         for category, kind in CATEGORIES[role]:
             pool += [(item, kind) for item in category_files(category, session=session)
-                     if item["id"] not in exclude]
+                     if item["id"] not in exclude
+                     and (category not in US_ONLY or in_usa(item["title"]))]
     except (requests.RequestException, ValueError) as exc:
         print(f"Wikimedia unavailable: {type(exc).__name__}")
         return []

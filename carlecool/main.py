@@ -61,6 +61,16 @@ def caption_for(track, videos, copy: dict | None = None) -> str:
     return caption.rstrip() + "\n\n" + tags
 
 
+MAX_PER_MOTIF = 2
+ARCHIVE_BONUS = 2  # extra archive films when the portrait stock is thin
+
+
+def motif_of(video) -> str:
+    """Search word a stock clip came from (its motif); "" for clips without one."""
+    query = (getattr(video, "query", "") or "").strip().lower()
+    return "" if video.source in ("owned", "ai") or query.startswith("wikimedia:") else query
+
+
 class QualityTooLow(RuntimeError):
     """Not enough distinct footage: no review mail rather than a thin, repetitive Reel."""
 
@@ -281,9 +291,15 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         paths.append(path)
 
     from .video import coverr_blocked
+    from collections import Counter
+    motif_count: Counter = Counter()  # Reel #46: five boats from one search word
     for video in candidates:
         if len(paths) >= stock_limit:
             break
+        motif = motif_of(video)
+        if motif and motif_count[motif] >= MAX_PER_MOTIF:
+            print(f"Clip skipped (already {MAX_PER_MOTIF} clips of '{motif}'): {video.id}")
+            continue
         if coverr_blocked() and video.source == "coverr":
             print(f"Coverr {coverr_blocked()} — remaining Coverr candidates skipped")
             break
@@ -292,6 +308,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
             path = fetch_owned_stock(video, target) if video.source == "owned" else download_video(video.url, target)
             if not unique(video, path):
                 continue
+            if motif:
+                motif_count[motif] += 1
             if is_portrait(path):
                 accept(video, path)
             elif allow_landscape():
@@ -313,10 +331,15 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                        else "lana")
         # Owner: the Prelinger home movies are a highlight → up to 4 films per Reel (one
         # segment each); films from the last 12 Reels are skipped so the pool lasts.
+        # Reel #46: no portrait stock at all → 10 cropped landscape fillers. Then more
+        # public-domain home movies (178 since 24 Nov) instead of random filler clips.
+        films = int((style_pkg.look(style_name) or {}).get("archive_films") or PRELINGER_CLIPS)
+        if len(paths) < MIN_PORTRAIT_CLIPS:
+            films += ARCHIVE_BONUS
+            print(f"Few portrait stock clips ({len(paths)}): up to {films} archive films")
         archival = fetch_archival(archive_key, set(recent_video_ids(previews, limit=12)) | recent,
-                                  output_dir / "archive", run_key=edition,
-                                  max_clips=int((style_pkg.look(style_name) or {}).get("archive_films") or PRELINGER_CLIPS),
-                                  attempts=14)
+                                  output_dir / "archive", run_key=edition, max_clips=films,
+                                  attempts=24)
         from .wikimedia import fetch_wikimedia
         archival += fetch_wikimedia(style_name, set(recent_video_ids(previews, limit=30)) | recent,
                                     output_dir / "wikimedia", run_key=edition, max_clips=1)

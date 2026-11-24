@@ -250,6 +250,12 @@ def strongest_opening(pool: list[int], motion: list[float], dims: list[tuple[int
     usable = [i for i in pool if durations[i] >= min_seconds] or list(pool)
     if not usable:
         return None
+    if style_fit and all(i in style_fit for i in usable) and len(usable) > 2:
+        # Reel #46 opened on a modern "Speedboat": lively and sharp, but far from the owner's
+        # references. Only the best-fitting third (at least 2) may open the Reel.
+        keep = max(2, len(usable) // 3)
+        best = set(sorted(usable, key=lambda i: style_fit[i], reverse=True)[:keep])
+        usable = [i for i in usable if i in best]
     if len(usable) == 1:
         return usable[0]
 

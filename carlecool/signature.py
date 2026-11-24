@@ -52,7 +52,7 @@ FRIENDS_QUERIES = {  # timeless-classic (owner, 22 Nov): couples and friends, no
     None: ("couple walking", "friends walking", "friends together"),
 }
 AMERICANA_QUERIES = {
-    "lana": ("porch", "horse", "pickup truck", "farm", "barn", "lawn", "sailing", "picket fence",
+    "lana": ("porch", "horse", "pickup truck", "farm", "barn", "lawn", "wooden boat", "picket fence",
              "beach house", "sand dunes"),
     "rubin": ("basketball court", "diner", "empty road", "gas station", "parking lot"),
     "night": ("diner night", "neon sign", "palm trees night", "light trails", "driving night",
@@ -90,7 +90,7 @@ def car_order(queries, run_key: str) -> list[str]:
         q = q[k:3] + q[:k] + q[3:]
     return q
 WOMAN_QUERIES = {
-    "lana": ("woman porch", "woman horse", "woman countryside", "woman sunglasses", "woman boat",
+    "lana": ("woman porch", "woman horse", "woman countryside", "woman sunglasses", "woman sailboat",
              "woman hair wind", "woman field sunset", "woman rain boots"),
     "rubin": ("woman beach morning", "woman walking nature", "woman window"),
     "night": ("woman city night", "woman neon", "woman night"),
@@ -254,7 +254,7 @@ def rank(role: str, candidates: list[Video], workdir: Path, world: str | None = 
         from PIL import Image
         model, preprocess, tokenizer = clip
         positive, negative = prompts
-        from .stylegate import UNWANTED, load_references
+        from .stylegate import UNWANTED, load_neighbors, load_references, neighbor_score
         # Cars: best match to any owner car profile (Land/Range Rover, Porsche 993);
         # other roles: the style world's references.
         people_roles = ("woman", "friends", "friends2", "skater")
@@ -263,6 +263,8 @@ def rank(role: str, candidates: list[Video], workdir: Path, world: str | None = 
                 or load_references(world)[:1])
         ref_t = (torch.nn.functional.normalize(torch.tensor(refs, dtype=torch.float32), dim=-1)
                  if refs else None)
+        # Nearest owner reference images of the world (not for cars: own car profiles)
+        world_nb = load_neighbors(world) if role != "car" else None
         with torch.no_grad():
             text = torch.nn.functional.normalize(
                 model.encode_text(tokenizer(list(positive + negative + UNWANTED))), dim=-1)
@@ -289,8 +291,10 @@ def rank(role: str, candidates: list[Video], workdir: Path, world: str | None = 
                     print(f"Signature {role} candidate rejected (looks off-brief): {video.id}")
                     gated += 1
                     continue
-                if ref_t is not None:  # look like the owner's example images (styling, era, light)
-                    score += REF_WEIGHT * float((ref_t @ v[0]).max())
+                ref_parts = ([float((ref_t @ v[0]).max())] if ref_t is not None else []) + \
+                    ([neighbor_score(v[0], world_nb)] if world_nb is not None else [])
+                if ref_parts:  # look like the owner's example images (styling, era, light)
+                    score += REF_WEIGHT * max(ref_parts)
                 scored.append((score, i))
         if not scored:
             # Everything failed the style gate → better no clip than a wrong one; no

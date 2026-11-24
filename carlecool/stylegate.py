@@ -50,6 +50,10 @@ BLOCK_WORDS = (
     "pride flag", "rainbow flag", "pride parade", "lgbt flag", "lgbtq flag",
     # selfie / phone-filming looks (Reel #44: "Taking selfies at night")
     "selfie", "selfies",
+    # Reel #46: modern water toys instead of classic sailing; snow / winter dates a Reel
+    "speedboat", "speed boat", "motorboat", "motor boat", "jet ski", "jetski", "jet-ski",
+    "jetskiing", "wakeboard", "powerboat", "cruising boat", "cruising in the ocean", "yacht",
+    "snow", "snowy", "snowfall", "winter", "frozen", "skiing", "ski ", "snowboard",
 )
 UNWANTED = (
     "a cartoon or an animated film", "a 3d computer rendering", "an ai generated cartoon character",
@@ -65,6 +69,8 @@ UNWANTED = (
     # owner 23 Nov (Reel #43)
     "a dutch brick house with gabled roofs or a canal", "a close-up of flowers or butterflies in a field",
     "a rainbow pride flag",  # the flag object only (owner 23 Nov)
+    "a modern motorboat, speedboat or jet ski on the water",  # Reel #46
+    "a snowy winter landscape",  # Reel #46 (seasonal, dates the Reel)
 )
 WANTED = {
     "lana": ("young friends together outdoors at golden hour", "a neon motel or diner sign at dusk",
@@ -249,6 +255,47 @@ def load_references(name: str | None) -> list[list[float]]:
     return [v for v in vecs if isinstance(v, list) and len(v) >= 64]
 
 
+NEIGHBORS_K = 3  # mean of the 3 closest reference images (24 Nov calibration)
+# Below this a stock clip is too far from the owner's references (63 Coverr thumbnails:
+# lower quartile ≈0.25 — modern supercars, construction, MPC close-ups, Mexico street).
+REF_FLOOR = 0.25
+CAR_WORDS = ("porsche", "land rover", "range rover", "defender", "classic car", "convertible", "car")
+
+
+def is_car_query(query: str | None) -> bool:
+    q = " " + (query or "").lower() + " "
+    return any(" " + w + " " in q for w in CAR_WORDS)
+
+
+def load_neighbors(name: str | None):
+    """One vector per reference image (float16, base64) as a torch tensor, or None."""
+    import base64
+    import json
+    try:
+        import numpy as np
+        import torch
+        doc = json.loads((REF_DIR / f"{name}.json").read_text(encoding="utf-8"))
+        nb = doc.get("neighbors") or {}
+        if nb.get("dtype") != "float16":
+            return None
+        arr = np.frombuffer(base64.b64decode(nb["data"]), dtype=np.float16).reshape(nb["shape"])
+        return torch.nn.functional.normalize(torch.tensor(arr.astype("float32")), dim=-1)
+    except Exception:
+        return None
+
+
+def neighbor_score(vec, neighbors, k: int = NEIGHBORS_K) -> float:
+    """Mean similarity to the k closest reference images.
+
+    Calibrated on the owner's images vs 63 real Coverr thumbnails (24 Nov): a single mean
+    vector let Christmas clips score like vinyl; nearest neighbours keep the several looks
+    of a world apart (porch, flag, sailing, people …). Lana: 72 % instead of 63 % of the
+    references score above the best off-brief stock clip; Night: 97 % instead of 89 %.
+    """
+    sims = neighbors @ vec
+    return float(sims.topk(min(k, len(sims))).values.mean())
+
+
 def reference_similarity(images, world: str | None, clip) -> list[float | None]:
     """Cosine similarity of each thumbnail to the owner's references (None = unscored).
 
@@ -256,13 +303,15 @@ def reference_similarity(images, world: str | None, clip) -> list[float | None]:
     the references show the look (era, light, colour, setting), the gate keeps out content.
     """
     ref = load_reference(world)
-    if ref is None or clip is None or not images:
+    neighbors = load_neighbors(world)
+    if (ref is None and neighbors is None) or clip is None or not images:
         return [None] * len(images)
     try:
         import torch
         from PIL import Image
         model, preprocess, _tok = clip
-        ref_t = torch.nn.functional.normalize(torch.tensor(ref, dtype=torch.float32), dim=-1)
+        ref_t = (torch.nn.functional.normalize(torch.tensor(ref, dtype=torch.float32), dim=-1)
+                 if ref is not None else None)
         out = []
         with torch.no_grad():
             for image in images:
@@ -272,7 +321,7 @@ def reference_similarity(images, world: str | None, clip) -> list[float | None]:
                 with Image.open(image) as img:
                     v = torch.nn.functional.normalize(
                         model.encode_image(preprocess(img.convert("RGB")).unsqueeze(0)), dim=-1)[0]
-                out.append(float(v @ ref_t))
+                out.append(neighbor_score(v, neighbors) if neighbors is not None else float(v @ ref_t))
         return out
     except Exception as exc:
         print("Reference similarity unavailable:", type(exc).__name__)

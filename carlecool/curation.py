@@ -253,6 +253,17 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
                 keep_idx.append(i)
                 if style_fit is not None and verdict is not None:
                     style_fit[remote[i].id] = verdict[0]
+        # Too far from the owner's reference images → out, as long as enough clips remain
+        # (cars are judged by the car profiles in signature.py, not by the world's images).
+        far = [i for i in keep_idx if ref_all[i] is not None and ref_all[i] < stylegate.REF_FLOOR
+               and not stylegate.is_car_query(remote[i].query)]
+        if far and len(keep_idx) - len(far) >= keep:
+            for i in far:
+                print(f"Clip rejected (far from the reference images, {ref_all[i]:.2f}): "
+                      f"{remote[i].id} '{remote[i].title[:50]}'")
+                if thumbs[i] is not None:
+                    thumbs[i].unlink(missing_ok=True)
+            keep_idx = [i for i in keep_idx if i not in far]
         remote = [remote[i] for i in keep_idx]
         thumbs = [thumbs[i] for i in keep_idx]
         ref_sims = [ref_all[i] for i in keep_idx]
@@ -283,8 +294,11 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
     order = sorted(range(len(remote)), key=lambda i: (-rank[i], i))
     chosen: list[int] = []
     for lane in dict.fromkeys(c.query for c in remote):
+        # Variety per search word only for clips at least as close to the references as
+        # the median (Reel #46: the "sailboat" lane's best clip was a modern speedboat).
         best = next((i for i in order if remote[i].query == lane and scores[i] > -1
-                     and (remote[i].vertical or not any(r.vertical for r in remote))), None)
+                     and (remote[i].vertical or not any(r.vertical for r in remote))
+                     and (ref_sims[i] is None or ref_sims[i] >= ref_mid)), None)
         if best is not None and best not in chosen:
             chosen.append(best)
     for i in order:
