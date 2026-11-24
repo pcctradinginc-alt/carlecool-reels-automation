@@ -42,29 +42,246 @@
       "at": "2026-11-20T15:37:14.037803+00:00",
       "target": "tiktok",
       "facts": {},
-      "checkpoints": {}
+      "checkpoints": {
+        "d2": {
+          "fetched": "2026-11-24T01:57:26+00:00",
+          "platforms": {
+            "tiktok": {
+              "views": 220.0,
+              "impressions": 0.0,
+              "reach": 214.0,
+              "likes": 2.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 1820.0,
+              "completionRate": 0.0242,
+              "replays": 0.0,
+              "videoDurationSeconds": 13.376,
+              "engagementRate": 0.93,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7710278272197659936?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
+        }
+      }
     },
     "6b0183de64bcc19e79622762": {
       "track_id": "2437525047",
       "at": "2026-11-21T11:43:23.837307+00:00",
       "target": "both",
       "facts": {},
-      "checkpoints": {}
+      "checkpoints": {
+        "d2": {
+          "fetched": "2026-11-24T01:57:27+00:00",
+          "platforms": {
+            "instagram": {
+              "views": 18.0,
+              "impressions": 18.0,
+              "reach": 17.0,
+              "likes": 0.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 14809.0,
+              "completionRate": 0.0,
+              "replays": 0.0,
+              "videoDurationSeconds": 26.0,
+              "engagementRate": 0.0,
+              "url": "https://www.instagram.com/reel/DgAJo8_CRWt/"
+            },
+            "tiktok": {
+              "views": 201.0,
+              "impressions": 0.0,
+              "reach": 200.0,
+              "likes": 2.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 2740.0,
+              "completionRate": 0.0217,
+              "replays": 0.0,
+              "videoDurationSeconds": 26.753,
+              "engagementRate": 1.0,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7710589112666950945?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
+        }
+      }
     },
     "6b01c3b88bffd16f3297e92b": {
       "track_id": "2437525038",
       "at": "2026-11-21T16:15:49.058620+00:00",
       "target": "tiktok",
       "facts": {},
-      "checkpoints": {}
+      "checkpoints": {
+        "d2": {
+          "fetched": "2026-11-24T01:57:27+00:00",
+          "platforms": {
+            "tiktok": {
+              "views": 229.0,
+              "impressions": 0.0,
+              "reach": 142.0,
+              "likes": 0.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 1.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 2860.0,
+              "completionRate": 0.0164,
+              "replays": 0.0,
+              "videoDurationSeconds": 31.595,
+              "engagementRate": 0.7,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7710659303262211361?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
+        }
+      }
     },
     "6b01eed9a6fb10bd584b1f58": {
       "track_id": "2437525050",
       "at": "2026-11-21T19:19:51.482023+00:00",
       "target": "tiktok",
       "facts": {},
+      "checkpoints": {
+        "d2": {
+          "fetched": "2026-11-24T01:57:27+00:00",
+          "platforms": {
+            "tiktok": {
+              "views": 222.0,
+              "impressions": 0.0,
+              "reach": 216.0,
+              "likes": 3.0,
+              "comments": 1.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 2130.0,
+              "completionRate": 0.0161,
+              "replays": 0.0,
+              "videoDurationSeconds": 31.211,
+              "engagementRate": 1.85,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7710706725615111456?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
+        }
+      }
+    },
+    "6b0219ae94cb88ded0551346": {
+      "track_id": "2391158355",
+      "at": "2026-11-21T22:22:34.748403+00:00",
+      "target": "tiktok",
+      "facts": {
+        "archival": 3,
+        "bpm": 112.3,
+        "hashtags": [
+          "#carlecool",
+          "#nightdrive",
+          "#vinyl",
+          "#beatmaker",
+          "#instrumental"
+        ],
+        "length_bucket": "long",
+        "length_s": 25.64,
+        "opening_clip": "se6A6GqTIm",
+        "question": false,
+        "roles": [
+          "flag",
+          "friends",
+          "gear",
+          "skater",
+          "woman"
+        ],
+        "scenes": 12,
+        "style": "lana",
+        "style_basis": "music: 112 BPM, bright and flowing (1906 Hz)",
+        "variant": null
+      },
+      "checkpoints": {
+        "d2": {
+          "fetched": "2026-11-24T01:57:28+00:00",
+          "platforms": {
+            "tiktok": {
+              "views": 250.0,
+              "impressions": 0.0,
+              "reach": 80.0,
+              "likes": 2.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 2450.0,
+              "completionRate": 0.0149,
+              "replays": 0.0,
+              "videoDurationSeconds": 25.643,
+              "engagementRate": 2.5,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7710753821823208737?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
+        }
+      }
+    },
+    "6b033e73f483a61307483b51": {
+      "track_id": "2437525041",
+      "at": "2026-11-22T19:11:45.196093+00:00",
+      "target": "tiktok",
+      "facts": {
+        "archival": 1,
+        "bpm": 123.0,
+        "hashtags": [
+          "#carlecool",
+          "#producer",
+          "#minimalmusic",
+          "#analogsynth",
+          "#studiolife"
+        ],
+        "length_bucket": "short",
+        "length_s": 15.6,
+        "opening_clip": "Fa1GhUWb97",
+        "question": false,
+        "roles": [
+          "flag",
+          "friends",
+          "skater"
+        ],
+        "scenes": 7,
+        "style": "rubin",
+        "style_basis": "music: lots of space (dynamics 3.7)",
+        "variant": null
+      },
+      "checkpoints": {}
+    },
+    "6b0497b5fb25be015e55e8a3": {
+      "track_id": "2437525059",
+      "at": "2026-11-23T19:44:50.551264+00:00",
+      "target": "both",
+      "facts": {
+        "archival": 2,
+        "bpm": 76.0,
+        "hashtags": [
+          "#carlecool",
+          "#studiolife",
+          "#instrumental",
+          "#beatmaker",
+          "#ambientmusic"
+        ],
+        "length_bucket": "short",
+        "length_s": 12.63,
+        "opening_clip": "ppURFfx7lL",
+        "question": true,
+        "roles": [
+          "friends",
+          "skater"
+        ],
+        "scenes": 6,
+        "style": "rubin",
+        "style_basis": "music: slow (76 BPM)",
+        "variant": null
+      },
       "checkpoints": {}
     }
   },
-  "updated": "2026-11-21T21:21:04+00:00"
+  "updated": "2026-11-24T01:57:28+00:00"
 }
