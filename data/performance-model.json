@@ -1,60 +1,65 @@
 {
   "version": 1,
-  "observations": 1,
+  "observations": 6,
   "min_posts": 4,
   "min_lift": 0.15,
   "length": {
     "n_yes": 0,
-    "n_no": 0,
+    "n_no": 1,
     "decided": false,
     "prefer": null
   },
   "roles": {
     "gear": {
-      "n_yes": 0,
+      "n_yes": 1,
       "n_no": 0,
       "decided": false
     },
     "friends": {
-      "n_yes": 0,
+      "n_yes": 1,
       "n_no": 0,
       "decided": false
     },
     "flag": {
-      "n_yes": 0,
+      "n_yes": 1,
       "n_no": 0,
       "decided": false
     },
     "car": {
       "n_yes": 0,
-      "n_no": 0,
+      "n_no": 1,
       "decided": false
     },
     "americana": {
       "n_yes": 0,
-      "n_no": 0,
+      "n_no": 1,
       "decided": false
     },
     "skater": {
-      "n_yes": 0,
+      "n_yes": 1,
       "n_no": 0,
       "decided": false
     },
     "woman": {
-      "n_yes": 0,
+      "n_yes": 1,
       "n_no": 0,
       "decided": false
     },
     "friends2": {
       "n_yes": 0,
-      "n_no": 0,
+      "n_no": 1,
       "decided": false
     }
   },
   "question": {
     "n_yes": 0,
-    "n_no": 0,
+    "n_no": 1,
     "decided": false
   },
-  "styles": {}
+  "styles": {
+    "lana": {
+      "n": 1,
+      "median_relative": 0.78
+    }
+  }
 }
