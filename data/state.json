@@ -330,7 +330,11 @@
     "at": "2026-11-24T19:01:06.558197+00:00",
     "issue_number": 45,
     "target": "tiktok",
-    "provider": "zernio"
+    "provider": "zernio",
+    "provider_post_id": "6b05def5dc51748fc788e9d0",
+    "platform_status": {
+      "tiktok": "uploading"
+    }
   },
   "reconciled": [
     {
