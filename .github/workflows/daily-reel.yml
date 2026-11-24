@@ -9,12 +9,13 @@ name: CarleCool — make and review Reel
 # Owner-requested review verification with bundled FFmpeg and authorized-audio fallback; no auto-publish.
 on:
   schedule:
-    # FALLBACK only. The punctual daily start at 09:00 Europe/Berlin comes from the
-    # Cloudflare approval worker (cron trigger → workflow_dispatch), because GitHub starts
-    # scheduled runs hours late or drops them (19-24 Nov: 4-11 h late, three days dropped).
-    # The `guard` job skips this fallback when a Reel run already started in the last 18 h.
-    # Always REVIEW, never auto-publish.
+    # Two daily slots, 09:00 and 12:00 Europe/Berlin (owner, 24 Nov): GitHub starts
+    # scheduled runs hours late or drops them (19-24 Nov: 4-11 h late, three days dropped),
+    # so the second slot is a backup. The `guard` job makes sure only ONE Reel per day
+    # comes from the schedule. Always REVIEW, never auto-publish.
     - cron: '0 9 * * *'
+      timezone: 'Europe/Berlin'
+    - cron: '0 12 * * *'
       timezone: 'Europe/Berlin'
   # One-off, opt-in test run: editing this workflow starts a REAL approval email,
   # never a social publication. The rendered video still needs owner approval.
@@ -55,7 +56,8 @@ permissions:
   issues: write
 jobs:
   guard:
-    # Late GitHub schedule after the Cloudflare start the same day → no second Reel.
+    # Only one scheduled Reel per Berlin day: whichever slot GitHub starts first wins,
+    # the other one is skipped. Manual runs never count.
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     outputs:
@@ -68,10 +70,10 @@ jobs:
         run: |
           skip=false
           if [ "$EVENT" = "schedule" ]; then
-            since=$(date -u -d '18 hours ago' +%Y-%m-%dT%H:%M:%SZ)
-            recent=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/daily-reel.yml/runs?created=>${since}&per_page=20" \
-              --jq "[.workflow_runs[] | select(.id != ${GITHUB_RUN_ID}) | select(.conclusion == null or .conclusion == \"success\")] | length" || echo 0)
-            if [ "${recent:-0}" -gt 0 ]; then skip=true; echo "A Reel run already started in the last 18 h: fallback skipped."; fi
+            since=$(date -u -d "$(TZ=Europe/Berlin date +%Y-%m-%d) 00:00 $(TZ=Europe/Berlin date +%z)" +%Y-%m-%dT%H:%M:%SZ)
+            earlier=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/daily-reel.yml/runs?event=schedule&created=%3E%3D${since}&per_page=20" \
+              --jq "[.workflow_runs[] | select(.id < ${GITHUB_RUN_ID}) | select(.conclusion == null or .conclusion == \"success\")] | length" || echo 0)
+            if [ "${earlier:-0}" -gt 0 ]; then skip=true; echo "Today's scheduled Reel already started (since ${since}): this slot is skipped."; fi
           fi
           echo "skip=$skip" >> "$GITHUB_OUTPUT"
   reel:

@@ -10,8 +10,3 @@ database_id = "3f5135f9-85f3-483b-b84c-debc1d28fef9"
 
 [vars]
 GITHUB_REPOSITORY = "pcctradinginc-alt/carlecool-reels-automation"
-
-# Daily Reel at 09:00 Europe/Berlin: 07:00 UTC in summer, 08:00 UTC in winter; the
-# worker dispatches only from the cron that is 09:00 in Berlin (src/index.js dailyReel).
-[triggers]
-crons = ["0 7 * * *", "0 8 * * *"]

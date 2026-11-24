@@ -37,36 +37,7 @@ function issuePayload(body){
   if(!body||body.split(start).length!==2||body.split(end).length!==2)throw Error("Missing review metadata");
   return JSON.parse(body.split(start)[1].split(end)[0]);
 }
-// Daily Reel start (owner, 24 Nov): GitHub's own schedule starts hours late or not at all,
-// so a Cloudflare cron trigger dispatches the review workflow. Two UTC crons (07:00 and
-// 08:00) cover summer and winter time; only the one that is 09:00 in Berlin dispatches.
-export function berlinHour(ms){
-  return Number(new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Berlin",hour:"2-digit",hourCycle:"h23"}).format(new Date(ms)));
-}
-export async function dailyReel(env,scheduledTime){
-  if(String(env.DAILY_REEL_ENABLED||"true").toLowerCase()==="false")return "disabled";
-  const hour=Number(env.DAILY_REEL_HOUR_BERLIN||9);
-  if(berlinHour(scheduledTime)!==hour)return "other-hour";
-  if(!/^[a-z0-9_.-]+\/[a-z0-9_.-]+$/i.test(env.GITHUB_REPOSITORY||""))throw Error("config-repository");
-  const token=env.GITHUB_DISPATCH_TOKEN||env.GITHUB_APPROVAL_TOKEN;
-  if(typeof token!=="string"||!token.trim())throw Error("config-token");
-  let r;
-  try{
-    r=await fetch("https://api.github.com/repos/"+env.GITHUB_REPOSITORY+"/actions/workflows/daily-reel.yml/dispatches",{
-      method:"POST",redirect:"manual",
-      headers:{"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28",
-               "User-Agent":"CarleCool-Daily","Content-Type":"application/json"},
-      body:JSON.stringify({ref:"main",inputs:{mode:"review",style:"auto"}})});
-  }catch(_error){throw Error("github-network")}
-  if(r.status!==204&&!r.ok)throw Error("github-http-"+r.status);
-  return "dispatched";
-}
-export default {async scheduled(event,env,ctx){
-  ctx.waitUntil(dailyReel(env,event.scheduledTime).then(
-    result=>console.log("CarleCool daily reel",{result}),
-    error=>{const m=String(error?.message||"");console.error("CarleCool daily reel failed",{code:/^(config-repository|config-token|github-network|github-http-[1-5][0-9]{2})$/.test(m)?m:"internal"});throw error;}));
-},
-async fetch(request,env){
+export default {async fetch(request,env){
   const url=new URL(request.url),parts=url.pathname.match(route);
   if(!parts)return page("Link ungültig","<p>Ungültige Freigabe.</p>",404);
   if(!["GET","POST"].includes(request.method))return page("Nicht erlaubt","<p>Nur GET und POST sind erlaubt.</p>",405);

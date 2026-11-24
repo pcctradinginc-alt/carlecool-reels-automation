@@ -161,28 +161,3 @@ test("tokenized cross-origin form succeeds only because of explicit signed confi
     assert.deepEqual(h.posted,["/publish tiktok"]);
   }finally{h.restore();}
 });
-
-test("daily reel: dispatches the review workflow only at 09:00 Berlin (summer and winter)", async () => {
-  const { dailyReel, berlinHour } = await import("../src/index.js");
-  const winter8 = Date.UTC(2026, 11, 1, 8, 0), winter7 = Date.UTC(2026, 11, 1, 7, 0);
-  const summer7 = Date.UTC(2027, 6, 1, 7, 0), summer8 = Date.UTC(2027, 6, 1, 8, 0);
-  assert.equal(berlinHour(winter8), 9); assert.equal(berlinHour(summer7), 9);
-  const env = { GITHUB_REPOSITORY: "pcctradinginc-alt/carlecool-reels-automation", GITHUB_APPROVAL_TOKEN: "t" };
-  const calls = [];
-  const initialFetch = globalThis.fetch;
-  globalThis.fetch = async (url, options) => { calls.push({ url, options }); return { ok: false, status: 204 }; };
-  try {
-    assert.equal(await dailyReel(env, winter7), "other-hour");
-    assert.equal(await dailyReel(env, summer8), "other-hour");
-    assert.equal(calls.length, 0);
-    assert.equal(await dailyReel(env, winter8), "dispatched");
-    assert.equal(await dailyReel(env, summer7), "dispatched");
-    assert.equal(calls.length, 2);
-    assert.match(calls[0].url, /\/actions\/workflows\/daily-reel\.yml\/dispatches$/);
-    assert.deepEqual(JSON.parse(calls[0].options.body), { ref: "main", inputs: { mode: "review", style: "auto" } });
-    assert.equal(await dailyReel({ ...env, DAILY_REEL_ENABLED: "false" }, winter8), "disabled");
-    globalThis.fetch = async () => ({ ok: false, status: 403 });
-    await assert.rejects(dailyReel(env, winter8), /github-http-403/);
-    await assert.rejects(dailyReel({ GITHUB_REPOSITORY: env.GITHUB_REPOSITORY }, winter8), /config-token/);
-  } finally { globalThis.fetch = initialFetch; }
-});
