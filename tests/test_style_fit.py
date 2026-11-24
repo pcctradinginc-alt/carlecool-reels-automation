@@ -130,6 +130,10 @@ def test_reel_39_offbrief_clips_are_blocked_and_people_are_not_judged():
     for title in ("Throwing a pride flag", "Running with a pride flag ", "Gay couple wrapped in a pride flag"):
         assert stylegate.flag_mismatch(v(title))
     assert stylegate.flag_mismatch(v("US Flag near the Chrysler Building")) is None
+    assert stylegate.flag_mismatch(v("American flag waving at sunset")) is None
+    assert stylegate.flag_mismatch(v("Philippines flag")) == "not a US flag"  # Reel #44
+    assert stylegate.flag_mismatch(v("Woman laughing in the car")) is None
+    assert stylegate.blocked_words(v("Taking selfies at night"))
     # couples / friends are never filtered for who they are
     assert stylegate.blocked_words(v("Gay couple representing LGBT community")) is None
     assert stylegate.blocked_words(v("Friends meeting at a cafe")) is None

@@ -48,6 +48,8 @@ BLOCK_WORDS = (
     # owner 23 Nov: no pride / rainbow flags anywhere (the flag motif is the US flag only).
     # Only the flag object — never a reason to drop a clip because of who is in it.
     "pride flag", "rainbow flag", "pride parade", "lgbt flag", "lgbtq flag",
+    # selfie / phone-filming looks (Reel #44: "Taking selfies at night")
+    "selfie", "selfies",
 )
 UNWANTED = (
     "a cartoon or an animated film", "a 3d computer rendering", "an ai generated cartoon character",
@@ -149,6 +151,8 @@ def _norm(text: str) -> str:
 # of the FLAG slot and the "american flag" search lane — people in a clip are never judged.
 OTHER_FLAGS = ("pride flag", "rainbow flag", "rainbow", "pride", "lgbt flag", "canadian flag",
                "uk flag", "union jack", "mexican flag", "eu flag", "german flag")
+US_FLAG_WORDS = ("us", "usa", "u s", "american", "america", "united states", "stars and stripes",
+                 "old glory", "star spangled")
 
 
 def flag_mismatch(video) -> str | None:
@@ -157,7 +161,14 @@ def flag_mismatch(video) -> str | None:
     title = _norm(getattr(video, "title", "") or "")
     if " flag " not in title and " flags " not in title:
         return None
-    return next((w for w in OTHER_FLAGS if _norm(w) in title), None)
+    word = next((w for w in OTHER_FLAGS if _norm(w) in title), None)
+    if word:
+        return word
+    # Owner: US flag only. A flag title without a US word is another country's flag
+    # (Reel #44: "Philippines flag").
+    if not any(_norm(w) in title for w in US_FLAG_WORDS):
+        return "not a US flag"
+    return None
 
 
 # Coverr tags are broad ("santa monica", "jungle", "laptop", "valentine" on harmless clips),

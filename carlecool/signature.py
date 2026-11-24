@@ -215,7 +215,7 @@ def search_slot(api_key: str, queries, *, exclude: set[str], session=None,
             exclude.add(vid)
             from .stylegate import blocked_words
             word = blocked_words(item_view(item))
-            if not word and role == "flag":
+            if not word:  # US flag only, in every role
                 from .stylegate import flag_mismatch
                 word = flag_mismatch(item_view(item))
             if word:
