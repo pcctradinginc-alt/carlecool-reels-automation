@@ -376,20 +376,65 @@
         "style_basis": "music: slow (99 BPM) · night (manual)",
         "variant": "night"
       }
+    },
+    {
+      "track_id": "2437525056",
+      "at": "2026-11-24T19:22:13.524017+00:00",
+      "video_ids": [
+        "W7RZBdP0Sw",
+        "pl-Sagaofth1957",
+        "lOBFIJnPmy",
+        "JdbVWsyY0c",
+        "C7Sn8oKXVm",
+        "wm-f38f3a24d513",
+        "m2EBVbIZ6b",
+        "36Xx0f3K1T",
+        "3oCBDrnQw7",
+        "pl-Paradeof1941",
+        "7sqW5r6s9Z",
+        "l8uexpcEtt",
+        "1ovJULi4xN",
+        "DDHFpsZb7H",
+        "OUEnZsMrXP",
+        "7THTdXaNRG",
+        "GeZdCWlSuf"
+      ],
+      "sha256": "ad0e17edcd54d3e737eae1168f11fc3ad20752de3bffd19ae0bb406ce5584e13",
+      "approval_issue": 46,
+      "provider": "zernio",
+      "target": "tiktok",
+      "provider_post_id": "6b05e3e85ce5573158c81c34",
+      "platform_status": {
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 3,
+        "bpm": 136.0,
+        "hashtags": [
+          "#carlecool",
+          "#vinyl",
+          "#beatmaker",
+          "#instrumental",
+          "#producerlife"
+        ],
+        "length_bucket": "long",
+        "length_s": 28.23,
+        "opening_clip": "JdbVWsyY0c",
+        "question": false,
+        "roles": [
+          "car",
+          "friends",
+          "skater",
+          "woman"
+        ],
+        "scenes": 15,
+        "style": "lana",
+        "style_basis": "music: 136 BPM, bright and flowing (2831 Hz)",
+        "variant": null
+      }
     }
   ],
-  "pending": {
-    "track_id": "2437525056",
-    "sha256": "ad0e17edcd54d3e737eae1168f11fc3ad20752de3bffd19ae0bb406ce5584e13",
-    "at": "2026-11-24T19:22:13.524017+00:00",
-    "issue_number": 46,
-    "target": "tiktok",
-    "provider": "zernio",
-    "provider_post_id": "6b05e3e85ce5573158c81c34",
-    "platform_status": {
-      "tiktok": "uploading"
-    }
-  },
+  "pending": null,
   "reconciled": [
     {
       "track_id": "2373071753",
