@@ -404,6 +404,20 @@ def _remember_sent_preview(metadata: dict, run_id: int, kind: str) -> None:
         token=os.getenv("GH_TOKEN", ""), repo=os.getenv("GITHUB_REPOSITORY", ""),
     )
     print("Preview rotation history:", "recorded" if changed else "already recorded")
+    _remember_licences(metadata, run_id)
+
+
+def _remember_licences(metadata: dict, run_id: int) -> None:
+    """Licence proof per clip, kept for good in data/licence-log.json (also in the issue)."""
+    if os.getenv("GITHUB_ACTIONS") != "true":
+        return
+    from .licences import record_licence_log
+    try:
+        changed = record_licence_log(metadata, run_id=run_id, token=os.getenv("GH_TOKEN", ""),
+                                     repo=os.getenv("GITHUB_REPOSITORY", ""))
+        print("Licence log:", "recorded" if changed else "already recorded")
+    except Exception as exc:  # the mail is out; the issue still holds the same proof
+        print("Warning: licence log not stored (proof remains in the approval issue):", type(exc).__name__)
 
 
 def main():

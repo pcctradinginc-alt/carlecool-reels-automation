@@ -177,6 +177,7 @@ def prelinger_media(item: dict, *, session=None) -> tuple[str, float]:
     data = r.json()
     if "publicdomain" not in _clean((data.get("metadata") or {}).get("licenseurl")):
         raise ValueError("Item is not marked public domain")
+    item["licence_url"] = str((data.get("metadata") or {}).get("licenseurl") or "")[:200]
     best = None
     for f in data.get("files", []):
         name = str(f.get("name") or "")
@@ -406,8 +407,13 @@ def fetch_archival(style: str | None, exclude: set[str], workdir: Path, *, run_k
                 print(f"Archive clip rejected after cut (mixed content): {item['id']}")
                 path.unlink(missing_ok=True)
                 continue
+            public = item["source"] == "prelinger"
             found.append(Video(item["id"], item["source"], path=str(path), title=item["title"],
-                               creator_name=credit, creator_url=page, query=item["query"],
+                               creator_name=credit, creator_url=page, query=item["query"], page_url=page,
+                               licence=("Public domain (" + (item.get("archive") or "Internet Archive") + ")"
+                                        if public else "NASA media usage guidelines (not copyrighted)"),
+                               licence_url=(item.get("licence_url") or "https://creativecommons.org/publicdomain/mark/1.0/"
+                                            if public else "https://www.nasa.gov/nasa-brand-center/images-and-media/"),
                                duration=SEGMENT_SECONDS))
             print(f"Archive clip: {item['id']} '{item['title'][:50]}' @ {start:.0f}s")
         except (requests.RequestException, ValueError, KeyError, OSError,

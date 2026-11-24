@@ -33,6 +33,10 @@ class Video:
     width: int = 0
     height: int = 0
     score: float = 0.0
+    # Licence proof (owner, 24 Nov): page of the clip and the licence at the time of use.
+    page_url: str = ""
+    licence: str = ""
+    licence_url: str = ""
 
 
 from .keywords import select_keywords
@@ -91,6 +95,13 @@ def download_video(url: str, destination: Path, session=None, max_bytes=180_000_
             raise ValueError("Downloaded video is unexpectedly small")
         return destination
     raise RuntimeError("Too many video redirects")
+
+
+def coverr_page(item: dict) -> str:
+    """Public Coverr page of a clip, when the API gives a plain slug."""
+    import re as _re
+    slug = str(item.get("slug") or "")
+    return f"https://coverr.co/videos/{slug}" if _re.fullmatch(r"[a-z0-9-]{3,120}", slug) else ""
 
 
 def _coverr_creator_metadata(item: dict) -> tuple[str, str]:
@@ -324,7 +335,7 @@ def search_coverr(key: str, mood: str, recent: set[str], session=None, wanted=8,
                                   thumb_url=str(item.get("thumbnail") or item.get("poster") or ""),
                                   tags=tags, duration=duration,
                                   width=int(item.get("max_width") or 0),
-                                  height=int(item.get("max_height") or 0)))
+                                  height=int(item.get("max_height") or 0), page_url=coverr_page(item)))
         per_lane.append(sorted(lane, key=lambda x: (x.vertical, x.views), reverse=True))
     if stop and not any(per_lane):
         raise RuntimeError("Coverr unavailable before any usable result")

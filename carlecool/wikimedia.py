@@ -99,7 +99,7 @@ def category_files(category: str, *, session=None, limit: int = 60, pause: float
     params = {"action": "query", "generator": "categorymembers", "gcmtitle": f"Category:{category}",
               "gcmtype": "file", "gcmlimit": limit, "prop": "imageinfo",
               "iiprop": "size|mime|extmetadata|url", "iiurlwidth": 1920,
-              "iiextmetadatafilter": "LicenseShortName|Restrictions|Artist",
+              "iiextmetadatafilter": "LicenseShortName|LicenseUrl|Restrictions|Artist",
               "format": "json", "maxlag": 5}
     for attempt in range(2):
         time.sleep(pause)
@@ -131,6 +131,7 @@ def category_files(category: str, *, session=None, limit: int = 60, pause: float
             continue
         out.append({"id": "wm-" + hashlib.sha1(page.get("title", "").encode()).hexdigest()[:12],
                     "title": str(page.get("title", ""))[5:120], "license": lic,
+                    "license_url": _text((meta.get("LicenseUrl") or {}).get("value"))[:200],
                     "artist": _text((meta.get("Artist") or {}).get("value"))[:80],
                     "page": str(info.get("descriptionurl") or ""), "url": url,
                     "thumb": str(info.get("thumburl") or ""), "mime": str(info.get("mime") or ""),
@@ -276,7 +277,9 @@ def fetch_wikimedia(role: str, exclude: set[str], workdir: Path, *, run_key: str
                 target.unlink(missing_ok=True)
                 continue
             found.append(Video(item["id"], "wikimedia", path=str(target), title=item["title"],
-                               creator_name=credit_line(item), creator_url=item["page"],
+                               creator_name=credit_line(item), creator_url=item["page"], page_url=item["page"],
+                               licence=f"{item['license']} (Wikimedia Commons)",
+                               licence_url=item.get("license_url") or item["page"],
                                query=f"wikimedia:{role}",
                                duration=PHOTO_SECONDS if kind == "photo" else SEGMENT_SECONDS))
             print(f"Wikimedia {kind}: {item['title'][:60]} ({item['license']})")

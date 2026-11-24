@@ -102,6 +102,8 @@ def revise(issue_number: int, command: str) -> str:
             metadata, run_id=int(os.environ["GITHUB_RUN_ID"]), kind="revision",
             token=os.environ["GH_TOKEN"], repo=os.environ["GITHUB_REPOSITORY"],
         )
+        from .review import _remember_licences
+        _remember_licences(metadata, int(os.environ["GITHUB_RUN_ID"]))
     except Exception as exc:
         # The private original was already sent and the new approval is valid.
         # Do not re-email or reactivate the old issue after a history failure.

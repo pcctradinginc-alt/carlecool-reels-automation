@@ -221,12 +221,13 @@ def search_slot(api_key: str, queries, *, exclude: set[str], session=None,
             if word:
                 print(f"Signature {role} candidate rejected ('{word}'): {vid}")
                 continue
-            from .video import _coverr_creator_metadata
+            from .video import _coverr_creator_metadata, coverr_page
             name, link = _coverr_creator_metadata(item)
             found.append(Video(vid, "coverr", url=url, title=item.get("title", ""),
                                vertical=_is_portrait(item), creator_name=name, creator_url=link,
                                query=query, thumb_url=str(item.get("thumbnail") or item.get("poster") or ""),
-                               tags=tuple(str(t).lower() for t in (item.get("tags") or []) if isinstance(t, str))[:30]))
+                               tags=tuple(str(t).lower() for t in (item.get("tags") or []) if isinstance(t, str))[:30],
+                               page_url=coverr_page(item)))
         print(f"Signature {role} '{query}': {len(hits)} hits")
     return found
 

@@ -9,6 +9,8 @@ import os
 from pathlib import Path
 import sys
 
+from . import licences
+
 from .analysis import analyze_audio
 from .aesthetic import editorial_brief
 from .creative import load_profile, choose_shots, validate_profile
@@ -484,7 +486,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "track_id": track.id, "title": track.title, "permalink": track.permalink_url,
         "song_label": song_label(track.title),
         "features": vars(features), "video_ids": [v.id for v in selected],
-        "footage_sources": [{"id": v.id, "provider": v.source, "title": v.title} for v in selected],
+        "footage_sources": [licences.proof(v) for v in selected],  # licence proof per clip
         "caption": caption_for(track, selected, caption_copy), "caption_variant": caption_copy,
         "reel_facts": reel_facts, "length_bucket": reel_facts["length_bucket"],
         "performance_summary": performance.summary(perf_model),
