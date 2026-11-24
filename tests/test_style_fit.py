@@ -266,3 +266,10 @@ def test_reference_neighbors_are_stored_and_used():
     assert 0.2 <= stylegate.REF_FLOOR <= 0.3
     assert stylegate.is_car_query("land rover") and stylegate.is_car_query("classic car")
     assert not stylegate.is_car_query("wooden boat")
+
+
+def test_reel_47_surreal_staging_is_blocked():
+    from carlecool.video import Video
+    for title in ("Whimsical Picnic in Pastel Paradise", "Magical Picnic with Floating Tennis Balls"):
+        assert stylegate.blocked_words(Video("x", "coverr", title=title)), title
+    assert stylegate.blocked_words(Video("x", "coverr", title="Family picnic on a lawn")) is None

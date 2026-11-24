@@ -54,6 +54,9 @@ BLOCK_WORDS = (
     "speedboat", "speed boat", "motorboat", "motor boat", "jet ski", "jetski", "jet-ski",
     "jetskiing", "wakeboard", "powerboat", "cruising boat", "cruising in the ocean", "yacht",
     "snow", "snowy", "snowfall", "winter", "frozen", "skiing", "ski ", "snowboard",
+    # Reel #47: surreal / fantasy staging ("Whimsical Picnic in Pastel Paradise",
+    # "Magical Picnic with Floating Tennis Balls") is not timeless-classic
+    "whimsical", "magical", "floating", "fantasy", "surreal", "dreamlike", "pastel paradise",
 )
 UNWANTED = (
     "a cartoon or an animated film", "a 3d computer rendering", "an ai generated cartoon character",
