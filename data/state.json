@@ -322,20 +322,63 @@
       "platform_post_urls": {
         "instagram": "https://www.instagram.com/reel/DgGKU-Pig1x/"
       }
+    },
+    {
+      "track_id": "2437525044",
+      "at": "2026-11-24T19:01:06.558197+00:00",
+      "video_ids": [
+        "pl-tmp_AmateurF",
+        "DMCZqGG337",
+        "hi5d328a8z",
+        "wm-22d778b91cbe",
+        "pl-supervisors_picnic",
+        "hIXgomM7D4",
+        "XWAkWqD0W6",
+        "18oZkp9RSF",
+        "QudmOWscyp",
+        "D074lkHKfG",
+        "uyK9ODHVH0",
+        "9oSxiZEFjE",
+        "HJ10BLIZw8",
+        "zWLVK5D3QQ",
+        "5bCqMSTcCj"
+      ],
+      "sha256": "d7217dc9aa4b35c56559385211a09982d64c4ac6c2f0101439b17a263d5a2cbe",
+      "approval_issue": 45,
+      "provider": "zernio",
+      "target": "tiktok",
+      "provider_post_id": "6b05def5dc51748fc788e9d0",
+      "platform_status": {
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 3,
+        "bpm": 99.4,
+        "hashtags": [
+          "#carlecool",
+          "#analogsynth",
+          "#studiolife",
+          "#instrumental",
+          "#beatmaker"
+        ],
+        "length_bucket": "short",
+        "length_s": 19.32,
+        "opening_clip": "hi5d328a8z",
+        "question": false,
+        "roles": [
+          "friends",
+          "gear",
+          "skater",
+          "woman"
+        ],
+        "scenes": 11,
+        "style": "rubin",
+        "style_basis": "music: slow (99 BPM) · night (manual)",
+        "variant": "night"
+      }
     }
   ],
-  "pending": {
-    "track_id": "2437525044",
-    "sha256": "d7217dc9aa4b35c56559385211a09982d64c4ac6c2f0101439b17a263d5a2cbe",
-    "at": "2026-11-24T19:01:06.558197+00:00",
-    "issue_number": 45,
-    "target": "tiktok",
-    "provider": "zernio",
-    "provider_post_id": "6b05def5dc51748fc788e9d0",
-    "platform_status": {
-      "tiktok": "uploading"
-    }
-  },
+  "pending": null,
   "reconciled": [
     {
       "track_id": "2373071753",
