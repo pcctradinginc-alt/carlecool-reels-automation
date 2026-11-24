@@ -15,3 +15,7 @@ GITHUB_REPOSITORY = "pcctradinginc-alt/carlecool-reels-automation"
 
 # Secrets set only by: npx wrangler secret put APPROVAL_LINK_SECRET
 #                       npx wrangler secret put GITHUB_APPROVAL_TOKEN
+
+# Daily Reel at 09:00 Europe/Berlin (see src/index.js dailyReel)
+[triggers]
+crons = ["0 7 * * *", "0 8 * * *"]

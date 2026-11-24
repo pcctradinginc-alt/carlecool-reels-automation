@@ -9,8 +9,10 @@ name: CarleCool — make and review Reel
 # Owner-requested review verification with bundled FFmpeg and authorized-audio fallback; no auto-publish.
 on:
   schedule:
-    # Daily 09:00 Europe/Berlin (owner, 23 Nov: mail before the evening even when GitHub
-    # starts scheduled runs hours late — 19-22 Nov: 6-8 h, one slot dropped).
+    # FALLBACK only. The punctual daily start at 09:00 Europe/Berlin comes from the
+    # Cloudflare approval worker (cron trigger → workflow_dispatch), because GitHub starts
+    # scheduled runs hours late or drops them (19-24 Nov: 4-11 h late, three days dropped).
+    # The `guard` job skips this fallback when a Reel run already started in the last 18 h.
     # Always REVIEW, never auto-publish.
     - cron: '0 9 * * *'
       timezone: 'Europe/Berlin'
@@ -52,7 +54,29 @@ permissions:
   actions: read
   issues: write
 jobs:
+  guard:
+    # Late GitHub schedule after the Cloudflare start the same day → no second Reel.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          skip=false
+          if [ "$EVENT" = "schedule" ]; then
+            since=$(date -u -d '18 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+            recent=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/daily-reel.yml/runs?created=>${since}&per_page=20" \
+              --jq "[.workflow_runs[] | select(.id != ${GITHUB_RUN_ID}) | select(.conclusion == null or .conclusion == \"success\")] | length" || echo 0)
+            if [ "${recent:-0}" -gt 0 ]; then skip=true; echo "A Reel run already started in the last 18 h: fallback skipped."; fi
+          fi
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
   reel:
+    needs: guard
+    if: needs.guard.outputs.skip != 'true'
     # The user's own official SoundCloud podcast RSS feed and complete
     # no-publish preview-to-Gmail flow were verified with live GitHub Actions.
     # Human issue approval is still mandatory; publish secret stays disabled.
