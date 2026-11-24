@@ -112,7 +112,7 @@ def validate_footage_rights(approval: dict) -> None:
         raise RuntimeError('Pexels credit missing from approved caption')
     if 'nasa' in providers and 'NASA' not in caption:
         raise RuntimeError('NASA archive credit missing from approved caption')
-    if 'prelinger' in providers and 'Prelinger Archives' not in caption:
+    if 'prelinger' in providers and 'archive.org' not in caption:
         raise RuntimeError('Prelinger credit missing from approved caption')
     if 'wikimedia' in providers and 'Wikimedia Commons' not in caption:
         raise RuntimeError('Wikimedia Commons credit missing from approved caption')

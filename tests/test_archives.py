@@ -93,3 +93,34 @@ def test_unknown_style_or_disabled_returns_nothing(monkeypatch, tmp_path):
     assert archives.fetch_archival(None, set(), tmp_path) == []
     monkeypatch.setenv("CARLECOOL_ARCHIVES", "false")
     assert archives.fetch_archival("rubin", set(), tmp_path) == []
+
+
+def test_more_curated_home_movie_collections_public_domain_only_with_credit():
+    docs = [
+        {"identifier": "cahuca_000008", "title": "Main Street Festival, Huntington Beach, 1975",
+         "licenseurl": "http://creativecommons.org/publicdomain/mark/1.0/", "collection": ["californiarevealed"]},
+        {"identifier": "ocaclark01", "title": "Clark Family Home Movies",
+         "licenseurl": "http://creativecommons.org/publicdomain/mark/1.0/", "collection": ["orangecountyarchives"]},
+        {"identifier": "disney01", "title": "Disneyland Main Street Electrical Parade",
+         "licenseurl": "http://creativecommons.org/publicdomain/mark/1.0/", "collection": ["orangecountyarchives"]},
+        {"identifier": "xmas01", "title": "Family Christmas 1958",
+         "licenseurl": "http://creativecommons.org/publicdomain/mark/1.0/", "collection": ["home_movies"]},
+    ]
+    session = MagicMock()
+    session.get.return_value = _resp({"response": {"docs": docs}})
+    found = archives.search_prelinger(["family", "beach"], set(), session=session)
+    assert [(i["id"], i["archive"]) for i in found] == [("pl-cahuca_000008", "California Revealed"),
+                                                       ("pl-ocaclark01", "Orange County Archives")]
+    q = session.get.call_args.kwargs["params"]["q"]
+    assert "collection:californiarevealed" in q and "licenseurl:*publicdomain*" in q
+    assert "collection:community" not in q and "opensource_movies" not in q
+
+
+def test_caption_names_each_archive_used():
+    from carlecool.main import caption_for
+    from carlecool.video import Video
+    vids = [Video("pl-a", "prelinger", creator_name="California Revealed (public domain)"),
+            Video("pl-b", "prelinger", creator_name="Prelinger Archives (public domain)")]
+    from types import SimpleNamespace
+    text = caption_for(SimpleNamespace(title="x"), vids)
+    assert "California Revealed, Prelinger Archives, public domain (archive.org)" in text

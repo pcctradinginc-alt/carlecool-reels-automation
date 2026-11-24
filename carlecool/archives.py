@@ -3,8 +3,10 @@
 * NASA Image & Video Library (images-api.nasa.gov, no key): generally not
   copyrighted; never use NASA logos or imply endorsement. Used for the Rubin
   (space/minimal) and Night (Earth at night) styles.
-* Prelinger Archives (archive.org, no key): ONLY items explicitly marked public
-  domain (`licenseurl` …/publicdomain/); used for the Lana/Americana style.
+* Internet Archive home movies (archive.org, no key): curated collections only —
+  Prelinger Archives, Prelinger home movies, Home Movies, California Revealed (Californian
+  libraries and archives) and Orange County Archives — and ONLY items explicitly marked
+  public domain (`licenseurl` …/publicdomain/); used for the Lana/Americana look.
 
 Films are long (minutes to hours, up to GB), so only a short segment is cut
 straight from the remote file via HTTP range requests (no full download).
@@ -41,8 +43,15 @@ NASA_QUERIES = {
 }
 PRELINGER_QUERIES = {
     # Amateur films only: real summers, roads and beaches; no ads, no propaganda.
-    "lana": ("amateur film", "home movie", "home movies"),
+    "lana": ("amateur film", "home movie", "home movies", "family", "beach", "summer",
+             "vacation", "picnic", "parade", "road trip", "fair"),
 }
+# Curated archive.org collections (owner, 24 Nov: more free footage). Community uploads
+# are left out: there the "public domain" mark is only the uploader's own claim.
+ARCHIVE_COLLECTIONS = {"prelinger": "Prelinger Archives", "prelingerhomemovies": "Prelinger Archives",
+                       "home_movies": "Internet Archive Home Movies",
+                       "californiarevealed": "California Revealed",
+                       "orangecountyarchives": "Orange County Archives"}
 NASA_EXCLUDE = ("briefing", "conference", "interview", "news", "media", "talk", "lecture",
                 "panel", "podcast", "this week", "live", "tour", "event", "award", "ceremony",
                 "update", "explained", "q&a", "town hall", "webinar", "launch coverage", "hearing",
@@ -55,7 +64,11 @@ PRELINGER_EXCLUDE = ("crash", "accident", "signal 30", "war", "atomic", "bomb", 
                      "nazi", "communis", "propaganda", "alcohol", "drunk", "gun", "weapon",
                      "kill", "blood", "fire", "disaster", "riot", "race", "negro", "indian",
                      "chevrolet", "ford", "general motors", "motorama", "advertis", "commercial",
-                     "sponsor", "coca", "pepsi", "initiation", "snowstorm", "world's fair")
+                     "sponsor", "coca", "pepsi", "initiation", "snowstorm", "world's fair",
+                     "halloween", "christmas", "santa", "easter", "haunt", "ghoul", "church",
+                     "baptist", "sunday school", "funeral", "storm", "flood", "armistice",
+                     "germany", "v-e day", "veteran", "police", "lecture", "interview",
+                     "oral history", "council", "meeting", "hearing", "disney", "knott")
 THIRD_PARTY = ("esa", "european space agency", "jaxa", "csa", "dlr", "herschel", "planck", "gaia",
                "sofia", "courtesy of", "copyright", "©", "getty", "ap photo", "reuters")
 POSITIVE = {
@@ -136,9 +149,10 @@ def nasa_media_url(item: dict, *, session=None) -> str:
 def search_prelinger(queries, exclude: set[str], *, session=None, rows: int = 150) -> list[dict]:
     session = session or requests.Session()
     terms = " OR ".join(f'title:"{q}"' for q in queries)
+    cols = " OR ".join(f"collection:{c}" for c in ARCHIVE_COLLECTIONS)
     r = session.get(IA_SEARCH, timeout=25, params={
-        "q": f"collection:prelinger AND licenseurl:*publicdomain* AND ({terms})",
-        "fl[]": ["identifier", "title", "licenseurl", "subject"], "rows": rows,
+        "q": f"({cols}) AND mediatype:movies AND licenseurl:*publicdomain* AND ({terms})",
+        "fl[]": ["identifier", "title", "licenseurl", "subject", "collection"], "rows": rows,
         "output": "json", "sort[]": "downloads desc"})
     r.raise_for_status()
     items = []
@@ -148,7 +162,10 @@ def search_prelinger(queries, exclude: set[str], *, session=None, rows: int = 15
         if (not re.fullmatch(r"[A-Za-z0-9._-]{3,120}", ident) or f"pl-{ident}" in exclude
                 or "publicdomain" not in _clean(doc.get("licenseurl")) or _blocked(text, PRELINGER_EXCLUDE)):
             continue
-        items.append({"id": f"pl-{ident}", "source": "prelinger", "identifier": ident,
+        cols = doc.get("collection") or []
+        cols = cols if isinstance(cols, list) else [cols]
+        archive = next((ARCHIVE_COLLECTIONS[c] for c in cols if c in ARCHIVE_COLLECTIONS), "Prelinger Archives")
+        items.append({"id": f"pl-{ident}", "source": "prelinger", "identifier": ident, "archive": archive,
                       "title": str(doc.get("title") or "")[:120], "query": "vintage americana"})
     return items
 
@@ -374,7 +391,8 @@ def fetch_archival(style: str | None, exclude: set[str], workdir: Path, *, run_k
                 credit, page = "NASA", f"https://images.nasa.gov/details/{quote(item['nasa_id'])}"
             else:
                 url, duration = prelinger_media(item, session=session)
-                credit, page = "Prelinger Archives (public domain)", f"https://archive.org/details/{item['identifier']}"
+                credit = f"{item.get('archive') or 'Prelinger Archives'} (public domain)"
+                page = f"https://archive.org/details/{item['identifier']}"
             if duration < SEGMENT_SECONDS + 5:
                 continue
             start, margin = best_offset(url, duration, item["source"], f"{run_key}|{item['id']}")

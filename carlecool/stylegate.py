@@ -38,7 +38,7 @@ BLOCK_WORDS = (
     # brand products / ad looks (Reel #39: Coca-Cola, champagne)
     "coca cola", "coca-cola", "coke", "pepsi", "champagne", "starbucks", "mcdonald", "red bull",
     # work / everyday scenes outside the brief (Reel #39: construction workers, video call)
-    "construction", "workers", "video call", "video calling", "zoom call", "warehouse",
+    "construction", "workers", "welding", "welder", "factory", "video call", "video calling", "zoom call", "warehouse",
     # studio fashion shoots (Reel #41 opened on "Chic Studio Fashion Portrait with Unique Backdrop")
     "fashion portrait", "fashion shoot", "photo shoot", "photoshoot", "studio portrait", "backdrop",
     "model posing", "lookbook", "catwalk", "runway",
