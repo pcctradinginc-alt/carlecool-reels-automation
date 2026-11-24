@@ -251,7 +251,29 @@
         "style_basis": "music: lots of space (dynamics 3.7)",
         "variant": null
       },
-      "checkpoints": {}
+      "checkpoints": {
+        "d2": {
+          "fetched": "2026-11-24T23:41:47+00:00",
+          "platforms": {
+            "tiktok": {
+              "views": 228.0,
+              "impressions": 0.0,
+              "reach": 228.0,
+              "likes": 0.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 2060.0,
+              "completionRate": 0.02,
+              "replays": 0.0,
+              "videoDurationSeconds": 15.595,
+              "engagementRate": 0.0,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7711075739755384097?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
+        }
+      }
     },
     "6b0497b5fb25be015e55e8a3": {
       "track_id": "2437525059",
@@ -281,7 +303,69 @@
         "variant": null
       },
       "checkpoints": {}
+    },
+    "6b05def5dc51748fc788e9d0": {
+      "track_id": "2437525044",
+      "at": "2026-11-24T19:01:06.558197+00:00",
+      "target": "tiktok",
+      "facts": {
+        "archival": 3,
+        "bpm": 99.4,
+        "hashtags": [
+          "#carlecool",
+          "#analogsynth",
+          "#studiolife",
+          "#instrumental",
+          "#beatmaker"
+        ],
+        "length_bucket": "short",
+        "length_s": 19.32,
+        "opening_clip": "hi5d328a8z",
+        "question": false,
+        "roles": [
+          "friends",
+          "gear",
+          "skater",
+          "woman"
+        ],
+        "scenes": 11,
+        "style": "rubin",
+        "style_basis": "music: slow (99 BPM) · night (manual)",
+        "variant": "night"
+      },
+      "checkpoints": {}
+    },
+    "6b05e3e85ce5573158c81c34": {
+      "track_id": "2437525056",
+      "at": "2026-11-24T19:22:13.524017+00:00",
+      "target": "tiktok",
+      "facts": {
+        "archival": 3,
+        "bpm": 136.0,
+        "hashtags": [
+          "#carlecool",
+          "#vinyl",
+          "#beatmaker",
+          "#instrumental",
+          "#producerlife"
+        ],
+        "length_bucket": "long",
+        "length_s": 28.23,
+        "opening_clip": "JdbVWsyY0c",
+        "question": false,
+        "roles": [
+          "car",
+          "friends",
+          "skater",
+          "woman"
+        ],
+        "scenes": 15,
+        "style": "lana",
+        "style_basis": "music: 136 BPM, bright and flowing (2831 Hz)",
+        "variant": null
+      },
+      "checkpoints": {}
     }
   },
-  "updated": "2026-11-24T01:57:28+00:00"
+  "updated": "2026-11-24T23:41:47+00:00"
 }
