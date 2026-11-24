@@ -673,6 +673,34 @@
       ],
       "sha256": "7dc1edb4864c3b055b469d6c8b415b2ecdef9b2dd6107a0205d3798f1ba63a28",
       "length_bucket": "short"
+    },
+    {
+      "at": "2026-11-24T01:25:09+00:00",
+      "kind": "daily",
+      "run_id": 45303897904,
+      "track_id": "2437525044",
+      "video_ids": [
+        "UgzAaghmAu",
+        "wm-c3ff4ffba326",
+        "0HKg4vnrb9",
+        "Re4Oy37YnP",
+        "PCxHQubrBd",
+        "WBHvMStUUf",
+        "kiUcuO0T6y",
+        "Vnigs71I7Y",
+        "KMTkg65Kh8",
+        "yKDHfbWUfq",
+        "PUvIrVhDeV",
+        "4mK1QTcIRA",
+        "fYiaxJCu4S",
+        "uH1FqY1L65",
+        "0hNzl6Stg6",
+        "AGTsRkDwp9",
+        "pulKMH0KHL",
+        "wfCUlvEjMz"
+      ],
+      "sha256": "1164d981690be987465290ae044d25897cc516a17aac35f74335e791bf43e262",
+      "length_bucket": "long"
     }
   ]
 }
