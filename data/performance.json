@@ -335,7 +335,84 @@
         "variant": null,
         "text_hook": false
       },
-      "checkpoints": {}
+      "checkpoints": {
+        "d1": {
+          "fetched": "2026-11-25T23:24:50+00:00",
+          "age_hours": 51.7,
+          "platforms": {
+            "instagram": {
+              "views": 119.0,
+              "impressions": 119.0,
+              "reach": 107.0,
+              "likes": 3.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 1.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 3715.0,
+              "completionRate": 0.0,
+              "replays": 0.0,
+              "videoDurationSeconds": 12.0,
+              "engagementRate": 3.36,
+              "url": "https://www.instagram.com/reel/DgGKU-Pig1x/"
+            },
+            "tiktok": {
+              "views": 224.0,
+              "impressions": 0.0,
+              "reach": 157.0,
+              "likes": 2.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 1.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 2370.0,
+              "completionRate": 0.0328,
+              "replays": 0.0,
+              "videoDurationSeconds": 12.63,
+              "engagementRate": 1.91,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7711455347243781408?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
+        },
+        "d2": {
+          "fetched": "2026-11-25T23:24:50+00:00",
+          "age_hours": 51.7,
+          "platforms": {
+            "instagram": {
+              "views": 119.0,
+              "impressions": 119.0,
+              "reach": 107.0,
+              "likes": 3.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 1.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 3715.0,
+              "completionRate": 0.0,
+              "replays": 0.0,
+              "videoDurationSeconds": 12.0,
+              "engagementRate": 3.36,
+              "url": "https://www.instagram.com/reel/DgGKU-Pig1x/"
+            },
+            "tiktok": {
+              "views": 224.0,
+              "impressions": 0.0,
+              "reach": 157.0,
+              "likes": 2.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 1.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 2370.0,
+              "completionRate": 0.0328,
+              "replays": 0.0,
+              "videoDurationSeconds": 12.63,
+              "engagementRate": 1.91,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7711455347243781408?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
+        }
+      }
     },
     "6b05def5dc51748fc788e9d0": {
       "track_id": "2437525044",
@@ -367,7 +444,30 @@
         "variant": "night",
         "text_hook": false
       },
-      "checkpoints": {}
+      "checkpoints": {
+        "d1": {
+          "fetched": "2026-11-25T23:24:51+00:00",
+          "age_hours": 28.4,
+          "platforms": {
+            "tiktok": {
+              "views": 156.0,
+              "impressions": 0.0,
+              "reach": 0.0,
+              "likes": 0.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 2300.0,
+              "completionRate": 0.0242,
+              "replays": 0.0,
+              "videoDurationSeconds": 19.35,
+              "engagementRate": 0.0,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7711815195370196263?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
+        }
+      }
     },
     "6b05e3e85ce5573158c81c34": {
       "track_id": "2437525056",
@@ -399,8 +499,63 @@
         "variant": null,
         "text_hook": false
       },
+      "checkpoints": {
+        "d1": {
+          "fetched": "2026-11-25T23:24:51+00:00",
+          "age_hours": 28.0,
+          "platforms": {
+            "tiktok": {
+              "views": 124.0,
+              "impressions": 0.0,
+              "reach": 0.0,
+              "likes": 4.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 1.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 1570.0,
+              "completionRate": 0.0071,
+              "replays": 0.0,
+              "videoDurationSeconds": 28.267,
+              "engagementRate": 4.03,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7711820595234606369?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
+        }
+      }
+    },
+    "6b070dbba050ad974cf36aba": {
+      "track_id": "2437525047",
+      "at": "2026-11-25T16:32:57.012567+00:00",
+      "target": "tiktok",
+      "facts": {
+        "archival": 5,
+        "bpm": 143.6,
+        "hashtags": [
+          "#carlecool",
+          "#americana",
+          "#nightdrive",
+          "#vinyl",
+          "#beatmaker"
+        ],
+        "length_bucket": "long",
+        "length_s": 26.75,
+        "opening_clip": "F9C1KBdRWo",
+        "question": false,
+        "roles": [
+          "americana",
+          "car",
+          "friends",
+          "skater",
+          "woman"
+        ],
+        "scenes": 12,
+        "style": "lana",
+        "style_basis": "rotation (night)",
+        "variant": "night"
+      },
       "checkpoints": {}
     }
   },
-  "updated": "2026-11-24T23:41:47+00:00"
+  "updated": "2026-11-25T23:24:51+00:00"
 }
