@@ -1,0 +1,188 @@
+{
+ "version": 1,
+ "reels": [
+  {
+   "at": "2026-11-25T16:25:40+00:00",
+   "run_id": 45651802000,
+   "song": "carl e cool - do ya",
+   "sha256": "1d737f4bd5cef83e23819e142e2f41f3f0f9efa3ddafe642a4607da1b9817b78",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co",
+    "🎬 Wikimedia Commons (public domain)",
+    "🎬 Archive footage: Prelinger Archives, public domain (archive.org)"
+   ],
+   "clips": [
+    {
+     "id": "JgkWWhdv17",
+     "provider": "coverr",
+     "title": "A guy picking up trash at the beach ",
+     "page": "https://coverr.co/videos/a-guy-picking-up-trash-at-the-beach-jgkwwhdv17",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "iHfhxW86cA",
+     "provider": "coverr",
+     "title": "Garage door closing ",
+     "page": "https://coverr.co/videos/garage-door-closing-ihfhxw86ca",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "Wa2sQnmNAB",
+     "provider": "coverr",
+     "title": "A cinematic shot of a BMW M5 driving on a wet neon-lit street at night, reflecti",
+     "page": "",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "pl-SanFranc1940",
+     "provider": "prelinger",
+     "title": "[Amateur film: San Francisco]",
+     "page": "https://archive.org/details/SanFranc1940",
+     "creator": "Prelinger Archives (public domain)",
+     "licence": "Public domain (Prelinger Archives)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "mXTfpsXLrd",
+     "provider": "coverr",
+     "title": "Driving near cows on the roadside",
+     "page": "https://coverr.co/videos/driving-near-cows-on-the-roadside-mxtfpsxlrd",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "pl-Summersc1941_2",
+     "provider": "prelinger",
+     "title": "[Amateur film: Summers collection: San Francisco, California, 1941] (Part II)",
+     "page": "https://archive.org/details/Summersc1941_2",
+     "creator": "Prelinger Archives (public domain)",
+     "licence": "Public domain (Prelinger Archives)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "F9C1KBdRWo",
+     "provider": "coverr",
+     "title": "Blurred car lights ",
+     "page": "https://coverr.co/videos/blurred-car-lights-f9c1kbdrwo",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "RTyJNxHwHT",
+     "provider": "coverr",
+     "title": "Man yawning whilst driving",
+     "page": "https://coverr.co/videos/man-yawning-whilst-driving-rtyjnxhwht",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "pl-DateWith1950_2",
+     "provider": "prelinger",
+     "title": "Date With Your Family, A (outtakes)",
+     "page": "https://archive.org/details/DateWith1950_2",
+     "creator": "Prelinger Archives (public domain)",
+     "licence": "Public domain (Prelinger Archives)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "wm-67cdb51ec4dd",
+     "provider": "wikimedia",
+     "title": "Grand Canyon National Park B-roll Video- Cape Royal Sunset - Time-lapse (8661965788).webm",
+     "page": "https://commons.wikimedia.org/wiki/File:Grand_Canyon_National_Park_B-roll_Video-_Cape_Royal_Sunset_-_Time-lapse_(8661965788).webm",
+     "creator": "Wikimedia Commons (public domain)",
+     "licence": "Public domain (Wikimedia Commons)",
+     "licence_url": "https://commons.wikimedia.org/wiki/File:Grand_Canyon_National_Park_B-roll_Video-_Cape_Royal_Sunset_-_Time-lapse_(8661965788).webm",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "pl-MemberOfTheF",
+     "provider": "prelinger",
+     "title": "Member Of The Family",
+     "page": "https://archive.org/details/MemberOfTheF",
+     "creator": "Prelinger Archives (public domain)",
+     "licence": "Public domain (Prelinger Archives)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "J3yrAYllJn",
+     "provider": "coverr",
+     "title": "Piccadilly Circus",
+     "page": "https://coverr.co/videos/piccadilly-circus-j3yraylljn",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "HuZnIlHLVQ",
+     "provider": "coverr",
+     "title": "Man doing a trick on a skateboard",
+     "page": "https://coverr.co/videos/man-doing-a-trick-on-a-skateboard-huznilhlvq",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "S7mrD0wQiW",
+     "provider": "coverr",
+     "title": "A couple kissing at the bar ",
+     "page": "https://coverr.co/videos/a-couple-kissing-at-the-bar-s7mrd0wqiw",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "VTGpBS2gna",
+     "provider": "coverr",
+     "title": "Woman gives gift to her friend",
+     "page": "https://coverr.co/videos/woman-gives-gift-to-her-friend-vtgpbs2gna",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "g0cR5U9Krw",
+     "provider": "coverr",
+     "title": "Range rover on the road",
+     "page": "https://coverr.co/videos/range-rover-on-the-road-g0cr5u9krw",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-25"
+    },
+    {
+     "id": "KK342MfQEX",
+     "provider": "coverr",
+     "title": "Moving car on an empty road",
+     "page": "https://coverr.co/videos/moving-car-on-an-empty-road-kk342mfqex",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-25"
+    }
+   ]
+  }
+ ]
+}
