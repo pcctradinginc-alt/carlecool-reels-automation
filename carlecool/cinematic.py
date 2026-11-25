@@ -83,6 +83,9 @@ def _bars_for_energy(level: float, pace: str) -> float:
     return 1.0 if level >= 0.45 else 2.0
 
 
+FIRST_SHOT_MAX = 1.6  # seconds; first cut inside the window where viewers decide
+
+
 def plan_cuts_from_beats(duration: float, beats: tuple[float, ...] | list[float],
                          downbeats: tuple[float, ...] | list[float],
                          beat_energy: tuple[float, ...] | list[float], *,
@@ -132,6 +135,12 @@ def plan_cuts_from_beats(duration: float, beats: tuple[float, ...] | list[float]
     t = grid[0] if grid[0] >= min_shot else next((g for g in grid if g >= min_shot), duration)
     if grid[0] > 1e-3 and grid[0] < min_shot:
         t = grid[0] if grid[0] >= 0.5 else t  # short pickup before the first "one"
+    elif grid[0] <= 1e-3:
+        # Hook first (25 Nov): the first visual change comes within FIRST_SHOT_MAX, on the
+        # beat grid, so the opening second has both the strongest image and a cut.
+        early = [g for g in half if min_shot * 0.95 - 1e-6 <= g <= FIRST_SHOT_MAX]
+        if early:
+            t = max(early)
     while t < duration - min_shot * 0.6:
         if t - boundaries[-1] >= min(min_shot, 0.5) - 1e-6:
             boundaries.append(t)

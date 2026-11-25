@@ -103,12 +103,13 @@ def _downbeat_offset(beat_frames: np.ndarray, bass_onset: np.ndarray) -> int:
 
 
 def _hook_start(beat_times: np.ndarray, downbeat_idx: list[int], beat_energy: np.ndarray,
-                length: float, track_seconds: float, *, lead_bars: int = 1) -> tuple[float, float]:
+                length: float, track_seconds: float, *, lead_bars: int = 0) -> tuple[float, float]:
     """Return (start, hook_time) in song seconds.
 
     The hook is the downbeat with the biggest energy lift (next 2 bars vs previous 2 bars,
-    weighted by absolute loudness). The excerpt starts `lead_bars` before it, so the lift
-    lands within the first ~1–3 s — the moment that decides whether viewers keep watching.
+    weighted by absolute loudness). The excerpt starts ON it (lead_bars=0): TikTok data of
+    the first 7 Reels showed ~2.4 s average watch time regardless of length, and one bar
+    of lead-in at ~100 BPM is exactly those 2.4 s (owner, 25 Nov: hook in the first second).
     """
     best = None
     for pos, beat_index in enumerate(downbeat_idx):

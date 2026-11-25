@@ -51,10 +51,10 @@ def test_librosa_features_beats_downbeats_and_early_hook():
     assert 9 <= features.reel_length <= 19  # target 15 → whole phrases around it
     assert len(features.beats) == len(features.beat_energy) >= 12
     assert all(b < features.reel_length for b in features.beats)
-    # Downbeats every 4 beats, and the energy lift arrives in the first ~3 s.
+    # Downbeats every 4 beats; the excerpt starts ON the energy lift (hook first, 25 Nov).
     gaps = np.diff(features.downbeats)
     assert np.allclose(gaps, 2.0, atol=0.1)
-    assert 0.5 <= features.hook_at <= 3.5
+    assert features.hook_at <= 0.3
     assert math.isclose(features.excerpt_start + features.hook_at, 20.0, abs_tol=0.3)
 
 
@@ -78,7 +78,10 @@ def test_bar_based_cuts_land_on_downbeats_and_breathe_in_calm_parts(pace):
     frame = 1 / FPS
     # every cut sits on a bar start ("the one"; half-bar only in fast pace), one frame early
     grid = list(downs) + ([d + 1.0 for d in downs] if pace == "fast" else [])
-    assert all(any(abs(e + frame - d) < 1e-3 for d in grid) for e in edges)
+    # hook first: the first cut comes early (≤ FIRST_SHOT_MAX, may be a half bar)
+    from carlecool.cinematic import FIRST_SHOT_MAX
+    assert edges[0] + frame <= FIRST_SHOT_MAX + 1e-3
+    assert all(any(abs(e + frame - d) < 1e-3 for d in grid) for e in edges[1:])
     assert any(abs(e + frame - 8.0) < 1e-3 for e in edges)  # picture changes on the hook
     calm = [c for c, start in zip(cuts, [0.0] + edges) if start + c <= 8.0]
     peak = [c for c, start in zip(cuts, [0.0] + edges) if start >= 8.0 - frame]
@@ -261,11 +264,11 @@ def test_cuts_snap_to_the_audible_kick():
     beats, downs, energy = _timeline(seconds=16.0)
     kicks = [d + 0.03 for d in downs]  # real hit 30 ms after the tracked grid
     cuts = plan_cuts_from_beats(16.0, beats, downs, energy, pace="medium", hook_at=8.0, kicks=kicks)
-    edges = list(np.cumsum(cuts)[:-1])
+    edges = list(np.cumsum(cuts)[:-1])[1:]  # the early first cut sits on a half bar
     assert all(any(abs(e + 1 / FPS - k) < 1e-3 for k in kicks) for e in edges)
     far = [d + 0.1 for d in downs]  # too far away: keep the grid
     cuts = plan_cuts_from_beats(16.0, beats, downs, energy, pace="medium", hook_at=8.0, kicks=far)
-    assert all(any(abs(e + 1 / FPS - d) < 1e-3 for d in downs) for e in np.cumsum(cuts)[:-1])
+    assert all(any(abs(e + 1 / FPS - d) < 1e-3 for d in downs) for e in np.cumsum(cuts)[:-1][1:])
 
 
 def test_motion_matching_puts_moving_clips_on_loud_passages():

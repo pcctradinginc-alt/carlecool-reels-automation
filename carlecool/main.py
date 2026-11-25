@@ -492,6 +492,10 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     from .titlecard import enabled as title_card_enabled
     title_card = (artist_name(), track.title) if title_card_enabled() else None
     out = output_dir / f"carlecool_{track.id}.mp4"
+    from . import hooktext
+    hook_line = hooktext.choose(style_name, style_variant, edition,
+                                prefer=performance.preferred(perf_model, "text"))
+    print(f"Text hook: {hook_line!r}" if hook_line else "Text hook: none (A/B test)")
     try:
         details = render_reel(audio, paths, features, out, reel_length,
                               pace=style_pkg.pace_for(profile["pace"], style_name), analog=profile["analog"], cover=cover,
@@ -499,7 +503,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                               title_card=title_card,
                               style_grade=style_pkg.grade_filters(style_name, style_variant),
                               signature_slots=signature_slots, look=style_pkg.look(style_name),
-                              opening_pool=opening_pool, opening_fit=opening_fit)
+                              opening_pool=opening_pool, opening_fit=opening_fit, hook_text=hook_line)
     finally:
         if cover is not None:
             cover.unlink(missing_ok=True)
@@ -515,6 +519,12 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "opening_clip": (selected[details["opening_clip"]].id if details.get("opening_clip") is not None else None),
         "archival": sum(1 for v in selected if v.source in ("prelinger", "nasa", "wikimedia")),
         "question": bool(caption_copy["question"]), "hashtags": caption_copy["hashtags"],
+        # hook facts for the learning system (25 Nov)
+        "text_hook": bool(details.get("hook_text")), "hook_line": details.get("hook_text") or "",
+        "hook_at": round(float(getattr(features, "hook_at", 0.0) or 0.0), 2),
+        "first_shot_s": details.get("first_shot_s"),
+        "opening_source": (selected[details["opening_clip"]].source if details.get("opening_clip") is not None else None),
+        "opening_motif": (selected[details["opening_clip"]].query if details.get("opening_clip") is not None else None),
     }
     metadata = {
         "track_id": track.id, "title": track.title, "permalink": track.permalink_url,

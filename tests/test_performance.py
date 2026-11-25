@@ -59,9 +59,12 @@ def test_collect_fetches_checkpoints_once_and_parses_platforms():
         return performance.parse_analytics(payload)
 
     data = {"posts": {}}
-    assert performance.collect(state, data, fetch=fetch, now=now) == 2   # d2 + d7 for p1
-    assert calls == ["p1", "p1"]
+    # 8 days old: only d7 is filled — d1/d2 would get today's numbers (fake growth curve)
+    assert performance.collect(state, data, fetch=fetch, now=now) == 1
+    assert calls == ["p1"]
+    assert set(data["posts"]["p1"]["checkpoints"]) == {"d7"}
     assert data["posts"]["p1"]["checkpoints"]["d7"]["platforms"]["tiktok"]["shares"] == 12
+    assert data["posts"]["p1"]["checkpoints"]["d7"]["age_hours"] == 192.0
     assert performance.collect(state, data, fetch=fetch, now=now) == 0   # nothing due again
     assert data["posts"]["p1"]["facts"] == {"length_bucket": "short"}
 
@@ -85,3 +88,40 @@ def test_tiny_or_missing_numbers_are_ignored():
     assert performance.post_score({"views": 5, "shares": 3}) is None
     assert performance.parse_analytics({}) == {}
     assert performance.due_checkpoints("not a date", {}) == []
+
+
+def test_checkpoints_on_time_include_the_24h_indicator():
+    at = datetime(2026, 12, 1, tzinfo=timezone.utc)
+    assert performance.due_checkpoints(at.isoformat(), {}, at + timedelta(hours=26)) == ["d1"]
+    assert performance.due_checkpoints(at.isoformat(), {"d1": {}}, at + timedelta(days=2, hours=3)) == ["d2"]
+
+
+def test_score_parts_units_and_missing_values():
+    # Zernio TikTok: watch time in ms, completion as a fraction (stored data, 19 Nov)
+    m = {"views": 222.0, "likes": 2.0, "comments": 0.0, "shares": 0.0, "saves": 0.0, "reposts": 0.0,
+         "igReelsAvgWatchTime": 2480.0, "completionRate": 0.0319, "videoDurationSeconds": 12.625}
+    parts = performance.components(m)
+    assert abs(parts["watch"] - 2.48 / 12.625) < 1e-6 and parts["completion"] == 0.0319
+    assert parts["reach"] == 222.0
+    # completion 0 % is a real value, a missing completion rate is not zero
+    assert performance.components(dict(m, completionRate=0.0))["completion"] == 0.0
+    assert "completion" not in performance.components({k: v for k, v in m.items() if k != "completionRate"})
+    # seconds stay seconds, percent becomes a fraction
+    assert performance.watch_seconds({"igReelsAvgWatchTime": 4.2, "videoDurationSeconds": 18}) == 4.2
+    assert performance.components(dict(m, completionRate=12.5))["completion"] == 0.125
+
+
+def test_reach_counts_and_platforms_learn_separately():
+    def post(views, text, platform="tiktok"):
+        return {"facts": {"text_hook": text},
+                "checkpoints": {"d7": {"platforms": {platform: {
+                    "views": views, "likes": 5, "shares": 0, "igReelsAvgWatchTime": 2500,
+                    "completionRate": 0.03, "videoDurationSeconds": 18}}}}}
+    posts = {f"t{i}": post(2000, True) for i in range(4)} | {f"n{i}": post(220, False) for i in range(4)}
+    posts |= {f"ig{i}": post(50, False, "instagram") for i in range(3)}
+    model = performance.build_model({"posts": posts})
+    assert model["platform"] == "tiktok" and model["observations"] == 8
+    assert set(model["platforms"]) == {"tiktok", "instagram"}
+    assert model["text"]["prefer"] == "text"        # 10x the views wins, same watch/completion
+    assert performance.preferred(model, "text") == "text"
+    assert performance.preferred({}, "text") is None

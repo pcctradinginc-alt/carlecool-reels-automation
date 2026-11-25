@@ -5,15 +5,20 @@
    checkpoints — 2, 7 and 28 days after publishing — with GET /v1/analytics?postId=…
    and stored in data/performance.json (views, shares, saves, comments, likes, average
    watch time, completion rate, replays — whatever the platform returns).
-2. Score: per post and platform, engagement that signals "people want more of this":
-   shares and saves weigh most, then comments, likes; plus watch time relative to the
-   video length (or the completion rate). Each post is compared with the median of the
-   owner's own posts on that platform (no absolute targets).
-3. Learn (data/performance-model.json): variants are compared only when BOTH sides have
-   at least MIN_POSTS posts and differ by at least MIN_LIFT. Learned:
+2. Score (owner goal 25 Nov: maximum views for song promotion): per post and platform,
+   five parts, each relative to the median of the owner's own posts on that platform:
+   reach (views) 30 %, watch time ÷ video length 25 %, completion rate 20 %,
+   shares + saves + reposts per view 20 %, likes + comments per view 5 %. These are our
+   own optimisation weights, not TikTok's. Missing values are left out (never counted
+   as zero); watch time units are checked against the video length.
+3. Learn (data/performance-model.json): one model PER PLATFORM (TikTok and Instagram
+   react differently); main.py follows the TikTok model (the Reels' main target).
+   Variants are compared only when BOTH sides have at least MIN_POSTS posts and differ by
+   at least MIN_LIFT. Learned:
      * Reel length (short ≈15–20 s vs long ≈24–30 s) → used by the length test,
      * signature roles (gear, friends, flag, car …) → placement priority,
-     * caption question yes/no → how often a question is asked.
+     * caption question yes/no → how often a question is asked,
+     * on-screen text hook yes/no (hooktext.py) → how often a line is shown.
    Style worlds are only REPORTED: the owner's rules (cover/music/song memory) decide.
 4. Owner choices (/revise, remembered song styles) always win over learned weights.
 No personal data is stored: only public post metrics and our own Reel facts.
@@ -31,7 +36,10 @@ import time
 
 DATA_PATH = Path("data/performance.json")
 MODEL_PATH = Path("data/performance-model.json")
-CHECKPOINTS = (("d2", 2), ("d7", 7), ("d28", 28))
+CHECKPOINTS = (("d1", 1), ("d2", 2), ("d7", 7), ("d28", 28))  # d1 = early indicator (25 Nov)
+PRIMARY_PLATFORM = "tiktok"
+PART_CAP = 3.0  # a score part counts at most 3x the platform median
+WEIGHTS = {"reach": 0.30, "watch": 0.25, "completion": 0.20, "share": 0.20, "like": 0.05}
 MIN_POSTS = 4          # per variant before anything is adjusted
 MIN_LIFT = 0.15        # +15 % median score difference
 SHORT_TARGET = 18.0   # owner 23 Nov: never shorter than 15 s
@@ -47,8 +55,15 @@ def due_checkpoints(published_at: str, done: dict, now: datetime | None = None) 
         at = datetime.fromisoformat(published_at)
     except (TypeError, ValueError):
         return []
-    return [name for name, days in CHECKPOINTS
-            if name not in done and now - at >= timedelta(days=days)]
+    latest_done = max((days for name, days in CHECKPOINTS if name in done), default=0)
+    due = [(name, days) for name, days in CHECKPOINTS
+           if name not in done and days > latest_done and now - at >= timedelta(days=days)]
+    # A checkpoint long overdue (e.g. analytics were down) would get TODAY's numbers and
+    # fake the growth curve: only the latest due checkpoint is filled then, older missed
+    # ones are skipped (25 Nov).
+    age_days = (now - at).total_seconds() / 86400
+    fair = [n for n, d in due if age_days <= d * 1.5 + 1]
+    return fair or ([due[-1][0]] if due else [])
 
 
 def parse_analytics(payload: dict) -> dict[str, dict]:
@@ -115,8 +130,13 @@ def collect(state: dict, data: dict, *, fetch=fetch_post, now: datetime | None =
             if metrics is None:
                 print(f"Analytics for {post_id} not synced yet ({name}); next run retries")
                 break
-            entry["checkpoints"][name] = {"fetched": (now or datetime.now(timezone.utc)).isoformat(timespec="seconds"),
-                                          "platforms": metrics}
+            fetched = now or datetime.now(timezone.utc)
+            try:
+                age_h = round((fetched - datetime.fromisoformat(str(record.get("at")))).total_seconds() / 3600, 1)
+            except (TypeError, ValueError):
+                age_h = None
+            entry["checkpoints"][name] = {"fetched": fetched.isoformat(timespec="seconds"),
+                                          "age_hours": age_h, "platforms": metrics}
             added += 1
             print(f"Analytics {post_id} {name}: " + ", ".join(
                 f"{p}: {int(m.get('views', 0))} views, {int(m.get('shares', 0))} shares"
@@ -127,21 +147,49 @@ def collect(state: dict, data: dict, *, fetch=fetch_post, now: datetime | None =
 
 # ---------------------------------------------------------------- scoring + model
 
-def post_score(metrics: dict) -> float | None:
-    """Engagement per view with shares/saves weighted highest, plus watch quality."""
-    views = metrics.get("views") or metrics.get("impressions") or 0
+def _num(metrics: dict, key: str) -> float | None:
+    value = metrics.get(key)
+    return float(value) if isinstance(value, (int, float)) else None
+
+
+def watch_seconds(metrics: dict) -> float | None:
+    """Average watch time in seconds. Zernio reports TikTok and Instagram in ms (2480 for a
+    12.6 s video); a value that cannot be seconds (more than 3× the video) is ms."""
+    avg, length = _num(metrics, "igReelsAvgWatchTime"), _num(metrics, "videoDurationSeconds")
+    if avg is None or avg <= 0:
+        return None
+    if length and avg > 3 * length:
+        return avg / 1000.0
+    return avg if length else (avg / 1000.0 if avg > 100 else avg)
+
+
+def components(metrics: dict) -> dict[str, float] | None:
+    """Raw score parts of one post; None below 20 views. Missing parts are absent."""
+    views = _num(metrics, "views") or _num(metrics, "impressions") or 0.0
     if views < 20:
         return None
-    eng = (3 * metrics.get("shares", 0) + 3 * metrics.get("saves", 0) + 2 * metrics.get("reposts", 0)
-           + 2 * metrics.get("comments", 0) + metrics.get("likes", 0)) / views
-    watch = None
-    if metrics.get("completionRate"):
-        watch = float(metrics["completionRate"]) / (100.0 if metrics["completionRate"] > 1 else 1.0)
-    elif metrics.get("igReelsAvgWatchTime") and metrics.get("videoDurationSeconds"):
-        avg = float(metrics["igReelsAvgWatchTime"])
-        avg = avg / 1000.0 if avg > 1000 else avg  # ms or s
-        watch = min(2.0, avg / max(1.0, float(metrics["videoDurationSeconds"])))
-    return eng * 10 + (watch if watch is not None else 0.0)
+    out = {"reach": views}
+    watch, length = watch_seconds(metrics), _num(metrics, "videoDurationSeconds")
+    if watch is not None and length:
+        out["watch"] = min(2.0, watch / max(1.0, length))
+    completion = _num(metrics, "completionRate")
+    if completion is not None:
+        out["completion"] = completion / 100.0 if completion > 1 else completion
+    shares = [_num(metrics, k) for k in ("shares", "saves", "reposts")]
+    if any(v is not None for v in shares):
+        out["share"] = sum(v or 0.0 for v in shares) / views
+    likes = [_num(metrics, k) for k in ("likes", "comments")]
+    if any(v is not None for v in likes):
+        out["like"] = sum(v or 0.0 for v in likes) / views
+    return out
+
+
+def post_score(metrics: dict) -> float | None:
+    """Absolute weighted score of one post (kept for reports; learning uses relative scores)."""
+    parts = components(metrics)
+    if parts is None:
+        return None
+    return sum(WEIGHTS[k] * v for k, v in parts.items() if k != "reach") + WEIGHTS["reach"] * (parts["reach"] / 1000.0)
 
 
 def _latest(entry: dict) -> dict:
@@ -152,20 +200,33 @@ def _latest(entry: dict) -> dict:
 
 
 def observations(data: dict) -> list[dict]:
-    """One row per (post, platform) with a score relative to that platform's median."""
+    """One row per (post, platform). `relative` = weighted mean of each score part divided
+    by that platform's median of the part (1.0 = a typical post of the owner)."""
     rows = []
     for post_id, entry in (data.get("posts") or {}).items():
         for platform, metrics in _latest(entry).items():
-            score = post_score(metrics)
-            if score is not None:
-                rows.append({"post": post_id, "platform": platform, "score": score,
-                             "facts": entry.get("facts") or {}})
-    by_platform: dict[str, list[float]] = {}
-    for row in rows:
-        by_platform.setdefault(row["platform"], []).append(row["score"])
-    for row in rows:
-        median = statistics.median(by_platform[row["platform"]]) or 1e-9
-        row["relative"] = row["score"] / median
+            if platform == "all":
+                continue
+            parts = components(metrics)
+            if parts is not None:
+                rows.append({"post": post_id, "platform": platform, "parts": parts,
+                             "score": post_score(metrics), "facts": entry.get("facts") or {}})
+    for platform in {r["platform"] for r in rows}:
+        mine = [r for r in rows if r["platform"] == platform]
+        stats = {}
+        for key in WEIGHTS:
+            vals = [r["parts"][key] for r in mine if key in r["parts"]]
+            if vals:
+                mean = sum(vals) / len(vals)
+                stats[key] = (statistics.median(vals), 0.25 * mean if mean > 0 else 1.0)
+        for r in mine:
+            num = den = 0.0
+            for key, value in r["parts"].items():
+                median, smooth = stats[key]
+                # capped: one share against a median of 0 must not make a post "6.5x" (25 Nov)
+                num += WEIGHTS[key] * min(PART_CAP, (value + smooth) / (median + smooth))
+                den += WEIGHTS[key]
+            r["relative"] = round(num / den, 4) if den else 1.0
     return rows
 
 
@@ -180,9 +241,20 @@ def _compare(rows, predicate) -> dict | None:
 
 
 def build_model(data: dict) -> dict:
+    """Model for the primary platform (TikTok) on top, every platform separately inside."""
     rows = observations(data)
-    model = {"version": 1, "observations": len(rows), "min_posts": MIN_POSTS, "min_lift": MIN_LIFT,
-             "length": None, "roles": {}, "question": None, "styles": {}}
+    per_platform = {p: _model_for([r for r in rows if r["platform"] == p])
+                    for p in sorted({r["platform"] for r in rows})}
+    primary = PRIMARY_PLATFORM if PRIMARY_PLATFORM in per_platform else (next(iter(per_platform), None))
+    model = dict(per_platform.get(primary) or _model_for([]))
+    model.update({"version": 2, "platform": primary, "platforms": per_platform,
+                  "observations_all": len(rows)})
+    return model
+
+
+def _model_for(rows: list[dict]) -> dict:
+    model = {"observations": len(rows), "min_posts": MIN_POSTS, "min_lift": MIN_LIFT,
+             "length": None, "roles": {}, "question": None, "text": None, "styles": {}}
     length = _compare(rows, lambda f: None if "length_bucket" not in f else f["length_bucket"] == "short")
     if length:
         model["length"] = dict(length, prefer=("short" if length.get("lift", 0) > 0 else "long")
@@ -194,8 +266,13 @@ def build_model(data: dict) -> dict:
     question = _compare(rows, lambda f: None if "question" not in f else bool(f["question"]))
     if question:
         model["question"] = question
-    for world in ("lana", "rubin"):  # report only
-        vals = [r["relative"] for r in rows if r["facts"].get("style") == world]
+    text = _compare(rows, lambda f: None if "text_hook" not in f else bool(f["text_hook"]))
+    if text:
+        model["text"] = dict(text, prefer=("text" if text.get("lift", 0) > 0 else "none")
+                             if text.get("decided") else None)
+    for world in ("lana", "rubin", "night"):  # report only
+        vals = [r["relative"] for r in rows
+                if (("night" if r["facts"].get("variant") == "night" else r["facts"].get("style")) == world)]
         if vals:
             model["styles"][world] = {"n": len(vals), "median_relative": round(statistics.median(vals), 3)}
     return model
@@ -204,7 +281,7 @@ def build_model(data: dict) -> dict:
 def load_model(path: Path = MODEL_PATH) -> dict:
     try:
         model = json.loads(path.read_text(encoding="utf-8"))
-        return model if isinstance(model, dict) and model.get("version") == 1 else {}
+        return model if isinstance(model, dict) and model.get("version") in (1, 2) else {}
     except (OSError, ValueError):
         return {}
 
@@ -255,6 +332,11 @@ def role_priority(default: tuple[str, ...], model: dict | None) -> tuple[str, ..
     return tuple(sorted(default, key=lambda r: (weight(r), default.index(r))))
 
 
+def preferred(model: dict | None, key: str) -> str | None:
+    """Learned winner of an A/B test ("text" / "none" for the text hook), else None."""
+    return ((model or {}).get(key) or {}).get("prefer")
+
+
 def ask_question(model: dict | None, default: bool) -> bool:
     info = (model or {}).get("question") or {}
     if info.get("decided"):
@@ -268,7 +350,8 @@ def summary(model: dict | None) -> str:
     n = model.get("observations", 0)
     if not n:
         return "Performance: noch keine Plattform-Zahlen"
-    parts = [f"Performance aus {n} Post-Messungen"]
+    platform = model.get("platform")
+    parts = [f"Performance aus {n} Post-Messungen" + (f" ({platform})" if platform else "")]
     length = model.get("length") or {}
     if length.get("prefer"):
         parts.append(f"Länge: {length['prefer']} besser ({length.get('lift', 0):+.0%})")

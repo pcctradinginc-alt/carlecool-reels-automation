@@ -194,7 +194,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 style_grade: list[str] | None = None,
                 signature_slots: dict[str, int] | None = None,
                 look: dict | None = None, opening_pool: set[int] | None = None,
-                opening_fit: dict[int, float] | None = None) -> dict:
+                opening_fit: dict[int, float] | None = None, hook_text: str = "") -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -308,6 +308,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                                    seed=str(features.excerpt_start))
     for item in shot_look:  # frame-exact transitions keep the cuts on the beat grid
         item["dissolve_in"] = round(item["dissolve_in"] * FPS) / FPS
+    from . import hooktext
+    hook_png = hooktext.make_png(hook_text, width, height, work / "hook_text.png") if hook_text else None
     leak = None
     if any(item["leak"] for item in shot_look):
         leak = look_mod.make_light_leak(width, height, work / "light_leak.png")
@@ -415,6 +417,13 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             overlays.append((["-loop", "1", "-framerate", str(FPS), "-i", str(card)],
                              f"format=rgba,fade=t=out:st=0.04:d={LOOP_BRIDGE_SECONDS:.2f}:alpha=1",
                              "overlay=0:0"))
+        if hook_png is not None and shot_start < hooktext.HOOK_SECONDS - 0.05:
+            # Text hook over the first ~2.6 s (A/B test, 25 Nov), across the first shots.
+            local_end = hooktext.HOOK_SECONDS - shot_start
+            fade_in = ",fade=t=in:st=0.08:d=0.3:alpha=1" if index == 0 else ""
+            overlays.append((["-loop", "1", "-framerate", str(FPS), "-i", str(hook_png)],
+                             f"format=rgba{fade_in},fade=t=out:st={max(0.0, local_end - 0.4):.3f}:d=0.4:alpha=1",
+                             f"overlay=0:0:enable='lt(t,{local_end:.3f})'"))
         if card_start is not None and shot_end + tail > card_start + 1e-3:
             # Title card fades in over the last ~2 s, after grain so the text stays crisp.
             local = max(0.0, card_start - shot_start)
@@ -503,6 +512,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "smart_cropped_shots": reframed,
             "dissolves": sum(1 for d in dissolves if d > 0), "slowmo_shots": slowed,
             "light_leaks": leaks, "punch_ins": punched, "bw_shots": bw_shots,
+            "hook_text": hook_text if hook_png is not None else "",
+            "first_shot_s": round(storyboard[0].duration, 2) if storyboard else None,
             "framed_shots": framed,
             "signature_shots": {role: sum(1 for sh in storyboard if sh.source_index == idx)
                                 for role, idx in (signature_slots or {}).items()},

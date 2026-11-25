@@ -39,6 +39,7 @@ def main():
         }]}))
         env = os.environ.copy()
         env.update({'CARLECOOL_MIN_QUALITY': 'off',  # one synthetic clip on purpose
+                    'CARLECOOL_TEXT_HOOK': 'always',  # render path of the text hook (25 Nov)
                     'REEL_SECONDS': '15', 'REEL_WIDTH': '270', 'REEL_HEIGHT': '480',
                     'COVERR_API_KEY': '', 'SOUNDCLOUD_CLIENT_ID': '',
                     'SOUNDCLOUD_CLIENT_SECRET': '', 'PUBLISH_ENABLED': 'false',
@@ -48,6 +49,12 @@ def main():
         assert (root / 'output/carlecool_1000.mp4').is_file()
         meta = json.loads((root / 'output/reel_metadata.json').read_text())
         assert meta['track_id'] == '1000' and 7.9 <= meta['duration'] <= 19.6, meta['duration']  # REEL_SECONDS=15 is the target: whole phrases around it
+        facts = meta.get('reel_facts') or {}
+        if facts.get('style'):  # text hook only exists with a style world
+            assert facts.get('text_hook') is True and facts.get('hook_line'), facts
+        frame_out = os.getenv('SMOKE_FRAME_OUT')
+        if frame_out:
+            ffmpeg('-ss', '1.0', '-i', str(root / 'output/carlecool_1000.mp4'), '-frames:v', '1', frame_out)
         try:
             import librosa  # noqa: F401
             assert meta['music_analysis']['analyzer'] == 'librosa', meta['music_analysis']

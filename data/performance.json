@@ -5,7 +5,13 @@
       "track_id": "2437525038",
       "at": "2026-11-19T19:53:28.376846+00:00",
       "target": "tiktok",
-      "facts": {},
+      "facts": {
+        "length_s": 12.62,
+        "length_bucket": "short",
+        "question": false,
+        "text_hook": false,
+        "facts_source": "reconstructed 25 Nov (length from TikTok, no caption question, no text line)"
+      },
       "checkpoints": {
         "d2": {
           "fetched": "2026-11-21T21:21:03+00:00",
@@ -41,7 +47,13 @@
       "track_id": "2437525047",
       "at": "2026-11-20T15:37:14.037803+00:00",
       "target": "tiktok",
-      "facts": {},
+      "facts": {
+        "length_s": 13.38,
+        "length_bucket": "short",
+        "question": false,
+        "text_hook": false,
+        "facts_source": "reconstructed 25 Nov (length from TikTok, no caption question, no text line)"
+      },
       "checkpoints": {
         "d2": {
           "fetched": "2026-11-24T01:57:26+00:00",
@@ -70,7 +82,13 @@
       "track_id": "2437525047",
       "at": "2026-11-21T11:43:23.837307+00:00",
       "target": "both",
-      "facts": {},
+      "facts": {
+        "length_s": 26.0,
+        "length_bucket": "long",
+        "question": false,
+        "text_hook": false,
+        "facts_source": "reconstructed 25 Nov (length from TikTok, no caption question, no text line)"
+      },
       "checkpoints": {
         "d2": {
           "fetched": "2026-11-24T01:57:27+00:00",
@@ -115,7 +133,13 @@
       "track_id": "2437525038",
       "at": "2026-11-21T16:15:49.058620+00:00",
       "target": "tiktok",
-      "facts": {},
+      "facts": {
+        "length_s": 31.59,
+        "length_bucket": "long",
+        "question": false,
+        "text_hook": false,
+        "facts_source": "reconstructed 25 Nov (length from TikTok, no caption question, no text line)"
+      },
       "checkpoints": {
         "d2": {
           "fetched": "2026-11-24T01:57:27+00:00",
@@ -144,7 +168,13 @@
       "track_id": "2437525050",
       "at": "2026-11-21T19:19:51.482023+00:00",
       "target": "tiktok",
-      "facts": {},
+      "facts": {
+        "length_s": 31.21,
+        "length_bucket": "long",
+        "question": false,
+        "text_hook": false,
+        "facts_source": "reconstructed 25 Nov (length from TikTok, no caption question, no text line)"
+      },
       "checkpoints": {
         "d2": {
           "fetched": "2026-11-24T01:57:27+00:00",
@@ -197,7 +227,8 @@
         "scenes": 12,
         "style": "lana",
         "style_basis": "music: 112 BPM, bright and flowing (1906 Hz)",
-        "variant": null
+        "variant": null,
+        "text_hook": false
       },
       "checkpoints": {
         "d2": {
@@ -249,7 +280,8 @@
         "scenes": 7,
         "style": "rubin",
         "style_basis": "music: lots of space (dynamics 3.7)",
-        "variant": null
+        "variant": null,
+        "text_hook": false
       },
       "checkpoints": {
         "d2": {
@@ -300,7 +332,8 @@
         "scenes": 6,
         "style": "rubin",
         "style_basis": "music: slow (76 BPM)",
-        "variant": null
+        "variant": null,
+        "text_hook": false
       },
       "checkpoints": {}
     },
@@ -331,7 +364,8 @@
         "scenes": 11,
         "style": "rubin",
         "style_basis": "music: slow (99 BPM) · night (manual)",
-        "variant": "night"
+        "variant": "night",
+        "text_hook": false
       },
       "checkpoints": {}
     },
@@ -362,7 +396,8 @@
         "scenes": 15,
         "style": "lana",
         "style_basis": "music: 136 BPM, bright and flowing (2831 Hz)",
-        "variant": null
+        "variant": null,
+        "text_hook": false
       },
       "checkpoints": {}
     }

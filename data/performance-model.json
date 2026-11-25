@@ -1,11 +1,10 @@
 {
-  "version": 1,
   "observations": 7,
   "min_posts": 4,
   "min_lift": 0.15,
   "length": {
-    "n_yes": 1,
-    "n_no": 1,
+    "n_yes": 3,
+    "n_no": 4,
     "decided": false,
     "prefer": null
   },
@@ -53,17 +52,102 @@
   },
   "question": {
     "n_yes": 0,
-    "n_no": 2,
+    "n_no": 7,
     "decided": false
+  },
+  "text": {
+    "n_yes": 0,
+    "n_no": 7,
+    "decided": false,
+    "prefer": null
   },
   "styles": {
     "lana": {
       "n": 1,
-      "median_relative": 0.783
+      "median_relative": 0.972
     },
     "rubin": {
       "n": 1,
-      "median_relative": 0.165
+      "median_relative": 1.022
     }
-  }
+  },
+  "version": 2,
+  "platform": "tiktok",
+  "platforms": {
+    "tiktok": {
+      "observations": 7,
+      "min_posts": 4,
+      "min_lift": 0.15,
+      "length": {
+        "n_yes": 3,
+        "n_no": 4,
+        "decided": false,
+        "prefer": null
+      },
+      "roles": {
+        "gear": {
+          "n_yes": 1,
+          "n_no": 1,
+          "decided": false
+        },
+        "friends": {
+          "n_yes": 2,
+          "n_no": 0,
+          "decided": false
+        },
+        "flag": {
+          "n_yes": 2,
+          "n_no": 0,
+          "decided": false
+        },
+        "car": {
+          "n_yes": 0,
+          "n_no": 2,
+          "decided": false
+        },
+        "americana": {
+          "n_yes": 0,
+          "n_no": 2,
+          "decided": false
+        },
+        "skater": {
+          "n_yes": 2,
+          "n_no": 0,
+          "decided": false
+        },
+        "woman": {
+          "n_yes": 1,
+          "n_no": 1,
+          "decided": false
+        },
+        "friends2": {
+          "n_yes": 0,
+          "n_no": 2,
+          "decided": false
+        }
+      },
+      "question": {
+        "n_yes": 0,
+        "n_no": 7,
+        "decided": false
+      },
+      "text": {
+        "n_yes": 0,
+        "n_no": 7,
+        "decided": false,
+        "prefer": null
+      },
+      "styles": {
+        "lana": {
+          "n": 1,
+          "median_relative": 0.972
+        },
+        "rubin": {
+          "n": 1,
+          "median_relative": 1.022
+        }
+      }
+    }
+  },
+  "observations_all": 7
 }

@@ -1,0 +1,119 @@
+"""On-screen text hook in the first seconds — as an A/B test (owner, 25 Nov).
+
+The first 7 TikTok Reels were watched ~2.4 s on average, whatever their length. A short,
+quiet line at the top ("pov: 2 am, driving nowhere") is a known lever for instrumental
+music: it gives the viewer a scene to project the song into. It is tested, not assumed:
+half of the Reels get a line, half don't, and performance.py compares both once enough
+posts exist (then the better variant is used more often, the other keeps being tested).
+
+Lowercase, understated, English (international audience), no hashtags, no claims about
+how the music was made. Rendered with Pillow as a transparent PNG and laid over the first
+~2.6 s by render.py (works with any FFmpeg build, no drawtext needed).
+"""
+from __future__ import annotations
+
+import hashlib
+import os
+from pathlib import Path
+
+HOOK_SECONDS = 2.6  # visible from the start, gone before the first musical phrase ends
+LINES = {
+    "lana": ("pov: summer, 1969. the radio's still on",
+             "for the summers you can't get back",
+             "pov: driving home with the windows down",
+             "for the nights you can't explain",
+             "pov: the last warm evening of the year"),
+    "rubin": ("pov: 2 am, one more take",
+              "for the quiet hours",
+              "pov: the studio after everyone left",
+              "music for thinking in the dark",
+              "pov: sunday morning, nowhere to be"),
+    "night": ("pov: 2 am, driving nowhere",
+              "for the city at 3 am",
+              "pov: the last diner still open",
+              "the drive home you don't want to end",
+              "pov: empty freeway, full moon"),
+}
+FONTS = (
+    "/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf",   # GitHub ubuntu runners
+    "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+    "/System/Library/Fonts/Supplemental/Georgia Italic.ttf",             # macOS
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+)
+
+
+def enabled() -> bool:
+    return os.getenv("CARLECOOL_TEXT_HOOK", "test").strip().lower() not in ("off", "false", "0", "no")
+
+
+def _share(key: str) -> float:
+    return int.from_bytes(hashlib.sha256(key.encode()).digest()[:2], "big") / 65535
+
+
+def choose(world: str | None, variant: str | None, run_key: str, prefer: str | None = None) -> str:
+    """The line for this Reel, or "" (no text). 50/50 while testing; once performance.py
+    has a winner ("text" / "none"), 70 % of the Reels follow it and 30 % keep testing.
+    CARLECOOL_TEXT_HOOK=always / off forces it."""
+    mode = os.getenv("CARLECOOL_TEXT_HOOK", "test").strip().lower()
+    if mode in ("off", "false", "0", "no"):
+        return ""
+    key = "night" if variant == "night" else (world if world in LINES else "lana")
+    pool = LINES[key]
+    line = pool[int.from_bytes(hashlib.sha256(f"{run_key}|hookline".encode()).digest()[:2], "big") % len(pool)]
+    if mode == "always":
+        return line
+    want = 0.5
+    if prefer == "text":
+        want = 0.7
+    elif prefer == "none":
+        want = 0.3
+    return line if _share(f"{run_key}|hooktext") < want else ""
+
+
+def _font(size: int):
+    from PIL import ImageFont
+    for path in FONTS:
+        if Path(path).is_file():
+            try:
+                return ImageFont.truetype(path, size)
+            except OSError:
+                continue
+    return None
+
+
+def make_png(text: str, width: int, height: int, path: Path) -> Path | None:
+    """Transparent full-frame PNG with the line in the upper third; None without a font."""
+    if not text:
+        return None
+    from PIL import Image, ImageDraw, ImageFilter
+    font = _font(max(18, int(width * 0.047)))
+    if font is None:
+        print("Text hook skipped: no font available")
+        return None
+    layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    max_w = int(width * 0.8)
+    words, lines, cur = text.split(), [], ""
+    for w in words:
+        trial = (cur + " " + w).strip()
+        if draw.textlength(trial, font=font) <= max_w or not cur:
+            cur = trial
+        else:
+            lines.append(cur)
+            cur = w
+    lines.append(cur)
+    line_h = int(font.size * 1.3)
+    y0 = int(height * 0.2)
+    shadow = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    sdraw = ImageDraw.Draw(shadow)
+    for i, ln in enumerate(lines):
+        x = (width - draw.textlength(ln, font=font)) / 2
+        y = y0 + i * line_h
+        sdraw.text((x + 2, y + 2), ln, font=font, fill=(0, 0, 0, 170))
+        draw.text((x, y), ln, font=font, fill=(255, 250, 240, 235))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(radius=max(2, width // 270)))
+    out = Image.alpha_composite(shadow, layer)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    out.save(path)
+    return path
