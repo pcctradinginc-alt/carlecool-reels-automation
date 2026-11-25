@@ -432,20 +432,66 @@
         "style_basis": "music: 136 BPM, bright and flowing (2831 Hz)",
         "variant": null
       }
+    },
+    {
+      "track_id": "2437525047",
+      "at": "2026-11-25T16:32:57.012567+00:00",
+      "video_ids": [
+        "JgkWWhdv17",
+        "iHfhxW86cA",
+        "Wa2sQnmNAB",
+        "pl-SanFranc1940",
+        "mXTfpsXLrd",
+        "pl-Summersc1941_2",
+        "F9C1KBdRWo",
+        "RTyJNxHwHT",
+        "pl-DateWith1950_2",
+        "wm-67cdb51ec4dd",
+        "pl-MemberOfTheF",
+        "J3yrAYllJn",
+        "HuZnIlHLVQ",
+        "S7mrD0wQiW",
+        "VTGpBS2gna",
+        "g0cR5U9Krw",
+        "KK342MfQEX"
+      ],
+      "sha256": "1d737f4bd5cef83e23819e142e2f41f3f0f9efa3ddafe642a4607da1b9817b78",
+      "approval_issue": 48,
+      "provider": "zernio",
+      "target": "tiktok",
+      "provider_post_id": "6b070dbba050ad974cf36aba",
+      "platform_status": {
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 5,
+        "bpm": 143.6,
+        "hashtags": [
+          "#carlecool",
+          "#americana",
+          "#nightdrive",
+          "#vinyl",
+          "#beatmaker"
+        ],
+        "length_bucket": "long",
+        "length_s": 26.75,
+        "opening_clip": "F9C1KBdRWo",
+        "question": false,
+        "roles": [
+          "americana",
+          "car",
+          "friends",
+          "skater",
+          "woman"
+        ],
+        "scenes": 12,
+        "style": "lana",
+        "style_basis": "rotation (night)",
+        "variant": "night"
+      }
     }
   ],
-  "pending": {
-    "track_id": "2437525047",
-    "sha256": "1d737f4bd5cef83e23819e142e2f41f3f0f9efa3ddafe642a4607da1b9817b78",
-    "at": "2026-11-25T16:32:57.012567+00:00",
-    "issue_number": 48,
-    "target": "tiktok",
-    "provider": "zernio",
-    "provider_post_id": "6b070dbba050ad974cf36aba",
-    "platform_status": {
-      "tiktok": "uploading"
-    }
-  },
+  "pending": null,
   "reconciled": [
     {
       "track_id": "2373071753",
