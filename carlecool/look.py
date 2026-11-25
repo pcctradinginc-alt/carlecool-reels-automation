@@ -69,7 +69,11 @@ def plan_look(look: dict | None, features, starts: list[float], durations: list[
     if look.get("bw_share"):
         bw = max(1, round(float(look["bw_share"]) * n))
     if bw and n > 4:
-        for i in sorted(range(1, n - 1), key=lambda k: rank[k])[:bw]:
+        # 25 Nov (homogeneous look): one contiguous B/W passage in the calmest stretch
+        # instead of single B/W shots scattered through the Reel.
+        bw = min(bw, n - 2)
+        start = min(range(1, n - bw), key=lambda s: (sum(rank[k] for k in range(s, s + bw)), s))
+        for i in range(start, start + bw):
             plan[i].update(bw=True, leak=False, slowmo=1.0, dissolve_in=0.0,
                            bw_contrast=float(look.get("bw_contrast") or 1.08))
             if i + 1 < n:

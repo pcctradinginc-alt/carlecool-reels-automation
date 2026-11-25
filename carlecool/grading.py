@@ -73,12 +73,18 @@ def lab_stats(path: Path, *, video: bool) -> tuple[np.ndarray, np.ndarray]:
 def transfer_lut(src_stats, ref_stats, *, strength: float = STRENGTH,
                  size: int = LUT_SIZE) -> np.ndarray:
     """Return a (size³, 3) RGB table in .cube order (red fastest)."""
-    (src_mean, src_std), (ref_mean, ref_std) = src_stats, ref_stats
+    (src_mean, src_std), (ref_mean, ref_std) = src_stats, ref_stats[:2]
+    luma_only = len(ref_stats) > 2 and ref_stats[2] == "luma"
     ratio = np.clip(ref_std / src_std, [0.75, 0.6, 0.6], [1.3, 1.5, 1.5])
     target_mean = ref_mean.copy()
     # Keep exposure close to the footage: only nudge lightness, mostly move colour.
     target_mean[0] = src_mean[0] + np.clip(ref_mean[0] - src_mean[0], -12, 12)
     target_mean[1:] = src_mean[1:] + np.clip(ref_mean[1:] - src_mean[1:], -18, 18)
+    if luma_only:
+        # Homogeneous look (25 Nov): exposure + contrast towards the owner's references,
+        # colour intensity evened out a little, the clip's own colours kept.
+        target_mean[1:] = src_mean[1:]
+        ratio[1:] = np.clip(ratio[1:], 0.85, 1.15)
     axis = np.linspace(0.0, 1.0, size)
     b, g, r = np.meshgrid(axis, axis, axis, indexing="ij")
     grid = np.stack([r, g, b], axis=-1).reshape(-1, 3)
@@ -97,15 +103,44 @@ def write_cube(table: np.ndarray, path: Path, *, size: int = LUT_SIZE) -> Path:
     return path
 
 
-def cover_luts(cover: Path | None, videos: list[Path], work: Path,
-               *, strength: float = STRENGTH) -> list[Path | None]:
-    """One LUT per clip (None where statistics are unavailable)."""
-    if cover is None or not Path(cover).is_file() or strength <= 0:
-        return [None] * len(videos)
+def reference_stats(world: str | None):
+    """Lab mean/std of the owner's reference images for a style (data/style-refs)."""
+    import json
+    if not world:
+        return None
     try:
-        ref = lab_stats(Path(cover), video=False)
-    except (OSError, ValueError, subprocess.SubprocessError):
+        doc = json.loads((Path(__file__).resolve().parent.parent / "data" / "style-refs"
+                          / f"{world}.json").read_text(encoding="utf-8"))
+        stats = doc["lab_stats"]
+        mean = np.array(stats["mean"], dtype=float)
+        std = np.array(stats["std"], dtype=float) + 1e-6
+        # Compared on real Coverr + archive frames (25 Nov): the full colour transfer
+        # towards the references gives the most even look (warm, slightly muted, archive
+        # and digital alike). A magenta cast in the first try came from the halation
+        # blend, not from this transfer. transfer_lut bounds every shift.
+        return mean, std
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def cover_luts(cover: Path | None, videos: list[Path], work: Path,
+               *, strength: float = STRENGTH, reference=None) -> list[Path | None]:
+    """One LUT per clip (None where statistics are unavailable).
+
+    25 Nov (homogeneous look): with `reference` (Lab stats of the owner's example images
+    for the style) every clip is moved towards THAT palette, so stock, archive and
+    Wikimedia footage meet on one look; the album cover is only the fallback target."""
+    if strength <= 0:
         return [None] * len(videos)
+    if reference is not None:
+        ref = reference
+    elif cover is None or not Path(cover).is_file():
+        return [None] * len(videos)
+    else:
+        try:
+            ref = lab_stats(Path(cover), video=False)
+        except (OSError, ValueError, subprocess.SubprocessError):
+            return [None] * len(videos)
     luts: list[Path | None] = []
     for index, video in enumerate(videos):
         try:

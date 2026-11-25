@@ -503,7 +503,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                               title_card=title_card,
                               style_grade=style_pkg.grade_filters(style_name, style_variant),
                               signature_slots=signature_slots, look=style_pkg.look(style_name),
-                              opening_pool=opening_pool, opening_fit=opening_fit, hook_text=hook_line)
+                              opening_pool=opening_pool, opening_fit=opening_fit, hook_text=hook_line,
+                              ref_world=("night" if style_variant == "night" else style_name),
+                              soft_sources={i for i, v in enumerate(selected) if v.source in ("coverr", "pexels")})
     finally:
         if cover is not None:
             cover.unlink(missing_ok=True)

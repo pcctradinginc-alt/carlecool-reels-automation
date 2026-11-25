@@ -304,3 +304,21 @@ def test_history_records_the_style_for_rotation():
     body = session.request.call_args.kwargs["json"]
     entry = json.loads(base64.b64decode(body["content"]))["previews"][-1]
     assert entry["style"] == "night"
+
+
+def test_homogeneous_look_parts():
+    from carlecool import grading, look
+    from carlecool.render import halation_filter
+    # colour target per style from the owner's reference images
+    for world in ("lana", "rubin", "night"):
+        mean, std = grading.reference_stats(world)
+        assert mean.shape == (3,) and std.shape == (3,) and 15 < mean[0] < 70
+    assert grading.reference_stats(None) is None
+    # halation is blended in RGB (a YUV screen blend tinted everything magenta)
+    f = halation_filter(3)
+    assert "format=gbrp[hh3]" in f and "blend=all_mode=screen" in f
+    # B/W as ONE contiguous passage, never on the loop bookends
+    lana = dict(style.LOOKS["lana"])
+    plan = look.plan_look(lana, None, [i * 1.5 for i in range(12)], [1.5] * 12, seed="x")
+    bw = [i for i, p in enumerate(plan) if p["bw"]]
+    assert bw and bw == list(range(bw[0], bw[0] + len(bw))) and 0 not in bw and 11 not in bw

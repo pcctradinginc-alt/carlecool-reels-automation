@@ -25,6 +25,8 @@ FRAMED_UPSCALE_LIMIT = 3.0  # crop upscale beyond this → framed presentation
 # Picture clean-up and grain (see grain_filter).
 CLEAN_UP = os.getenv("CARLECOOL_CLEANUP", "on").strip().lower() not in ("off", "false", "0", "no")
 DENOISE = "hqdn3d=1.2:0.9:4:3"
+SOFTEN = "gblur=sigma=0.7"
+FILM_TEXTURE = os.getenv("CARLECOOL_FILM_TEXTURE", "on").strip().lower() not in ("off", "false", "0", "no")
 SHARPEN = "unsharp=5:5:0.45:5:5:0.0"
 LOOP_BRIDGE_SECONDS = 0.38   # cover card fading out at the start (matches the last frame)
 LOOP_CROSSFADE = 0.25        # audio: the end blends into the bar just before the start
@@ -132,6 +134,17 @@ def loudness_filter(audio: Path, start: float, length: float) -> str:
             f"measured_thresh={thresh}:offset={offset}:linear=true")
 
 
+def halation_filter(index: int, opacity: float = 0.18) -> str:
+    """Film halation: a warm glow bleeding around bright highlights, the same on every
+    clip (25 Nov, homogeneous look) — digital and archive footage share one emulsion."""
+    return (f"split=2[hs{index}][hb{index}];"
+            f"[hb{index}]format=gbrp,colorlevels=rimin=0.72:gimin=0.72:bimin=0.72,"
+            f"gblur=sigma=14,colorchannelmixer=rr=1.0:gg=0.45:bb=0.2[hg{index}];"
+            # blend in RGB: a screen blend on YUV chroma planes tints everything magenta
+            f"[hs{index}]format=gbrp[hh{index}];"
+            f"[hh{index}][hg{index}]blend=all_mode=screen:all_opacity={opacity:.2f},format=yuv420p")
+
+
 def grain_filter(level: int, index: int) -> str:
     """Coarse, weak 35 mm-style grain.
 
@@ -194,7 +207,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 style_grade: list[str] | None = None,
                 signature_slots: dict[str, int] | None = None,
                 look: dict | None = None, opening_pool: set[int] | None = None,
-                opening_fit: dict[int, float] | None = None, hook_text: str = "") -> dict:
+                opening_fit: dict[int, float] | None = None, hook_text: str = "",
+                ref_world: str | None = None, soft_sources: set[int] | frozenset[int] = frozenset()) -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -258,7 +272,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     storyboard = look_mod.frame_exact(storyboard, total_frames, FPS)
     storyboard, loop_sealed = look_mod.seal_loop(storyboard, source_durations)
     from .grading import cover_luts
-    luts = cover_luts(cover, videos, work)
+    from .grading import reference_stats
+    luts = cover_luts(cover, videos, work, reference=reference_stats(ref_world))
     level = analog / 100.0
     saturation = 1.0 - 0.25 * level
     contrast = 1.0 - 0.07 * level
@@ -391,8 +406,14 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             # Documentary black-and-white moment (Lana references): neutral grey, a touch of contrast.
             chain += ["hue=s=0", f"eq=contrast={styling.get('bw_contrast', 1.08):.2f}:brightness=0.01"]
             bw_shots += 1
-        if CLEAN_UP:
+        if shot.source_index in soft_sources:
+            # 25 Nov: modern digital stock is much crisper than the archive films; a slight
+            # softening puts both on the same "film" (no extra sharpening for it).
+            chain.append(SOFTEN)
+        elif CLEAN_UP:
             chain.append(SHARPEN)  # gentle, luma only, after the grade
+        if FILM_TEXTURE:
+            chain.append(halation_filter(index))
         if grain:
             chain.append(grain_filter(grain, index))
         # Outgoing shot runs on under the next shot's dissolve (total length unchanged).
