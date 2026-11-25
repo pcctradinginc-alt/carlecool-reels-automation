@@ -57,6 +57,10 @@ BLOCK_WORDS = (
     # Reel #47: surreal / fantasy staging ("Whimsical Picnic in Pastel Paradise",
     # "Magical Picnic with Floating Tennis Balls") is not timeless-classic
     "whimsical", "magical", "floating", "fantasy", "surreal", "dreamlike", "pastel paradise",
+    # Reel #48: modern car brands, London instead of America, chores / tired drivers
+    "bmw", "mercedes", "audi", "volkswagen", "toyota", "honda", "hyundai", "kia",
+    "london", "piccadilly", "big ben", "picking up trash", "trash", "garbage", "litter",
+    "yawning", "tired driver",
 )
 UNWANTED = (
     "a cartoon or an animated film", "a 3d computer rendering", "an ai generated cartoon character",

@@ -322,3 +322,12 @@ def test_homogeneous_look_parts():
     plan = look.plan_look(lana, None, [i * 1.5 for i in range(12)], [1.5] * 12, seed="x")
     bw = [i for i, p in enumerate(plan) if p["bw"]]
     assert bw and bw == list(range(bw[0], bw[0] + len(bw))) and 0 not in bw and 11 not in bw
+
+
+def test_reel_48_offbrief_titles_are_blocked():
+    from carlecool.video import Video
+    for title in ("A cinematic shot of a BMW M5 driving on a wet neon-lit street", "Piccadilly Circus",
+                  "A guy picking up trash at the beach ", "Man yawning whilst driving"):
+        assert stylegate.blocked_words(Video("x", "coverr", title=title)), title
+    for title in ("Range rover on the road", "Blurred car lights ", "Moving car on an empty road"):
+        assert stylegate.blocked_words(Video("x", "coverr", title=title)) is None, title
