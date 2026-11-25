@@ -783,6 +783,34 @@
       "sha256": "b17942bf4d818e5e0ba97a34e9d0006bf56608e8d98bfa6cb66dc6c4946bb1c3",
       "length_bucket": "long",
       "style": "lana"
+    },
+    {
+      "at": "2026-11-25T16:25:39+00:00",
+      "kind": "daily",
+      "run_id": 45651802000,
+      "track_id": "2437525047",
+      "video_ids": [
+        "JgkWWhdv17",
+        "iHfhxW86cA",
+        "Wa2sQnmNAB",
+        "pl-SanFranc1940",
+        "mXTfpsXLrd",
+        "pl-Summersc1941_2",
+        "F9C1KBdRWo",
+        "RTyJNxHwHT",
+        "pl-DateWith1950_2",
+        "wm-67cdb51ec4dd",
+        "pl-MemberOfTheF",
+        "J3yrAYllJn",
+        "HuZnIlHLVQ",
+        "S7mrD0wQiW",
+        "VTGpBS2gna",
+        "g0cR5U9Krw",
+        "KK342MfQEX"
+      ],
+      "sha256": "1d737f4bd5cef83e23819e142e2f41f3f0f9efa3ddafe642a4607da1b9817b78",
+      "style": "night",
+      "length_bucket": "long"
     }
   ]
 }
