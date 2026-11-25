@@ -273,3 +273,34 @@ def test_reel_47_surreal_staging_is_blocked():
     for title in ("Whimsical Picnic in Pastel Paradise", "Magical Picnic with Floating Tennis Balls"):
         assert stylegate.blocked_words(Video("x", "coverr", title=title)), title
     assert stylegate.blocked_words(Video("x", "coverr", title="Family picnic on a lawn")) is None
+
+
+def test_styles_rotate_evenly():
+    from carlecool import style
+    hist = [{"style": "lana"}] * 5 + [{"style": "rubin"}] * 3 + [{"style": "night"}] * 2
+    assert style.rotate_style(hist, "r1") == "night"
+    assert style.rotate_style(hist + [{"style": "night"}], "r1") in ("rubin", "night")
+    # revisions don't count, unknown entries don't count
+    assert style.rotate_style([{"style": "lana", "kind": "revision"}, {"kind": "daily"}], "x") in style.ROTATION
+    # three Reels in a row from an empty history use every style once
+    seen, h = [], []
+    for k in range(3):
+        s = style.rotate_style(h, f"k{k}"); seen.append(s); h.append({"style": s})
+    assert sorted(seen) == ["lana", "night", "rubin"]
+
+
+def test_history_records_the_style_for_rotation():
+    from unittest.mock import MagicMock
+    import base64, json
+    from carlecool import history
+    meta = {"track_id": "1", "sha256": "a" * 64, "video_ids": [],
+            "reel_facts": {"style": "lana", "variant": "night"}}
+    session = MagicMock()
+    doc = base64.b64encode(json.dumps({"version": 1, "previews": []}).encode()).decode()
+    get = MagicMock(status_code=200, content=b"1"); get.json.return_value = {"content": doc, "sha": "s"}
+    put = MagicMock(status_code=200, content=b"1"); put.json.return_value = {}
+    session.request.side_effect = [get, put]
+    history.record_preview_delivery(meta, run_id=5, token="t", repo="o/r", session=session)
+    body = session.request.call_args.kwargs["json"]
+    entry = json.loads(base64.b64decode(body["content"]))["previews"][-1]
+    assert entry["style"] == "night"

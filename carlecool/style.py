@@ -179,6 +179,26 @@ def decide(scores: dict[str, tuple[float, str]], brightness: float | None, featu
     return out
 
 
+ROTATION = ("lana", "rubin", "night")
+
+
+def rotation_enabled() -> bool:
+    return os.getenv("CARLECOOL_STYLE_ROTATION", "on").strip().lower() not in ("off", "false", "0", "no")
+
+
+def rotate_style(previews: list[dict], run_key: str = "") -> str:
+    """Owner, 25 Nov: Lana, Rubin and Night take turns evenly. The least-used style
+    in the preview history wins; ties are broken by the run (not always Lana first)."""
+    import hashlib
+    used = {s: 0 for s in ROTATION}
+    for entry in previews:
+        if entry.get("style") in used and entry.get("kind", "daily") == "daily":
+            used[entry["style"]] += 1
+    low = min(used.values())
+    tied = [s for s in ROTATION if used[s] == low]
+    return tied[int.from_bytes(hashlib.sha256(f"{run_key}|style".encode()).digest()[:2], "big") % len(tied)]
+
+
 def analyze(cover: Path | None, *, override: str = "auto", features=None) -> dict:
     """Choose world + variant for this Reel; never raises."""
     chosen = mode() if override in ("", "auto") else override
@@ -287,7 +307,7 @@ SEARCH_QUERIES = {
              "classic car", "convertible", "ocean",
              # 24 Nov: words closest to the owner's 54 Lana images (CLIP text vs reference
              # neighbours) instead of farm / barn / countryside sunset, which ranked lowest
-             "white dress", "boardwalk", "sunset beach", "home movie"),
+             "white dress", "boardwalk", "sunset beach", "home movie", "canoe", "vintage dress"),
     "rubin": ("friends walking", "empty road", "american flag",
               "land rover", "range rover", "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
               "golden hour", "friends talking", "street", "turntable", "recording studio", "synthesizer",
@@ -303,7 +323,9 @@ NIGHT_QUERIES = {
              # "Drive" (2011): car interior at night, rearview mirror, sodium street lights,
              # garage, city view from a window
              "night drive", "driving night", "rearview mirror", "street lights",
-             "parking garage", "city view"),
+             "parking garage", "city view",
+             # 25 Nov: next closest words to the 37 night references
+             "drive in", "motel", "bridge night", "main street"),
     "rubin": ("friends night", "parking lot", "gas station", "night drive", "street night",
               "american flag", "porsche", "basketball court", "driving night", "street lights"),
 }
@@ -331,6 +353,8 @@ SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("v
                    "white dress": ("woman dress",), "boardwalk": ("pier",), "sunset beach": ("beach",),
                    "home movie": ("vintage",), "record player": ("turntable",),
                    "tape recorder": ("cassette",), "cassette": ("tape",),
+                   "canoe": ("lake",), "vintage dress": ("woman dress",), "drive in": ("drive-in", "cinema"),
+                   "bridge night": ("bridge",), "main street": ("small town",),
                    "sunglasses": ("woman sunglasses",), "pool": ("swimming pool",),
                    "beach house": ("house beach",), "sand dunes": ("dunes",), "beach umbrellas": ("beach umbrella",),
                    "mixing console": ("mixer", "studio"), "white room": ("minimal interior",),

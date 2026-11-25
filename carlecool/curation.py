@@ -288,7 +288,9 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
     # Portrait clips always rank ahead of landscape fill-ins (which need a 9:16 crop).
     known = sorted(x for x in ref_sims if x is not None)
     ref_mid = known[len(known) // 2] if known else 0.0
-    rank = [scores[i] + (1.0 if remote[i].vertical else 0.0)
+    from .video import landscape_equal
+    portrait_bonus = 0.0 if landscape_equal() else 1.0  # owner 25 Nov: landscape is fine
+    rank = [scores[i] + (portrait_bonus if remote[i].vertical else 0.0)
             + (stylegate.REF_WEIGHT * (ref_sims[i] - ref_mid) if ref_sims[i] is not None else 0.0)
             for i in range(len(remote))]
     order = sorted(range(len(remote)), key=lambda i: (-rank[i], i))
@@ -297,7 +299,7 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
         # Variety per search word only for clips at least as close to the references as
         # the median (Reel #46: the "sailboat" lane's best clip was a modern speedboat).
         best = next((i for i in order if remote[i].query == lane and scores[i] > -1
-                     and (remote[i].vertical or not any(r.vertical for r in remote))
+                     and (portrait_bonus == 0.0 or remote[i].vertical or not any(r.vertical for r in remote))
                      and (ref_sims[i] is None or ref_sims[i] >= ref_mid)), None)
         if best is not None and best not in chosen:
             chosen.append(best)

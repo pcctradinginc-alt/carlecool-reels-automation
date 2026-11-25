@@ -27,6 +27,7 @@ SAMPLE_WIDTH = 192
 TARGET_ASPECT = 9 / 16
 MAX_PAN_PER_SECOND = 0.18  # fraction of the source width
 MIN_PAN = 0.035            # smaller moves stay static (no wobble)
+DRIFT = 0.03               # slow deliberate drift for static subjects (fraction of width)
 
 
 @dataclass(frozen=True)
@@ -132,7 +133,15 @@ def plan_crop(samples: FrameSamples, start: float, duration: float) -> Crop:
 
     x0, x1, xm = to_src(first), to_src(last), to_src(overall)
     if abs(x1 - x0) < MIN_PAN * samples.src_w or len(idx) < 3:
-        return Crop(crop_w, xm, xm)
+        # Static subject: a slow drift (≈ DRIFT of the source width over the shot) makes
+        # the reframing look intended rather than cropped (owner, 25 Nov: "artsy").
+        drift = int(min(DRIFT * samples.src_w, max_left))
+        if drift < 8:
+            return Crop(crop_w, xm, xm)
+        direction = 1 if (int(start * 10) % 2 == 0) else -1
+        a = int(min(max_left, max(0, xm - direction * drift // 2)))
+        b = int(min(max_left, max(0, xm + direction * drift // 2)))
+        return Crop(crop_w, a, b)
     limit = MAX_PAN_PER_SECOND * samples.src_w * max(duration, 0.1)
     if abs(x1 - x0) > limit:
         mid, direction = (x0 + x1) / 2, math.copysign(1.0, x1 - x0)

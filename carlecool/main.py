@@ -62,6 +62,8 @@ def caption_for(track, videos, copy: dict | None = None) -> str:
 
 
 MAX_PER_MOTIF = 2
+
+
 ARCHIVE_BONUS = 2  # extra archive films when the portrait stock is thin
 
 
@@ -203,7 +205,16 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     if style_override in ("", "auto") and songstyle.for_track(track.id):
         style_override = songstyle.for_track(track.id)
         print(f"Style remembered for this song: {style_override}")
+    rotated = None
+    if (style_override in ("", "auto") and style_pkg.mode() == "auto" and style_pkg.rotation_enabled()):
+        # Owner, 25 Nov: Lana / Rubin / Night in even rotation instead of cover detection.
+        rotated = style_pkg.rotate_style(previews, edition)
+        style_override = rotated
     style_decision = style_pkg.analyze(cover, override=style_override, features=features)
+    if rotated:
+        if rotated != "night":
+            style_decision["variant"] = None  # a dark cover no longer turns Lana / Rubin into Night
+        style_decision["basis"] = f"rotation ({rotated})"
     style_name = style_decision.get("style")
     style_variant = style_decision.get("variant")
     print(f"Style: {style_pkg.label(style_decision)} ({style_decision.get('basis')})")
@@ -257,7 +268,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     if prerank:
         print(f"Pre-download ranking kept {len(prerank)} of the candidate clips")
     from .render import is_portrait
-    from .video import MIN_PORTRAIT_CLIPS, allow_landscape
+    from .video import MIN_PORTRAIT_CLIPS, allow_landscape, landscape_equal
     selected = []
     paths = []
     # Within a Reel: one clip per shot. Count the shots first and fetch enough clips
@@ -310,8 +321,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                 continue
             if motif:
                 motif_count[motif] += 1
-            if is_portrait(path):
-                accept(video, path)
+            if is_portrait(path) or landscape_equal():
+                accept(video, path)  # owner 25 Nov: landscape reframed / panned is fine
             elif allow_landscape():
                 landscape_reserve.append((video, path))
             else:

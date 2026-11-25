@@ -244,6 +244,13 @@ def allow_landscape() -> bool:
 MIN_PORTRAIT_CLIPS = 4
 
 
+def landscape_equal() -> bool:
+    """Owner, 25 Nov: portrait is not required — landscape clips are reframed to 9:16
+    (content-aware crop with a slow pan), which looks deliberate. Default on;
+    CARLECOOL_PREFER_PORTRAIT=true restores the old portrait-first rule."""
+    return os.getenv("CARLECOOL_PREFER_PORTRAIT", "false").strip().lower() not in ("true", "1", "yes", "on")
+
+
 def _is_portrait(item: dict) -> bool:
     if item.get("is_vertical") is True:
         return True

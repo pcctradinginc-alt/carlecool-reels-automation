@@ -27,8 +27,10 @@ def test_window_follows_off_centre_subject():
     crop = plan_crop(_samples([150, 152, 150, 153, 151, 150]), 0.0, 2.0)
     assert crop.width == 608
     subject_left = 150 * 1920 / reframe.SAMPLE_WIDTH
-    assert crop.x_start <= subject_left and crop.x_start + crop.width >= subject_left + 200
-    assert crop.x_start == crop.x_end  # small jitter does not cause a pan
+    for x in (crop.x_start, crop.x_end):  # the subject stays in frame for the whole shot
+        assert x <= subject_left and x + crop.width >= subject_left + 200
+    # small jitter does not cause a follow-pan, only the slow deliberate drift
+    assert abs(crop.x_end - crop.x_start) <= reframe.DRIFT * 1920 + 2
 
 
 def test_moving_subject_beats_static_texture():
