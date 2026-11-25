@@ -307,17 +307,28 @@ SEARCH_QUERIES = {
              "classic car", "convertible", "ocean",
              # 24 Nov: words closest to the owner's 54 Lana images (CLIP text vs reference
              # neighbours) instead of farm / barn / countryside sunset, which ranked lowest
-             "white dress", "boardwalk", "sunset beach", "home movie", "canoe", "vintage dress"),
+             "white dress", "boardwalk", "sunset beach", "home movie", "canoe", "vintage dress",
+             # 25 Nov: maximal expansion — the best of 252 words scored against the 54 Lana
+             # images (nearest neighbours), searchable words only
+             "beach towel", "sand dunes", "beach umbrella", "lifeguard", "lemonade", "couple car",
+             "polaroid", "mansion", "swing", "hair wind", "white t-shirt", "sunglasses", "hitchhiking",
+             "radio", "leather jacket", "hammock", "lighthouse", "dock", "ranch", "road trip",
+             "drive in", "pier", "stable", "diner", "rain", "denim"),
     "rubin": ("friends walking", "empty road", "american flag",
               "land rover", "range rover", "porsche", "classic car", "pickup truck", "diner", "rooftop", "skatepark",
               "golden hour", "friends talking", "street", "turntable", "recording studio", "synthesizer",
               "mixing console", "piano", "acoustic guitar", "white room", "wooden interior", "sunlight window",
               "vinyl records", "beat making", "record store",
               # 24 Nov: closest to the owner's Rubin images (analog gear, warm interiors)
-              "record player", "tape recorder", "cassette"),
+              "record player", "tape recorder", "cassette",
+              # 25 Nov: maximal expansion — best of 252 words vs the 36 Rubin images
+              "radio", "drum machine", "reel tape", "beach house", "rain", "home movie", "porch",
+              "piano bar", "jukebox", "bedroom", "slow dance", "jazz club", "silhouette",
+              "porch swing", "sampler", "typewriter", "rocking chair", "staircase", "window light",
+              "old film", "film grain", "polaroid", "guitar amp", "mirror"),
 }
 NIGHT_QUERIES = {
-    "lana": ("diner night", "neon sign", "blue hour", "palm trees night", "light trails", "freeway night",
+    "lana": ("diner night", "neon sign", "blue hour", "palm trees", "light trails", "freeway night",
              "city lights", "american flag", "elevated train", "brownstone", "apartment windows",
              "night street", "starry sky", "gas station", "porsche", "land rover",
              # "Drive" (2011): car interior at night, rearview mirror, sodium street lights,
@@ -325,11 +336,19 @@ NIGHT_QUERIES = {
              "night drive", "driving night", "rearview mirror", "street lights",
              "parking garage", "city view",
              # 25 Nov: next closest words to the 37 night references
-             "drive in", "motel", "bridge night", "main street"),
+             "drive in", "motel", "bridge night", "main street",
+             # 25 Nov: maximal expansion — best of 252 words vs the 37 night images
+             "freeway", "neon motel", "dusk", "corner store", "highway", "skyline", "marquee",
+             "bridge", "car wash", "arcade", "super 8", "theater", "cinema", "bar", "rain",
+             "piano bar", "rooftop", "train tracks", "parking lot", "billboard", "subway",
+             "laundromat", "vintage sign", "jazz club", "taxi", "yellow cab", "night sky", "stars"),
     "rubin": ("friends night", "parking lot", "gas station", "night drive", "street night",
-              "american flag", "porsche", "basketball court", "driving night", "street lights"),
+              "american flag", "porsche", "basketball court", "driving night", "street lights",
+              # 25 Nov: Rubin at night — closest night words that fit the quiet Rubin look
+              "freeway", "diner", "city lights", "neon sign", "rain", "jazz club", "piano bar",
+              "skyline", "subway", "rooftop", "blue hour"),
 }
-SEARCH_LANES = 5
+SEARCH_LANES = 7  # 25 Nov: more material per run (was 5); ~50 Coverr requests/h allow it
 # Fallback when a style word finds nothing on Coverr (style words never broaden into
 # generic lane words such as "road" or "nature").
 SEARCH_FALLBACK = {"porsche": ("classic car", "vintage car"), "classic car": ("vintage car",),

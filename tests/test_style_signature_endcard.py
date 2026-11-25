@@ -279,7 +279,7 @@ def test_style_search_words_always_include_a_car_and_the_flag():
     for decision in ({"style": "lana"}, {"style": "rubin"}, {"style": "lana", "variant": "night"}):
         for key in ("a", "b", "c", "d"):
             words = style.search_queries(decision, run_key=key)
-            assert len(words) == 5 and "american flag" in words
+            assert len(words) == style.SEARCH_LANES and "american flag" in words
             assert any(w in ("porsche", "land rover", "range rover", "classic car") for w in words)
             assert all(len(w.split()) <= 2 for w in words)  # Coverr matches every word
     ladders = style.search_ladders(["porsche", "motel"])

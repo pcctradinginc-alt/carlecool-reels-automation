@@ -252,7 +252,7 @@ def test_night_profile_and_look():
     grade = " ".join(style.grade_filters("lana", "night"))
     assert "vignette" not in grade and "saturation=1.2" in grade
     q = style.search_queries({"style": "lana", "variant": "night"}, run_key="x")
-    assert "american flag" in q and len(q) == 5
+    assert "american flag" in q and len(q) == style.SEARCH_LANES
     assert any("blue hour" in w for w in stylegate.WANTED["lana"]) and any("blue hour" in w for w in stylegate.WANTED["rubin"])
 
 
