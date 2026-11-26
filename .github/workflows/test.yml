@@ -18,6 +18,7 @@ jobs:
         timeout-minutes: 8
         run: |
           python -m pip install --disable-pip-version-check --retries 2 --timeout 30 -r requirements.txt pytest pyyaml 'imageio-ffmpeg==0.6.0'
+          python -m pip install --disable-pip-version-check --retries 2 --timeout 30 torch --index-url https://download.pytorch.org/whl/cpu
           python scripts/setup_ffmpeg.py
       - name: Unit tests and parse all workflows
         run: |
