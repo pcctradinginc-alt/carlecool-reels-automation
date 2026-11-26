@@ -540,21 +540,69 @@
         "theme": "drive",
         "variant": "night"
       }
+    },
+    {
+      "track_id": "2437525062",
+      "at": "2026-11-26T21:04:41.854678+00:00",
+      "video_ids": [
+        "j9ZtGgPrC6",
+        "pl-cbas_00008",
+        "pl-castaoca_000157",
+        "pl-cahuca_000014",
+        "pl-cubanc_000042",
+        "ndq9jCcV5Y",
+        "iqhPgZPO5v",
+        "UqE3HwdCj7",
+        "TyP17q0wRj",
+        "tmN1lWmAQy",
+        "lfRCrkeQWY",
+        "VpLFU1gBdL"
+      ],
+      "sha256": "c3fdfcd9da1887bd0a54b1c722007aa18c9629933dc0026e2d5577bc95459298",
+      "approval_issue": 59,
+      "provider": "zernio",
+      "target": "both",
+      "provider_post_id": "6b089eecd941700e19a51d44",
+      "platform_status": {
+        "instagram": "published",
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 4,
+        "bpm": 86.1,
+        "first_shot_s": 1.42,
+        "hashtags": [
+          "#carlecool",
+          "#instrumental",
+          "#producerlife",
+          "#lofibeats",
+          "#americana"
+        ],
+        "hook_at": 0.0,
+        "hook_line": "",
+        "length_bucket": "short",
+        "length_s": 16.72,
+        "opening_clip": "j9ZtGgPrC6",
+        "opening_motif": "american flag",
+        "opening_source": "coverr",
+        "question": false,
+        "roles": [
+          "car",
+          "friends"
+        ],
+        "scenes": 6,
+        "style": "lana",
+        "style_basis": "rotation (lana)",
+        "text_hook": false,
+        "theme": "family",
+        "variant": null
+      },
+      "platform_post_urls": {
+        "instagram": "https://www.instagram.com/reel/DgOB2Z4gbS3/"
+      }
     }
   ],
-  "pending": {
-    "track_id": "2437525062",
-    "sha256": "c3fdfcd9da1887bd0a54b1c722007aa18c9629933dc0026e2d5577bc95459298",
-    "at": "2026-11-26T21:04:41.854678+00:00",
-    "issue_number": 59,
-    "target": "both",
-    "provider": "zernio",
-    "provider_post_id": "6b089eecd941700e19a51d44",
-    "platform_status": {
-      "instagram": "processing",
-      "tiktok": "uploading"
-    }
-  },
+  "pending": null,
   "reconciled": [
     {
       "track_id": "2373071753",
