@@ -679,7 +679,43 @@
         "variant": "night"
       },
       "checkpoints": {}
+    },
+    "6b089eecd941700e19a51d44": {
+      "track_id": "2437525062",
+      "at": "2026-11-26T21:04:41.854678+00:00",
+      "target": "both",
+      "facts": {
+        "archival": 4,
+        "bpm": 86.1,
+        "first_shot_s": 1.42,
+        "hashtags": [
+          "#carlecool",
+          "#instrumental",
+          "#producerlife",
+          "#lofibeats",
+          "#americana"
+        ],
+        "hook_at": 0.0,
+        "hook_line": "",
+        "length_bucket": "short",
+        "length_s": 16.72,
+        "opening_clip": "j9ZtGgPrC6",
+        "opening_motif": "american flag",
+        "opening_source": "coverr",
+        "question": false,
+        "roles": [
+          "car",
+          "friends"
+        ],
+        "scenes": 6,
+        "style": "lana",
+        "style_basis": "rotation (lana)",
+        "text_hook": false,
+        "theme": "family",
+        "variant": null
+      },
+      "checkpoints": {}
     }
   },
-  "updated": "2026-11-26T20:09:36+00:00"
+  "updated": "2026-11-26T23:25:25+00:00"
 }
