@@ -33,6 +33,28 @@
               "url": "https://www.tiktok.com/@carl_e_cool/video/7709973233797270817?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
           }
+        },
+        "d7": {
+          "fetched": "2026-11-26T20:09:34+00:00",
+          "age_hours": 168.3,
+          "platforms": {
+            "tiktok": {
+              "views": 222.0,
+              "impressions": 0.0,
+              "reach": 222.0,
+              "likes": 2.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 2530.0,
+              "completionRate": 0.0357,
+              "replays": 0.0,
+              "videoDurationSeconds": 12.625,
+              "engagementRate": 0.9,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7709973233797270817?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
         }
       }
     },
@@ -466,6 +488,28 @@
               "url": "https://www.tiktok.com/@carl_e_cool/video/7711815195370196263?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
           }
+        },
+        "d2": {
+          "fetched": "2026-11-26T20:09:35+00:00",
+          "age_hours": 49.1,
+          "platforms": {
+            "tiktok": {
+              "views": 156.0,
+              "impressions": 0.0,
+              "reach": 100.0,
+              "likes": 0.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 2340.0,
+              "completionRate": 0.0241,
+              "replays": 0.0,
+              "videoDurationSeconds": 19.35,
+              "engagementRate": 0.0,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7711815195370196263?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
         }
       }
     },
@@ -521,6 +565,28 @@
               "url": "https://www.tiktok.com/@carl_e_cool/video/7711820595234606369?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
           }
+        },
+        "d2": {
+          "fetched": "2026-11-26T20:09:35+00:00",
+          "age_hours": 48.8,
+          "platforms": {
+            "tiktok": {
+              "views": 124.0,
+              "impressions": 0.0,
+              "reach": 122.0,
+              "likes": 4.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 1.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 1570.0,
+              "completionRate": 0.0071,
+              "replays": 0.0,
+              "videoDurationSeconds": 28.267,
+              "engagementRate": 4.1,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7711820595234606369?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
         }
       }
     },
@@ -554,8 +620,66 @@
         "style_basis": "rotation (night)",
         "variant": "night"
       },
+      "checkpoints": {
+        "d1": {
+          "fetched": "2026-11-26T20:09:36+00:00",
+          "age_hours": 27.6,
+          "platforms": {
+            "tiktok": {
+              "views": 222.0,
+              "impressions": 0.0,
+              "reach": 0.0,
+              "likes": 0.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 1770.0,
+              "completionRate": 0.0198,
+              "replays": 0.0,
+              "videoDurationSeconds": 26.753,
+              "engagementRate": 0.0,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7712148059613859105?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          }
+        }
+      }
+    },
+    "6b0890ca34c85f292c654d65": {
+      "track_id": "2437525038",
+      "at": "2026-11-26T20:04:23.174625+00:00",
+      "target": "tiktok",
+      "facts": {
+        "archival": 0,
+        "bpm": 152.0,
+        "first_shot_s": 1.54,
+        "hashtags": [
+          "#carlecool",
+          "#beatmaker",
+          "#instrumental",
+          "#producerlife",
+          "#lofibeats"
+        ],
+        "hook_at": 0.0,
+        "hook_line": "the drive home you don't want to end",
+        "length_bucket": "long",
+        "length_s": 25.26,
+        "opening_clip": "2FQl41Kv9c",
+        "opening_motif": "bridge night",
+        "opening_source": "coverr",
+        "question": false,
+        "roles": [
+          "woman"
+        ],
+        "scenes": 8,
+        "style": "lana",
+        "style_basis": "rotation (night)",
+        "text_hook": true,
+        "theme": "drive",
+        "variant": "night"
+      },
       "checkpoints": {}
     }
   },
-  "updated": "2026-11-25T23:24:51+00:00"
+  "updated": "2026-11-26T20:09:36+00:00"
 }
