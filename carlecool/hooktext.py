@@ -51,7 +51,8 @@ def _share(key: str) -> float:
     return int.from_bytes(hashlib.sha256(key.encode()).digest()[:2], "big") / 65535
 
 
-def choose(world: str | None, variant: str | None, run_key: str, prefer: str | None = None) -> str:
+def choose(world: str | None, variant: str | None, run_key: str, prefer: str | None = None,
+           lines: tuple[str, ...] | None = None) -> str:
     """The line for this Reel, or "" (no text). 50/50 while testing; once performance.py
     has a winner ("text" / "none"), 70 % of the Reels follow it and 30 % keep testing.
     CARLECOOL_TEXT_HOOK=always / off forces it."""
@@ -59,7 +60,7 @@ def choose(world: str | None, variant: str | None, run_key: str, prefer: str | N
     if mode in ("off", "false", "0", "no"):
         return ""
     key = "night" if variant == "night" else (world if world in LINES else "lana")
-    pool = LINES[key]
+    pool = tuple(lines) if lines else LINES[key]  # theme lines: only what the pictures can keep
     line = pool[int.from_bytes(hashlib.sha256(f"{run_key}|hookline".encode()).digest()[:2], "big") % len(pool)]
     if mode == "always":
         return line

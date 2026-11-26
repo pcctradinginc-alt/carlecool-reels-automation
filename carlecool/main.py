@@ -64,6 +64,11 @@ def caption_for(track, videos, copy: dict | None = None) -> str:
 MAX_PER_MOTIF = 2
 
 
+def themes_enabled() -> bool:
+    """One theme per Reel (owner, 26 Nov); CARLECOOL_THEMES=off restores the word mix."""
+    return os.getenv("CARLECOOL_THEMES", "on").strip().lower() not in ("off", "false", "0", "no")
+
+
 ARCHIVE_BONUS = 2  # extra archive films when the portrait stock is thin
 
 
@@ -222,6 +227,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     style_name = style_decision.get("style")
     style_variant = style_decision.get("variant")
     print(f"Style: {style_pkg.label(style_decision)} ({style_decision.get('basis')})")
+    # Owner, 26 Nov: ONE theme per Reel (search words, roles, archive share, text line).
+    from . import themes
+    theme = themes.choose(style_name, style_variant, previews, edition) if themes_enabled() else None
+    if theme:
+        print(f"Theme: {theme} ({themes.get(style_name, style_variant, theme)['label']})")
     # Styles only nudge v4: lane weights blended 50/50 with the owner's profile.
     style_profile = validate_profile(dict(profile, weights=style_pkg.blended_weights(
         profile["weights"], style_name, style_variant)))
@@ -245,8 +255,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     # Fixed style word lists lead the search (the cover-derived phrases often matched
     # nothing, e.g. "guitar wood grain notebook paper", and drifted off-style); one
     # cover/profile phrase stays as the fifth+1 lane.
-    style_words = style_pkg.search_queries(style_decision, run_key=edition)
-    if style_words:
+    style_words = (themes.words(style_name, style_variant, theme, edition, style_pkg.SEARCH_LANES)
+                   if theme else style_pkg.search_queries(style_decision, run_key=edition))
+    if theme:
+        keywords = style_words  # no off-theme cover/profile phrase (Reel #54)
+    elif style_words:
         keywords = style_words + [k for k in keywords if k not in style_words][:1]
     print(f"Video search phrases: {keywords}")
     candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=32, keywords=keywords,
@@ -349,15 +362,20 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         # Reel #46: no portrait stock at all → 10 cropped landscape fillers. Then more
         # public-domain home movies (178 since 24 Nov) instead of random filler clips.
         films = int((style_pkg.look(style_name) or {}).get("archive_films") or PRELINGER_CLIPS)
-        if len(paths) < MIN_PORTRAIT_CLIPS:
+        if theme:  # sunny 1940s–70s home movies only where the theme is that kind of scene
+            films = themes.archive_films(style_name, style_variant, theme, films)
+        if films and len(paths) < MIN_PORTRAIT_CLIPS:
             films += ARCHIVE_BONUS
             print(f"Few portrait stock clips ({len(paths)}): up to {films} archive films")
-        archival = fetch_archival(archive_key, set(recent_video_ids(previews, limit=12)) | recent,
-                                  output_dir / "archive", run_key=edition, max_clips=films,
-                                  attempts=24)
-        from .wikimedia import fetch_wikimedia
-        archival += fetch_wikimedia(style_name, set(recent_video_ids(previews, limit=30)) | recent,
-                                    output_dir / "wikimedia", run_key=edition, max_clips=1)
+        if films:
+            archival = fetch_archival(archive_key, set(recent_video_ids(previews, limit=12)) | recent,
+                                      output_dir / "archive", run_key=edition, max_clips=films,
+                                      attempts=24)
+            from .wikimedia import fetch_wikimedia
+            archival += fetch_wikimedia(style_name, set(recent_video_ids(previews, limit=30)) | recent,
+                                        output_dir / "wikimedia", run_key=edition, max_clips=1)
+        else:
+            print(f"Theme '{theme}': no archive footage")
     portrait_count = len(paths)
     portrait_paths = set(paths)
     # Landscape only fills up a thin portrait supply, and always after the portrait clips.
@@ -444,9 +462,12 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         # Learned from platform numbers: roles that clearly help come first (also for the
         # ~40 % placement cap), roles that clearly hurt come last.
         signature.PRIORITY = performance.role_priority(signature.DEFAULT_PRIORITY, perf_model)
+        theme_roles = themes.roles(style_name, style_variant, theme) if theme else None
         roles = [(role, signature.queries_for(role, style_name, style_variant))
-                 for role in signature.PRIORITY if role != "motif"]
-        roles.append(("motif", style_pkg.motif_queries(style_decision)))
+                 for role in signature.PRIORITY if role != "motif"
+                 and (theme_roles is None or role in theme_roles)]
+        if theme_roles is None:
+            roles.append(("motif", style_pkg.motif_queries(style_decision)))
         for role, queries in roles:
             if not queries or len(signature_slots) >= signature.MAX_ROLES:
                 continue
@@ -513,7 +534,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     out = output_dir / f"carlecool_{track.id}.mp4"
     from . import hooktext
     hook_line = hooktext.choose(style_name, style_variant, edition,
-                                prefer=performance.preferred(perf_model, "text"))
+                                prefer=performance.preferred(perf_model, "text"),
+                                lines=themes.lines(style_name, style_variant, theme) if theme else None)
     print(f"Text hook: {hook_line!r}" if hook_line else "Text hook: none (A/B test)")
     try:
         details = render_reel(audio, paths, features, out, reel_length,
@@ -546,6 +568,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "question": bool(caption_copy["question"]), "hashtags": caption_copy["hashtags"],
         # hook facts for the learning system (25 Nov)
         "text_hook": bool(details.get("hook_text")), "hook_line": details.get("hook_text") or "",
+        "theme": theme,
         "hook_at": round(float(getattr(features, "hook_at", 0.0) or 0.0), 2),
         "first_shot_s": details.get("first_shot_s"),
         "opening_source": (selected[details["opening_clip"]].source if details.get("opening_clip") is not None else None),

@@ -61,6 +61,9 @@ BLOCK_WORDS = (
     "bmw", "mercedes", "audi", "volkswagen", "toyota", "honda", "hyundai", "kia",
     "london", "piccadilly", "big ben", "picking up trash", "trash", "garbage", "litter",
     "yawning", "tired driver",
+    # Reel #54: modern landmark architecture is not timeless-classic
+    "the vessel", "vessel new york", "hudson yards", "modern architecture", "glass facade", "glass building",
+    "skyscraper construction", "futuristic", "oculus",
 )
 UNWANTED = (
     "a cartoon or an animated film", "a 3d computer rendering", "an ai generated cartoon character",
