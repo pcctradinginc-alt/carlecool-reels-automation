@@ -309,6 +309,28 @@
    "variant": "night",
    "theme": "drive",
    "opening_clip": "2FQl41Kv9c"
+  },
+  {
+   "issue": 59,
+   "decision": "published",
+   "video_ids": [
+    "j9ZtGgPrC6",
+    "pl-cbas_00008",
+    "TyP17q0wRj",
+    "lfRCrkeQWY",
+    "VpLFU1gBdL"
+   ],
+   "motifs": [
+    "american flag",
+    "couple walking beach",
+    "land rover",
+    "summer family",
+    "vintage americana"
+   ],
+   "style": "lana",
+   "variant": null,
+   "theme": "family",
+   "opening_clip": "j9ZtGgPrC6"
   }
  ]
 }
