@@ -58,9 +58,7 @@ permissions:
   issues: write
 jobs:
   guard:
-    # One Reel per Berlin day: a scheduled run is skipped when any Reel run (scheduled or
-    # started by hand) already succeeded or is running today. Failed runs don't count,
-    # so the second slot still tries after e.g. a Coverr block.
+    # Only a successful delivery step in a completed run counts; skipped jobs do not.
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     outputs:
@@ -74,9 +72,18 @@ jobs:
           skip=false
           if [ "$EVENT" = "schedule" ]; then
             since=$(date -u -d "$(TZ=Europe/Berlin date +%Y-%m-%d) 00:00 $(TZ=Europe/Berlin date +%z)" +%Y-%m-%dT%H:%M:%SZ)
-            earlier=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/daily-reel.yml/runs?created=%3E%3D${since}&per_page=30" \
-              --jq "[.workflow_runs[] | select(.id != ${GITHUB_RUN_ID}) | select(.event == \"schedule\" or .event == \"workflow_dispatch\") | select(.conclusion == null or .conclusion == \"success\")] | length" || echo 0)
-            if [ "${earlier:-0}" -gt 0 ]; then skip=true; echo "A Reel run already ran today (since ${since}): this slot is skipped."; fi
+            # The concurrency group serializes runs. Queued runs are not deliveries.
+            # Include push-triggered review runs and exclude manual dry runs.
+            # Inspect the actual delivery step rather than the aggregate conclusion.
+            ids=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/workflows/daily-reel.yml/runs?status=completed&created=%3E%3D${since}&per_page=100" \
+              --jq ".workflow_runs[] | select(.id != ${GITHUB_RUN_ID}) | .id")
+            for id in $ids; do
+              delivered=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/runs/${id}/jobs?per_page=100" \
+                --jq '[.jobs[] | select(.name == "reel") | .steps[]? | select(.name == "Deliver private approval email" and .conclusion == "success")] | length')
+              if echo "$delivered" | grep -q '[1-9]'; then
+                skip=true; echo "Verified review delivery in run $id"; break
+              fi
+            done
           fi
           echo "skip=$skip" >> "$GITHUB_OUTPUT"
   reel:
@@ -163,7 +170,8 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: python -m carlecool.main --mode preview
-      - name: Email exact original privately and remember rotation
+      - name: Deliver private approval email
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'review' }}
         env:
           MODE: ${{ github.event_name != 'workflow_dispatch' && 'review' || inputs.mode }}
           GH_TOKEN: ${{ github.token }}
@@ -173,9 +181,15 @@ jobs:
           APPROVAL_LINK_SECRET: ${{ secrets.APPROVAL_LINK_SECRET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          if [[ "$MODE" == "review" ]]; then
-            python -m carlecool.review
-          else
-            python -m carlecool.review --dry-run-email
-          fi
+        run: python -m carlecool.review
+      - name: Send private test email
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'dry-run' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+          APPROVAL_LINK_SECRET: ${{ secrets.APPROVAL_LINK_SECRET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: python -m carlecool.review --dry-run-email
