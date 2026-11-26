@@ -542,7 +542,14 @@
       }
     }
   ],
-  "pending": null,
+  "pending": {
+    "track_id": "2437525062",
+    "sha256": "c3fdfcd9da1887bd0a54b1c722007aa18c9629933dc0026e2d5577bc95459298",
+    "at": "2026-11-26T21:04:41.854678+00:00",
+    "issue_number": 59,
+    "target": "both",
+    "provider": "zernio"
+  },
   "reconciled": [
     {
       "track_id": "2373071753",
