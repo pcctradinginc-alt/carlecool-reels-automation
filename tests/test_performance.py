@@ -73,10 +73,10 @@ def test_model_needs_enough_posts_before_deciding():
     def post(bucket, shares, roles=("gear",)):
         return {"facts": {"length_bucket": bucket, "roles": list(roles), "question": False, "style": "lana"},
                 "checkpoints": {"d7": {"platforms": {"tiktok": {"views": 1000, "shares": shares, "likes": 50}}}}}
-    data = {"posts": {f"s{i}": post("short", 30) for i in range(3)} | {f"l{i}": post("long", 10, ()) for i in range(4)}}
+    data = {"posts": {f"s{i}": post("short", 30) for i in range(29)} | {f"l{i}": post("long", 10, ()) for i in range(30)}}
     model = performance.build_model(data)
-    assert model["length"]["decided"] is False and model["length"]["prefer"] is None   # only 3 short
-    data["posts"]["s3"] = post("short", 30)
+    assert model["length"]["decided"] is False and model["length"]["prefer"] is None   # only 29 short
+    data["posts"]["s29"] = post("short", 30)
     model = performance.build_model(data)
     assert model["length"]["prefer"] == "short" and model["roles"]["gear"]["decided"]
     assert performance.role_priority(("skater", "friends", "gear"), model)[0] == "gear"
@@ -117,10 +117,10 @@ def test_reach_counts_and_platforms_learn_separately():
                 "checkpoints": {"d7": {"platforms": {platform: {
                     "views": views, "likes": 5, "shares": 0, "igReelsAvgWatchTime": 2500,
                     "completionRate": 0.03, "videoDurationSeconds": 18}}}}}
-    posts = {f"t{i}": post(2000, True) for i in range(4)} | {f"n{i}": post(220, False) for i in range(4)}
+    posts = {f"t{i}": post(2000, True) for i in range(30)} | {f"n{i}": post(220, False) for i in range(30)}
     posts |= {f"ig{i}": post(50, False, "instagram") for i in range(3)}
     model = performance.build_model({"posts": posts})
-    assert model["platform"] == "tiktok" and model["observations"] == 8
+    assert model["platform"] == "tiktok" and model["observations"] == 60
     assert set(model["platforms"]) == {"tiktok", "instagram"}
     assert model["text"]["prefer"] == "text"        # 10x the views wins, same watch/completion
     assert performance.preferred(model, "text") == "text"
