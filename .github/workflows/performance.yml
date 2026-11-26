@@ -10,6 +10,7 @@ on:
     paths: ['.github/workflows/performance.yml']   # first probe when this workflow changes
 permissions:
   contents: write
+  issues: read  # decisions.py reads the review issues (publish / discard)
 concurrency:
   group: carlecool-performance
   cancel-in-progress: false

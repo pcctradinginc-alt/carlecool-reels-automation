@@ -413,6 +413,12 @@ def main() -> int:
     if os.getenv("GITHUB_ACTIONS") == "true":
         commit_json(DATA_PATH, f"performance: {added} new analytics snapshots [skip ci]")
         commit_json(MODEL_PATH, "performance: update learned model [skip ci]")
+        try:  # owner's publish / discard decisions (decisions.py, 26 Nov)
+            from . import decisions
+            decisions.refresh()
+            commit_json(decisions.PATH, "decisions: owner's publish / discard decisions [skip ci]")
+        except Exception as exc:
+            print("Decisions not refreshed:", type(exc).__name__)
     return 0
 
 
