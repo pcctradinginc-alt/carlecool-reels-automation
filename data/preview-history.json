@@ -811,6 +811,31 @@
       "sha256": "1d737f4bd5cef83e23819e142e2f41f3f0f9efa3ddafe642a4607da1b9817b78",
       "style": "night",
       "length_bucket": "long"
+    },
+    {
+      "at": "2026-11-26T14:29:51+00:00",
+      "kind": "daily",
+      "run_id": 45661437163,
+      "track_id": "2437525041",
+      "video_ids": [
+        "pl-castaoca_000162",
+        "v3jFAji3Ix",
+        "pl-cahuca_000018",
+        "QzT6LnFfHB",
+        "nFsTOv1qTq",
+        "pqzaxSMXtf",
+        "GKQ7SM1a3l",
+        "YKlJkmO6Y1",
+        "VcnCCKamBm",
+        "1WKKoZRZeT",
+        "qyl0o9RJvY",
+        "saDe0TN6BS",
+        "UhS3ZlR42g",
+        "3Z0M8FR8DR"
+      ],
+      "sha256": "60551cf6ee9bfa76e9ffb5913bd3ab11d9ecdc2b36104c25d83e10cdc6854ca1",
+      "style": "rubin",
+      "length_bucket": "long"
     }
   ]
 }
