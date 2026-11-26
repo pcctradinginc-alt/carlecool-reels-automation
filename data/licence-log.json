@@ -751,6 +751,162 @@
      "used_at": "2026-11-26"
     }
    ]
+  },
+  {
+   "at": "2026-11-26T21:02:21+00:00",
+   "run_id": 45890311021,
+   "song": "carl e cool - see clear",
+   "sha256": "c3fdfcd9da1887bd0a54b1c722007aa18c9629933dc0026e2d5577bc95459298",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co",
+    "🎬 Archive footage: California Revealed, Orange County Archives, public domain (archive.org)"
+   ],
+   "clips": [
+    {
+     "id": "j9ZtGgPrC6",
+     "provider": "coverr",
+     "title": "United States flag in the sky ",
+     "page": "https://coverr.co/videos/united-states-flag-in-the-sky",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26",
+     "motif": "american flag",
+     "used": true
+    },
+    {
+     "id": "pl-cbas_00008",
+     "provider": "prelinger",
+     "title": "Family in Bakersfield w/ sister Joanne, Mother, Sean (about 8)",
+     "page": "https://archive.org/details/cbas_00008",
+     "creator": "California Revealed (public domain)",
+     "licence": "Public domain (California Revealed)",
+     "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+     "used_at": "2026-11-26",
+     "motif": "vintage americana",
+     "used": true
+    },
+    {
+     "id": "pl-castaoca_000157",
+     "provider": "prelinger",
+     "title": "Clark Family Home Movies Grandma Clark Vett and Buzzy",
+     "page": "https://archive.org/details/castaoca_000157",
+     "creator": "Orange County Archives (public domain)",
+     "licence": "Public domain (Orange County Archives)",
+     "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+     "used_at": "2026-11-26",
+     "motif": "vintage americana",
+     "used": false
+    },
+    {
+     "id": "pl-cahuca_000014",
+     "provider": "prelinger",
+     "title": "California Bicentennial Fourth of July Parade, Huntington Beach, 1976",
+     "page": "https://archive.org/details/cahuca_000014",
+     "creator": "California Revealed (public domain)",
+     "licence": "Public domain (California Revealed)",
+     "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+     "used_at": "2026-11-26",
+     "motif": "vintage americana",
+     "used": false
+    },
+    {
+     "id": "pl-cubanc_000042",
+     "provider": "prelinger",
+     "title": "[Home movies. Brower. Family trip to Big Sur]",
+     "page": "https://archive.org/details/cubanc_000042",
+     "creator": "California Revealed (public domain)",
+     "licence": "Public domain (California Revealed)",
+     "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+     "used_at": "2026-11-26",
+     "motif": "vintage americana",
+     "used": false
+    },
+    {
+     "id": "ndq9jCcV5Y",
+     "provider": "coverr",
+     "title": "Girl meditating on the lawn",
+     "page": "https://coverr.co/videos/girl-meditating-on-the-lawn-ndq9jccv5y",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26",
+     "motif": "lawn",
+     "used": false
+    },
+    {
+     "id": "iqhPgZPO5v",
+     "provider": "coverr",
+     "title": "A loving couple clinking wine glasses at the beach",
+     "page": "https://coverr.co/videos/a-loving-couple-clinking-wine-glasses-at-the-beach-iqhpgzpo5v",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26",
+     "motif": "family picnic",
+     "used": false
+    },
+    {
+     "id": "UqE3HwdCj7",
+     "provider": "coverr",
+     "title": "A family of swans swims in the water",
+     "page": "https://coverr.co/videos/a-family-of-swans-swims-in-the-water-uqe3hwdcj7",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26",
+     "motif": "summer family",
+     "used": false
+    },
+    {
+     "id": "TyP17q0wRj",
+     "provider": "coverr",
+     "title": "A beach in Tel Aviv",
+     "page": "https://coverr.co/videos/a-beach-in-tel-aviv-typ17q0wrj",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26",
+     "motif": "summer family",
+     "used": true
+    },
+    {
+     "id": "tmN1lWmAQy",
+     "provider": "coverr",
+     "title": "Girl doing the Warrior I yoga pose on the lawn",
+     "page": "https://coverr.co/videos/girl-doing-the-warrior-i-yoga-pose-on-the-lawn-tmn1lwmaqy",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26",
+     "motif": "lawn",
+     "used": false
+    },
+    {
+     "id": "lfRCrkeQWY",
+     "provider": "coverr",
+     "title": "Couple on the beach",
+     "page": "https://coverr.co/videos/couple-on-the-beach-lfrcrkeqwy",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26",
+     "motif": "couple walking beach",
+     "used": true
+    },
+    {
+     "id": "VpLFU1gBdL",
+     "provider": "coverr",
+     "title": "Sunlit Red Rock Buttes and Meandering River in Desert Vista",
+     "page": "https://coverr.co/videos/sunlit-red-rock-buttes-and-meandering-river-in-desert-vista",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26",
+     "motif": "land rover",
+     "used": true
+    }
+   ]
   }
  ]
 }
