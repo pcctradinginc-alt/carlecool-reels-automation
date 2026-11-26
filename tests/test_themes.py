@@ -54,3 +54,15 @@ def test_modern_landmarks_blocked_but_boats_stay():
     assert stylegate.blocked_words(Video("x", "coverr", title="Timelapse Vessel New York City"))
     assert stylegate.blocked_words(Video("x", "coverr", title="The Vessel sky view"))
     assert stylegate.blocked_words(Video("x", "coverr", title="Old sailing vessel at the dock")) is None
+
+
+def test_night_rejects_daylight_but_keeps_neon(tmp_path):
+    from PIL import Image, ImageDraw
+    day = Image.new("RGB", (120, 200), (170, 190, 210))          # bright sky
+    day.save(tmp_path / "day.jpg")
+    night = Image.new("RGB", (120, 200), (12, 14, 28))           # dark street
+    ImageDraw.Draw(night).rectangle([40, 30, 80, 60], fill=(255, 60, 160))  # neon sign
+    night.save(tmp_path / "night.jpg")
+    assert stylegate.too_bright_for_night(tmp_path / "day.jpg") is not None
+    assert stylegate.too_bright_for_night(tmp_path / "night.jpg") is None
+    assert stylegate.too_bright_for_night(tmp_path / "missing.jpg") is None

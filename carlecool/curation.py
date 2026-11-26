@@ -264,6 +264,14 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
                 if thumbs[i] is not None:
                     thumbs[i].unlink(missing_ok=True)
             keep_idx = [i for i in keep_idx if i not in far]
+        if ref_world == "night":  # Night Reels: no daylight clips (Reel #55)
+            bright = {i: stylegate.too_bright_for_night(thumbs[i]) for i in keep_idx if thumbs[i] is not None}
+            dark_ok = [i for i in keep_idx if bright.get(i) is None]
+            for i in keep_idx:
+                if bright.get(i) is not None:
+                    print(f"Clip rejected (daylight in a Night Reel, luma {bright[i]}): "
+                          f"{remote[i].id} '{remote[i].title[:50]}'")
+            keep_idx = dark_ok
         remote = [remote[i] for i in keep_idx]
         thumbs = [thumbs[i] for i in keep_idx]
         ref_sims = [ref_all[i] for i in keep_idx]

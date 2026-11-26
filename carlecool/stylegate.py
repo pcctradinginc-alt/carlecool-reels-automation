@@ -336,3 +336,25 @@ def reference_similarity(images, world: str | None, clip) -> list[float | None]:
     except Exception as exc:
         print("Reference similarity unavailable:", type(exc).__name__)
         return [None] * len(images)
+
+
+# ---------------------------------------------------------------- night: no daylight
+# Reel #55 (Night · city at night) got a backyard, a sunset, clouds and a sunny terrace.
+# Calibrated 26 Nov on the owner's 37 night references (mean luma: median 0.24, 90 % below
+# 0.36) vs day images (median ≈0.57): a clip is "daylight" when its thumbnail is bright
+# overall AND in its middle tones — blue hour, neon and lit streets stay in.
+NIGHT_MAX_MEAN = 0.42
+NIGHT_MAX_MEDIAN = 0.35
+
+
+def too_bright_for_night(image) -> float | None:
+    """Mean luma (0..1) when the picture looks like daylight, else None (or unreadable)."""
+    try:
+        import numpy as np
+        from PIL import Image
+        with Image.open(image) as img:
+            px = np.asarray(img.convert("L").resize((96, 96)), dtype=float) / 255.0
+    except Exception:
+        return None
+    mean, median = float(px.mean()), float(np.median(px))
+    return round(mean, 3) if mean > NIGHT_MAX_MEAN and median > NIGHT_MAX_MEDIAN else None

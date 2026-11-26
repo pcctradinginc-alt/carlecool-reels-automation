@@ -274,6 +274,14 @@ def rank(role: str, candidates: list[Video], workdir: Path, world: str | None = 
                 thumb = download_thumbnail(video.thumb_url, workdir / f"sig_{role}_{i}.jpg")
                 if thumb is None:
                     continue
+                if world == "night":
+                    from .stylegate import too_bright_for_night
+                    luma = too_bright_for_night(thumb)
+                    if luma is not None:  # Reel #55: sunny terrace / clouds in a Night Reel
+                        print(f"Signature {role} candidate rejected (daylight, luma {luma}): {video.id}")
+                        thumb.unlink(missing_ok=True)
+                        gated += 1
+                        continue
                 with Image.open(thumb) as img:
                     v = torch.nn.functional.normalize(
                         model.encode_image(preprocess(img.convert("RGB")).unsqueeze(0)), dim=-1)
