@@ -836,6 +836,24 @@
       "sha256": "60551cf6ee9bfa76e9ffb5913bd3ab11d9ecdc2b36104c25d83e10cdc6854ca1",
       "style": "rubin",
       "length_bucket": "long"
+    },
+    {
+      "at": "2026-11-26T14:39:14+00:00",
+      "kind": "daily",
+      "run_id": 45839596893,
+      "track_id": "2437525059",
+      "video_ids": [
+        "pl-AmateurFilmFriendsAppleHarvestFestival1948",
+        "pl-Northwest_2",
+        "pl-TheFair",
+        "NOpCsG74Oi",
+        "zGLuNAmLvv",
+        "pl-tmp_AmateurF_5",
+        "fvWfCdP2vc"
+      ],
+      "sha256": "d31efbc65bf1f2121799a53b9b790d0a3d477ee682798ac24f538547c9061819",
+      "style": "night",
+      "length_bucket": "short"
     }
   ]
 }
