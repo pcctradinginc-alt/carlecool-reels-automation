@@ -126,7 +126,9 @@ def pick_song(tracks, wanted: str) -> str | None:
 
 
 def process(publish: bool, *, track_id: str | None = None, creative_profile: dict | None = None) -> None:
-    from .video import COVERR_BLOCK
+    from . import video as video_provider
+    video_provider.COVERR_REQUESTS = 0
+    COVERR_BLOCK = video_provider.COVERR_BLOCK
     COVERR_BLOCK["status"] = None  # fresh for every Reel (also for revisions in one process)
     if publish:
         raise RuntimeError("Direct publication is disabled; use the human-approved Gmail workflow")
@@ -421,7 +423,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     signature_slots: dict[str, int] = {}
     signature_info: dict[str, dict] = {}
     from . import signature
-    if signature.enabled() and config.coverr_key:
+    from . import pexels
+    if signature.enabled() and (config.coverr_key or pexels.configured()):
         memory = recent_video_ids(previews, limit=signature.MEMORY_REELS)
         exclude = set(memory) | set(recent) | {v.id for v in selected}
         # Friends/couples, flag, car and Americana belong to BOTH worlds (owner: also in Rubin); priority order, and the
@@ -435,15 +438,17 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         for role, queries in roles:
             if not queries or len(signature_slots) >= signature.MAX_ROLES:
                 continue
-            if coverr_blocked() and role != "skater":
-                print(f"Signature {role}: skipped (Coverr {coverr_blocked()})")
-                continue
             # Fixed order where the first query matters (flag, Porsche), rotated otherwise.
             ordered = (list(queries) if role in ("motif", "flag")
                        else signature.car_order(queries, edition) if role == "car"
                        else signature._rotate(tuple(queries), f"{edition}|{role}"))
-            found = signature.rank(role, signature.search_slot(config.coverr_key, ordered, exclude=exclude,
-                                                               role=role), output_dir / "thumbs",
+            pool = (signature.search_slot(config.coverr_key, ordered, exclude=exclude, role=role)
+                    if config.coverr_key and not coverr_blocked() else [])
+            if len(pool) < 4 and pexels.configured():
+                from .stylegate import blocked_words, flag_mismatch
+                alternatives = pexels.search_pexels(os.getenv("PEXELS_API_KEY", ""), ordered, exclude, wanted=8)
+                pool.extend(v for v in alternatives if not blocked_words(v) and not flag_mismatch(v))
+            found = signature.rank(role, pool, output_dir / "thumbs",
                                     world="night" if style_variant == "night" else style_name)
             for video in found[:3]:
                 target = output_dir / f"sig_{role}.mp4"
@@ -457,7 +462,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                             continue
                     if not unique(video, path):
                         continue
-                    record_coverr_download(video.id, config.coverr_key)
+                    if video.source == "coverr":
+                        record_coverr_download(video.id, config.coverr_key)
+                    exclude.add(video.id)
                     selected.append(video)
                     paths.append(path)
                     signature_slots[role] = len(paths) - 1
