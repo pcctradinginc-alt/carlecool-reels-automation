@@ -43,6 +43,7 @@ jobs:
       - name: Install Python dependencies (no secrets in this step)
         run: pip install -r requirements.txt
       - name: Confirm publication target before any Instagram or TikTok operation
+        id: preflight
         env:
           PUBLISH_COMMAND: ${{ github.event.comment.body }}
           ZERNIO_PUBLISH_ENABLED: ${{ secrets.ZERNIO_PUBLISH_ENABLED }}
@@ -58,6 +59,7 @@ jobs:
           RUN_ID=$(python -m carlecool.approve --issue "$REVIEW_ISSUE" --inspect)
           echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
       - name: Restore SHA-256 verified original from private Gmail Sent
+        id: restore
         env:
           RUN_ID: ${{ steps.source.outputs.run_id }}
           PUBLISH_COMMAND: ${{ github.event.comment.body }}
@@ -67,7 +69,17 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: python -m carlecool.approve --issue "$REVIEW_ISSUE" --run "$RUN_ID" --command "$PUBLISH_COMMAND" --fetch
+      - name: Verify immutable original and distribution rights before upload
+        id: rights
+        env:
+          RUN_ID: ${{ steps.source.outputs.run_id }}
+          PUBLISH_COMMAND: ${{ github.event.comment.body }}
+          GH_TOKEN: ${{ github.token }}
+          COVERR_PUBLISH_PERMISSION_CONFIRMED: ${{ secrets.COVERR_PUBLISH_PERMISSION_CONFIRMED }}
+          AI_VIDEO_PUBLISH_LICENSE_CONFIRMED: ${{ secrets.AI_VIDEO_PUBLISH_LICENSE_CONFIRMED }}
+        run: python -m carlecool.approve --issue "$REVIEW_ISSUE" --run "$RUN_ID" --command "$PUBLISH_COMMAND" --validate
       - name: Publish the SHA-256 verified media (fail closed)
+        id: publish_media
         env:
           RUN_ID: ${{ steps.source.outputs.run_id }}
           PUBLISH_COMMAND: ${{ github.event.comment.body }}
@@ -82,6 +94,21 @@ jobs:
           COVERR_PUBLISH_PERMISSION_CONFIRMED: ${{ secrets.COVERR_PUBLISH_PERMISSION_CONFIRMED }}
           AI_VIDEO_PUBLISH_LICENSE_CONFIRMED: ${{ secrets.AI_VIDEO_PUBLISH_LICENSE_CONFIRMED }}
         run: python -m carlecool.approve --issue "$REVIEW_ISSUE" --run "$RUN_ID" --command "$PUBLISH_COMMAND"
+      - name: Send private publication outcome email (never retry posting)
+        if: ${{ always() && !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+          PUBLISH_COMMAND: ${{ github.event.comment.body }}
+          PREFLIGHT_OUTCOME: ${{ steps.preflight.outcome }}
+          SOURCE_OUTCOME: ${{ steps.source.outcome }}
+          RESTORE_OUTCOME: ${{ steps.restore.outcome }}
+          RIGHTS_OUTCOME: ${{ steps.rights.outcome }}
+          PUBLISH_OUTCOME: ${{ steps.publish_media.outcome }}
+          AI_LICENSE_CONFIRMED: ${{ secrets.AI_VIDEO_PUBLISH_LICENSE_CONFIRMED == 'true' }}
+        run: python -m carlecool.publish_notice
   reject:
     if: >-
       github.event.issue.pull_request == null &&

@@ -40,7 +40,7 @@ class FakeIMAP:
         assert name == 'X-GM-RAW' and query.startswith('"rfc822msgid:')
         return ('OK', [b'42'])
     def fetch(self, which, fields):
-        assert which == b'42' and fields == '(RFC822)'
+        assert which == b'42' and fields == '(BODY.PEEK[])'
         return ('OK', [(b'42 (RFC822 {1000}', self.email_bytes), b')'])
 
 
@@ -107,3 +107,22 @@ def test_oversize_original_rejected_before_smtp(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError, match='too large'):
         send_review_email('https://github.com/a/b/issues/1', {'title': 'test'}, reel,
                           message_id=make_msgid(domain='carlecool.invalid'), run_id=1)
+
+
+def test_transient_gmail_login_retries(monkeypatch, tmp_path):
+    from carlecool import mailstore
+    from unittest.mock import Mock
+    fetch = Mock(side_effect=[TimeoutError(), ConnectionResetError(), ({}, tmp_path / 'video.mp4')])
+    monkeypatch.setattr(mailstore, '_fetch_reel_once', fetch)
+    monkeypatch.setattr(mailstore.time, 'sleep', lambda _: None)
+    assert mailstore.fetch_reel_from_sent({}, tmp_path)[1] == tmp_path / 'video.mp4'
+    assert fetch.call_count == 3
+
+def test_invalid_gmail_identity_never_retried(monkeypatch, tmp_path):
+    from carlecool import mailstore
+    from unittest.mock import Mock
+    fetch = Mock(side_effect=ValueError('SHA mismatch'))
+    monkeypatch.setattr(mailstore, '_fetch_reel_once', fetch)
+    with pytest.raises(ValueError, match='SHA mismatch'):
+        mailstore.fetch_reel_from_sent({}, tmp_path)
+    assert fetch.call_count == 1

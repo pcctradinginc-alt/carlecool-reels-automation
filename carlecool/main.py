@@ -395,6 +395,10 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     # because it is short (2 s) and low resolution (512×768).
     ai_mode = os.getenv("CARLECOOL_AI_VIDEO", "off")
     ai_facts = []
+    if profile["ai_video"] and ai_mode in ("one", "multi") and os.getenv("AI_VIDEO_PUBLISH_LICENSE_CONFIRMED") != "true":
+        print("AI footage skipped: production distribution permission is not confirmed")
+        ai_facts.append({"status": "skipped", "reason": "distribution_permission_unconfirmed"})
+        ai_mode = "off"
     if profile["ai_video"] and ai_mode in ("one", "multi"):
         from .ai_video import generate_one, AIUnavailable
         from .quality_gate import clip_metrics, ai_usable

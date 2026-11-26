@@ -25,7 +25,7 @@ DEFAULTS = {
     "prelinger": ("Public domain (Internet Archive)", "https://creativecommons.org/publicdomain/mark/1.0/"),
     "wikimedia": ("Wikimedia Commons free licence", "https://commons.wikimedia.org/wiki/Commons:Licensing"),
     "owned": ("Own footage (CarleCool)", ""),
-    "ai": ("AI-generated footage (LTX-2.3), own creation", ""),
+    "ai": ("AI-generated footage (LTX-2.3); distribution subject to applicable terms", "https://huggingface.co/Lightricks/LTX-2.3/blob/main/LICENSE"),
 }
 
 

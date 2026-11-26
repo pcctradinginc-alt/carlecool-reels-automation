@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import re
+import time
 
 
 MAX_ATTACHMENT_BYTES = 16_000_000  # Gmail's ~25 MB MIME limit includes base64 overhead
@@ -33,6 +34,20 @@ def _sent_mailbox(connection) -> str:
 
 
 def fetch_reel_from_sent(approval: dict, target: Path, *, connection=None) -> tuple[dict, Path]:
+    """Retry only transient read-only IMAP failures; never retry an upload."""
+    if connection is not None:
+        return _fetch_reel_once(approval, target, connection=connection)
+    for attempt in range(3):
+        try:
+            return _fetch_reel_once(approval, target)
+        except (TimeoutError, ConnectionError, imaplib.IMAP4.abort) as exc:
+            if attempt == 2:
+                raise RuntimeError('Gmail original retrieval failed after three attempts; no publication') from None
+            print('Transient Gmail retrieval failure; retrying:', type(exc).__name__)
+            time.sleep(2 ** (attempt + 1))
+
+
+def _fetch_reel_once(approval: dict, target: Path, *, connection=None) -> tuple[dict, Path]:
     """Find immutable original sent by this account and verify all hashes and headers."""
     msg_id = approval.get('mail_message_id', '')
     if not re.fullmatch(r'<[A-Za-z0-9_.@-]{6,200}>', msg_id):
@@ -43,7 +58,7 @@ def fetch_reel_from_sent(approval: dict, target: Path, *, connection=None) -> tu
         raise RuntimeError('Gmail credentials are missing')
     own = connection is None
     if own:
-        connection = imaplib.IMAP4_SSL('imap.gmail.com', 993, timeout=45)
+        connection = imaplib.IMAP4_SSL('imap.gmail.com', 993, timeout=120)
     try:
         if own:
             connection.login(address, password)
@@ -53,7 +68,7 @@ def fetch_reel_from_sent(approval: dict, target: Path, *, connection=None) -> tu
         typ, ids = connection.search(None, 'X-GM-RAW', f'"rfc822msgid:{msg_id}"')
         if typ != 'OK' or not ids or len(ids[0].split()) != 1:
             raise RuntimeError('Exactly one matching review email must exist in Gmail Sent')
-        typ, items = connection.fetch(ids[0].split()[0], '(RFC822)')
+        typ, items = connection.fetch(ids[0].split()[0], '(BODY.PEEK[])')
         if typ != 'OK' or not items:
             raise RuntimeError('Cannot fetch original Gmail message')
         raw = next((x[1] for x in items if isinstance(x, tuple) and isinstance(x[1], bytes)), None)
