@@ -27,7 +27,7 @@ def test_gmail_contains_clear_hero_label_and_designed_approval():
     assert "CarleCool-Original.mp4" in email
     assert "65%" in email
     assert "/revise mehr natur" not in email and "Gefällt mir" not in email and "DEINE OPTIONEN" not in email
-    assert "/approve" in email
+    assert "/approve" not in email
     assert "/reject" in email
     assert URL in plain
     assert "MP4 im Anhang" in plain
