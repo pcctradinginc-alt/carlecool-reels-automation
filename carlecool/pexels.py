@@ -53,18 +53,24 @@ def search_pexels(key: str, keywords: list[str], recent: set[str], *, session=No
     session = session or requests.Session()
     seen: set[str] = set()
     lanes: list[list[Video]] = []
+    stopped = False
     for editorial in keywords[:3]:
+        if stopped:
+            break
         lane: list[Video] = []
         for attempt, query in enumerate(query_ladder(editorial)[:2]):
             if attempt and len(lane) >= per_lane_minimum:
                 break
-            r = session.get(API, headers={"Authorization": key}, timeout=30,
-                            params={"query": query, "orientation": "portrait", "size": "medium",
-                                    "per_page": per_query})
-            if r.status_code == 429:
-                raise RuntimeError("Pexels 429: hourly rate limit reached")
-            r.raise_for_status()
-            videos = r.json().get("videos", [])
+            try:
+                r = session.get(API, headers={"Authorization": key}, timeout=30,
+                                params={"query": query, "orientation": "portrait", "size": "medium",
+                                        "per_page": per_query})
+                r.raise_for_status()
+                videos = r.json().get("videos", [])
+            except (requests.RequestException, ValueError) as exc:
+                print(f"Pexels unavailable ({type(exc).__name__}); retaining earlier candidates")
+                stopped = True
+                break
             print(f"Pexels '{query}': {len(videos)} portrait hits")
             for item in videos:
                 vid = f"px-{item.get('id')}"
