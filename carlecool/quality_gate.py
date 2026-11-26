@@ -3,6 +3,7 @@ from pathlib import Path
 import subprocess
 import re
 import math
+import os
 
 def inspect_reel(path, details, expected_duration):
     from .render import probe_duration, probe_dimensions
@@ -10,8 +11,9 @@ def inspect_reel(path, details, expected_duration):
     errors, warnings = [], []
     width, height = probe_dimensions(path)
     duration = probe_duration(path)
-    if (width, height) != (1080, 1920):
-        errors.append("production resolution must be 1080x1920")
+    expected_size = (270, 480) if os.getenv("CARLECOOL_OFFLINE_SMOKE") == "1" else (1080, 1920)
+    if (width, height) != expected_size:
+        errors.append(f"required resolution must be {expected_size[0]}x{expected_size[1]}")
     if abs(duration - expected_duration) > 0.25:
         errors.append("duration mismatch")
     p = subprocess.run(["ffmpeg", "-hide_banner", "-v", "info", "-xerror", "-i", str(path),
