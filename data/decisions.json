@@ -290,6 +290,25 @@
    "variant": "night",
    "theme": null,
    "opening_clip": "F9C1KBdRWo"
+  },
+  {
+   "issue": 57,
+   "decision": "published",
+   "video_ids": [
+    "jrXaJAZ05E",
+    "ai-45886884447-0",
+    "WPxMF0h6Da",
+    "2FQl41Kv9c",
+    "lxzEzmUG1M",
+    "1JHPEi5yNC",
+    "aXikFcuhT6",
+    "sbOw3wGAH8"
+   ],
+   "motifs": [],
+   "style": "lana",
+   "variant": "night",
+   "theme": "drive",
+   "opening_clip": "2FQl41Kv9c"
   }
  ]
 }
