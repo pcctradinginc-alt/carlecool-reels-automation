@@ -30,7 +30,7 @@ def _best_file(files: list, *, landscape=False) -> dict | None:
             w, h = int(f.get("width") or 0), int(f.get("height") or 0)
         except (TypeError, ValueError):
             continue
-        if f.get("file_type") != "video/mp4" or not f.get("link") or (min(w, h) < 720 if landscape else (h <= w or h < 1280)):
+        if f.get("file_type") != "video/mp4" or not f.get("link") or ((w <= h or h < 720) if landscape else (h <= w or h < 1280)):
             continue
         usable.append((abs((w if landscape else h) - 1920), -h, f))
     return min(usable, key=lambda x: (x[0], x[1]))[2] if usable else None
@@ -60,8 +60,8 @@ def search_pexels(key: str, keywords: list[str], recent: set[str], *, session=No
             break
         lane: list[Video] = []
         for attempt, (query, orientation) in enumerate([(q, "portrait") for q in query_ladder(editorial)[:2]] + ([(query_ladder(editorial)[0], "landscape")] if allow_landscape() else [])):
-            if attempt and len(lane) >= per_lane_minimum:
-                break
+            if attempt and orientation == "portrait" and len(lane) >= per_lane_minimum:
+                continue
             try:
                 r = session.get(API, headers={"Authorization": key}, timeout=30,
                                 params={"query": query, "orientation": orientation, "size": "medium",
@@ -72,7 +72,7 @@ def search_pexels(key: str, keywords: list[str], recent: set[str], *, session=No
                 print(f"Pexels unavailable ({type(exc).__name__}); retaining earlier candidates")
                 stopped = True
                 break
-            print(f"Pexels '{query}': {len(videos)} portrait hits")
+            print(f"Pexels '{query}': {len(videos)} {orientation} hits")
             for item in videos:
                 vid = f"px-{item.get('id')}"
                 if not item.get("id") or vid in seen or vid in recent:
