@@ -40,7 +40,7 @@ CHECKPOINTS = (("d1", 1), ("d2", 2), ("d7", 7), ("d28", 28))  # d1 = early indic
 PRIMARY_PLATFORM = "tiktok"
 PART_CAP = 3.0  # a score part counts at most 3x the platform median
 WEIGHTS = {"reach": 0.30, "watch": 0.25, "completion": 0.20, "share": 0.20, "like": 0.05}
-MIN_POSTS = 4          # per variant before anything is adjusted
+MIN_POSTS = 30          # per variant before anything is adjusted
 MIN_LIFT = 0.15        # +15 % median score difference
 SHORT_TARGET = 18.0   # owner 23 Nov: never shorter than 15 s
 METRICS = ("views", "impressions", "reach", "likes", "comments", "shares", "saves", "reposts",
