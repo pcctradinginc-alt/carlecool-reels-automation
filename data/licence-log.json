@@ -335,6 +335,88 @@
      "used_at": "2026-11-26"
     }
    ]
+  },
+  {
+   "at": "2026-11-26T14:39:15+00:00",
+   "run_id": 45839596893,
+   "song": "carl e cool - donkey (eah)",
+   "sha256": "d31efbc65bf1f2121799a53b9b790d0a3d477ee682798ac24f538547c9061819",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co",
+    "🎬 Archive footage: Internet Archive Home Movies, Prelinger Archives, public domain (archive.org)"
+   ],
+   "clips": [
+    {
+     "id": "pl-AmateurFilmFriendsAppleHarvestFestival1948",
+     "provider": "prelinger",
+     "title": "[Amateur Film - Friends Apple Harvest Festival 1948]",
+     "page": "https://archive.org/details/AmateurFilmFriendsAppleHarvestFestival1948",
+     "creator": "Internet Archive Home Movies (public domain)",
+     "licence": "Public domain (Internet Archive Home Movies)",
+     "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "pl-Northwest_2",
+     "provider": "prelinger",
+     "title": "Amateur Film Northwest",
+     "page": "https://archive.org/details/Northwest_2",
+     "creator": "Internet Archive Home Movies (public domain)",
+     "licence": "Public domain (Internet Archive Home Movies)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "pl-TheFair",
+     "provider": "prelinger",
+     "title": "The Fair",
+     "page": "https://archive.org/details/TheFair",
+     "creator": "Prelinger Archives (public domain)",
+     "licence": "Public domain (Prelinger Archives)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "NOpCsG74Oi",
+     "provider": "coverr",
+     "title": "A teenage boy walking in a parking lot",
+     "page": "https://coverr.co/videos/a-teenage-boy-walking-in-a-parking-lot-nopcsg74oi",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "zGLuNAmLvv",
+     "provider": "coverr",
+     "title": "Asian man getting a jacket out of his car",
+     "page": "https://coverr.co/videos/asian-man-getting-a-jacket-out-of-his-car-zglunamlvv",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "pl-tmp_AmateurF_5",
+     "provider": "prelinger",
+     "title": "Amateur Film Medicus09b",
+     "page": "https://archive.org/details/tmp_AmateurF_5",
+     "creator": "Internet Archive Home Movies (public domain)",
+     "licence": "Public domain (Internet Archive Home Movies)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "fvWfCdP2vc",
+     "provider": "coverr",
+     "title": "Asian man using his a smartphone as a mirror",
+     "page": "https://coverr.co/videos/asian-man-using-his-a-smartphone-as-a-mirror-fvwfcdp2vc",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    }
+   ]
   }
  ]
 }
