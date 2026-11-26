@@ -66,3 +66,19 @@ def test_night_rejects_daylight_but_keeps_neon(tmp_path):
     assert stylegate.too_bright_for_night(tmp_path / "day.jpg") is not None
     assert stylegate.too_bright_for_night(tmp_path / "night.jpg") is None
     assert stylegate.too_bright_for_night(tmp_path / "missing.jpg") is None
+
+
+def test_music_first_theme_choice():
+    from types import SimpleNamespace
+    quiet = SimpleNamespace(bpm=78, timbre_hz=1400, percussive=0.06, dynamics=3.4)
+    groove = SimpleNamespace(bpm=128, timbre_hz=2900, percussive=0.5, dynamics=1.8)
+    assert themes.music_classes(quiet) == {"tempo": "slow", "sound": "dark", "drive": "sparse", "space": "spacious"}
+    # fresh history: the song decides
+    assert themes.choose("rubin", None, [], "r", quiet) == "quiet"
+    assert themes.choose("lana", None, [], "r", groove) == "roadtrip"
+    assert themes.choose("lana", "night", [], "r", groove) == "drive"
+    # rotation still wins over time: a theme never gets 2 Reels ahead of the least used
+    hist = [{"style": "rubin", "theme": "quiet"}] * 2
+    assert themes.choose("rubin", None, hist, "r", quiet) != "quiet"
+    # missing measurements: no class, pure rotation
+    assert themes.music_classes(SimpleNamespace(bpm=0, timbre_hz=0, percussive=0, dynamics=0)) == {}

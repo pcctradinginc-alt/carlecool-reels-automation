@@ -1,0 +1,22 @@
+{
+ "version": 1,
+ "coverr": {
+  "hourly_limit": 50,
+  "events": [
+   {
+    "at": "2026-11-26T19:25:00+00:00",
+    "run": "45883024398",
+    "requests": 30,
+    "blocked": null,
+    "estimated": true
+   },
+   {
+    "at": "2026-11-26T19:56:00+00:00",
+    "run": "45886884447",
+    "requests": 30,
+    "blocked": null,
+    "estimated": true
+   }
+  ]
+ }
+}

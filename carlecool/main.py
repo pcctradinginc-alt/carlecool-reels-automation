@@ -229,9 +229,13 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     print(f"Style: {style_pkg.label(style_decision)} ({style_decision.get('basis')})")
     # Owner, 26 Nov: ONE theme per Reel (search words, roles, archive share, text line).
     from . import themes
-    theme = themes.choose(style_name, style_variant, previews, edition) if themes_enabled() else None
+    theme = themes.choose(style_name, style_variant, previews, edition, features) if themes_enabled() else None
     if theme:
-        print(f"Theme: {theme} ({themes.get(style_name, style_variant, theme)['label']})")
+        classes = themes.music_classes(features)
+        fit = themes.music_fit(themes.key_for(style_name, style_variant), theme, classes)
+        print(f"Theme: {theme} ({themes.get(style_name, style_variant, theme)['label']}) — music {classes}"
+              f", fit {fit if fit is None else round(fit, 2)}; timbre {getattr(features, 'timbre_hz', 0):.0f} Hz,"
+              f" percussive {getattr(features, 'percussive', 0):.2f}, dynamics {getattr(features, 'dynamics', 0):.2f}")
     # Styles only nudge v4: lane weights blended 50/50 with the owner's profile.
     style_profile = validate_profile(dict(profile, weights=style_pkg.blended_weights(
         profile["weights"], style_name, style_variant)))
@@ -262,6 +266,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     elif style_words:
         keywords = style_words + [k for k in keywords if k not in style_words][:1]
     print(f"Video search phrases: {keywords}")
+    if config.coverr_key:
+        apply_coverr_plan()
     candidates = gather_videos(config.coverr_key, features.mood, recent, wanted=32, keywords=keywords,
                                max_lanes=len(keywords), exact=style_pkg.search_ladders(style_words))
     # Across Reels: clips from the last MEMORY_REELS previews are only used when there are
@@ -582,7 +588,10 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "track_id": track.id, "title": track.title, "permalink": track.permalink_url,
         "song_label": song_label(track.title),
         "features": vars(features), "video_ids": [v.id for v in selected],
-        "footage_sources": [licences.proof(v) for v in selected],  # licence proof per clip
+        # licence proof per clip (+ search motif, so decisions.py can learn per motif)
+        "footage_sources": [dict(licences.proof(v), motif=v.query or "",
+                                 used=(i in set(details.get("used_sources") or range(len(selected)))))
+                            for i, v in enumerate(selected)],
         "caption": caption_for(track, selected, caption_copy), "caption_variant": caption_copy,
         "reel_facts": reel_facts, "length_bucket": reel_facts["length_bucket"],
         "performance_summary": performance.summary(perf_model),
@@ -607,11 +616,45 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     print("Preview mode: no Instagram API call, no state change")
 
 
+def apply_coverr_plan(sleep=None) -> dict:
+    """Respect Coverr's hourly limit ACROSS runs (data/provider-usage.json, 26 Nov)."""
+    import time
+    from . import providers, video as video_mod
+    if os.getenv("CARLECOOL_PROVIDER_MEMORY", "on").strip().lower() in ("off", "false", "0", "no"):
+        return {"action": "go"}
+    plan = providers.coverr_plan()
+    print(f"Coverr plan: {plan['action']} — {plan['reason']}")
+    if plan["action"] == "wait":
+        print(f"Waiting {plan['wait_s'] // 60} min for Coverr's hourly window instead of failing")
+        (sleep or time.sleep)(plan["wait_s"])
+    if plan["action"] == "skip":
+        video_mod.COVERR_BLOCK["status"] = 429  # alternatives only; the quality gate decides
+    else:
+        video_mod.COVERR_MAX_REQUESTS = max(1, min(video_mod.COVERR_MAX_REQUESTS, plan["budget"]))
+    return plan
+
+
+def record_provider_usage() -> None:
+    from . import providers, video as video_mod
+    if not os.getenv("COVERR_API_KEY"):
+        return
+    try:
+        # a real 403/429 from Coverr — not our own per-run budget running out
+        real_block = (video_mod.coverr_blocked() if video_mod.COVERR_REQUESTS
+                      and video_mod.COVERR_REQUESTS < video_mod.COVERR_MAX_REQUESTS else None)
+        providers.record(video_mod.COVERR_REQUESTS, real_block, os.getenv("GITHUB_RUN_ID"))
+    except OSError as exc:
+        print("Provider usage not written:", type(exc).__name__)
+
+
 def main():
     parser = argparse.ArgumentParser(description="CarleCool video pipeline")
     parser.add_argument("--mode", choices=["preview", "publish"], default="preview")
     args = parser.parse_args()
-    process(publish=args.mode == "publish")
+    try:
+        process(publish=args.mode == "publish")
+    finally:
+        record_provider_usage()  # also after a failed run: the next run must know
 
 
 if __name__ == "__main__":

@@ -107,7 +107,7 @@ jobs:
     # no-publish preview-to-Gmail flow were verified with live GitHub Actions.
     # Human issue approval is still mandatory; publish secret stays disabled.
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 90  # may wait up to 60 min for Coverr's hourly window (providers.py)
     # Only non-secret configuration here. Secrets are passed to the two steps that
     # use them, never to dependency installation steps.
     env:
@@ -186,6 +186,11 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: python -m carlecool.main --mode preview
+      - name: Remember provider usage (also after a failed render)
+        if: ${{ always() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m carlecool.providers
       - name: Deliver private approval email
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'review' }}
         env:

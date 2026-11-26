@@ -90,6 +90,60 @@ THEMES: dict[str, dict[str, dict]] = {
 }
 ALWAYS_ROLES = ("flag", "car")  # owner: US flag and a classic car in every Reel
 
+# Music first (26 Nov): which kind of song suits a theme. Classes from analysis.py:
+# tempo slow < 95 ≤ mid < 125 ≤ fast BPM; sound dark < 1800 ≤ warm < 2500 ≤ bright Hz
+# (spectral centroid); percussion sparse < 0.15 ≤ groove; spacious = loud/quiet ≥ 2.8.
+# "Energy" is left out: it reads 1.0 for every song of the EP (saturated, no signal).
+MUSIC = {
+    ("lana", "coast"): {"tempo": "mid", "sound": "bright"},
+    ("lana", "porch"): {"tempo": "slow", "sound": "warm"},
+    ("lana", "roadtrip"): {"tempo": "fast", "drive": "groove"},
+    ("lana", "family"): {"tempo": "mid", "sound": "bright", "drive": "groove"},
+    ("rubin", "studio"): {"tempo": "mid", "drive": "groove"},
+    ("rubin", "coast"): {"tempo": "slow", "space": "spacious"},
+    ("rubin", "road"): {"tempo": "mid", "sound": "warm"},
+    ("rubin", "quiet"): {"tempo": "slow", "sound": "dark", "drive": "sparse"},
+    ("night", "drive"): {"tempo": "fast", "drive": "groove"},
+    ("night", "diner"): {"tempo": "mid", "sound": "bright"},
+    ("night", "city"): {"tempo": "slow", "sound": "dark", "space": "spacious"},
+}
+ORDER = {"tempo": ("slow", "mid", "fast"), "sound": ("dark", "warm", "bright"),
+         "drive": ("sparse", "groove"), "space": ("tight", "spacious")}
+WEIGHT = {"tempo": 0.35, "sound": 0.3, "drive": 0.2, "space": 0.15}  # energy, cover: no usable signal
+MUSIC_SHARE = 0.6  # theme choice = 60 % musical fit + 40 % even rotation
+
+
+def music_classes(features) -> dict[str, str]:
+    """Classes of the song; a missing measurement (0) gives no class."""
+    out = {}
+    bpm = float(getattr(features, "bpm", 0) or 0)
+    if bpm:
+        out["tempo"] = "slow" if bpm < 95 else "mid" if bpm < 125 else "fast"
+    hz = float(getattr(features, "timbre_hz", 0) or 0)
+    if hz:
+        out["sound"] = "dark" if hz < 1800 else "warm" if hz < 2500 else "bright"
+    perc = float(getattr(features, "percussive", 0) or 0)
+    if perc:
+        out["drive"] = "sparse" if perc < 0.15 else "groove"
+    dyn = float(getattr(features, "dynamics", 0) or 0)
+    if dyn:
+        out["space"] = "spacious" if dyn >= 2.8 else "tight"
+    return out
+
+
+def music_fit(key: str, theme: str, classes: dict[str, str]) -> float | None:
+    """0..1: how well the song suits the theme (neighbouring class = half); None = unknown."""
+    wants = MUSIC.get((key, theme)) or {}
+    num = den = 0.0
+    for dim, want in wants.items():
+        have = classes.get(dim)
+        if have is None:
+            continue
+        steps = abs(ORDER[dim].index(have) - ORDER[dim].index(want))
+        num += WEIGHT[dim] * (1.0 if steps == 0 else 0.5 if steps == 1 and len(ORDER[dim]) > 2 else 0.0)
+        den += WEIGHT[dim]
+    return num / den if den else None
+
 
 def key_for(style: str | None, variant: str | None) -> str | None:
     if variant == "night":
@@ -97,8 +151,9 @@ def key_for(style: str | None, variant: str | None) -> str | None:
     return style if style in THEMES else None
 
 
-def choose(style: str | None, variant: str | None, previews: list[dict], run_key: str) -> str | None:
-    """Least-used theme of the style in the preview history; ties broken per run."""
+def choose(style: str | None, variant: str | None, previews: list[dict], run_key: str,
+           features=None) -> str | None:
+    """Theme that suits the song best (60 %) while every theme keeps its turn (40 %)."""
     key = key_for(style, variant)
     if key is None:
         return None
@@ -107,9 +162,19 @@ def choose(style: str | None, variant: str | None, previews: list[dict], run_key
     for entry in previews:
         if entry.get("style") == key and entry.get("theme") in used and entry.get("kind", "daily") == "daily":
             used[entry["theme"]] += 1
-    low = min(used.values())
-    tied = [n for n in names if used[n] == low]
-    return tied[int.from_bytes(hashlib.sha256(f"{run_key}|theme".encode()).digest()[:2], "big") % len(tied)]
+    low, high = min(used.values()), max(used.values())
+    classes = music_classes(features) if features is not None else {}
+
+    def score(n):
+        fair = 1.0 if high == low else (high - used[n]) / (high - low)
+        fit = music_fit(key, n, classes)
+        tie = int.from_bytes(hashlib.sha256(f"{run_key}|theme|{n}".encode()).digest()[:2], "big") / 65535 * 1e-3
+        if fit is None:
+            return fair + tie
+        return MUSIC_SHARE * fit + (1 - MUSIC_SHARE) * fair + tie
+    # never more than 2 Reels ahead of the least-used theme (no theme starves)
+    eligible = [n for n in names if used[n] - low < 2] or names
+    return max(eligible, key=score)
 
 
 def get(style: str | None, variant: str | None, theme: str | None) -> dict | None:

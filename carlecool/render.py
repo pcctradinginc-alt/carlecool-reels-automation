@@ -522,6 +522,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         if output.stat().st_size > MAX_ATTACHMENT_BYTES:
             raise RuntimeError("Reel exceeds safe Gmail attachment limit after compression")
     return {"duration": probe_duration(output), "scenes": len(files),
+            # which downloaded clips really appear in the Reel (26 Nov: licence log, memory)
+            "used_sources": sorted({shot.source_index for shot in storyboard}),
             "resolution": f"{width}x{height}", "fps": FPS, "pace": pace, "analog": analog,
             "cover_graded": sum(1 for lut in luts if lut is not None),
             "title_card": card is not None,
