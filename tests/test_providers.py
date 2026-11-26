@@ -22,7 +22,9 @@ def test_recent_block_or_spent_hour_waits_then_skips():
     plan = providers.coverr_plan(_data((40, 30, 403)), NOW)          # blocked 40 min ago
     assert plan["action"] == "wait" and 20 * 60 <= plan["wait_s"] <= 21 * 60
     plan = providers.coverr_plan(_data((10, 35, None)), NOW)          # 35 used 10 min ago
-    assert plan["action"] == "skip"                                    # 50 min > MAX_WAIT
+    assert plan["action"] == "wait" and 50 * 60 <= plan["wait_s"] <= 51 * 60   # ≤ 60 min: wait
+    plan = providers.coverr_plan(_data((0, 20, 403)), NOW)            # blocked just now: 60 min
+    assert plan["action"] == "wait"
     plan = providers.coverr_plan(_data((50, 35, None)), NOW)
     assert plan["action"] == "wait" and plan["wait_s"] <= 11 * 60
 
@@ -47,3 +49,11 @@ def test_main_applies_the_plan(monkeypatch):
     main.apply_coverr_plan(sleep=waited.append)
     assert video.coverr_blocked() == 429
     monkeypatch.setitem(video.COVERR_BLOCK, "status", None)
+
+
+def test_budget_after_waiting_counts_what_is_still_in_the_hour():
+    # 30 requests 50 min ago and 30 requests 20 min ago: waiting 10 min frees only the first 30
+    plan = providers.coverr_plan(_data((50, 30, None), (20, 30, None)), NOW)
+    assert plan["action"] == "wait" and plan["budget"] == 48           # waits until both are out
+    plan = providers.coverr_plan(_data((50, 30, None), (40, 10, None)), NOW)
+    assert plan["action"] == "wait" and plan["budget"] == 38

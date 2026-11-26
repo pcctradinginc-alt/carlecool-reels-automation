@@ -8,7 +8,7 @@ in a row were stopped by HTTP 403 because the previous run had used the hour up.
 data/provider-usage.json keeps, per run, how many Coverr requests were made and whether
 Coverr answered 403/429. Before searching, main.py asks `coverr_plan()`:
 * enough budget in the last hour → go, with this run's budget capped to what is left;
-* not enough / blocked recently → wait (up to MAX_WAIT) until the hour has passed;
+* not enough / blocked recently → wait (up to MAX_WAIT = 60 min) until the hour has passed;
 * longer than that → run without Coverr (archive, Wikimedia, Pexels, AI); the quality
   gate still decides (fail closed) and the second daily slot retries later.
 The render step writes the file; a workflow step commits it even when the run fails.
@@ -24,7 +24,7 @@ PATH = Path("data/provider-usage.json")
 WINDOW = timedelta(hours=1)
 HOURLY_LIMIT = 50          # Coverr's documented allowance
 MIN_FOR_A_REEL = 20        # search lanes + fallbacks + signature roles + download stats
-MAX_WAIT = timedelta(minutes=35)
+MAX_WAIT = timedelta(minutes=60)  # public repo: runner minutes are free; job timeout 90 min
 KEEP = timedelta(days=2)
 
 
@@ -60,20 +60,22 @@ def coverr_plan(data: dict | None = None, now: datetime | None = None) -> dict:
     used = sum(int(e.get("requests") or 0) for e in recent)
     blocks = [e["_at"] for e in recent if e.get("blocked")]
     remaining = max(0, HOURLY_LIMIT - used)
-    if blocks:
-        free_at = max(blocks) + WINDOW
-        reason = f"Coverr blocked at {max(blocks):%H:%M} UTC"
-    elif remaining < MIN_FOR_A_REEL:
-        # the hour frees up as the oldest requests of the window fall out of it
-        free_at = min(e["_at"] for e in recent) + WINDOW
-        reason = f"{used} Coverr requests in the last hour"
-    else:
+    if not blocks and remaining >= MIN_FOR_A_REEL:
         return {"action": "go", "budget": remaining - 2, "wait_s": 0,
                 "reason": f"{used} Coverr requests in the last hour, {remaining} left"}
-    wait = free_at - now
-    if wait <= MAX_WAIT:
-        return {"action": "wait", "budget": HOURLY_LIMIT - 5, "wait_s": max(0, int(wait.total_seconds()) + 30),
-                "reason": reason}
+    reason = (f"Coverr blocked at {max(blocks):%H:%M} UTC" if blocks
+              else f"{used} Coverr requests in the last hour")
+    earliest = max(blocks) + WINDOW if blocks else now
+    # the hour frees up as earlier requests fall out of it: first moment with enough budget
+    for t in sorted({earliest} | {e["_at"] + WINDOW for e in recent if e["_at"] + WINDOW >= earliest}):
+        still = sum(int(e.get("requests") or 0) for e in recent if e["_at"] > t - WINDOW)
+        budget = HOURLY_LIMIT - still - 2
+        if budget >= MIN_FOR_A_REEL:
+            wait = t - now
+            if wait <= MAX_WAIT:
+                return {"action": "wait", "budget": budget,
+                        "wait_s": max(0, int(wait.total_seconds()) + 30), "reason": reason}
+            break
     return {"action": "skip", "budget": 0, "wait_s": 0, "reason": reason}
 
 

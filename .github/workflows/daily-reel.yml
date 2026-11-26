@@ -107,7 +107,7 @@ jobs:
     # no-publish preview-to-Gmail flow were verified with live GitHub Actions.
     # Human issue approval is still mandatory; publish secret stays disabled.
     runs-on: ubuntu-24.04
-    timeout-minutes: 90  # may wait up to 35 min for Coverr's hourly window (providers.py)
+    timeout-minutes: 90  # may wait up to 60 min for Coverr's hourly window (providers.py)
     # Only non-secret configuration here. Secrets are passed to the two steps that
     # use them, never to dependency installation steps.
     env:
