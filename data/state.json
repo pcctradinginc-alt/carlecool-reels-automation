@@ -489,20 +489,60 @@
         "style_basis": "rotation (night)",
         "variant": "night"
       }
+    },
+    {
+      "track_id": "2437525038",
+      "at": "2026-11-26T20:04:23.174625+00:00",
+      "video_ids": [
+        "jrXaJAZ05E",
+        "ai-45886884447-0",
+        "WPxMF0h6Da",
+        "2FQl41Kv9c",
+        "lxzEzmUG1M",
+        "1JHPEi5yNC",
+        "aXikFcuhT6",
+        "sbOw3wGAH8"
+      ],
+      "sha256": "6a7d3536fba22de42be780ad30a57f2a39802936c0518dfd654c208153637a16",
+      "approval_issue": 57,
+      "provider": "zernio",
+      "target": "tiktok",
+      "provider_post_id": "6b0890ca34c85f292c654d65",
+      "platform_status": {
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 0,
+        "bpm": 152.0,
+        "first_shot_s": 1.54,
+        "hashtags": [
+          "#carlecool",
+          "#beatmaker",
+          "#instrumental",
+          "#producerlife",
+          "#lofibeats"
+        ],
+        "hook_at": 0.0,
+        "hook_line": "the drive home you don't want to end",
+        "length_bucket": "long",
+        "length_s": 25.26,
+        "opening_clip": "2FQl41Kv9c",
+        "opening_motif": "bridge night",
+        "opening_source": "coverr",
+        "question": false,
+        "roles": [
+          "woman"
+        ],
+        "scenes": 8,
+        "style": "lana",
+        "style_basis": "rotation (night)",
+        "text_hook": true,
+        "theme": "drive",
+        "variant": "night"
+      }
     }
   ],
-  "pending": {
-    "track_id": "2437525038",
-    "sha256": "6a7d3536fba22de42be780ad30a57f2a39802936c0518dfd654c208153637a16",
-    "at": "2026-11-26T20:04:23.174625+00:00",
-    "issue_number": 57,
-    "target": "tiktok",
-    "provider": "zernio",
-    "provider_post_id": "6b0890ca34c85f292c654d65",
-    "platform_status": {
-      "tiktok": "uploading"
-    }
-  },
+  "pending": null,
   "reconciled": [
     {
       "track_id": "2373071753",
