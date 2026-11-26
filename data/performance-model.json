@@ -1,75 +1,78 @@
 {
-  "observations": 8,
-  "min_posts": 4,
+  "observations": 10,
+  "min_posts": 30,
   "min_lift": 0.15,
   "length": {
-    "n_yes": 4,
-    "n_no": 4,
-    "lift": 0.191,
-    "decided": true,
-    "prefer": "short"
+    "n_yes": 5,
+    "n_no": 5,
+    "decided": false,
+    "prefer": null
   },
   "roles": {
     "gear": {
-      "n_yes": 1,
-      "n_no": 2,
+      "n_yes": 2,
+      "n_no": 3,
       "decided": false
     },
     "friends": {
-      "n_yes": 3,
+      "n_yes": 5,
       "n_no": 0,
       "decided": false
     },
     "flag": {
       "n_yes": 2,
-      "n_no": 1,
+      "n_no": 3,
       "decided": false
     },
     "car": {
-      "n_yes": 0,
-      "n_no": 3,
+      "n_yes": 1,
+      "n_no": 4,
       "decided": false
     },
     "americana": {
       "n_yes": 0,
-      "n_no": 3,
+      "n_no": 5,
       "decided": false
     },
     "skater": {
-      "n_yes": 3,
+      "n_yes": 5,
       "n_no": 0,
       "decided": false
     },
     "woman": {
-      "n_yes": 1,
+      "n_yes": 3,
       "n_no": 2,
       "decided": false
     },
     "friends2": {
       "n_yes": 0,
-      "n_no": 3,
+      "n_no": 5,
       "decided": false
     }
   },
   "question": {
     "n_yes": 1,
-    "n_no": 7,
+    "n_no": 9,
     "decided": false
   },
   "text": {
     "n_yes": 0,
-    "n_no": 8,
+    "n_no": 10,
     "decided": false,
     "prefer": null
   },
   "styles": {
     "lana": {
-      "n": 1,
-      "median_relative": 0.943
+      "n": 2,
+      "median_relative": 1.07
     },
     "rubin": {
       "n": 2,
-      "median_relative": 1.296
+      "median_relative": 1.312
+    },
+    "night": {
+      "n": 1,
+      "median_relative": 0.929
     }
   },
   "version": 2,
@@ -77,7 +80,7 @@
   "platforms": {
     "instagram": {
       "observations": 1,
-      "min_posts": 4,
+      "min_posts": 30,
       "min_lift": 0.15,
       "length": {
         "n_yes": 1,
@@ -146,80 +149,83 @@
       }
     },
     "tiktok": {
-      "observations": 8,
-      "min_posts": 4,
+      "observations": 10,
+      "min_posts": 30,
       "min_lift": 0.15,
       "length": {
-        "n_yes": 4,
-        "n_no": 4,
-        "lift": 0.191,
-        "decided": true,
-        "prefer": "short"
+        "n_yes": 5,
+        "n_no": 5,
+        "decided": false,
+        "prefer": null
       },
       "roles": {
         "gear": {
-          "n_yes": 1,
-          "n_no": 2,
+          "n_yes": 2,
+          "n_no": 3,
           "decided": false
         },
         "friends": {
-          "n_yes": 3,
+          "n_yes": 5,
           "n_no": 0,
           "decided": false
         },
         "flag": {
           "n_yes": 2,
-          "n_no": 1,
+          "n_no": 3,
           "decided": false
         },
         "car": {
-          "n_yes": 0,
-          "n_no": 3,
+          "n_yes": 1,
+          "n_no": 4,
           "decided": false
         },
         "americana": {
           "n_yes": 0,
-          "n_no": 3,
+          "n_no": 5,
           "decided": false
         },
         "skater": {
-          "n_yes": 3,
+          "n_yes": 5,
           "n_no": 0,
           "decided": false
         },
         "woman": {
-          "n_yes": 1,
+          "n_yes": 3,
           "n_no": 2,
           "decided": false
         },
         "friends2": {
           "n_yes": 0,
-          "n_no": 3,
+          "n_no": 5,
           "decided": false
         }
       },
       "question": {
         "n_yes": 1,
-        "n_no": 7,
+        "n_no": 9,
         "decided": false
       },
       "text": {
         "n_yes": 0,
-        "n_no": 8,
+        "n_no": 10,
         "decided": false,
         "prefer": null
       },
       "styles": {
         "lana": {
-          "n": 1,
-          "median_relative": 0.943
+          "n": 2,
+          "median_relative": 1.07
         },
         "rubin": {
           "n": 2,
-          "median_relative": 1.296
+          "median_relative": 1.312
+        },
+        "night": {
+          "n": 1,
+          "median_relative": 0.929
         }
       }
     }
   },
-  "observations_all": 9
+  "observations_all": 11
 }
