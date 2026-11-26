@@ -660,6 +660,97 @@
      "used_at": "2026-11-26"
     }
    ]
+  },
+  {
+   "at": "2026-11-26T20:00:30+00:00",
+   "run_id": 45886884447,
+   "song": "carl e cool - voco babie",
+   "sha256": "6a7d3536fba22de42be780ad30a57f2a39802936c0518dfd654c208153637a16",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co"
+   ],
+   "clips": [
+    {
+     "id": "jrXaJAZ05E",
+     "provider": "coverr",
+     "title": "Cars driving on the highway",
+     "page": "https://coverr.co/videos/cars-driving-on-the-highway-jrxajaz05e",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "ai-45886884447-0",
+     "provider": "ai",
+     "title": "LTX 2.3 original AI footage",
+     "page": "",
+     "creator": "",
+     "licence": "AI-generated footage (LTX-2.3); distribution subject to applicable terms",
+     "licence_url": "https://huggingface.co/Lightricks/LTX-2.3/blob/main/LICENSE",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "WPxMF0h6Da",
+     "provider": "coverr",
+     "title": "Road in the mountains",
+     "page": "https://coverr.co/videos/road-in-the-mountains-wpxmf0h6da",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "2FQl41Kv9c",
+     "provider": "coverr",
+     "title": "Blurry Brooklyn bridge",
+     "page": "https://coverr.co/videos/blurry-brooklyn-bridge-2fql41kv9c",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "lxzEzmUG1M",
+     "provider": "coverr",
+     "title": "Traffic in downtown NYC",
+     "page": "https://coverr.co/videos/traffic-in-downtown-nyc-lxzezmug1m",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "1JHPEi5yNC",
+     "provider": "coverr",
+     "title": "New York City at night",
+     "page": "https://coverr.co/videos/new-york-city-at-night-1jhpei5ync",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "aXikFcuhT6",
+     "provider": "coverr",
+     "title": "Cars on the highway",
+     "page": "https://coverr.co/videos/cars-on-the-highway-axikfcuht6",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "sbOw3wGAH8",
+     "provider": "coverr",
+     "title": "Woman watching the sunset",
+     "page": "https://coverr.co/videos/woman-watching-the-sunset-sbow3wgah8",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    }
+   ]
   }
  ]
 }
