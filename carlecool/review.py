@@ -146,12 +146,6 @@ def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | No
             "Zernio-Konten verbunden und die Publishing-Gates freigegeben sind.\n"
             "Mit /publish tiktok oder /publish both bestätigst du ausdrücklich,\n"
             "dass du das MP4 geprüft hast und es öffentlich auf TikTok erscheinen darf.\n"
-            "Weitere Optionen:\n"
-            "  /revise mehr natur, weniger skate  - Video neu gestalten\n"
-            "  /revise more_mpc              - mehr analoges Studio\n"
-            "  /revise preset_rubin_lana     - Natur und Americana\n"
-            "  /reject                       - verwerfen\n"
-            "  /approve                      - alte Kurzform für nur Instagram\n"
         )
     else:
         actions = (
@@ -232,7 +226,7 @@ def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = N
         action_area = (
             f'<a href="{h(url)}" style="display:inline-block;background:#1f2937;'
             'color:#fff;font-size:15px;font-weight:700;padding:15px 24px;'
-            'border-radius:10px;text-decoration:none">Video freigeben oder überarbeiten</a>'
+            'border-radius:10px;text-decoration:none">Freigabe auf GitHub öffnen</a>'
             '<p style="font-size:12px;color:#79818e;margin-top:13px">'
             'Öffnet ausschließlich die GitHub-Freigabe. Kein automatisches Posting.</p>'
             '<p style="font-size:12px;font-weight:700;color:#202b36;margin-top:24px">'
@@ -249,22 +243,8 @@ def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = N
             'Bei „beide“ wird vorab geprüft; bis dahin erfolgt auch kein Instagram-Post. '
             'Der Kommentar für TikTok bestätigt die Prüfung des MP4 und deine ausdrückliche '
             'Einwilligung zur öffentlichen TikTok-Veröffentlichung.</p>'
-            '<div style="margin-top:26px;border-top:1px solid #e8e6e1;padding-top:20px">'
-            '<p style="font-size:12px;font-weight:700;letter-spacing:1.2px;'
-            'color:#7b756e;margin:0 0 14px">DEINE OPTIONEN</p>'
-            '<p style="font-size:14px;color:#202b36;margin:0 0 14px">'
-            '<b>✳ Überarbeiten</b><br>'
-            '<code style="font-family:monospace;font-size:12px;color:#4b5563">'
-            '/revise mehr natur, weniger skate</code></p>'
-            '<p style="font-size:14px;color:#202b36;margin:0 0 14px">'
-            '<b>✓ Gefällt mir</b><br>'
-            '<code style="font-family:monospace;font-size:12px;color:#4b5563">'
-            '/approve</code> <span style="font-size:12px;color:#7b756e">'
-            '(Instagram-Sperre bleibt aktiv)</span></p>'
-            '<p style="font-size:14px;color:#202b36;margin:0">'
-            '<b>× Verwerfen</b><br>'
-            '<code style="font-family:monospace;font-size:12px;color:#4b5563">/reject</code></p>'
-            '</div>'
+            # owner, 26 Nov: the "Überarbeiten / Gefällt mir / Verwerfen" block is gone —
+            # the platform choice above is the only decision in the mail
         )
     else:
         action_area = (

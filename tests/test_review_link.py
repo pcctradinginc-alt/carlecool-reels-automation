@@ -33,7 +33,7 @@ def test_review_email_contains_safe_clickable_github_link(tmp_path, monkeypatch)
     html = sent[0].get_body(preferencelist=("html",)).get_content()
     text = sent[0].get_body(preferencelist=("plain",)).get_content()
     assert f'href="{url}"' in html
-    assert "/revise mehr natur, weniger skate" in html
+    assert "/revise mehr natur, weniger skate" not in html  # owner 26 Nov: options block removed
     assert "/approve" in text
     assert url in text
     assert sorted(x.get_filename() for x in sent[0].iter_attachments()) == [

@@ -23,10 +23,10 @@ def test_gmail_contains_clear_hero_label_and_designed_approval():
     assert "NEUER VIDEOENTWURF" in email
     assert "CARLECOOL" in email
     assert 'href="' + URL + '"' in email
-    assert "Video freigeben oder überarbeiten" in email
+    assert "Freigabe auf GitHub öffnen" in email
     assert "CarleCool-Original.mp4" in email
     assert "65%" in email
-    assert "/revise mehr natur, weniger skate" in email
+    assert "/revise mehr natur" not in email and "Gefällt mir" not in email and "DEINE OPTIONEN" not in email
     assert "/approve" in email
     assert "/reject" in email
     assert URL in plain
