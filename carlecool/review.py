@@ -446,6 +446,8 @@ def main():
     args = parser.parse_args()
     metadata = json.loads(Path(args.metadata).read_text(encoding='utf-8'))
     original = Path(metadata['output'])
+    if os.getenv('CARLECOOL_OFFLINE_SMOKE') == '1' or metadata.get('resolution') != '1080x1920':
+        raise RuntimeError('Offline or non-production render cannot be delivered')
     run_id = int(os.environ['GITHUB_RUN_ID'])
     metadata = prepare_delivery(metadata, run_id, Path(args.metadata))
     message_id = make_msgid(domain='carlecool.invalid')
