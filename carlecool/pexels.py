@@ -22,7 +22,7 @@ def configured() -> bool:
     return bool(os.getenv("PEXELS_API_KEY", "").strip())
 
 
-def _best_file(files: list) -> dict | None:
+def _best_file(files: list, *, landscape=False) -> dict | None:
     """Portrait MP4 closest to 1080×1920 (avoid 4K downloads, avoid < 720p)."""
     usable = []
     for f in files or []:
@@ -30,9 +30,9 @@ def _best_file(files: list) -> dict | None:
             w, h = int(f.get("width") or 0), int(f.get("height") or 0)
         except (TypeError, ValueError):
             continue
-        if f.get("file_type") != "video/mp4" or not f.get("link") or h <= w or h < 1280:
+        if f.get("file_type") != "video/mp4" or not f.get("link") or (min(w, h) < 720 if landscape else (h <= w or h < 1280)):
             continue
-        usable.append((abs(h - 1920), -h, f))
+        usable.append((abs((w if landscape else h) - 1920), -h, f))
     return min(usable, key=lambda x: (x[0], x[1]))[2] if usable else None
 
 
@@ -54,16 +54,17 @@ def search_pexels(key: str, keywords: list[str], recent: set[str], *, session=No
     seen: set[str] = set()
     lanes: list[list[Video]] = []
     stopped = False
-    for editorial in keywords[:3]:
+    from .video import allow_landscape
+    for editorial in keywords[:6]:
         if stopped:
             break
         lane: list[Video] = []
-        for attempt, query in enumerate(query_ladder(editorial)[:2]):
+        for attempt, (query, orientation) in enumerate([(q, "portrait") for q in query_ladder(editorial)[:2]] + ([(query_ladder(editorial)[0], "landscape")] if allow_landscape() else [])):
             if attempt and len(lane) >= per_lane_minimum:
                 break
             try:
                 r = session.get(API, headers={"Authorization": key}, timeout=30,
-                                params={"query": query, "orientation": "portrait", "size": "medium",
+                                params={"query": query, "orientation": orientation, "size": "medium",
                                         "per_page": per_query})
                 r.raise_for_status()
                 videos = r.json().get("videos", [])
@@ -76,13 +77,13 @@ def search_pexels(key: str, keywords: list[str], recent: set[str], *, session=No
                 vid = f"px-{item.get('id')}"
                 if not item.get("id") or vid in seen or vid in recent:
                     continue
-                best = _best_file(item.get("video_files"))
+                best = _best_file(item.get("video_files"), landscape=orientation == "landscape")
                 if best is None:
                     continue
                 seen.add(vid)
                 name, url = _credit(item.get("user") or {})
                 lane.append(Video(vid, "pexels", url=str(best["link"]), title=str(item.get("url") or ""),
-                                  vertical=True, creator_name=name, creator_url=url, query=editorial,
+                                  vertical=int(best.get("height") or 0) > int(best.get("width") or 0), page_url=str(item.get("url") or ""), creator_name=name, creator_url=url, query=editorial,
                                   thumb_url=str(item.get("image") or ""),
                                   duration=float(item.get("duration") or 0),
                                   width=int(best.get("width") or 0), height=int(best.get("height") or 0)))
