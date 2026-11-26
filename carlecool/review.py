@@ -113,13 +113,28 @@ def _style_line(metadata: dict) -> str:
     return " · ".join(parts) + "  (ändern: /revise stil lana|rubin|night|auto)"
 
 
+def footage_summary(metadata):
+    from collections import Counter
+    counts = Counter(x.get("provider", "unknown") for x in metadata.get("footage_sources", []))
+    return ", ".join(f"{k}: {v}" for k, v in sorted(counts.items())) or "nicht dokumentiert"
+
+
+def quality_summary(metadata):
+    q = metadata.get("final_quality")
+    if not q:
+        return "Keine Endproduktprüfung dokumentiert"
+    return ("Technik: " + ("bestanden" if not q["errors"] else "Fehler")
+            + "; Szenenquellen: " + str(q["distinct_sources"]) + "/" + str(q["shots"])
+            + "; Hinweise: " + (", ".join(q["warnings"]) or "keine"))
+
+
 def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | None = None) -> str:
     """Copy-friendly alternatives to HTML mail, never publish on link open."""
     title = str(metadata.get("song_label") or metadata.get("title", "Neuer Track"))
     profile = metadata.get("creative_profile") or {}
     duration = round(float(metadata.get("duration", 15) or 15))
     ai = any(x.get("provider") == "ai" for x in metadata.get("footage_sources", []))
-    footage_label = "KI-Kurzclip (LTX-2.3) + Coverr" if ai else "kuratierte Coverr-Clips"
+    footage_label = footage_summary(metadata)
     if issue_url:
         actions = (
             f"DEIN FREIGABELINK:\n{issue_url}\n\n"
@@ -164,6 +179,7 @@ def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | No
         "dann den nächsten Schritt auswählen.\n\n"
         + actions + "\n"
         f"FOOTAGE: {footage_label}\n"
+        f"QUALITÄT: {quality_summary(metadata)}\n"
         f"STIL: {_style_line(metadata)}\n"
         f"LOOK: {profile.get('preset', 'Rubin / Analog / Americana / Skate')}\n"
         f"SCHNITT: {profile.get('pace', 'medium')}   "
@@ -186,7 +202,7 @@ def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = N
     duration = h(round(float(metadata.get("duration", 15) or 15)))
     analog = h(profile.get("analog", 65))
     ai = any(x.get("provider") == "ai" for x in metadata.get("footage_sources", []))
-    footage_label = "1 KI-Shot + Coverr" if ai else "kuratierte Coverr-Clips"
+    footage_label = footage_summary(metadata)
     source = _safe_public_link(str(metadata.get("permalink") or ""), host="soundcloud.com")
     song = (
         f'<a href="{h(source)}" style="color:#606d81;text-decoration:underline">Song auf SoundCloud</a>'
@@ -281,6 +297,7 @@ def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = N
         f'<b style="color:#202b36">BILDER</b> &nbsp;{h(footage_label)}<br>'
         f'<b style="color:#202b36">SCHNITT</b> &nbsp;{h(pace)}'
         f' &nbsp;&nbsp;<b style="color:#202b36">ANALOG</b> &nbsp;{analog}%'
+        f'<br><b>QUALITÄT</b> {h(quality_summary(metadata))}'
         '</td></tr></table>'
         '<p style="font-size:13px;color:#79818e;margin:22px 0 20px">'
         '▶ Dein Video liegt als <b>CarleCool-Original.mp4</b> im Anhang.</p>'
@@ -337,7 +354,9 @@ def send_review_email(issue_url: str, metadata: dict, original_path: Path | None
     msg.add_attachment(meta_bytes, maintype='application', subtype='json', filename='reel_metadata.json')
     with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=40) as smtp:
         smtp.login(sender, password)
-        smtp.send_message(msg)
+        refused = smtp.send_message(msg)
+        if refused:
+            raise RuntimeError('SMTP refused review recipient')
     return True
 
 
@@ -427,6 +446,8 @@ def main():
     args = parser.parse_args()
     metadata = json.loads(Path(args.metadata).read_text(encoding='utf-8'))
     original = Path(metadata['output'])
+    if os.getenv('CARLECOOL_OFFLINE_SMOKE') == '1' or metadata.get('resolution') != '1080x1920':
+        raise RuntimeError('Offline or non-production render cannot be delivered')
     run_id = int(os.environ['GITHUB_RUN_ID'])
     metadata = prepare_delivery(metadata, run_id, Path(args.metadata))
     message_id = make_msgid(domain='carlecool.invalid')
@@ -436,14 +457,24 @@ def main():
         _remember_sent_preview(metadata, run_id, 'test')
         print('Private dry-run email sent; no approval issue, no Instagram call')
         return
+    from . import production_journal as journal
+    journal_date = os.getenv("CARLECOOL_PRODUCTION_DATE")
+    if journal_date and journal.check(journal_date):
+        print("Daily delivery already confirmed; no duplicate email")
+        return
     issue = create_review(metadata, run_id=run_id,
                           token=os.environ['GH_TOKEN'], repo=os.environ['GITHUB_REPOSITORY'],
                           mail_message_id=message_id)
+    if journal_date and not journal.begin(journal_date, run_id, message_id, metadata["sha256"]):
+        return
     try:
         if not send_review_email(issue['html_url'], metadata, original,
                                  message_id=message_id, run_id=run_id):
             raise RuntimeError('Gmail configuration is missing; no preview was sent')
     except Exception:
+        # Ambiguous SMTP result: keep the approval record for Sent reconciliation.
+        if journal_date:
+            raise
         # Fail closed; don't leave an unservable approval issue if delivery fails.
         try:
             github_request('PATCH', f"issues/{issue['number']}",
@@ -452,6 +483,8 @@ def main():
         except Exception as cleanup_error:
             print('Warning: review issue cleanup failed:', type(cleanup_error).__name__)
         raise
+    if journal_date:
+        journal.complete(journal_date, run_id)
     _remember_sent_preview(metadata, run_id, 'daily')
     print('Private review email delivered; approval issue:', issue['html_url'])
 

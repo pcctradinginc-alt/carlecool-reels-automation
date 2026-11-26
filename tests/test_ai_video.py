@@ -71,7 +71,8 @@ def test_daily_pipeline_ai_is_strictly_opt_in():
     content = Path(".github/workflows/daily-reel.yml").read_text()
     assert type(load_profile()["ai_video"]) is bool
     assert default_profile()["ai_video"] is False
-    assert "CARLECOOL_AI_VIDEO: 'one'" in content
+    assert "vars.CARLECOOL_AI_VIDEO" in content
+    assert "profile[\"ai_video\"]" in Path("carlecool/main.py").read_text()
     assert apply_commands(load_profile(), ["ai_video"])["ai_video"] is True
     assert apply_commands(apply_commands(load_profile(), ["ai_video"]),
                           ["coverr_only"])["ai_video"] is False

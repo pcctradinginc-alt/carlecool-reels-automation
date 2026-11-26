@@ -38,7 +38,8 @@ def main():
             'license_confirmed': True, 'commercial_social_allowed': True
         }]}))
         env = os.environ.copy()
-        env.update({'CARLECOOL_MIN_QUALITY': 'off',  # one synthetic clip on purpose
+        env.update({'CARLECOOL_OFFLINE_SMOKE': '1',
+                    'CARLECOOL_MIN_QUALITY': 'off',  # one synthetic clip on purpose
                     'CARLECOOL_TEXT_HOOK': 'always',  # render path of the text hook (25 Nov)
                     'REEL_SECONDS': '15', 'REEL_WIDTH': '270', 'REEL_HEIGHT': '480',
                     'COVERR_API_KEY': '', 'SOUNDCLOUD_CLIENT_ID': '',
@@ -67,6 +68,8 @@ def main():
         except ImportError:
             pass
         assert meta['resolution'] == '270x480'
+        assert meta['final_quality']['errors'] == []
+        assert meta['final_quality']['resolution'] == [270, 480]
         assert json.loads((root / 'data/state.json').read_text())['published'] == []
         # Three filmic variants from synthetic music and synthetic licensed stock.
         # No emails, public media artifacts, API or real song required.

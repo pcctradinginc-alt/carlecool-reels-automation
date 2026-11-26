@@ -21,9 +21,6 @@ on:
       timezone: 'Europe/Berlin'
   # One-off, opt-in test run: editing this workflow starts a REAL approval email,
   # never a social publication. The rendered video still needs owner approval.
-  push:
-    branches: [main]
-    paths: ['.github/workflows/daily-reel.yml']
   workflow_dispatch:
     inputs:
       mode:
@@ -63,14 +60,31 @@ jobs:
     timeout-minutes: 3
     outputs:
       skip: ${{ steps.check.outputs.skip }}
+      date: ${{ steps.check.outputs.date }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install requests
       - id: check
         env:
           GH_TOKEN: ${{ github.token }}
           EVENT: ${{ github.event_name }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: |
           skip=false
+          day=$(TZ=Europe/Berlin date +%F)
+          echo "date=$day" >> "$GITHUB_OUTPUT"
           if [ "$EVENT" = "schedule" ]; then
+            journal_result=$(python -c 'import sys; from carlecool.production_journal import check; print(check(sys.argv[1]))' "$day")
+            if [ "$journal_result" = "True" ]; then
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
             since=$(date -u -d "$(TZ=Europe/Berlin date +%Y-%m-%d) 00:00 $(TZ=Europe/Berlin date +%z)" +%Y-%m-%dT%H:%M:%SZ)
             # The concurrency group serializes runs. Queued runs are not deliveries.
             # Include push-triggered review runs and exclude manual dry runs.
@@ -97,7 +111,7 @@ jobs:
     # Only non-secret configuration here. Secrets are passed to the two steps that
     # use them, never to dependency installation steps.
     env:
-      CARLECOOL_AI_VIDEO: 'one'
+      CARLECOOL_AI_VIDEO: ${{ vars.CARLECOOL_AI_VIDEO || 'multi' }}
       CARLECOOL_TRENDS: 'true'
       CARLECOOL_COVER_MATCH: 'true' # Creative v3: enable safe, local album-art palette ranking
       CARLECOOL_STYLE: ${{ inputs.style || vars.CARLECOOL_STYLE || 'auto' }}
@@ -146,11 +160,12 @@ jobs:
           set -euo pipefail
           python -m pip install --disable-pip-version-check --retries 1 --timeout 45 'open_clip_torch>=3,<4' 'Pillow>=10,<13'
       - name: Install optional AI video client
+        continue-on-error: true
         timeout-minutes: 5
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "${CARLECOOL_AI_VIDEO:-off}" == "one" ]]; then
+          if [[ "${CARLECOOL_AI_VIDEO:-off}" != "off" ]]; then
             timeout 240s python -m pip install --disable-pip-version-check --retries 2 --timeout 20 'gradio_client>=1.13,<3'
           else
             echo "Experimental AI client disabled; skipping installation"
@@ -173,7 +188,7 @@ jobs:
       - name: Deliver private approval email
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'review' }}
         env:
-          MODE: ${{ github.event_name != 'workflow_dispatch' && 'review' || inputs.mode }}
+          CARLECOOL_PRODUCTION_DATE: ${{ github.event_name == 'schedule' && needs.guard.outputs.date || '' }}
           GH_TOKEN: ${{ github.token }}
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}

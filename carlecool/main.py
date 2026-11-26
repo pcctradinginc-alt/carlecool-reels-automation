@@ -182,6 +182,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     # Length test (≈12 s vs ≈30 s, per song in turn) and what the numbers taught so far.
     from . import performance
     perf_model = performance.load_model()
+    if int(perf_model.get("observations", 0)) < 60:
+        perf_model = {}  # observation only until a meaningful sample exists
     length_choice = performance.choose_length(track.id, previews, config.reel_seconds, edition, perf_model)
     print(f"Reel length: {length_choice['bucket']} (target {length_choice['target']:.0f}s; {length_choice['reason']})")
     features = analyze_audio(str(audio), length_choice["target"], track.genre, fixed_start=fixed_start)
@@ -314,8 +316,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
             print(f"Clip skipped (already {MAX_PER_MOTIF} clips of '{motif}'): {video.id}")
             continue
         if coverr_blocked() and video.source == "coverr":
-            print(f"Coverr {coverr_blocked()} — remaining Coverr candidates skipped")
-            break
+            print(f"Coverr {coverr_blocked()} — Coverr candidate skipped; other sources remain eligible")
+            continue
         try:
             target = output_dir / f"stock_{len(paths) + len(landscape_reserve):02d}.mp4"
             path = fetch_owned_stock(video, target) if video.source == "owned" else download_video(video.url, target)
@@ -371,25 +373,35 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         paths.append(Path(video.path))
     print(f"Footage: {portrait_count} portrait + {len(paths) - portrait_count - len(archival)} landscape fill-in"
           f" + {len(archival)} archival clips")
-    if not paths:
-        raise RuntimeError("No licensed clips available; add assets/stock and manifest.json as fallback")
     # Optional AI shot: appended LAST and excluded from the opening/closing shot,
     # because it is short (2 s) and low resolution (512×768).
-    if profile["ai_video"] and os.getenv("CARLECOOL_AI_VIDEO", "off") == "one":
-        try:
-            from .ai_video import generate_one
-            ai_path = generate_one(style_pkg.AI_DIRECTION.get(style_name, keywords[0]),
-                                   output_dir / "ai_experiment.mp4")
-            selected.append(Video(id="hf-ltx23-" + track.id, source="ai",
-                                  title="LTX 2.3 original AI footage", path=str(ai_path)))
-            paths.append(ai_path)
-            print("Experimental AI footage ready: 1 scene; no audio uploaded to HF.")
-        except Exception as exc:
-            # Only emit internally sanitized AIUnavailable status, never raw
-            # Gradio HTTP exceptions, signed URLs or optional HF token.
-            from .ai_video import AIUnavailable
-            reason = str(exc) if isinstance(exc, AIUnavailable) else type(exc).__name__
-            print("Experimental AI footage unavailable, Coverr fallback: " + reason)
+    ai_mode = os.getenv("CARLECOOL_AI_VIDEO", "off")
+    ai_facts = []
+    if profile["ai_video"] and ai_mode in ("one", "multi"):
+        from .ai_video import generate_one, AIUnavailable
+        from .quality_gate import clip_metrics, ai_usable
+        from .creative_director import ai_directions
+        directions = ai_directions(style_name, style_variant, keywords, style_decision, edition)
+        limit = 1 if ai_mode == "one" else (2 if reel_length < 21 else 3)
+        for i, direction in enumerate(directions[:limit]):
+            try:
+                ai_path = generate_one(direction, output_dir / f"ai_experiment_{i}.mp4", timeout_seconds=190)
+                metrics = clip_metrics(ai_path)
+                if not ai_usable(metrics):
+                    ai_facts.append({"index": i, "status": "rejected", "metrics": metrics})
+                    continue
+                if not unique(Video(f"ai-{edition}-{i}", "ai"), ai_path):
+                    continue
+                selected.append(Video(id=f"ai-{edition}-{i}", source="ai",
+                                      title="LTX 2.3 original AI footage", path=str(ai_path)))
+                paths.append(ai_path)
+                ai_facts.append({"index": i, "status": "accepted", "metrics": metrics, "direction": direction})
+            except Exception as exc:
+                ai_facts.append({"index": i, "status": "unavailable", "reason": str(exc) if isinstance(exc, AIUnavailable) else type(exc).__name__})
+                print("Free AI provider unavailable; no retries or paid fallback")
+                break
+    if not paths:
+        raise RuntimeError("No usable footage available")
     cover_matching = {"available": cover is not None, "scores": [],
                       "search": cover_choice, "prerank": prerank}
     if cover is not None:
@@ -516,6 +528,10 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     finally:
         if cover is not None:
             cover.unlink(missing_ok=True)
+    from .quality_gate import inspect_reel
+    quality = inspect_reel(out, details, reel_length)
+    if quality["errors"]:
+        raise QualityTooLow("Final master: " + "; ".join(quality["errors"]))
     from . import captions
     caption_copy = captions.variant(style_name, style_variant, edition)
     if performance.ask_question(perf_model, bool(caption_copy["question"])) != bool(caption_copy["question"]):
@@ -553,7 +569,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "music_analysis": {"analyzer": features.analyzer, "reel_length": reel_length,
                            "hook_at": features.hook_at, "beats": len(features.beats),
                            "downbeats": len(features.downbeats)},
-        "trend_signals": trend_signals,
+        "trend_signals": trend_signals, "final_quality": quality, "ai_generation": ai_facts,
         "output": str(out), "sha256": hashlib.sha256(out.read_bytes()).hexdigest(), **details,
     }
     (output_dir / "reel_metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
