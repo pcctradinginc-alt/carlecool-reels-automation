@@ -183,6 +183,158 @@
      "used_at": "2026-11-25"
     }
    ]
+  },
+  {
+   "at": "2026-11-26T14:29:52+00:00",
+   "run_id": 45661437163,
+   "song": "carl e cool - nastro azzuro",
+   "sha256": "60551cf6ee9bfa76e9ffb5913bd3ab11d9ecdc2b36104c25d83e10cdc6854ca1",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co",
+    "🎬 Archive footage: Orange County Archives, California Revealed, public domain (archive.org)"
+   ],
+   "clips": [
+    {
+     "id": "pl-castaoca_000162",
+     "provider": "prelinger",
+     "title": "Clark Family Home Movies",
+     "page": "https://archive.org/details/castaoca_000162",
+     "creator": "Orange County Archives (public domain)",
+     "licence": "Public domain (Orange County Archives)",
+     "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "v3jFAji3Ix",
+     "provider": "coverr",
+     "title": "Pouring wine into glasses",
+     "page": "https://coverr.co/videos/pouring-wine-into-glasses-v3jfaji3ix",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "pl-cahuca_000018",
+     "provider": "prelinger",
+     "title": "Voter's Pipeline, Huntington Beach, ~1975",
+     "page": "https://archive.org/details/cahuca_000018",
+     "creator": "California Revealed (public domain)",
+     "licence": "Public domain (California Revealed)",
+     "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "QzT6LnFfHB",
+     "provider": "coverr",
+     "title": "Futuristic Cityscape with Hovering Vehicles",
+     "page": "https://coverr.co/videos/futuristic-cityscape-with-hovering-vehicles",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "nFsTOv1qTq",
+     "provider": "coverr",
+     "title": "A retro car in the rain",
+     "page": "https://coverr.co/videos/a-retro-car-in-the-rain-nfstov1qtq",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "pqzaxSMXtf",
+     "provider": "coverr",
+     "title": "Prepping three cocktails",
+     "page": "https://coverr.co/videos/prepping-three-cocktails-pqzaxsmxtf",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "GKQ7SM1a3l",
+     "provider": "coverr",
+     "title": "Family waving sparklers",
+     "page": "https://coverr.co/videos/family-waving-sparklers-gkq7sm1a3l",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "YKlJkmO6Y1",
+     "provider": "coverr",
+     "title": "Family beach house",
+     "page": "https://coverr.co/videos/family-beach-house-ykljkmo6y1",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "VcnCCKamBm",
+     "provider": "coverr",
+     "title": "Two horses meeting ",
+     "page": "https://coverr.co/videos/two-horses-meeting-vcncckambm",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "1WKKoZRZeT",
+     "provider": "coverr",
+     "title": "Skateboarder",
+     "page": "https://coverr.co/videos/skateboarder-1wkkozrzet",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "qyl0o9RJvY",
+     "provider": "coverr",
+     "title": "Friends walking on the beach",
+     "page": "https://coverr.co/videos/friends-walking-on-the-beach-qyl0o9rjvy",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "saDe0TN6BS",
+     "provider": "coverr",
+     "title": "Close-up of a girl walking on the beach",
+     "page": "https://coverr.co/videos/close-up-of-a-girl-walking-on-the-beach-sade0tn6bs",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "UhS3ZlR42g",
+     "provider": "coverr",
+     "title": "Silver Porsche on a Rainy, Winding Forest Road — Scenic Drive",
+     "page": "https://coverr.co/videos/silver-porsche-on-a-rainy-winding-forest-road-scenic-drive",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "3Z0M8FR8DR",
+     "provider": "coverr",
+     "title": "Couple walking through the meadow",
+     "page": "https://coverr.co/videos/couple-walking-through-the-meadow-3z0m8fr8dr",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    }
+   ]
   }
  ]
 }
