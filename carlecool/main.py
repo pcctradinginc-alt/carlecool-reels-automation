@@ -373,8 +373,6 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         paths.append(Path(video.path))
     print(f"Footage: {portrait_count} portrait + {len(paths) - portrait_count - len(archival)} landscape fill-in"
           f" + {len(archival)} archival clips")
-    if not paths:
-        raise RuntimeError("No licensed clips available; add assets/stock and manifest.json as fallback")
     # Optional AI shot: appended LAST and excluded from the opening/closing shot,
     # because it is short (2 s) and low resolution (512×768).
     ai_mode = os.getenv("CARLECOOL_AI_VIDEO", "off")
@@ -387,7 +385,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         limit = 1 if ai_mode == "one" else (2 if reel_length < 21 else 3)
         for i, direction in enumerate(directions[:limit]):
             try:
-                ai_path = generate_one(direction, output_dir / f"ai_experiment_{i}.mp4", timeout_seconds=120)
+                ai_path = generate_one(direction, output_dir / f"ai_experiment_{i}.mp4", timeout_seconds=190)
                 metrics = clip_metrics(ai_path)
                 if not ai_usable(metrics):
                     ai_facts.append({"index": i, "status": "rejected", "metrics": metrics})
@@ -399,9 +397,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                 paths.append(ai_path)
                 ai_facts.append({"index": i, "status": "accepted", "metrics": metrics, "direction": direction})
             except Exception as exc:
-                ai_facts.append({"index": i, "status": "unavailable", "reason": type(exc).__name__})
+                ai_facts.append({"index": i, "status": "unavailable", "reason": str(exc) if isinstance(exc, AIUnavailable) else type(exc).__name__})
                 print("Free AI provider unavailable; no retries or paid fallback")
                 break
+    if not paths:
+        raise RuntimeError("No usable footage available")
     cover_matching = {"available": cover is not None, "scores": [],
                       "search": cover_choice, "prerank": prerank}
     if cover is not None:
