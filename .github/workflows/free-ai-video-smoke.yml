@@ -24,11 +24,10 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
-      - name: Install ZeroGPU client and FFprobe
+      - name: Install ZeroGPU client and production FFmpeg
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
-          pip install 'gradio_client>=1.13,<3'
+          pip install 'gradio_client>=1.13,<3' 'imageio-ffmpeg==0.6.0'
+          python scripts/setup_ffmpeg.py
       - name: Verify personal Hugging Face token is available without revealing it
         shell: bash
         run: |

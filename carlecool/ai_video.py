@@ -73,7 +73,7 @@ def _result_path(result) -> Path:
     """Recognize the gr.Video Gradio-client output shape, never a remote URL."""
     video = result[0] if isinstance(result, (tuple, list)) and result else result
     if isinstance(video, dict):
-        video = video.get("video")
+        video = video.get("video", video)
         if isinstance(video, dict):
             video = video.get("path") or video.get("name")
     if not isinstance(video, str) or not video or video.startswith(("http:", "https:")):
@@ -87,13 +87,28 @@ def _result_path(result) -> Path:
 
 
 def _valid_video(path: Path) -> bool:
+    """Decode real video frames with the same portable FFmpeg used by production."""
+    executable = shutil.which("ffmpeg")
+    if not executable:
+        try:
+            import imageio_ffmpeg
+            executable = imageio_ffmpeg.get_ffmpeg_exe()
+        except (ImportError, RuntimeError):
+            raise AIUnavailable("LOCAL_DECODER_MISSING") from None
     inspection = subprocess.run(
-        ["ffprobe", "-v", "error", "-select_streams", "v:0",
-         "-show_entries", "stream=codec_type", "-of", "json", str(path)],
-        capture_output=True, text=True, check=True, timeout=25,
+        [executable, "-hide_banner", "-v", "error", "-xerror", "-i", str(path),
+         "-map", "0:v:0", "-an", "-frames:v", "12", "-f", "null", "-"],
+        capture_output=True, timeout=30,
     )
-    streams = json.loads(inspection.stdout).get("streams", [])
-    return bool(streams and streams[0].get("codec_type") == "video")
+    if inspection.returncode != 0:
+        return False
+    # A second lightweight check requires a non-empty decoded frame, not just a stream header.
+    frame = subprocess.run(
+        [executable, "-v", "error", "-i", str(path), "-map", "0:v:0", "-frames:v", "1",
+         "-vf", "scale=32:32", "-pix_fmt", "rgb24", "-f", "rawvideo", "-"],
+        capture_output=True, timeout=30,
+    )
+    return frame.returncode == 0 and len(frame.stdout) == 32 * 32 * 3
 
 
 def generate_one(direction: str, destination: Path, *, client=None,
@@ -101,23 +116,30 @@ def generate_one(direction: str, destination: Path, *, client=None,
     """Exactly one 2s generation request, bounded. Do not retry over quota."""
     if not 60 <= timeout_seconds <= 240:
         raise ValueError("Allowed ZeroGPU request timeout is 60..240s")
-    client = client or _client()
     prompt = storyboard_prompt(direction)
     seed = int.from_bytes(hashlib.sha256(prompt.encode()).digest()[:4], "big") % (2**31 - 1)
     destination.parent.mkdir(parents=True, exist_ok=True)
+    stage = "connect"
     try:
+        client = client or _client()
+        stage = "submit"
         # Lightricks/LTX-2-3 app.py documents:
         # image, prompt, duration, enhance, seed, randomize, height, width.
         job = client.submit(
             None, prompt, 2.0, False, seed, False, 768, 512,
             api_name=API_NAME,
         )
+        stage = "remote_result"
         result = job.result(timeout=timeout_seconds)
+        stage = "downloaded_file"
         source = _result_path(result)
+        stage = "local_decode"
         if not _valid_video(source):
             raise AIUnavailable("Generated file has no decoded video stream")
+        stage = "copy"
         if source.resolve() != destination.resolve():
             shutil.copyfile(source, destination)
+        print("AI generation PASS: local video decoded and copied")
         return destination
     except (KeyboardInterrupt, SystemExit):
         raise
@@ -125,7 +147,7 @@ def generate_one(direction: str, destination: Path, *, client=None,
         destination.unlink(missing_ok=True)
         # Never log Gradio exception bodies; they could disclose remote info.
         if isinstance(exc, AIUnavailable):
-            raise
+            raise AIUnavailable(f"{stage}: {exc}") from None
         # Classify upstream failures without leaking remotely supplied
         # exception messages, URLs, signed payloads, or user identifiers.
         detail = str(exc).lower()
@@ -136,7 +158,7 @@ def generate_one(direction: str, destination: Path, *, client=None,
             "UNAVAILABLE"
         )
         raise AIUnavailable("Free ZeroGPU video generation unavailable: " +
-                            category + " / " + type(exc).__name__) from None
+                            category + " / " + stage + " / " + type(exc).__name__) from None
 
 
 def main():
@@ -163,8 +185,9 @@ def main():
                 print("PASS: Actual 2-second ZeroGPU video generated and validated; "
                       "temporary output erased. No GitHub artifact, no email or post.")
     except Exception as exc:
-        # Only print stage + exception class; never raw URLs or authentication.
-        print("UNAVAILABLE: free LTX at " + stage + " / " + type(exc).__name__)
+        # AIUnavailable messages are sanitized by this adapter.
+        detail = str(exc) if isinstance(exc, AIUnavailable) else type(exc).__name__
+        print("UNAVAILABLE: free LTX at " + stage + " / " + detail)
         raise SystemExit(2)
 
 
