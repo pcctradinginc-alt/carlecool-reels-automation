@@ -125,6 +125,19 @@ def _coverr_creator_metadata(item: dict) -> tuple[str, str]:
 # search / download-stats endpoints). Once seen, further Coverr calls are skipped instead of
 # burning more requests, and the quality check before the review mail knows why.
 COVERR_BLOCK: dict[str, int | None] = {"status": None}
+COVERR_REQUESTS = 0
+COVERR_MAX_REQUESTS = 35  # leave headroom below the documented hourly allowance
+
+
+def reserve_coverr_request():
+    global COVERR_REQUESTS
+    if coverr_blocked():
+        raise RuntimeError(f"Coverr {coverr_blocked()}: blocked for this run")
+    if COVERR_REQUESTS >= COVERR_MAX_REQUESTS:
+        COVERR_BLOCK["status"] = 429
+        raise RuntimeError("Coverr 429: local request budget exhausted")
+    COVERR_REQUESTS += 1
+
 
 
 def coverr_blocked() -> int | None:
@@ -150,9 +163,12 @@ def record_coverr_download(video_id: str, api_key: str, *, session=None):
     if not api_key:
         raise RuntimeError("Coverr API key missing for download tracking")
     session = session or requests.Session()
+    reserve_coverr_request()
     response = session.patch(
         f"https://api.coverr.co/videos/{video_id}/stats/downloads",
         headers={"x-api-key": api_key}, timeout=20)
+    if response.status_code in (403, 429):
+        COVERR_BLOCK["status"] = response.status_code
     response.raise_for_status()
     if response.status_code != 204:
         raise RuntimeError("Coverr download stats endpoint did not acknowledge selection")
@@ -263,6 +279,7 @@ def _is_portrait(item: dict) -> bool:
 def _coverr_request(session, key: str, query: str, page_size: int):
     if coverr_blocked():
         raise RuntimeError(f"Coverr {coverr_blocked()}: blocked earlier in this run; request skipped")
+    reserve_coverr_request()
     r = session.get(
         "https://api.coverr.co/videos",
         headers={"x-api-key": key},
@@ -387,7 +404,8 @@ def gather_videos(key: str, mood: str, recent: set[str], wanted=8, *, keywords=N
         except (requests.RequestException, RuntimeError, ValueError) as exc:
             print(f"Pexels unavailable; continuing with Coverr: {type(exc).__name__}")
     try:
-        selected += search_coverr(key, mood, recent, wanted=wanted, keywords=phrases,
+        if not coverr_blocked():
+            selected += search_coverr(key, mood, recent, wanted=wanted, keywords=phrases,
                                   max_lanes=max_lanes, exact=exact)
     except (requests.RequestException, RuntimeError, ValueError) as exc:
         print(f"Coverr unavailable; using licensed local fallback: {type(exc).__name__}")
