@@ -38,3 +38,14 @@ def test_quality_flags_actual_repeated_sources(monkeypatch):
     result = gate.inspect_reel("test.mp4", {"edit_plan": [{"source_index": 0}]*4}, 18)
     assert not result["errors"]
     assert result["warnings"]
+
+
+def test_low_resolution_only_allowed_in_explicit_offline_smoke(monkeypatch):
+    from carlecool import render
+    monkeypatch.setattr(render, "probe_dimensions", lambda p: (270,480))
+    monkeypatch.setattr(render, "probe_duration", lambda p: 18)
+    monkeypatch.setattr(gate.subprocess, "run", lambda *a, **k: Mock(returncode=0, stderr="max_volume: -1.5 dB"))
+    monkeypatch.delenv("CARLECOOL_OFFLINE_SMOKE", raising=False)
+    assert gate.inspect_reel("test.mp4", {}, 18)["errors"]
+    monkeypatch.setenv("CARLECOOL_OFFLINE_SMOKE", "1")
+    assert not gate.inspect_reel("test.mp4", {}, 18)["errors"]
