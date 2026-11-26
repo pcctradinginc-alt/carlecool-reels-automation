@@ -77,3 +77,35 @@ def test_daily_pipeline_ai_is_strictly_opt_in():
                           ["coverr_only"])["ai_video"] is False
     assert "upload-artifact" not in Path(
         ".github/workflows/free-ai-video-smoke.yml").read_text()
+
+
+def test_decode_without_ffprobe(tmp_path, monkeypatch):
+    import imageio_ffmpeg
+    import subprocess
+    ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    clip = tmp_path / "real.mp4"
+    subprocess.run([ffmpeg, "-v", "error", "-f", "lavfi", "-i",
+                    "testsrc2=size=128x192:rate=24", "-t", "2",
+                    "-c:v", "libx264", str(clip)], check=True)
+    monkeypatch.setattr(ai_video.shutil, "which", lambda name: None)
+    assert ai_video._valid_video(clip)
+    broken = tmp_path / "broken.mp4"
+    broken.write_bytes(b"x" * 4096)
+    assert not ai_video._valid_video(broken)
+
+
+def test_result_filedata_shape(tmp_path):
+    clip = tmp_path / "video.mp4"
+    clip.write_bytes(b"x" * 4096)
+    assert ai_video._result_path(({"path": str(clip)}, 42)) == clip
+
+
+def test_failure_stage_is_reported_without_remote_details(tmp_path, monkeypatch):
+    clip = tmp_path / "video.mp4"
+    clip.write_bytes(b"x" * 4096)
+    def fail(path):
+        raise FileNotFoundError("private path")
+    monkeypatch.setattr(ai_video, "_valid_video", fail)
+    with pytest.raises(ai_video.AIUnavailable, match="local_decode / FileNotFoundError") as error:
+        ai_video.generate_one("sunset", tmp_path / "out.mp4", client=FakeClient(clip))
+    assert "private path" not in str(error.value)
