@@ -83,3 +83,17 @@ def test_title_card_png_is_transparent_and_centred(tmp_path):
         box = alpha.getbbox()
         assert box and 150 < (box[1] + box[3]) / 2 < 270  # text block slightly above centre
     assert make_title_card("carl e cool", "   ", 270, 480, tmp_path / "x.png") is None
+
+
+@pytest.fixture(autouse=True)
+def isolate_coverr_state(monkeypatch):
+    from carlecool import video
+    monkeypatch.setattr(video, "COVERR_BLOCK", {"status": None})
+    monkeypatch.setattr(video, "COVERR_REQUESTS", 0)
+
+
+def test_pexels_keeps_partial_results_on_rate_limit():
+    import requests
+    session = _session([_hit(1)])
+    session.get.side_effect = [session.get.return_value, requests.HTTPError("429")]
+    assert [v.id for v in pexels.search_pexels("key", ["river flowing natural light"], set(), session=session)] == ["px-1"]
