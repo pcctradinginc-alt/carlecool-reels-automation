@@ -417,6 +417,138 @@
      "used_at": "2026-11-26"
     }
    ]
+  },
+  {
+   "at": "2026-11-26T18:54:52+00:00",
+   "run_id": 45878714808,
+   "song": "carl e cool - ducktales (da da da ddd)",
+   "sha256": "ad8b8ac01244ef472f8abd99436531fcbf844ca5a47a48773706325d26af5f7b",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co",
+    "🎬 Archive footage: Prelinger Archives, public domain (archive.org)"
+   ],
+   "clips": [
+    {
+     "id": "hf-ltx23-2437525050",
+     "provider": "ai",
+     "title": "LTX 2.3 original AI footage",
+     "page": "",
+     "creator": "",
+     "licence": "AI-generated footage (LTX-2.3), own creation",
+     "licence_url": "",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "h2DAoXGSBh",
+     "provider": "coverr",
+     "title": "Soaring through the clouds ",
+     "page": "https://coverr.co/videos/soaring-through-the-clouds-h2daoxgsbh",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "pl-TexasFar1952",
+     "provider": "prelinger",
+     "title": "[Amateur film: Texas Farm Family]",
+     "page": "https://archive.org/details/TexasFar1952",
+     "creator": "Prelinger Archives (public domain)",
+     "licence": "Public domain (Prelinger Archives)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "aeOA1LvIn5",
+     "provider": "coverr",
+     "title": "The Vessel sky view",
+     "page": "https://coverr.co/videos/the-vessel-sky-view-aeoa1lvin5",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "tHO30foset",
+     "provider": "coverr",
+     "title": "Sun setting over a barley crop field",
+     "page": "https://coverr.co/videos/sun-setting-over-a-barley-crop-field-tho30foset",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "pl-Summersc1941",
+     "provider": "prelinger",
+     "title": "[Amateur film: Summers collection: San Francisco, California, 1941] (Part I)",
+     "page": "https://archive.org/details/Summersc1941",
+     "creator": "Prelinger Archives (public domain)",
+     "licence": "Public domain (Prelinger Archives)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "hIO5DNPCwX",
+     "provider": "coverr",
+     "title": "Timelapse Vessel New York City",
+     "page": "https://coverr.co/videos/timelapse-vessel-new-york-city-hio5dnpcwx",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "6U8XuUh67L",
+     "provider": "coverr",
+     "title": "Topless man in the skatepark",
+     "page": "https://coverr.co/videos/topless-man-in-the-skatepark-6u8xuuh67l",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "Pj46mf4ktg",
+     "provider": "coverr",
+     "title": "Friends embrace each other when they meet",
+     "page": "https://coverr.co/videos/friends-embrace-each-other-when-they-meet-pj46mf4ktg",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "OKuVmMj7Yn",
+     "provider": "coverr",
+     "title": "Woman walking along the meadow",
+     "page": "https://coverr.co/videos/woman-walking-along-the-meadow-okuvmmj7yn",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "Iu8cjPV0F6",
+     "provider": "coverr",
+     "title": "Man taking photos of the beach",
+     "page": "https://coverr.co/videos/man-taking-photos-of-the-beach-iu8cjpv0f6",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "cOr1U2oRPD",
+     "provider": "coverr",
+     "title": "A couple walking in a park",
+     "page": "https://coverr.co/videos/a-couple-walking-in-a-park-cor1u2orpd",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    }
+   ]
   }
  ]
 }
