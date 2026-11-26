@@ -25,8 +25,10 @@ def inspect_reel(path, details, expected_duration):
         warnings.append("black sequence detected")
     if "freeze_start:" in p.stderr:
         warnings.append("static sequence detected")
-    volume = re.findall(r"max_volume:\s*([-\d.]+) dB", p.stderr)
-    if volume and float(volume[-1]) < -35:
+    volume = re.findall(r"max_volume:\s*(-inf|[-\d.]+) dB", p.stderr)
+    if not volume:
+        errors.append("audio level measurement missing")
+    elif float(volume[-1]) < -35:
         errors.append("audio unexpectedly quiet")
     plan = details.get("edit_plan") or []
     distinct = len({s["source_index"] for s in plan})
