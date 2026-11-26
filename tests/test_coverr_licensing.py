@@ -42,3 +42,21 @@ def test_download_tracking_only_acknowledged_on_204():
 def test_coverr_download_tracking_rejects_path_injection():
     with pytest.raises(ValueError, match="Unsafe"):
         record_coverr_download("../../test", "fake-api-key", session=MagicMock())
+
+
+@pytest.fixture(autouse=True)
+def isolate_coverr_state(monkeypatch):
+    from carlecool import video
+    monkeypatch.setattr(video, "COVERR_BLOCK", {"status": None})
+    monkeypatch.setattr(video, "COVERR_REQUESTS", 0)
+
+
+def test_budget_stops_network_calls(monkeypatch):
+    from carlecool import video
+    monkeypatch.setattr(video, "COVERR_MAX_REQUESTS", 1)
+    session = MagicMock()
+    session.patch.return_value.status_code = 204
+    video.record_coverr_download("abc_123", "key", session=session)
+    with pytest.raises(RuntimeError, match="budget"):
+        video.record_coverr_download("abc_456", "key", session=session)
+    assert session.patch.call_count == 1
