@@ -215,6 +215,16 @@ def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
     github_request('PATCH', f'issues/{issue_number}', json_body={'state': 'closed'})
 
 
+def validate_distribution_permissions(approval: dict) -> None:
+    validate_footage_rights(approval)
+    from .config import flag
+    if any(x.get('provider') == 'coverr' for x in approval['footage_sources']) and not flag('COVERR_PUBLISH_PERMISSION_CONFIRMED'):
+        raise RuntimeError('Coverr free-tier attribution is not cleared for this publish method')
+    if (any(x.get('provider') == 'ai' for x in approval['footage_sources'])
+            and os.getenv('AI_VIDEO_PUBLISH_LICENSE_CONFIRMED') != 'true'):
+        raise RuntimeError('AI-video distribution rights have not been confirmed')
+
+
 def publish(issue_number: int, run_id: int, directory: Path, *, target: str = 'instagram'):
     ensure_target_ready(target)
     if os.environ.get('GITHUB_ACTIONS') != 'true':
@@ -229,14 +239,7 @@ def publish(issue_number: int, run_id: int, directory: Path, *, target: str = 'i
     metadata = json.loads((directory / 'output/reel_metadata.json').read_text(encoding='utf-8'))
     video = directory / metadata['output']
     approval = verify_artifact(issue, metadata, video, run_id=run_id)
-    validate_footage_rights(approval)
-    if any(x.get('provider') == 'coverr' for x in approval['footage_sources']) and not settings.coverr_permission_confirmed:
-        raise RuntimeError('Coverr free-tier attribution is not cleared for this publish method')
-    # AI video still requires explicit license review and cannot be silently
-    # published even if the existing Instagram gate is enabled.
-    if (any(x.get('provider') == 'ai' for x in approval['footage_sources'])
-            and os.getenv('AI_VIDEO_PUBLISH_LICENSE_CONFIRMED') != 'true'):
-        raise RuntimeError('AI-video distribution rights have not been confirmed')
+    validate_distribution_permissions(approval)
     state = load_state()
     if os.getenv('ZERNIO_PUBLISH_ENABLED') == 'true':
         publish_via_zernio(issue_number, approval, metadata, video, target, state)
@@ -281,6 +284,7 @@ def main():
     parser.add_argument('--run', type=int)
     parser.add_argument('--directory', default='approval_artifact')
     parser.add_argument('--inspect', action='store_true', help='Print immutable source run id')
+    parser.add_argument('--validate', action='store_true', help='Verify approved original and distribution rights without upload')
     parser.add_argument('--fetch', action='store_true', help='Retrieve exact approved Gmail original')
     parser.add_argument('--command', default='/approve', help='Exact GitHub issue comment')
     parser.add_argument('--preflight', action='store_true', help='Verify selected target before any uploads')
@@ -306,6 +310,14 @@ def main():
             raise ValueError('Approved run ID differs from Gmail retrieval request')
         fetch_reel_from_sent(approval, Path(args.directory))
         print('Exact approved Gmail Reel restored locally; SHA-256 verified')
+        return
+    if args.validate:
+        issue = github_request('GET', f'issues/{args.issue}')
+        directory = Path(args.directory)
+        metadata = json.loads((directory / 'output/reel_metadata.json').read_text(encoding='utf-8'))
+        approval = verify_artifact(issue, metadata, directory / metadata['output'], run_id=args.run)
+        validate_distribution_permissions(approval)
+        print('Approved original and distribution permissions validated; no upload')
         return
     if not args.run:
         parser.error('--run is required unless --inspect')
