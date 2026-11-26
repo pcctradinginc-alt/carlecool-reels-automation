@@ -549,6 +549,117 @@
      "used_at": "2026-11-26"
     }
    ]
+  },
+  {
+   "at": "2026-11-26T19:29:26+00:00",
+   "run_id": 45883024398,
+   "song": "carl e cool - sleepwell",
+   "sha256": "0705b6c869f7ec93e10cef7df637003a80dca05a317a23ed7fcd284f37d940d7",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co"
+   ],
+   "clips": [
+    {
+     "id": "LibV6Sq8ct",
+     "provider": "coverr",
+     "title": "A backyard",
+     "page": "https://coverr.co/videos/a-backyard-libv6sq8ct",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "ai-45883024398-0",
+     "provider": "ai",
+     "title": "LTX 2.3 original AI footage",
+     "page": "",
+     "creator": "",
+     "licence": "AI-generated footage (LTX-2.3), own creation",
+     "licence_url": "",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "FJp0IfbjDM",
+     "provider": "coverr",
+     "title": "Black and white city ",
+     "page": "https://coverr.co/videos/black-and-white-city-fjp0ifbjdm",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "faWTmnMnrN",
+     "provider": "coverr",
+     "title": "Underground subway station",
+     "page": "https://coverr.co/videos/underground-subway-station-fawtmnmnrn",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "ai-45883024398-1",
+     "provider": "ai",
+     "title": "LTX 2.3 original AI footage",
+     "page": "",
+     "creator": "",
+     "licence": "AI-generated footage (LTX-2.3), own creation",
+     "licence_url": "",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "ai-45883024398-2",
+     "provider": "ai",
+     "title": "LTX 2.3 original AI footage",
+     "page": "",
+     "creator": "",
+     "licence": "AI-generated footage (LTX-2.3), own creation",
+     "licence_url": "",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "kkFMatJ8Pl",
+     "provider": "coverr",
+     "title": "Timelapse of a sunset",
+     "page": "https://coverr.co/videos/timelapse-of-a-sunset-kkfmatj8pl",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "IdwZf4tQUk",
+     "provider": "coverr",
+     "title": "Girl chatting on the phone on a terrace",
+     "page": "https://coverr.co/videos/girl-chatting-on-the-phone-on-a-terrace-idwzf4tquk",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "7u3mjNQOSH",
+     "provider": "coverr",
+     "title": "Blue subway departing ",
+     "page": "https://coverr.co/videos/blue-subway-departing-7u3mjnqosh",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    },
+    {
+     "id": "xmNWFiRQQa",
+     "provider": "coverr",
+     "title": "Woman in front of the clouds",
+     "page": "https://coverr.co/videos/woman-in-front-of-the-clouds-xmnwfirqqa",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-26"
+    }
+   ]
   }
  ]
 }
