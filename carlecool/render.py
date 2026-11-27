@@ -209,7 +209,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 look: dict | None = None, opening_pool: set[int] | None = None,
                 opening_fit: dict[int, float] | None = None, hook_text: str = "",
                 ref_world: str | None = None, soft_sources: set[int] | frozenset[int] = frozenset(),
-                hook_strategy: str = "push", dna: list[dict | None] | None = None) -> dict:
+                hook_strategy: str = "push", dna: list[dict | None] | None = None,
+                variant_rank: int = 0) -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -251,32 +252,57 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         if opening is not None:
             base = [opening] + [i for i in base if i != opening]
             no_bookend = set(no_bookend) - {opening}
-    storyboard = build_storyboard(intervals, [source_durations[i] for i in base],
-                                  seed=str(features.excerpt_start),
-                                  no_bookend={base.index(i) for i in no_bookend if i in base})
     from .cinematic import Shot
-    storyboard = [Shot(base[s.source_index], s.source_offset, s.duration) for s in storyboard]
-    if signature_slots and len(base) < len(videos):
-        from .signature import place_signature_shots
-        storyboard = place_signature_shots(storyboard, source_durations, dict(signature_slots))
-    # Picture follows the music: calm clips on quiet passages, moving clips on the loud ones.
-    motion_matched = False
-    if os.getenv("CARLECOOL_MOTION_MATCH", "true").lower() in ("true", "1", "yes", "on") and len(storyboard) > 3:
-        if motion is None:
-            motion = [look_mod.motion_score(p) for p in videos]
-        starts0 = [sum(sh.duration for sh in storyboard[:i]) for i in range(len(storyboard))]
-        energies = [look_mod.shot_energy(features, a, sh.duration) for a, sh in zip(starts0, storyboard)]
-        locked = {0, len(storyboard) - 1} | {i for i, sh in enumerate(storyboard) if sh.source_index in reserved}
-        matched = None
-        if dna and len(dna) == len(videos) and any(dna):
-            # Package C (27 Nov): the whole order optimised for visual coherence + music.
-            from . import coherence
-            matched, coherence_score = coherence.sequence(storyboard, energies, dna, source_durations, locked)
-            print(f"Coherence: sequence optimised (mean transition {coherence_score})")
-        if matched is None:
-            matched = look_mod.match_motion(storyboard, energies, motion, source_durations, locked)
-        motion_matched = matched != storyboard
-        storyboard = matched
+    motion_on = os.getenv("CARLECOOL_MOTION_MATCH", "true").lower() in ("true", "1", "yes", "on")
+
+    def make_board(seed: str, emphasis: dict | None = None):
+        board = build_storyboard(intervals, [source_durations[i] for i in base], seed=seed,
+                                 no_bookend={base.index(i) for i in no_bookend if i in base})
+        board = [Shot(base[s.source_index], s.source_offset, s.duration) for s in board]
+        if signature_slots and len(base) < len(videos):
+            from .signature import place_signature_shots
+            board = place_signature_shots(board, source_durations, dict(signature_slots))
+        matched_any = False
+        # Picture follows the music: calm clips on quiet passages, moving clips on the loud ones.
+        if motion_on and len(board) > 3:
+            nonlocal motion
+            if motion is None:
+                motion = [look_mod.motion_score(p) for p in videos]
+            starts0 = [sum(sh.duration for sh in board[:i]) for i in range(len(board))]
+            energies = [look_mod.shot_energy(features, a, sh.duration) for a, sh in zip(starts0, board)]
+            locked = {0, len(board) - 1} | {i for i, sh in enumerate(board) if sh.source_index in reserved}
+            matched = None
+            if dna and len(dna) == len(videos) and any(dna):
+                # Package C (27 Nov): the whole order optimised for visual coherence + music.
+                from . import coherence
+                matched, _score = coherence.sequence(board, energies, dna, source_durations, locked,
+                                                     emphasis=emphasis)
+            if matched is None:
+                matched = look_mod.match_motion(board, energies, motion, source_durations, locked)
+            matched_any = matched != board
+            board = matched
+        return board, matched_any
+
+    seed0 = str(features.excerpt_start)
+    storyboard_scores: list[dict] = []
+    if dna and len(dna) == len(videos) and any(dna):
+        # Package D (27 Nov): three storyboards, scored before rendering; the best is rendered
+        # (variant_rank 1 = the second best, for the critic's one re-edit).
+        from . import critic, coherence
+        boards = []
+        for k, suffix in enumerate(("", "|b", "|c")):
+            # three different edits: other clip rotation + another emphasis of the coherence engine
+            board, matched_any = make_board(seed0 + suffix, coherence.VARIANTS[k])
+            scored = critic.plan_score(board, dna)
+            boards.append((scored["total"], k, board, matched_any, scored))
+        boards.sort(key=lambda x: (-x[0], x[1]))
+        pick = boards[min(variant_rank, len(boards) - 1)]
+        storyboard, motion_matched = pick[2], pick[3]
+        storyboard_scores = [dict(b[4], variant=b[1]) for b in boards]
+        print("Storyboards: " + ", ".join(f"#{b[1]} {b[0]:.3f}" for b in boards)
+              + f" → rendering #{pick[1]}")
+    else:
+        storyboard, motion_matched = make_board(seed0)
     storyboard = look_mod.frame_exact(storyboard, total_frames, FPS)
     final_coherence = None
     if dna and len(dna) == len(videos):
@@ -575,7 +601,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "smart_cropped_shots": reframed,
             "dissolves": sum(1 for d in dissolves if d > 0), "slowmo_shots": slowed,
             "light_leaks": leaks, "punch_ins": punched, "moving_shots": zoomed, "hook_strategy": hook_strategy,
-            "coherence": final_coherence, "flash_cuts": flashes, "bw_shots": bw_shots,
+            "coherence": final_coherence, "storyboards": storyboard_scores, "variant_rank": variant_rank, "flash_cuts": flashes, "bw_shots": bw_shots,
             "hook_text": hook_text if hook_png is not None else "",
             "first_shot_s": round(storyboard[0].duration, 2) if storyboard else None,
             "framed_shots": framed,

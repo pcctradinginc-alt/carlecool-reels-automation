@@ -610,16 +610,35 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     from . import reach
     hook_strategy = reach.hook_strategy(edition, (directors.get(director) or {}).get("hook_strategies"))
     print(f"Hook strategy: {hook_strategy}")
+    def render_variant(rank: int) -> dict:
+        return render_reel(audio, paths, features, out, reel_length,
+                           pace=style_pkg.pace_for(profile["pace"], style_name), analog=profile["analog"], cover=cover,
+                           no_bookend=no_bookend, fit_email=not masterstore.configured(),
+                           title_card=title_card,
+                           style_grade=style_pkg.grade_filters(style_name, style_variant),
+                           signature_slots=signature_slots, look=style_pkg.look(style_name, style_variant),
+                           opening_pool=opening_pool, opening_fit=opening_fit, hook_text=hook_line,
+                           ref_world=ref_world, hook_strategy=hook_strategy, dna=shot_dna, variant_rank=rank,
+                           soft_sources={i for i, v in enumerate(selected) if v.source in ("coverr", "pexels")})
+    from . import critic
     try:
-        details = render_reel(audio, paths, features, out, reel_length,
-                              pace=style_pkg.pace_for(profile["pace"], style_name), analog=profile["analog"], cover=cover,
-                              no_bookend=no_bookend, fit_email=not masterstore.configured(),
-                              title_card=title_card,
-                              style_grade=style_pkg.grade_filters(style_name, style_variant),
-                              signature_slots=signature_slots, look=style_pkg.look(style_name, style_variant),
-                              opening_pool=opening_pool, opening_fit=opening_fit, hook_text=hook_line,
-                              ref_world=ref_world, hook_strategy=hook_strategy, dna=shot_dna,
-                              soft_sources={i for i, v in enumerate(selected) if v.source in ("coverr", "pexels")})
+        details = render_variant(0)
+        verdict = critic.review(out, details)
+        print(f"Visual critic: {verdict['score']} {verdict['issues'] or 'no issues'}")
+        if verdict["retry"] and len(details.get("storyboards") or []) > 1:
+            # Package D: one re-edit with the second-best storyboard; the better verdict wins.
+            first = out.with_name("first_edit.mp4")
+            os.replace(out, first)
+            second = render_variant(1)
+            second_verdict = critic.review(out, second)
+            print(f"Visual critic (re-edit): {second_verdict['score']} {second_verdict['issues'] or 'no issues'}")
+            if second_verdict["score"] > verdict["score"]:
+                details, verdict = second, second_verdict
+                first.unlink(missing_ok=True)
+            else:
+                os.replace(first, out)
+            verdict["re_edited"] = True
+        details["critic"] = verdict
     finally:
         if cover is not None:
             cover.unlink(missing_ok=True)
@@ -635,6 +654,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "style": style_name, "variant": style_variant, "style_basis": style_decision.get("basis"),
         "director": directors.current(), "hook_strategy": hook_strategy, "library_clips": len(library_ids),
         "coherence": details.get("coherence"),
+        "critic": {k: details.get("critic", {}).get(k) for k in ("score", "issues", "re_edited")},
+        "storyboard": details.get("variant_rank"),
         "length_s": round(reel_length, 2), "length_bucket": performance.bucket(reel_length),
         "scenes": details.get("scenes"), "bpm": features.bpm,
         "roles": sorted(r for r, n in (details.get("signature_shots") or {}).items() if n),

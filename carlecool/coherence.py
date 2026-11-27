@@ -42,7 +42,18 @@ def _closeness(a, b, scale) -> float:
     return max(0.0, 1.0 - abs(float(a) - float(b)) / scale)
 
 
-def transition(a: dict | None, b: dict | None, ea=None, eb=None) -> dict:
+VARIANTS = (None,                                            # the owner's starting weights
+            {"music": 0.30, "emotion": 0.20, "semantic": 0.15},  # follows the music harder
+            {"composition": 0.20, "colour": 0.20, "semantic": 0.10})  # shot-size rhythm + colour flow
+
+
+def _weights(emphasis: dict | None) -> dict:
+    w = dict(WEIGHTS, **(emphasis or {}))
+    total = sum(w.values())
+    return {k: v / total for k, v in w.items()}
+
+
+def transition(a: dict | None, b: dict | None, ea=None, eb=None, weights: dict | None = None) -> dict:
     """Component scores (0..1) and the weighted total for cutting from clip a to clip b."""
     if not a or not b:
         return {"total": 0.5}
@@ -68,7 +79,8 @@ def transition(a: dict | None, b: dict | None, ea=None, eb=None) -> dict:
     sa, sb = SIZE_ORDER.get(a.get("shot_size") or ""), SIZE_ORDER.get(b.get("shot_size") or "")
     parts["composition"] = 0.5 if sa is None or sb is None else (0.2 if sa == sb else 1.0)
     parts["music"] = 0.5  # set per slot in the sequence (energy vs motion)
-    parts["total"] = sum(WEIGHTS[k] * parts[k] for k in WEIGHTS)
+    w = weights or WEIGHTS
+    parts["total"] = sum(w[k] * parts[k] for k in w)
     return parts
 
 
@@ -79,7 +91,7 @@ def _music_fit(dna, energy_rank: float, motion_ranks: dict[int, float], src: int
 
 
 def sequence(shots, energies: list[float], dna: list[dict | None], source_durations: list[float],
-             locked: set[int], beam: int = BEAM):
+             locked: set[int], beam: int = BEAM, emphasis: dict | None = None):
     """Re-pair sources and free slots so the whole Reel flows; returns (shots, mean score)."""
     from .cinematic import Shot
     n = len(shots)
@@ -93,12 +105,13 @@ def sequence(shots, energies: list[float], dna: list[dict | None], source_durati
     e_order = sorted(range(n), key=lambda i: (energies[i], i))
     e_rank = {i: pos / max(1, n - 1) for pos, i in enumerate(e_order)}
     cache: dict[tuple[int, int], float] = {}
+    weights = _weights(emphasis)
 
     def pair(x: int, y: int) -> float:
         if x == y:
             return -1.0  # the same clip twice in a row
         if (x, y) not in cache:
-            cache[(x, y)] = transition(dna[x], dna[y], embs.get(x), embs.get(y))["total"]
+            cache[(x, y)] = transition(dna[x], dna[y], embs.get(x), embs.get(y), weights)["total"]
         return cache[(x, y)]
 
     pool = [shots[i].source_index for i in free]
@@ -118,7 +131,7 @@ def sequence(shots, energies: list[float], dna: list[dict | None], source_durati
                 if src in tried:
                     continue
                 tried.add(src)
-                s = score + WEIGHTS["music"] * _music_fit(dna[src], e_rank[i], motion_ranks, src)
+                s = score + weights["music"] * _music_fit(dna[src], e_rank[i], motion_ranks, src)
                 if prev is not None:
                     s += pair(prev, src)
                 nxt = i + 1
