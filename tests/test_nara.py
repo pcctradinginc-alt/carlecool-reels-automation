@@ -87,3 +87,10 @@ def test_searcher_uses_documented_parameters_and_respects_budget(monkeypatch):
 def test_without_key_nothing_happens(monkeypatch, tmp_path):
     monkeypatch.delenv("NARA_API_KEY", raising=False)
     assert nara.fetch_nara("lana", set(), tmp_path) == ([], 0)
+
+
+def test_archive_titles_with_snow_or_children_are_skipped():
+    from carlecool import archives
+    t = "Clark Family Home Movies Kids in Snow R.B.'s First Communion"
+    assert archives._blocked(archives._clean(t), archives.PRELINGER_EXCLUDE)
+    assert not archives._blocked(archives._clean("Summer at the beach, 1956"), archives.PRELINGER_EXCLUDE)
