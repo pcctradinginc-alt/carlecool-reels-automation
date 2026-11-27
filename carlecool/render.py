@@ -323,6 +323,10 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                                    seed=str(features.excerpt_start))
     for item in shot_look:  # frame-exact transitions keep the cuts on the beat grid
         item["dissolve_in"] = round(item["dissolve_in"] * FPS) / FPS
+    from . import reach
+    reach_fx = reach.plan(ref_world, features, starts, [s.duration for s in storyboard], shot_look)
+    if loop_sealed and len(storyboard) > 1:
+        reach_fx[-1].update(zoom=None, flash=0.0)  # loop seam: last frame = first frame
     from . import hooktext
     hook_png = hooktext.make_png(hook_text, width, height, work / "hook_text.png") if hook_text else None
     leak = None
@@ -333,6 +337,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     bw_shots = 0
     punched = 0
     leaks = 0
+    zoomed = 0
+    flashes = 0
     for index, shot in enumerate(storyboard):
         styling = shot_look[index]
         source = videos[shot.source_index]
@@ -372,6 +378,11 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             # Rubin: peaks get closer, not busier.
             chain += [f"crop=iw*0.9:ih*0.9", f"scale={width}:{height}:flags=lanczos"]
             punched += 1
+        fx = reach_fx[index]
+        if fx["zoom"]:
+            # Reach (27 Nov): the camera never stands still; shot 0 pushes in from frame 1.
+            chain += reach.zoom_filters(fx["zoom"], shot.duration, width, height)
+            zoomed += 1
         chain.append("setsar=1")
         speed = 1.0
         if styling["slowmo"] > 1.0:
@@ -414,6 +425,9 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             chain.append(SHARPEN)  # gentle, luma only, after the grade
         if FILM_TEXTURE:
             chain.append(halation_filter(index))
+        if fx["flash"]:
+            chain += reach.flash_filter(fx["flash"])  # film-splice flash on the beat
+            flashes += 1
         if grain:
             chain.append(grain_filter(grain, index))
         # Outgoing shot runs on under the next shot's dissolve (total length unchanged).
@@ -534,7 +548,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                               "cover_bridge": loop_bridge},
             "smart_cropped_shots": reframed,
             "dissolves": sum(1 for d in dissolves if d > 0), "slowmo_shots": slowed,
-            "light_leaks": leaks, "punch_ins": punched, "bw_shots": bw_shots,
+            "light_leaks": leaks, "punch_ins": punched, "moving_shots": zoomed, "flash_cuts": flashes, "bw_shots": bw_shots,
             "hook_text": hook_text if hook_png is not None else "",
             "first_shot_s": round(storyboard[0].duration, 2) if storyboard else None,
             "framed_shots": framed,

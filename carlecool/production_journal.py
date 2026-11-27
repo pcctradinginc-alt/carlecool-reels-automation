@@ -13,10 +13,28 @@ import requests
 def day():
     return datetime.now(ZoneInfo("Europe/Berlin")).date().isoformat()
 
+DAILY_REELS = 2  # owner, 27 Nov: "lass 2 videos pro tag durch"
+
+
+def slots(date):
+    """Journal keys of one Berlin day: 2026-11-27 (first Reel), 2026-11-27-2 (second)."""
+    return [date] + [f"{date}-{n}" for n in range(2, DAILY_REELS + 1)]
+
+
 def path_for(date):
-    if len(date) != 10 or datetime.strptime(date, "%Y-%m-%d").date().isoformat() != date:
+    base, _, slot = date[:10], None, date[11:]
+    if (len(date) not in (10, 12) or datetime.strptime(base, "%Y-%m-%d").date().isoformat() != base
+            or (len(date) == 12 and (date[10] != "-" or not slot.isdigit() or not 2 <= int(slot) <= 9))):
         raise ValueError("invalid production date")
     return "data/production/" + date + ".json"
+
+
+def free_slot(date):
+    """First journal key of the day without a confirmed delivery; None = day is full."""
+    for key in slots(date):
+        if not check(key):
+            return key
+    return None
 
 def read(date):
     from .review import github_request
