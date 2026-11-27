@@ -450,5 +450,19 @@
  "hook_strategies": [
   "motion",
   "push"
+ ],
+ "nara_queries": [
+  "sailing",
+  "regatta",
+  "yacht",
+  "cape cod",
+  "newport",
+  "tennis",
+  "polo",
+  "horse show",
+  "summer beach",
+  "boardwalk",
+  "skateboard",
+  "piano"
  ]
 }

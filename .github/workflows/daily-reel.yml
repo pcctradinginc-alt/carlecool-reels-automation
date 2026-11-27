@@ -202,6 +202,7 @@ jobs:
       - name: Render a balanced random Reel (no Instagram calls)
         env:
           COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
+          NARA_API_KEY: ${{ secrets.NARA_API_KEY }}
           WIKIMEDIA_USER_AGENT: ${{ secrets.WIKIMEDIA_USER_AGENT || vars.WIKIMEDIA_USER_AGENT }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}

@@ -70,6 +70,7 @@ def themes_enabled() -> bool:
 
 
 ARCHIVE_BONUS = 2  # extra archive films when the portrait stock is thin
+NARA_CLIPS = 2  # National Archives segments per Reel (27 Nov)
 
 
 def motif_of(video) -> str:
@@ -435,6 +436,14 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                                         output_dir / "wikimedia", run_key=edition, max_clips=1)
         else:
             print(f"Theme '{theme}': no archive footage")
+    # U.S. National Archives Catalog (owner, 27 Nov): unrestricted public-domain films for
+    # both directors, within the monthly API budget (nara.py).
+    from . import nara
+    if nara.api_key() and style_name:
+        nara_clips, _calls = nara.fetch_nara(directors.current(),
+                                             set(recent_video_ids(previews, limit=30)) | set(recent),
+                                             output_dir / "nara", run_key=edition, max_clips=NARA_CLIPS)
+        archival += nara_clips
     portrait_count = len(paths)
     portrait_paths = set(paths)
     # Landscape only fills up a thin portrait supply, and always after the portrait clips.
@@ -726,7 +735,12 @@ def apply_coverr_plan(sleep=None) -> dict:
 
 
 def record_provider_usage() -> None:
-    from . import providers, video as video_mod
+    from . import nara, providers, video as video_mod
+    if nara.api_key():
+        try:
+            nara.record(nara.RUN_CALLS, os.getenv("GITHUB_RUN_ID"))
+        except OSError as exc:
+            print("NARA usage not written:", type(exc).__name__)
     if not os.getenv("COVERR_API_KEY"):
         return
     try:
