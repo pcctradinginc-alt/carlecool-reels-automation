@@ -1217,6 +1217,138 @@
      "used": true
     }
    ]
+  },
+  {
+   "at": "2026-11-27T17:16:52+00:00",
+   "run_id": 46032138235,
+   "song": "carl e cool - sleepwell",
+   "sha256": "6bf7da529eb48f37b30b26dd61ec67b1a8f12a92de6e8d7b793261b17cd244c5",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co",
+    "🎬 Archive footage: Prelinger Archives, public domain (archive.org)"
+   ],
+   "clips": [
+    {
+     "id": "NZFguv7Dll",
+     "provider": "coverr",
+     "title": "Stormy Night Lighthouse Beacon Over Crashing Atlantic Waves",
+     "page": "https://coverr.co/videos/stormy-night-lighthouse-beacon-over-crashing-atlantic-waves",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "lighthouse",
+     "used": false
+    },
+    {
+     "id": "w7ZdjFecqV",
+     "provider": "coverr",
+     "title": "A lighthouse",
+     "page": "https://coverr.co/videos/a-lighthouse-w7zdjfecqv",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "lighthouse",
+     "used": true
+    },
+    {
+     "id": "pl-colachi_home_movies_1",
+     "provider": "prelinger",
+     "title": "Colaci Home Movies: Family 1952-1956 (Part I)",
+     "page": "https://archive.org/details/colachi_home_movies_1",
+     "creator": "Prelinger Archives (public domain)",
+     "licence": "Public domain (Prelinger Archives)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-27",
+     "motif": "vintage americana",
+     "used": false
+    },
+    {
+     "id": "pl-parade_in_new_york",
+     "provider": "prelinger",
+     "title": "Parade in New York",
+     "page": "https://archive.org/details/parade_in_new_york",
+     "creator": "Prelinger Archives (public domain)",
+     "licence": "Public domain (Prelinger Archives)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-27",
+     "motif": "vintage americana",
+     "used": false
+    },
+    {
+     "id": "sUKkOAjAZv",
+     "provider": "coverr",
+     "title": "POV of holding a woman's hand",
+     "page": "https://coverr.co/videos/pov-of-holding-a-womans-hand-sukkoajazv",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "white dress",
+     "used": true
+    },
+    {
+     "id": "DnBhCNa6Tl",
+     "provider": "coverr",
+     "title": "Golden dunes",
+     "page": "https://coverr.co/videos/golden-dunes-dnbhcna6tl",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "sand dunes",
+     "used": true
+    },
+    {
+     "id": "lr4cFgla6B",
+     "provider": "coverr",
+     "title": "Chic Styles in the Desert: Fashion Forward Looks",
+     "page": "https://coverr.co/videos/chic-styles-in-the-desert-fashion-forward-looks",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "sand dunes",
+     "used": false
+    },
+    {
+     "id": "TcWdXNDOWb",
+     "provider": "coverr",
+     "title": "Woman holding grass",
+     "page": "https://coverr.co/videos/woman-holding-grass-tcwdxndowb",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "women sailing",
+     "used": true
+    },
+    {
+     "id": "PHHyGtc7L7",
+     "provider": "coverr",
+     "title": "Woman with her dog",
+     "page": "https://coverr.co/videos/woman-with-her-dog-phhygtc7l7",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "woman horse",
+     "used": true
+    },
+    {
+     "id": "RumYOD3gR2",
+     "provider": "coverr",
+     "title": "Sunset over the Atlantic Ocean",
+     "page": "https://coverr.co/videos/sunset-over-the-atlantic-ocean-rumyod3gr2",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "range rover",
+     "used": false
+    }
+   ]
   }
  ]
 }
