@@ -20,3 +20,11 @@ Facts:
 - The 2 archive films were downloaded but not shown.
 
 This Reel is the reference that the next versions are measured against.
+
+## 3 · New pipeline vs reference #73 – 27 Nov 2026 (issue #82, run 46062134646)
+
+- **Conditions:** Lana, Hamptons theme restored exactly as in #73, short length. Pipeline on main with packages A–D and the National Archives source. Song "see clear", so not the same song as #73.
+- **Machine verdict:** critic 0.748, "incoherent" (coherence 0.436). One re-edit did not help.
+- **Owner verdict:** **worse than #73.**
+- **Causes found:** an off-brief archive home movie (snow, children; now blocked), a song that only half fits the theme (music fit 0.5), only 5 scenes used.
+- **Conclusion:** two owner verdicts in a row favour the old pipeline (blind test B = old, and #73). There is no evidence yet that packages A–D improve the films.
