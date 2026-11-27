@@ -91,3 +91,29 @@ def test_owner_video_guide_themes_27_nov():
     assert any("hamptons" in p for p in stylegate.WANTED["lana"])
     from carlecool import style
     assert style.look("lana")["chroma_shift"] and style.look("lana")["dissolve_below"] >= 0.7
+
+
+def test_owner_night_bible_27_nov(tmp_path, monkeypatch):
+    """Night: 993 drive, Brooklyn/Harlem, stadium floodlights, old money at night; step-print renders."""
+    import subprocess
+    from carlecool import style
+    from carlecool.analysis import AudioFeatures
+    from carlecool.render import render_reel
+    assert set(themes.THEMES["night"]) == {"drive", "projects", "stadium", "gilded"}
+    assert any("993" in p for p in stylegate.WANTED["lana"])
+    monkeypatch.setenv("REEL_WIDTH", "270")
+    monkeypatch.setenv("REEL_HEIGHT", "480")
+    clips = []
+    for k in range(3):
+        c = tmp_path / f"c{k}.mp4"
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", f"testsrc2=s=360x640:r=30:d=10",
+                        "-pix_fmt", "yuv420p", str(c)], check=True)
+        clips.append(c)
+    audio = tmp_path / "a.wav"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "sine=f=220:d=12", str(audio)], check=True)
+    beats = tuple(i * 0.5 for i in range(22))
+    f = AudioFeatures(120.0, 1.0, 0.0, "nightdrive", 10.0, beats=beats, downbeats=beats[::4],
+                      beat_energy=tuple(0.5 for _ in beats))
+    d = render_reel(audio, clips, f, tmp_path / "out/r.mp4", 9.0, fit_email=False,
+                    look=style.look("lana"), ref_world="night")
+    assert abs(d["duration"] - 9.0) < 0.1 and d["bw_shots"] in (0, d["scenes"])
