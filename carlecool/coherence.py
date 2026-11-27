@@ -1,0 +1,153 @@
+"""Visual Coherence Engine (owner's plan, package C, 27 Nov).
+
+"Eine Szene darf nicht allein deshalb verwendet werden, weil sie schön ist. Sie muss zum
+Song, zum Filmkonzept, zur vorhergehenden und zur nachfolgenden Szene passen."
+
+From the Shot DNA (shot_analysis.py) every pair of clips gets a transition score, with the
+owner's starting weights (to be calibrated on real verdicts):
+
+    emotional match 25 % · semantic link 20 % · colour continuity 15 % · motion continuity
+    15 % · musical fit 10 % · light continuity 10 % · composition 5 %
+
+Deliberate contrast stays allowed: a semantic link counts as strongly when two different
+subjects share form / colour (a match cut) as when they are the same subject.
+
+The whole order is optimised with a beam search over the free (unlocked) shots: bookends
+(loop seam) and signature shots keep their places. Musical fit = calm clips on quiet
+passages, moving clips on loud ones; composition = shot sizes vary (no five wide shots in
+a row). Runs locally in milliseconds.
+"""
+from __future__ import annotations
+
+import math
+
+WEIGHTS = {"emotion": 0.25, "semantic": 0.20, "colour": 0.15, "motion": 0.15,
+           "music": 0.10, "light": 0.10, "composition": 0.05}
+BEAM = 12
+SIZE_ORDER = {"wide": 0, "medium": 1, "close": 2, "detail": 3}
+
+
+def _emb(dna):
+    if not dna or not dna.get("embedding"):
+        return None
+    from .shot_analysis import decode_embedding
+    v = decode_embedding(dna["embedding"])
+    n = math.sqrt(float((v * v).sum())) or 1.0
+    return v / n
+
+
+def _closeness(a, b, scale) -> float:
+    if a is None or b is None:
+        return 0.5
+    return max(0.0, 1.0 - abs(float(a) - float(b)) / scale)
+
+
+def transition(a: dict | None, b: dict | None, ea=None, eb=None) -> dict:
+    """Component scores (0..1) and the weighted total for cutting from clip a to clip b."""
+    if not a or not b:
+        return {"total": 0.5}
+    parts = {}
+    # emotion: closeness to the owner's references + mood (brightness / warmth) of both
+    parts["emotion"] = 0.5 * _closeness(a.get("ref_score"), b.get("ref_score"), 0.12) + \
+        0.5 * _closeness(a.get("warmth"), b.get("warmth"), 25.0)
+    if ea is not None and eb is not None:
+        sim = float((ea * eb).sum())  # CLIP image-image cosine: ~0.5 unrelated … ~0.9 same subject
+        # a shared look / form (match cut) already counts; contrast is carried by the other parts
+        parts["semantic"] = min(1.0, max(0.0, (sim - 0.5) / 0.35))
+    else:
+        parts["semantic"] = 0.5
+    la, lb = a.get("lab"), b.get("lab")
+    if la and lb:
+        dist = math.sqrt(sum((x - y) ** 2 for x, y in zip(la, lb)))
+        parts["colour"] = max(0.0, 1.0 - dist / 45.0)
+    else:
+        parts["colour"] = 0.5
+    parts["motion"] = _closeness(a.get("motion"), b.get("motion"), 10.0)
+    parts["light"] = 0.6 * _closeness(a.get("luma"), b.get("luma"), 0.35) + \
+        0.4 * _closeness(a.get("contrast"), b.get("contrast"), 0.35)
+    sa, sb = SIZE_ORDER.get(a.get("shot_size") or ""), SIZE_ORDER.get(b.get("shot_size") or "")
+    parts["composition"] = 0.5 if sa is None or sb is None else (0.2 if sa == sb else 1.0)
+    parts["music"] = 0.5  # set per slot in the sequence (energy vs motion)
+    parts["total"] = sum(WEIGHTS[k] * parts[k] for k in WEIGHTS)
+    return parts
+
+
+def _music_fit(dna, energy_rank: float, motion_ranks: dict[int, float], src: int) -> float:
+    if not dna or src not in motion_ranks:
+        return 0.5
+    return 1.0 - abs(energy_rank - motion_ranks[src])
+
+
+def sequence(shots, energies: list[float], dna: list[dict | None], source_durations: list[float],
+             locked: set[int], beam: int = BEAM):
+    """Re-pair sources and free slots so the whole Reel flows; returns (shots, mean score)."""
+    from .cinematic import Shot
+    n = len(shots)
+    free = [i for i in range(n) if i not in locked]
+    if len(free) < 2 or not any(dna):
+        return list(shots), None
+    embs = {k: _emb(d) for k, d in enumerate(dna)}
+    known = [k for k, d in enumerate(dna) if d and d.get("motion") is not None]
+    order = sorted(known, key=lambda k: dna[k]["motion"])
+    motion_ranks = {k: pos / max(1, len(order) - 1) for pos, k in enumerate(order)}
+    e_order = sorted(range(n), key=lambda i: (energies[i], i))
+    e_rank = {i: pos / max(1, n - 1) for pos, i in enumerate(e_order)}
+    cache: dict[tuple[int, int], float] = {}
+
+    def pair(x: int, y: int) -> float:
+        if x == y:
+            return -1.0  # the same clip twice in a row
+        if (x, y) not in cache:
+            cache[(x, y)] = transition(dna[x], dna[y], embs.get(x), embs.get(y))["total"]
+        return cache[(x, y)]
+
+    pool = [shots[i].source_index for i in free]
+    # beam over slots in time order; state = (score, assignment dict, remaining pool)
+    states = [(0.0, {}, tuple(pool))]
+    for i in range(n):
+        new_states = []
+        for score, assign, remaining in states:
+            prev = assign.get(i - 1, shots[i - 1].source_index) if i > 0 else None
+            if i in locked:
+                src = shots[i].source_index
+                s = score + (pair(prev, src) if prev is not None else 0.0)
+                new_states.append((s, assign, remaining))
+                continue
+            tried = set()
+            for k, src in enumerate(remaining):
+                if src in tried:
+                    continue
+                tried.add(src)
+                s = score + WEIGHTS["music"] * _music_fit(dna[src], e_rank[i], motion_ranks, src)
+                if prev is not None:
+                    s += pair(prev, src)
+                nxt = i + 1
+                if nxt < n and nxt in locked:
+                    s += pair(src, shots[nxt].source_index)
+                new_states.append((s, {**assign, i: src}, remaining[:k] + remaining[k + 1:]))
+        new_states.sort(key=lambda st: -st[0])
+        states = new_states[:beam]
+    best_score, assign, _ = states[0]
+    out = list(shots)
+    used: dict[int, float] = {}
+    for i in range(n):
+        src = assign.get(i, out[i].source_index)
+        length = out[i].duration
+        if i in assign:
+            room = max(0.0, source_durations[src] - length)
+            offset = used.get(src, 0.0)
+            offset = offset if offset <= room else 0.0
+            out[i] = Shot(src, round(offset, 3), length)
+        used[src] = out[i].source_offset + max(0.5, length)
+    return out, round(best_score / max(1, n - 1), 4)
+
+
+def reel_coherence(shots, dna: list[dict | None]) -> float | None:
+    """Mean transition score of the final order (for the critic and for learning)."""
+    if len(shots) < 2 or not any(dna):
+        return None
+    embs = {k: _emb(d) for k, d in enumerate(dna)}
+    vals = [transition(dna[a.source_index], dna[b.source_index], embs.get(a.source_index),
+                       embs.get(b.source_index))["total"] for a, b in zip(shots, shots[1:])
+            if a.source_index != b.source_index]
+    return round(sum(vals) / len(vals), 4) if vals else None
