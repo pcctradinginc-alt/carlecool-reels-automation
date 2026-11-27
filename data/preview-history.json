@@ -983,6 +983,25 @@
       "style": "rubin",
       "theme": "road",
       "length_bucket": "long"
+    },
+    {
+      "at": "2026-11-27T15:59:19+00:00",
+      "kind": "daily",
+      "run_id": 46028777890,
+      "track_id": "2437525050",
+      "video_ids": [
+        "LviCUH3V0W",
+        "Lz6bwKBNYE",
+        "f7eTFXQbvz",
+        "dOHnEzsqLT",
+        "6kxRdq6Z1t",
+        "fWXjZsXF5h",
+        "wV5xiLVt8D"
+      ],
+      "sha256": "2ae655eb7b2b4d99e10a269ae1b9c11ccd1e3a4b982694e458d39709201f0dd8",
+      "style": "night",
+      "theme": "gilded",
+      "length_bucket": "long"
     }
   ]
 }
