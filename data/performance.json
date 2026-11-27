@@ -32,7 +32,10 @@
               "engagementRate": 0.91,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7709973233797270817?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "age_hours": 49.5,
+          "age_derived": true,
+          "valid": true
         },
         "d7": {
           "fetched": "2026-11-26T20:09:34+00:00",
@@ -54,7 +57,8 @@
               "engagementRate": 0.9,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7709973233797270817?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "valid": true
         }
       }
     },
@@ -96,7 +100,33 @@
               "engagementRate": 0.93,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7710278272197659936?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "age_hours": 82.3,
+          "age_derived": true,
+          "valid": false
+        },
+        "d7": {
+          "fetched": "2026-11-27T23:04:26+00:00",
+          "age_hours": 175.5,
+          "platforms": {
+            "tiktok": {
+              "views": 220.0,
+              "impressions": 0.0,
+              "reach": 214.0,
+              "likes": 2.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 1820.0,
+              "completionRate": 0.0242,
+              "replays": 0.0,
+              "videoDurationSeconds": 13.376,
+              "engagementRate": 0.93,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7710278272197659936?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          },
+          "valid": true
         }
       }
     },
@@ -147,7 +177,10 @@
               "engagementRate": 1.0,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7710589112666950945?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "age_hours": 62.2,
+          "age_derived": true,
+          "valid": false
         }
       }
     },
@@ -182,7 +215,10 @@
               "engagementRate": 0.7,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7710659303262211361?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "age_hours": 57.7,
+          "age_derived": true,
+          "valid": true
         }
       }
     },
@@ -217,7 +253,10 @@
               "engagementRate": 1.85,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7710706725615111456?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "age_hours": 54.6,
+          "age_derived": true,
+          "valid": true
         }
       }
     },
@@ -272,7 +311,10 @@
               "engagementRate": 2.5,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7710753821823208737?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "age_hours": 51.6,
+          "age_derived": true,
+          "valid": true
         }
       }
     },
@@ -325,7 +367,10 @@
               "engagementRate": 0.0,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7711075739755384097?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "age_hours": 52.5,
+          "age_derived": true,
+          "valid": true
         }
       }
     },
@@ -394,7 +439,8 @@
               "engagementRate": 1.91,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7711455347243781408?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "valid": false
         },
         "d2": {
           "fetched": "2026-11-25T23:24:50+00:00",
@@ -432,7 +478,8 @@
               "engagementRate": 1.91,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7711455347243781408?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "valid": true
         }
       }
     },
@@ -487,7 +534,8 @@
               "engagementRate": 0.0,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7711815195370196263?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "valid": true
         },
         "d2": {
           "fetched": "2026-11-26T20:09:35+00:00",
@@ -509,7 +557,8 @@
               "engagementRate": 0.0,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7711815195370196263?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "valid": true
         }
       }
     },
@@ -564,7 +613,8 @@
               "engagementRate": 4.03,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7711820595234606369?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "valid": true
         },
         "d2": {
           "fetched": "2026-11-26T20:09:35+00:00",
@@ -586,7 +636,8 @@
               "engagementRate": 4.1,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7711820595234606369?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "valid": true
         }
       }
     },
@@ -641,7 +692,31 @@
               "engagementRate": 0.0,
               "url": "https://www.tiktok.com/@carl_e_cool/video/7712148059613859105?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
             }
-          }
+          },
+          "valid": true
+        },
+        "d2": {
+          "fetched": "2026-11-27T23:04:27+00:00",
+          "age_hours": 54.5,
+          "platforms": {
+            "tiktok": {
+              "views": 222.0,
+              "impressions": 0.0,
+              "reach": 221.0,
+              "likes": 0.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 1770.0,
+              "completionRate": 0.0198,
+              "replays": 0.0,
+              "videoDurationSeconds": 26.753,
+              "engagementRate": 0.0,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7712148059613859105?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          },
+          "valid": true
         }
       }
     },
@@ -678,7 +753,31 @@
         "theme": "drive",
         "variant": "night"
       },
-      "checkpoints": {}
+      "checkpoints": {
+        "d1": {
+          "fetched": "2026-11-27T23:04:27+00:00",
+          "age_hours": 27.0,
+          "platforms": {
+            "tiktok": {
+              "views": 197.0,
+              "impressions": 0.0,
+              "reach": 0.0,
+              "likes": 3.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 1500.0,
+              "completionRate": 0.0045,
+              "replays": 0.0,
+              "videoDurationSeconds": 25.259,
+              "engagementRate": 1.52,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7712573622061255969?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          },
+          "valid": true
+        }
+      }
     },
     "6b089eecd941700e19a51d44": {
       "track_id": "2437525062",
@@ -714,8 +813,130 @@
         "theme": "family",
         "variant": null
       },
+      "checkpoints": {
+        "d1": {
+          "fetched": "2026-11-27T23:04:28+00:00",
+          "age_hours": 26.0,
+          "platforms": {
+            "instagram": {
+              "views": 19.0,
+              "impressions": 19.0,
+              "reach": 11.0,
+              "likes": 0.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 7103.0,
+              "completionRate": 0.0,
+              "replays": 0.0,
+              "videoDurationSeconds": 16.0,
+              "engagementRate": 0.0,
+              "url": "https://www.instagram.com/reel/DgOB2Z4gbS3/"
+            },
+            "tiktok": {
+              "views": 210.0,
+              "impressions": 0.0,
+              "reach": 0.0,
+              "likes": 0.0,
+              "comments": 0.0,
+              "shares": 0.0,
+              "saves": 0.0,
+              "reposts": 0.0,
+              "igReelsAvgWatchTime": 2040.0,
+              "completionRate": 0.0168,
+              "replays": 0.0,
+              "videoDurationSeconds": 16.726,
+              "engagementRate": 0.0,
+              "url": "https://www.tiktok.com/@carl_e_cool/video/7712589169884761377?utm_campaign=tt4d_open_api&utm_source=7608030276714774544"
+            }
+          },
+          "valid": true
+        }
+      }
+    },
+    "6b09673b6e2181073c0c2a67": {
+      "track_id": "2437525059",
+      "at": "2026-11-27T11:19:19.538263+00:00",
+      "target": "tiktok",
+      "facts": {
+        "archival": 0,
+        "bpm": 76.0,
+        "first_shot_s": 1.5,
+        "hashtags": [
+          "#carlecool",
+          "#minimalmusic",
+          "#analogsynth",
+          "#studiolife",
+          "#instrumental"
+        ],
+        "hook_at": 0.0,
+        "hook_line": "",
+        "length_bucket": "long",
+        "length_s": 25.26,
+        "opening_clip": "pEeGts0hP9",
+        "opening_motif": "sunlight window",
+        "opening_source": "coverr",
+        "question": false,
+        "roles": [
+          "woman"
+        ],
+        "scenes": 8,
+        "style": "rubin",
+        "style_basis": "rotation (rubin)",
+        "text_hook": false,
+        "theme": "quiet",
+        "variant": null
+      },
+      "checkpoints": {}
+    },
+    "6b09c49ac49f2ea48c0002f9": {
+      "track_id": "2437525053",
+      "at": "2026-11-27T17:57:44.126647+00:00",
+      "target": "both",
+      "facts": {
+        "archival": 2,
+        "bpm": 123.0,
+        "first_shot_s": 0.88,
+        "hashtags": [
+          "#carlecool",
+          "#nightdrive",
+          "#vinyl",
+          "#beatmaker",
+          "#instrumental"
+        ],
+        "hook_at": 0.0,
+        "hook_line": "pov: the last warm evening of the year",
+        "length_bucket": "short",
+        "length_s": 15.6,
+        "opening_clip": "sUKkOAjAZv",
+        "opening_motif": "white dress",
+        "opening_source": "coverr",
+        "question": false,
+        "reach_fx": true,
+        "roles": [
+          "friends",
+          "woman"
+        ],
+        "scenes": 6,
+        "style": "lana",
+        "style_basis": "manual",
+        "text_hook": true,
+        "theme": "hamptons",
+        "variant": null
+      },
       "checkpoints": {}
     }
   },
-  "updated": "2026-11-26T23:25:25+00:00"
+  "updated": "2026-11-27T23:04:28+00:00",
+  "migrations": [
+    {
+      "at": "2026-11-27T23:04:28+00:00",
+      "checkpoint_fix": [
+        "6b00692cae2ed8a04f4fbe50: d2 invalid (age 82.3 h)",
+        "6b0183de64bcc19e79622762: d2 invalid (age 62.2 h)",
+        "6b0497b5fb25be015e55e8a3: d1 invalid (age 51.7 h)"
+      ]
+    }
+  ]
 }
