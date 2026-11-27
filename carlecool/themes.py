@@ -108,6 +108,10 @@ def choose(style: str | None, variant: str | None, previews: list[dict], run_key
     key = key_for(style, variant)
     if key is None:
         return None
+    import os
+    forced = os.getenv("CARLECOOL_THEME", "").strip().lower()
+    if forced and forced in THEMES[key]:
+        return forced  # manual test run (workflow input `theme`)
     names = list(THEMES[key])
     used = {n: 0 for n in names}
     for entry in previews:
@@ -157,7 +161,8 @@ def roles(style, variant, theme) -> tuple[str, ...]:
     if not info:
         return ()
     d = _directors.get(key_for(style, variant))
-    always = tuple((d or {}).get("always_roles") or ALWAYS_ROLES)
+    # a theme may set its own always-roles (the #73 reference theme had no analog gear)
+    always = tuple(info.get("always_roles") or (d or {}).get("always_roles") or ALWAYS_ROLES)
     return always + tuple(r for r in info["roles"] if r not in always)
 
 

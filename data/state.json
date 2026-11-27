@@ -650,6 +650,66 @@
         "theme": "quiet",
         "variant": null
       }
+    },
+    {
+      "track_id": "2437525053",
+      "at": "2026-11-27T17:57:44.126647+00:00",
+      "video_ids": [
+        "NZFguv7Dll",
+        "w7ZdjFecqV",
+        "pl-colachi_home_movies_1",
+        "pl-parade_in_new_york",
+        "sUKkOAjAZv",
+        "DnBhCNa6Tl",
+        "lr4cFgla6B",
+        "TcWdXNDOWb",
+        "PHHyGtc7L7",
+        "RumYOD3gR2"
+      ],
+      "sha256": "6bf7da529eb48f37b30b26dd61ec67b1a8f12a92de6e8d7b793261b17cd244c5",
+      "approval_issue": 73,
+      "provider": "zernio",
+      "target": "both",
+      "provider_post_id": "6b09c49ac49f2ea48c0002f9",
+      "platform_status": {
+        "instagram": "published",
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 2,
+        "bpm": 123.0,
+        "first_shot_s": 0.88,
+        "hashtags": [
+          "#carlecool",
+          "#nightdrive",
+          "#vinyl",
+          "#beatmaker",
+          "#instrumental"
+        ],
+        "hook_at": 0.0,
+        "hook_line": "pov: the last warm evening of the year",
+        "length_bucket": "short",
+        "length_s": 15.6,
+        "opening_clip": "sUKkOAjAZv",
+        "opening_motif": "white dress",
+        "opening_source": "coverr",
+        "question": false,
+        "reach_fx": true,
+        "roles": [
+          "friends",
+          "woman"
+        ],
+        "scenes": 6,
+        "style": "lana",
+        "style_basis": "manual",
+        "text_hook": true,
+        "theme": "hamptons",
+        "variant": null
+      },
+      "platform_post_urls": {
+        "instagram": "https://www.instagram.com/reel/DgQRPwVhPig/",
+        "tiktok": "https://www.tiktok.com/@carl_e_cool/video/7712912070001298727"
+      }
     }
   ],
   "pending": null,

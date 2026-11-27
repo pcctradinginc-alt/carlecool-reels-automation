@@ -86,7 +86,7 @@ def test_music_first_theme_choice():
 
 def test_unified_creative_director_bible_27_nov():
     """Lana: dynasty, royals, 90s minimalism, street skate, analog music; analog gear in every Reel."""
-    assert set(themes.THEMES["lana"]) == {"dynasty", "royals", "minimal", "street", "studio"}
+    assert set(themes.THEMES["lana"]) == {"dynasty", "royals", "minimal", "street", "studio", "hamptons"}
     assert set(themes.THEMES["night"]) == {"drive", "projects", "stadium", "gilded", "skate", "studio"}
     assert themes.roles("lana", None, "dynasty")[:3] == ("flag", "car", "gear")
     assert themes.roles("lana", "night", "studio").count("gear") == 1
@@ -125,3 +125,19 @@ def test_owner_night_bible_27_nov(tmp_path, monkeypatch):
     d = render_reel(audio, clips, f, tmp_path / "out/r.mp4", 9.0, fit_email=False,
                     look=style.look("lana"), ref_world="night")
     assert abs(d["duration"] - 9.0) < 0.1 and d["bw_shots"] in (0, d["scenes"])
+
+
+def test_reel_73_is_the_lana_reference(monkeypatch):
+    """Owner's favourite (27 Nov): Hamptons theme restored exactly, its clips favoured."""
+    from carlecool import decisions, performance
+    from carlecool.video import Video
+    info = themes.THEMES["lana"]["hamptons"]
+    assert "lighthouse" in info["words"] and info["weight"] == max(t.get("weight", 1) for t in themes.THEMES["lana"].values())
+    assert themes.roles("lana", None, "hamptons") == ("flag", "car", "woman", "friends")  # no forced gear, like #73
+    clips, motifs = decisions.scores({"decisions": []})
+    assert clips["w7ZdjFecqV"] == decisions.FAVOURITE_WEIGHT and motifs["lighthouse"] == decisions.FAVOURITE_WEIGHT
+    assert decisions.adjustment(Video("w7ZdjFecqV", "coverr", query="lighthouse"), clips, motifs) > 0
+    monkeypatch.setenv("CARLECOOL_THEME", "hamptons")
+    assert themes.choose("lana", None, [], "r") == "hamptons"
+    monkeypatch.setenv("CARLECOOL_LENGTH", "short")
+    assert performance.choose_length("t", [], 30, "r")["bucket"] == "short"

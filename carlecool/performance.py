@@ -300,6 +300,10 @@ def choose_length(track_id: str, previews: list[dict], long_target: float, run_k
                   model: dict | None = None) -> dict:
     """Length test: each song gets both lengths in turn; once the data shows a winner,
     the winner is used ~70 % of the time (the other stays in to notice changes)."""
+    forced = os.getenv("CARLECOOL_LENGTH", "").strip().lower()
+    if forced in ("short", "long"):  # manual test run (workflow input `length`)
+        return {"bucket": forced, "target": SHORT_TARGET if forced == "short" else float(long_target),
+                "reason": "manual"}
     if os.getenv("CARLECOOL_LENGTH_TEST", "on").strip().lower() in ("off", "false", "0", "no"):
         return {"bucket": "long", "target": float(long_target), "reason": "length test off"}
     model = model or {}

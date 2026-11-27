@@ -158,14 +158,14 @@ def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | No
             f"Nur TikTok: {direct_links['tiktok']}\n"
             f"Nur Instagram: {direct_links['instagram']}\n"
             f"TikTok & Instagram: {direct_links['both']}\n"
-            f"Nicht veröffentlichen – Entwurf löschen: {direct_links['discard']}\n\n"
+            f"Schlechter als das letzte Video – nicht veröffentlichen: {direct_links['discard']}\n\n"
             "Jeder Link öffnet eine Bestätigungsseite. Erst ein zweiter Klick "
             "mit ausdrücklicher Zustimmung löst die Entscheidung aus.\n"
-            "Entwurf löschen bedeutet Freigabe verwerfen; die E-Mail bleibt "
-            "bis zu deiner eigenen Löschung im Postfach.\n"
+            "\"Schlechter als das letzte Video\" verwirft den Entwurf und meldet dein Urteil "
+            "ans System zurück (es lernt daraus); die E-Mail bleibt im Postfach.\n"
         )
     elif issue_url:
-        actions += "  /reject                       - Nicht veröffentlichen / Entwurf verwerfen\n"
+        actions += "  /reject                       - Schlechter als das letzte Video / nicht veröffentlichen\n"
     return (
         "CARLECOOL  /  CREATIVE REVIEW\n\n"
         f"{title}\n{duration} Sekunden · 9:16 Reel · MP4 im Anhang\n\n"
@@ -180,9 +180,15 @@ def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | No
         f"ANALOG: {profile.get('analog', 65)}%\n\n"
         "Das MP4 ist nur dieser privaten Mail beigefügt. "
         "Ein Link allein löst niemals eine Veröffentlichung aus.\n\n"
-        f"Musik: {metadata.get('permalink', '')}\n\n"
+        f"Musik: {metadata.get('permalink', '')}\n"
+        + (f"Spotify (für die Bio): {_spotify()}\n" if _spotify() else "") + "\n"
         f"Caption:\n{metadata.get('caption', '')}\n"
     )
+
+
+def _spotify() -> str:
+    from .captions import links
+    return str(links().get("spotify_artist") or "")
 
 
 def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = None) -> str:
@@ -212,7 +218,7 @@ def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = N
             ("Nur TikTok", "tiktok", "/publish tiktok"),
             ("Nur Instagram", "instagram", "/publish instagram"),
             ("TikTok & Instagram", "both", "/publish both"),
-            ("Nicht veröffentlichen – Entwurf löschen", "discard", "/reject"),
+            ("Schlechter als das letzte Video – nicht veröffentlichen", "discard", "/reject"),
         )
         choice_rows = ''.join(
             '<tr><td style="padding:7px 0">'

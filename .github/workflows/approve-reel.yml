@@ -118,8 +118,20 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       issues: write
+      contents: write
     env:
       GH_TOKEN: ${{ github.token }}
       REVIEW_ISSUE: ${{ github.event.issue.number }}
     steps:
-      - run: gh issue close "$REVIEW_ISSUE" -R "$GITHUB_REPOSITORY" --comment '❌ Reel verworfen, keine Veröffentlichung.'
+      - run: gh issue close "$REVIEW_ISSUE" -R "$GITHUB_REPOSITORY" --comment '❌ Reel verworfen, keine Veröffentlichung. Urteil – schlechter als das letzte Video.'
+      # Owner, 27 Nov: the verdict goes back into the repository (data/owner-verdicts.json).
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --disable-pip-version-check requests
+      - name: Record "worse than the previous Reel"
+        continue-on-error: true
+        run: python -m carlecool.verdicts worse "$REVIEW_ISSUE"

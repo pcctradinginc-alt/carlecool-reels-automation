@@ -1,0 +1,413 @@
+{
+ "clips": {
+  "1FsIhjtjB0": {
+   "added": "2026-11-27T20:19:41+00:00",
+   "director": "lana",
+   "dna": {
+    "contrast": 0.7743,
+    "embedding": "oiHpMJ0sn6ZJn3OqsSMWJ1Gl4S3pnJEprp9ErAihsKk9q+2nyCn3nW0Xk5mXJMWgIqvtp+Gi8iLBKfsn+6b9JQylKSztI4Mhq6eXLUokICclolOsDC1AKqShyBSfnokjJCoCJe2kSC1OIvUmUqsOp6WlbidfKOoq0bKGoEgklacbq+ajOyQhMXUpCqjEq1Mptia2oj2htC0nqSAtc6ygqtgnrZ/RGiYluSH4F88eByI6LcesfKR5KTKiQqs1FCss3Kj6pbEfApiuKZsaeZvBJWUi4ZuPJ36skiJap66lCiLSpJsp6x/yqwemmySenDSmtyhdqdkg7yjiny6hxxjcHSGgTSeYpbqoiahCKD0mWhwnID4PhKFkJWWdfyj7Kdcl5ShbpK6npKhhI9elgqRsHeM0Y6QxqlKi3yXlB6EkFijLFm4gIKCCIDgrNyy1KTkscyJSp3AsuyJwKMsXyqndLqug6yhpLTOkORmQpHmnrx0CpL6d3StEpA0abCK8JjIrUpyDqGWkmCAjp8ylrqUdHVOspS8SoZKjIybUIm4m+aPBI76NnawxqiKhWaOtKC+YPSMoqAip3KSLJB8huh+dJ4UodBqRKlAlnqY3GqEuzKUErI8mRCh3KMmqfqTYJoClLyHCrBUp0KNkGoORlBtKqRkkKSe+q0CkSBvEq+moU6qXHtekRbDIISmRKaURJyapIqRzJ8mhM6SfJlqpSC0BoR8o+iuYpk6nfCLoqNcncp1sirajWiKpKB2oWKbwIBIlxZ2JKtorSacqJFqhuSNKncEZNaSgKS0kjrAOqGih6yVYGXKsTqvptCEhgChzpUKrkiYPIBglIq+0oX6kwCkIpSkcz6C/npMuYa1ap98qa6SLqY6gkCCMpk2qWSfHKUSeH6kMnV8bDC3NJ6SlmCinKX0sqqyLK9ag2K1gJ8anjKMwq+WhxqfxIyQYWB7DIEqmCSlbJ3yjF6Xdn+aU7RlTJ2WdsSC+KBieGaMUokypEil/pLUhmaljoqYqeCdKreOhrKhIMZWeSCjgoX8ipSkhJfqhSCiFrNglEqbcJDYmviaFHFQksqXkKS4mkqiIKcojW6ZuJBkjVSldpKYcsiN0IcqoRZ/gJCMaJR/5KP8oCahamC4gLKKMqsKknymwnfswR4dUqOQpbqo7JeApjimSIQ0fPZ0mJESeQSi+py6qeiPXKCmoZicmpDCs+iCwJTqsayBEGFMlZiUrIWwkHKAtKaKeWJaIqBgljajoHBqrMCOupSImHarGrfgpEhnvo0mhVacom42kgSCmKyymKqt3mjurhBwhrKofMK3dDVakXS0foSkne6QqFQclTaCwKJOsUKVAnQokvyb8nfskraJSqg==",
+    "height": 1080,
+    "lab": [
+     57.86,
+     -2.27,
+     1.52
+    ],
+    "luma": 0.5605,
+    "motion": 32.2824,
+    "quality": 0.5188,
+    "ref_score": 0.4425,
+    "samples": 13,
+    "sharpness": 643.5771,
+    "shot_size": "medium",
+    "warmth": 1.07,
+    "width": 1920
+   },
+   "height": 0,
+   "id": "1FsIhjtjB0",
+   "last_used": "2026-11-27T20:19:41+00:00",
+   "page_url": "https://coverr.co/videos/woman-walking-outdoors-1fsihjtjb0",
+   "query": "woman field sunset",
+   "runs": [
+    "46062134646"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "hamptons",
+   "title": "Woman walking outdoors",
+   "width": 0
+  },
+  "J5zLeITypw": {
+   "added": "2026-11-27T20:19:01+00:00",
+   "director": "lana",
+   "dna": {
+    "contrast": 0.4881,
+    "embedding": "BSkip8An56jqoQmhxhnMKnQoPKLaqgmmGibzKa+m8SG2pTil8qKeJHCdiScjq+AcbKoprFeqI6RKI6GnraKyKt+qbSZcoreoIqFCraAlYaxGqICsvKbtK/Glt6OpKWQlmiEzJpyeHI4zqDEi5a0urCetayikn6wm9bC/qNEe9pMkJCqfPRe/MGopJa7DqLck9CFPKu8pZSyHItskO6M+qlOh3qADnDItBJ4wKeam9Rr4Ij0iV6Ufq9ufQKHiqOGrExpnKuMdBh6GKk8onChBmxsgRyDpJ0wpXyRZnjOgKhkGpNEgaaDvpL4ZPiH+JxaiYyR3qQAqiyh0pKih3h/dLKiotCukpD2j/aj4KzOXryuLHQghyqkwKXAj9CYWJdymEykDLVYpOqi8Kd8kxKMUJ8M1uKgVrBOpwyVuq7EsB6h7K3wg3CTnJJMpO6nmJZgkRqmnqzUpN6JMokwi/qiPKV+skqY/MWmdo6kkJ6EaWZdAqm8h36mTH08gqinCqDCpGancqJUmjCT8JHKsLqitJjCw2i4xH3WhliBnHBCk9qzyHKal/aoPqc8USiBbJcCg+CTQoNerwa0wobenTiQvqNqUDZy4KCmoAYiWIjCk8KVAqxSjSCImLEEgiiRSj4aoPyo9oYIusaN1JpCoaaVspq8n7ag4KvCmbKfCqPaqSyOqpDQphKq8IeocV6CPKKepnaDappykY6nvKGurSyhNH48qLCCpn+erRyGNpy+Z8iOkp8Yn1iZiI/+m56SkqRegWh+3IUip2CUtqDwpX5honRKq26PKIpOliS4BppqiAaQkrSyol67BtbIhNZlbGPAolyp4IEsjUy1KqTSoNagUpWEg4JYoKDosIqodk6an/CD/ppsoYayzJwygDSxVorQspazeKSWkJKExKQ0oKafEKiif2KohKiklZCJBHAKqDqUMqHibPiZiIuwkiyQ1o4SltiPALGWpHSV7JTOoSpxIqs2kXiRqKYMhYqMpKA6r2Sz+JWAjU6P2p2Scg6KNJGafnJ3oLROqGpnqH8ujBSh4IGkrlSSHrbOmd6cCqw8my6jlHn+jNCcbKRgpFR5qpYKmy6dYnkAsZiNYokcnniAyqbcWm5oZqLEcNCOZjAwqA6vzpOQZg6qjqX6m66b8Iu+pfZTDo82dnp4hKGMmyJulIGkn0aQrokwqTKYQpOaqTJdsJo2keilHHSeosCRyKSyeV6QoqryoqiZ4E14ey5qZJzGhWaTUpMIiCZPVGnGfI6mZFxgrhBzcrNYnqKTYnnqgWahgLCqqySqdLBuUJh/sq4ql8RVbLNGmY565JwYcIS1DJUsow6Q4n+kicBZKLWqcW6c8qr6gniuaJTSu0KLUJA==",
+    "height": 1080,
+    "lab": [
+     60.12,
+     -12.66,
+     21.22
+    ],
+    "luma": 0.5572,
+    "motion": 2.4375,
+    "quality": 0.5359,
+    "ref_score": 0.3867,
+    "samples": 14,
+    "sharpness": 593.572,
+    "shot_size": "medium",
+    "warmth": 18.69,
+    "width": 1920
+   },
+   "height": 1080,
+   "id": "J5zLeITypw",
+   "last_used": "2026-11-27T20:19:01+00:00",
+   "page_url": "https://coverr.co/videos/friends-playing-golf-j5zleitypw",
+   "query": "country club",
+   "runs": [
+    "46062134646"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "hamptons",
+   "title": "Friends playing golf",
+   "width": 1920
+  },
+  "OZfZXy4k4x": {
+   "added": "2026-11-27T20:18:37+00:00",
+   "director": "lana",
+   "dna": {
+    "contrast": 0.5389,
+    "embedding": "DR5cKqcng6RaraIjBivpJkUgNCTjH5Kc0qjvpx+jDhzwrQusKqcKJD8lFaRgp4EoBK1xqt+pmKM6nMIsK6rOJDOppyotI6Cl66c5nYwmLSz/IuirHSxBJBMlYqoqLXcrriP6oI4g7ChPq9ql+6zZJNergiYRpZ0o0bJuqeWn2iUIq50kq6NtJWchRKjup6cihCMzpj0oTiwbK5krMKSgIVOoMKGgppwo2CUUpR2p/SSiLUIg+RjrqeqaB6nXqAcmW5h6qRAqGKSKqPYsvZ10KC4YUSQMMJmfCKmnpHOsRCaAqMOaTZhvKFqawx1WpxWrLiB3pl2Y/SYJo4kgZifvJImnUSVoFIMgY62MGHYoVy4YqBkcFhz2IYskGhhZpLokkZUHpRAkyKuSH9oeeqTaG4o0ZieyqNMn9yMbpoAf6yStKgcfeJ15pDKhVSXYJ82foqLfnKeZPKNgJgwoFiQaKBMln5zPLSwOx6ohmpSl9aPorKqjoKDhILsetyAJFPQkGaTyqO8cciXaprIZKKgioXmlXyxxqiuf0yidoD6bRCLto1ymrh14rJmXnyjTIHqfKyxYrTimKKrgKCCpIhUxHjYhWaZlJbQaY6TGnbAvJCAro+Umeiudp4esFCThowKmriMcKpYmjqgyJGAiDqcpLBws4SWII1glGqHtp3Co6yXPqssl1agkLXSh86SGLsOqmibrDwAokKZiKXKthCrrFtYpkSutqWAlrx7wp4EgAZkQKDSkypyDGKsU+qa1pQieGintqoQqU6YjqvCiOBmfpTqo5Bt6Iu0oJqyVkU0jbiX2JBapZbCPtAgo5SfRJW4VYSy8JkAoE6k4qaoiGaOMHl6mXintpzalQbFVKL4XdxXLqnapfSSqGYwk3B4eJWmlD6k+nKWs7CjiJGGmnybmHAamAqtaLHkkgTBHLAcp6pq9H8clV6mRJtKcNCjllh2cSKU3JC2mBCYRqSGfTCg4Hb0kzib1KKOoB6X3KmAfiyrSqQcqKJ9dqLUmZCZOJLgjfqTgLwCXHSlhoxCpoqfGqFYYPSQrqPErMZ+VKI8osibQmlAgkyf4GrUkSAQKIaMkj5+4IFEiuaEPrRAt6J3SHJ2rcCRaLA0kfyU+KcQrp6XGpWAcraHTrY6lSCNkqVGsXijjrNMp3KGCqs8uPqbPo0QsTqGsKmendKzTqyStX6VjHWKl6SwtKcOkFaSGKcoa8yTupA4lHylgqKktnyg9JJSnoaCtp1smtKb8nK+njp1Eq0Om9ag6rrUqf6JvonSmjaKLqMOjVifaLTUex6UFrQOtsqkAMC6kZaypoNSkaS4RogUo2Jz3omgpoCFKLZepGR2eKDerGCrJJawpraYlqg==",
+    "height": 1080,
+    "lab": [
+     57.44,
+     -2.31,
+     -2.48
+    ],
+    "luma": 0.5419,
+    "motion": 14.1044,
+    "quality": 0.4139,
+    "ref_score": 0.5578,
+    "samples": 11,
+    "sharpness": 993.1131,
+    "shot_size": "medium",
+    "warmth": -2.94,
+    "width": 1920
+   },
+   "height": 1080,
+   "id": "OZfZXy4k4x",
+   "last_used": "2026-11-27T20:18:37+00:00",
+   "page_url": "https://coverr.co/videos/ripped-usa-flag-ozfzxy4k4x",
+   "query": "american flag",
+   "runs": [
+    "46062134646"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "hamptons",
+   "title": "Ripped USA flag",
+   "width": 1920
+  },
+  "VdAurjR7rF": {
+   "added": "2026-11-27T20:18:51+00:00",
+   "director": "lana",
+   "dna": {
+    "contrast": 0.5659,
+    "embedding": "DiWhLGkshKpaqJqlGqpxKaOjD54PAv8gMSTEpk6qxp+gkX0kUyg9GaQpJ6vBqB6SaKiiKAug5aADIgMqI6chJqmqEimKJNGhQ5E5H0Mj0iV1oB+p9yNOGA0rr6UhLOso7Sl6DBktSpJ8p/ujN6z5lIalL52aK1AgrrHepwSmjascqOEk6iNbLEgp4qosq+uiLyEAIEadTy5sKOCgt6AmpYYl5ilUlvkk7SYqKpGotqNKLzSnGqRtqB6nFqa3HZUq4aBPnGKp2igmIWgoJKhvnx6kB5wGmtqtvSRhqgGkUqaMpJCj4x86qtyXmSpzIZCpr45xpIwokhSNqOIk8SUjJxaotSf9odKWWqXCoMIkuiq6H8KsZB2+KZklSqFbpPgi/yiuJKCh8ibuJxSjThxapCI2z6VpIQqlAymqIL0oPSKOHcohNCCKKKkdoyszKD0aZ6NxEr4tOqHbKHujLqQSLvMZIyp5LjIqr5cRKOSlz6oCp6mhcaXbpTsllys6qWKcOCNSAk4nDCRop5+jl6j7JierWzB8HpmksKJxnnYk8KBlKOuoKKMYqPoWtJu9LKWhCCggqISm4SGSIDkh2iBZqJ0oiKU/KQui/6VjKV4tx6t9qWOh1Cg8J++pghUopSul8Si9reUnOKBOI5eiwig2JUIpeSC5q8acPaQsq9mplaNkJTUhNq1WJMmkXaqGKC4QMaYnKCso1h1CJv6keiAxJTUgPhieHAOljyZOpy2kwSH/KXksSxsgIEumyJgvI94MXyNcqpss4CGUIvWeCySEKLeqp6glp3YgWbAlpfidcCP2GxarE6EnttakApr1FwMwhaP5m68d+KO2qiscGCSwITwR7BvjHB8tE6ucqTIe8SchoV+pYijZp7EhtSguJswpAaVaiy0i7iKfGoSgYxuyKPgor6phIVUhR6IKJKGpn5rQqFwpeaRrIHqlIBDroZwZ2abhK4anQJ12pAGqyCNbHnUkoi1KKNogG6qqIZeezytfH0wdgJvvJGKkiyxoGKiOX6TyL96npxy+IEKi056RpcIVWSykqBKiH6znmgQgSClSoMQYCZfaomQeCiALKGabpqokJb8StpjskjOmqqrVIgAhTCFeKl2ol6KeKTqhr5x1p3Kmv6SPqxefkhgVoYIw6yfupS4p96kxHfAq8ikFqfUkDJBBpVifyB4ZqC+r6h5srV2otCzKIBmsShwKqDAmpaQoJDknAihnKK0qYiV0J6EnQKJnq6+mfaq+KGSpo6tEqxcmDqEusB8qA6EpI6EgGKYmptCiVipDLQKpuKChqLAdg6QlrhSrEyx5KyKcsS3TJnwlFByzCTcoph7FKBWqKqgHqsqpeSC1JhWlTKhNnQ==",
+    "height": 1080,
+    "lab": [
+     45.42,
+     2.49,
+     11.09
+    ],
+    "luma": 0.4314,
+    "motion": 38.2111,
+    "quality": 0.4128,
+    "ref_score": 0.4279,
+    "samples": 12,
+    "sharpness": 416.009,
+    "shot_size": "medium",
+    "warmth": 10.59,
+    "width": 1920
+   },
+   "height": 1080,
+   "id": "VdAurjR7rF",
+   "last_used": "2026-11-27T20:18:51+00:00",
+   "page_url": "https://coverr.co/videos/walking-in-the-sand-vdaurjr7rf",
+   "query": "sand dunes",
+   "runs": [
+    "46062134646"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "hamptons",
+   "title": "Walking in the sand",
+   "width": 1920
+  },
+  "iYPyDjkeQV": {
+   "added": "2026-11-27T20:18:44+00:00",
+   "director": "lana",
+   "dna": {
+    "contrast": 0.5648,
+    "embedding": "JKEFJx0p+agDrXMg/yiIJQYkTSQMHXUjdKO6oKQlSSPpoJOpNKk6HBUpZR5RpxEcN6r5qleqxiP7I4UlKKzwH2GogiaVIc+kz6A+HN0dkSgWJfar/ilQJkckVageKnclryLxmWIhKyjyqf8eAatoIy6rlKIPqAIofrHBp7WnRp5qpJIeVqXziVQorKkuqpIlcCFJqaggJSxwKL8pp6hVJsaljJwjosonsSSboWKoWyjfLfwmPCE0nlyidKpSqVgeIp3wnSMnC6UJHH4pGZ2RJAejI6C3LYsjqaoYJNGtmSgVo+AiJKCAnlMcPqdorKqaOh9Vpm8nsRRLnaIj7Cd4G2KohSB7HAShTawvHGgV5TBdpcOjhKT/JUgkuiOwHC4ixSFQopckIK3CKOiad6lIE8E1jCgOquGY+pwnpgYo3ZEXKjQij6LUpnwiZimBKe+mfqrjoVWnlZSOJQErgxwdngMi9SGqMMWrj6fpEaOnoCXqrGOgFqSFoqkfQZ4TJdgloKL0qaubF5k2qJufH5wLIK6qZy+cqLCcZyjAJzyjAwymJAOok5cvrg0evCRcGowgciuzp3ClNKtXJbubgppgoGIoi6WJJ0MiS4mSJSEvEaQIqm8igRp8ncGqSie9JCIa5ChupvAlmKHwJy6jTqFQLh8rtoyTps+fwJ0tqqeldylJq+IjL6XzLvqj96J1LgyrUiDNIo0mxKWhKhqt8ilvqbAoFSyqqpElZCadqdqlfykjKl2lVJqoG1aklah0macW4yJLpkkozaXTpJKnIyTrnJmkHSHEIPgnw6PwnyQbzRFLpw6kma7HtbAilCn2I4UpuCghIP8pLKmcqfikrahtKuijdSi0o06oBK82J/iWOSJQqQ6f9SU9Jq0bvCTSHhan2qdcoRSrbCqZHw6jZyOJHgagvaZXJHUadzHRJjQpQqGzmiqZyaxvKqEhDiTcHV6jQKjCJauk5yKopjqllSlEIzum3iblJrinmqdDKkkigy65qKoqepS0o6Are5vnoKMmgKUqLuegNiUepGeqsZsJk4KZCynErCMq/iOXJWMnbBdLpB0lBCUbqhsm7iaoJswaxp3XI9ge2yRzrawtTaUdIDOlyKW9Kh4rQyCBLEMrGad7qLYdrYijrOmlB57rpw6pEB1BqCaosqjTog8tg6c4GmAsnKJZKPyj4qnOqq+trKLZKTynfSoXIamnfaG/KgualSQOAFYi/CiVFHgtYyo5JbijDadYpLAcPaZ2JDulEhwZoomf7qkgrYQmk6ZpI2KneSbUpFoa4SehLJSfLadErD+spqjkL56ga6hGDYmigS7eoAuYRBiZqVks4YGULEqkBaCoJxepVSdNJacqCqI/qg==",
+    "height": 1080,
+    "lab": [
+     78.67,
+     1.02,
+     8.12
+    ],
+    "luma": 0.7716,
+    "motion": 29.2734,
+    "quality": 0.4326,
+    "ref_score": 0.5352,
+    "samples": 10,
+    "sharpness": 697.8261,
+    "shot_size": "medium",
+    "warmth": 7.92,
+    "width": 1920
+   },
+   "height": 1080,
+   "id": "iYPyDjkeQV",
+   "last_used": "2026-11-27T20:18:44+00:00",
+   "page_url": "https://coverr.co/videos/usa-flag",
+   "query": "american flag",
+   "runs": [
+    "46062134646"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "hamptons",
+   "title": "USA Flag ",
+   "width": 1920
+  },
+  "nara-364672880": {
+   "added": "2026-11-27T20:19:08+00:00",
+   "creator_name": "U.S. National Archives",
+   "creator_url": "https://catalog.archives.gov/id/364672880",
+   "director": "lana",
+   "dna": {
+    "contrast": 0.3962,
+    "embedding": "thb8qo2q9CjxpwKkRqXzKKslqxmupfEl2pmRJfapaJvgrVUcZx7mpgKkAyMpp9gVIiVkrCimzyRuJaImIKsKJ4apUCwHKNUkpqEhJTYls6itqXWlwo2uII8lBJ+zLYWfGCo+ppeg9iwknqci2isMKZIgJaYzqXEYTKliqlygdaBuqdgdNCP7J6QoGqyOqssj5iUNK+WiIS8OLpopCJw1oholciTSD1AeypCMJjqdpSjNLfuntqGpqWuppiIfnHslwRnTpICleRwvKdYjzqDloK0iCaHSjOqasqvYIcyq9KRirDEYgKg+qiEWXKS4phEqUqsMqBAstqZRqxsscpNoJXQlTx3Tqaek2qBOIzsjtSvvmTeeWaOIIIAcAKMLKLMnbCTAqACrDKJQJBSiDCgplfY0LqAxHIOiPCHNLPkcW6PgKN8oDyolI5srIKT0KOOia6lnItMbCinEIIWe06R7q7Icqy3mNHwWiao8op8nwiNurYGfyyccpQAiuSgiJ3clwqr9pighTqUipQyifKwVoX6s+C5SJl0cSB5lJk2iQqihoRUsBinxrYugfCrrKdEWJix9qhGq2Ky8KP6lLpsQqXIqYZzBDugn8RAUG7svNKt5pfmkwaNhoOikbCNMqZkl5KduIu0qQKLhGHslfaS+LpUosSjbKnYZ7huNqnOmU6tQpRgQpa2HJZ4o157rKoSl4ijHpWEg05gcLfihFK4ylH4koSMvpWOhUKSBna2ZyygZKyCoCp6OJ0mtSJFaHMcf+pcnpAalYwMDJTiX8Rsgpxgngak1JeEoOzFJoy8gfRFTKDKtPyYBtbOZ3JD9mdMeG6adFxWmP6DVqC8lJqgPJR+Zc6fMp5iodak/o62V5yApp6ypRidLmwSryB4rK2GofZSMo2usYChdqfAmECYpJXggq6ngJ8AcnyrzKiGg7CbdInUo3qtqKZmkDy1Im66cMaTtm3ygZqxoI4yikSi9KmioPi9aoQcn/qexLBIpjahWoFMj2KLQpW4pSy5rqCerraJdMJUZOimsoLEgRJhWqWGVRim8HYigB638KN+kOCYKJy+gE6U1rfuctCQuINOoWic4o24qqSuAIdKh0iTjmVSaJKpZJuAluyRDqzAqn6wjJjenBieWrIUUIiy8oqivyJ4Zi7CsAKQcpssnlijfpMoixx9kmNwl35jyHgaakiSTkkKoUCEPH0+aYSTmKMkoTyXDJPooHCMwIUeljKW1EzgdQ6frpC0m2SHjJCMoLaamom8onKCim60lzyXZqFqghyVmocMkZy1lqEKk46Pfq/kFiKeJLnisyCVUo+SlTC5BIDMVdSlRqOcmOyono++nHanNIM2R7qc+HkwdoBofJQ==",
+    "height": 1080,
+    "lab": [
+     44.16,
+     3.83,
+     1.79
+    ],
+    "luma": 0.4184,
+    "motion": 31.8216,
+    "quality": 0.4718,
+    "ref_score": 0.4751,
+    "samples": 9,
+    "sharpness": 979.51,
+    "shot_size": "medium",
+    "warmth": 1.02,
+    "width": 1920
+   },
+   "height": 0,
+   "id": "nara-364672880",
+   "last_used": "2026-11-27T20:19:08+00:00",
+   "licence": "Public domain – U.S. National Archives (use restriction: Unrestricted). This product uses the National Archives Catalog API but is not endorsed or certified by the National Archives and Records Administration.",
+   "licence_url": "https://catalog.archives.gov/id/364672880",
+   "page_url": "https://catalog.archives.gov/id/364672880",
+   "query": "horse show",
+   "runs": [
+    "46062134646"
+   ],
+   "seconds": 8.0,
+   "source": "nara",
+   "theme": "hamptons",
+   "title": "Peace and Friendship in Freedom: Nation Tour",
+   "width": 0
+  },
+  "nkgpzw9r7A": {
+   "added": "2026-11-27T20:19:33+00:00",
+   "director": "lana",
+   "dna": {
+    "contrast": 0.2566,
+    "embedding": "YSLKLdEwp6jep3+suSKUI54nJSs+pAoowyYsKAWmdiU5rAupMyRijCOh7aMxqPWjZawjJjqr/KECHmOerySdKQmkOiyHKv6kLqg6k3cmEKlsofumaCYiJdOjO6YCIVAhVC0oIv4m9iyUpQiiAg1OF9qj/ydPIAYsZq4foUygsqSVqPceL58hLT4YDKQSrJUZdCyHpmErMS/HqNYrQqiyp4mfo6hEncYn3xuhJ/UjIyk8LKuqSiUkI86nkSPRoRMqEiEmJzCo1BgNGqcf4Jo8IpmVCKRRJw+oFxbXnR2toKSxHZoiSqSJnSydFShuHq0tYqzlqMcoSppfnSIpJ6k5IdOj2iHLpTyaCakPID4kQawDIiKkVh08jBihfBuKJBcn5CySKQupeao3KA+phZaRJKA0YqRfoY0hSCK6KGieh6DSJY2m66VGKdMn+5bzpG0nBKh0od4sNqdlK9ekNaMCMV2pBCiwMKintCRkqaqmwaAeprIdAiypJb2lYCj2qNwra5izrXElYRnKJiSouCA/meapVyzjJjWp0yb+JBwYWQnzIwQcIqqwpnCscSO3LCEkWyYwowWmFqlkJMwHUSV4FzUonZncK46a3amVKhgwzp2rqJkmFChuHSisRqQPJeeojhg5rRwZYiotJDslbRvvrbCpQyLkp/WlkqQSrEMhgagUqjynB67dJGQiGKhzKzAfBSL7Jrgip6MvqMKodi8vpi4bVyiFo6qqHCjeqtAg8SE6oAOorZwLLL2dXqZGKMkmQ6BVJP8XiqcKKaCn/yF8mlCql6k3KBmqja3DpMaii5h+K/istKuntJqixBjcqpWu/yvMkf4bPKsSqZqpCiWKGeQjVaJ4odIuK6vmoTUl8aBUIj8mMygEpmKpRyUjKFujM6Y6po6lMSVgJWqkWShjLGEqt6y9KW8jjSb8KVGpXSR8pf+Ymq3qJZmhpSB/nAGhlqi3JsscbKZ7pggach0sIH+o8ChiKBQkmKF5KO+lqSwQKigpraSIHCoprSu3qMCiuqimMQIqGyZXqcMmzyqPHgcoDJ3xrxYlSbAoKqIkRqNFpQohQ6DmFRkoH60PpRkkExIBI2sk2CKpIqmnDabyJSul1qMZpbomGKS8KQYm7aSFqIcklaDUqsWmV6bEpaMxfhRDpV0p4qlKoR0tDi0epXakjJ4wJD6mppqyqBSoHiVFqF+l7SnwHuio4SU1LBusKylVJnoe8SSxKXQmu6noJ4cg66Tqqjed1ZyuLAWps6lInNMot6wAHpUozKNokIulryOBJYshHyJTLQ2jDKY1qiGid6QVIA0gC6u5HwqpAC4RKO0lrCJnJK0ocSoUKOmpmqnNIg+mbym6iCYqtiU/IA==",
+    "height": 1080,
+    "lab": [
+     39.63,
+     -5.24,
+     -2.16
+    ],
+    "luma": 0.3585,
+    "motion": 20.6463,
+    "quality": 0.4938,
+    "ref_score": 0.4464,
+    "samples": 11,
+    "sharpness": 191.3442,
+    "shot_size": "medium",
+    "warmth": -3.21,
+    "width": 1920
+   },
+   "height": 0,
+   "id": "nkgpzw9r7A",
+   "last_used": "2026-11-27T20:19:33+00:00",
+   "page_url": "https://coverr.co/videos/contemplative-woman-in-park",
+   "query": "women lawn",
+   "runs": [
+    "46062134646"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "hamptons",
+   "title": "Close-Up of a Young Woman Stretching at the Park",
+   "width": 0
+  },
+  "pl-castaoca_000147": {
+   "added": "2026-11-27T20:18:49+00:00",
+   "creator_name": "Orange County Archives (public domain)",
+   "creator_url": "https://archive.org/details/castaoca_000147",
+   "director": "lana",
+   "dna": {
+    "contrast": 0.4229,
+    "embedding": "r6h9LYouYCQ7I4il76FcoNaKMi5yJHkhmKVtpIogIozVo3EmcBwJpIAqo6YeqJQoDaJ4pAchUZ6DKUkqxqj2J1wgeScwKFynapl4LF4gVZwLpBCgwaI1JS0iHhtwKjOo1RbhpgIXDCwhJs0m0iY3oGGoj6TQKU6shyvNJAikyyMDpLQRFintLOIk9KTwq8WdEyRlKrIhvioPIhgmDKYLIFokkaYvqzcjnyW3oMAnZSfkK9anf5/VkNGsGiGsHeeg1qjAKA+l5KR0o2EhZiWEpc8olSEGJm8qPaUTqy2rppyPqisUHan3qIQdYRs6qQQrYaLrpZsj4B/Cqi6pbRUsocqkR5dOnlOWfik0KuQQC6zCps0kpSgdHUkg3aiQqhIo+iFNngGqzBR1KQ4mGiarqY41lyapo4KgkJhsoqsnoh+BD6sqvyCSKHKlTTAdoDWsBKwBI0EuDiZwpAqmNZydMdAk4ydIM/Omfac3q66fl6O/rHypRyKfFMWeKyZRJsUtKKwNqgypLqpUptaoBac6olCuBS3TpgykFiXTI08ocSlropaocCCvqyIbZimEJq8gbCQemZMluKyvI0ahnib9GiEqkaefqPAnVaXnnMUrLBxUoCgoLiUtHAepaqdVpbClLh2LrnkrK5yPILKaLiXhJI+lcCP4J4KVzCTyq0cShKA3o04r6qdxp9wYdqpwLAQkRCpyHZok3CkAJn6fxaWaptKhxSRQoX+oraZqqbikcirkIfaqhKfvl8WmtiJLJZwkTCKyIpOr8B02IeCqfiHdI7AZVSUbItyqWSvWGj+lm6RrqOSpFzCWtUIcMJlwJtKu4x0DJX4aUCM3pPIfhaaCp0+lMCJ1Ky+XnZAxo5Sl9KzGqbKnNSeoH2yqgyz7kG+hNiM2ICWkTyAWn4GjTiUMKKkqS6UJpD+o0C16oCop0SBVqpIoQKu9pLOnBimlnNmfdiXVps2lFaINIL0lRyZAJgemZikIK6Aky5wypQKeSarzI7eXVaDgp3WkHy52noCoYCdPMPOm9Zi2mmso+azIpVak9iSeqiYTxrHJIVCg/xzSHSqhliKDreqnHiiNHyKtGiQWJn4oNi5TKA4pip2zqCsirhuOKEsrsCRzqDas+qcvLAGp8iOiqo8jth5sKAQmHKifKAesCqRSJaEsPQTEJcsjCCUVDi4lvST+H8+ptyTHKU2inCUWluwbjizZKwwgLaNnJEuLZCWWoWml7SZIJTgoMqQWoLAk5BIqD9Qbeqs0nNOkZ6hYLGSV/ZqqpWyqVKIeLMGU2y6qq4KkXCUOqyWlkqhAo1mTQR61qOunFyq1pO+kkyPGp/GlCh63J26rcaDknaadN6M6KSSmkKDlFQ==",
+    "height": 480,
+    "lab": [
+     51.03,
+     -3.9,
+     -1.51
+    ],
+    "luma": 0.4759,
+    "motion": 35.9172,
+    "quality": 0.5911,
+    "ref_score": 0.4518,
+    "samples": 9,
+    "sharpness": 642.742,
+    "shot_size": "medium",
+    "warmth": -2.29,
+    "width": 640
+   },
+   "height": 0,
+   "id": "pl-castaoca_000147",
+   "last_used": "2026-11-27T20:18:49+00:00",
+   "licence": "Public domain (Orange County Archives)",
+   "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+   "page_url": "https://archive.org/details/castaoca_000147",
+   "query": "vintage americana",
+   "runs": [
+    "46062134646"
+   ],
+   "seconds": 8.0,
+   "source": "prelinger",
+   "theme": "hamptons",
+   "title": "Clark Family Home Movies Kids in Snow R.B.'s First Communion",
+   "width": 0
+  },
+  "pl-castaoca_000164": {
+   "added": "2026-11-27T20:18:59+00:00",
+   "creator_name": "Orange County Archives (public domain)",
+   "creator_url": "https://archive.org/details/castaoca_000164",
+   "director": "lana",
+   "dna": {
+    "contrast": 0.1114,
+    "embedding": "cqTEIEEuCKvMpdejPqadKTgkATDwIiio/x/JoQqeO5qrGlqimCp3pLAqHCHumcGataVBqo6ouChjJQ4ppqmVKOShyhnVJUootiFOmckQYCbjIMal7SnKK74gIqjPHLkdlylqnWEoFS0hoLOgJa7nqSirLCe6KpilHrGWqUif56NyEwMmKSIYpXqc46OxrDSjQCNAp0kRti0BJ52iiqYUKMMkb6a7pmOhzCXAGSOptSjILMOig6jIIxmq4SP/KYSbCqTmlP6oVKCToK+ivahpm/4s96aOKLAn3qYgpLekzCbMoe4g85mWqD6V0qE4p+ghOaj4pMAfvaCzpuAgxynbIXenPR/4IV8jJKXIJAAh2CoGJdCgnSWAKoqnq6LRJQQkcixVqFeobahkJXef5SHDpyQ2BqmHpmKjWybgpFEjbyA3nJEjexoeKBCf8SldJ+ekW6b4pCksfiIhEZ+bPZ25MqKcbywOMVCjByQLneogA6W1p9co3qTFpZglAiVpFIgarhyRpKYnLadGqRqqDKZXos6pjCttpPqmkJ0flaoodSj0lISoZaEQpqSoSp1tLOeg6B9eq8YafiaaFSmiWaI3HS4n2qXUJ5Eo2ZVHHL4tgqT2qhwjvh0SJYSYrJdBonWd/anDrroqRKwRnd4ecCMFoBGkZSToIcOpXpqwrL2lb6QupO0oDK3Hp+6WIawBKBwiaptDG2gmnqBGKJClgio4pl6XxprTqTqlVR6ZkccQl6lOGYAqGBl6IByqDB6lKDUftp43k5ckmKR/IiOqMqLlKfelAiL0Jl+pbKn3I8ok26Wtrhurrh0jtkyeHxDUIGqqIynspHkn2SS+qNSidiW7I7YggSbEKUAw4iz8qd2tYRivqOesiSZ+p+umUSo1mhuhppfkpHadUSqoJeGaYSOEI4EqAqznmQskGSpLKeamyxU+qzYYPq47IYCmFii7pjokhCRLK9EfyiXUoI2pUiYUJuaiZihfJS4ng6kpG66Y8ypPIaAieqQ5lz0h1CwZlt6k7idoLzOchJ2Ro1Al/yRPmQSoGSn/HagcH60VpFQjU54monAi/pksJNCjNqQ2I9CoLB0VHIcmNSYHKyQjrqVdqa8YY6luJkAiJZ2NKC+kTKedJN+gUqBtpgWldJsNJ90wT6TGIV0leZhxILcs7Cc8oUYhxCHyJiGURJyUI0KoGKcYqS2fNy8elHKpLyMgGwQpRilLnlMnwCCFKnmeLibSJnMo7Kb/pjiacqe8odirhqSRqWUmMSXtr0gpKxy6LMuotZEjIv4kRSl/JPylHiJUqoAjCprcqbym8ijWl8khsy2CqpUiiyovJx4oApoxJ4au/6QMKMmsCClAI20n+52xHQ==",
+    "height": 480,
+    "lab": [
+     17.89,
+     -1.43,
+     -4.4
+    ],
+    "luma": 0.1698,
+    "motion": 13.7133,
+    "quality": 0.4433,
+    "ref_score": 0.4332,
+    "samples": 8,
+    "sharpness": 49.8966,
+    "shot_size": "medium",
+    "warmth": -4.69,
+    "width": 640
+   },
+   "height": 0,
+   "id": "pl-castaoca_000164",
+   "last_used": "2026-11-27T20:18:59+00:00",
+   "licence": "Public domain (Orange County Archives)",
+   "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+   "page_url": "https://archive.org/details/castaoca_000164",
+   "query": "vintage americana",
+   "runs": [
+    "46062134646"
+   ],
+   "seconds": 8.0,
+   "source": "prelinger",
+   "theme": "hamptons",
+   "title": "Clark Family Home Movies Summer of 75, Jeff, Kel, Mike and Doug",
+   "width": 0
+  },
+  "qd2KPXuQY5": {
+   "added": "2026-11-27T20:19:15+00:00",
+   "director": "lana",
+   "dna": {
+    "contrast": 0.6756,
+    "embedding": "5SmKnpWoDCNZoj6l/KkQKewcmyu1lo8owCAbqpwmdCJzqVCgC6ViLG8gNKUII/CYJKDJJUulGyA4LYEoBaYoI66nCC4lKJeZTqjuJwUmF6TnI1ehUSSfJqwpqx5ZLRwlXiEkmA0ojSUjpcUZja87pTAnvalqLJkZeq9Wqw6dcqo1pfoZriTsKBolHpF1qrgj7yFZI8+mwy5apY8rcaKhnLomLSytKAAjgKgrKF8psSqiLaGm0ab0pmccmqIRpVcrfpEXJtaq0CQHI9Cly6XxIcKiZCgQqnGoqR6DnjStBCRMrMwZ8pBrnGeg+SpPorOlSKMLpicnhhZAJMee0ilCJLcSiCgPqdygtqd+pYUfzyuGHcCoqaXHKUqaSSTvIPoceSqZqaYVy6blKVkpoacKobI0xyD1ph0ivylWpseZUyUsKVMSFh7sqKIk4TCAI8oiSicQlYMsvpnXmuKhJaWqMPeqURwmMY0dUqSkJWqnFCgapzYkzKt/J80gIiziHGWfQyRtoUYZTiE+IwGrRxzupbajUS3RKDufbhwzKGIlv6klGMIksyFnHHAj3SRYqGOb1iYlqa8hKq3bJXGgep+FqO0l/KwqHDIpuJ/tJIcooqMGrWaXBicsJM2g+ib9KEGhK52Xpaks1Kh/HSsngyhwG8emSiz9pCyiICh3qh+w16hYK+wp9amCLauiRSr1KZGoOqaoIGkl6JqiHa6oHi+ink8kU5jopbkUOx7pq1uYeig7J+skgiCEqCklViQKp7sadCKLHRYcdyRfKxYpZh8CJ/SkV6WFKMqoiCwGI26mMiJTrZ+qcSm1tAYoLqSRIAEq0B75GkklqKbVo3Cq06LlHG0gWqQbrPcsNq5hoN0peqXAqfeqIB51oOqqhCjnpAQlDKyZpymm3iWRkjaoRKLKK7eeyKpUI2AoE6wfpcuo1qTPoJMnbKVbKWwkWh1PqDohCCjXKtOnIh/pJTiqBqn/pw+r4B+wJgEZBaNlGnSfQizgJdkpWylxJdmjbChyqoekY6ObLsSpJyU2JvGmLqdLoRwoMqo4q22oRB02qrQlzaOQmVkiTSWzoF8oVxoHJxckvaVWJZoq+SBMrtOp2yg0KUQlBg+mKZAjOCYJLtQu7aVdqsyklh29rGGpwynlqBCw26I3qV4oOqdTndYstCmZqzUqvihroS4ZrCjSoiyo/ZMVFAigoJ0knD2pRKMZouirE6CCJaEpWJwCLtEorSiEo5Am8ozeGWmbc6kpKCKjoq3OpLQqoKcasjMUsKUVKjykc6KiJcMh+SynK+Wij6gwqAeoWqz6MOScT6CVK0UqvCkAJbwlXJwun6sotCgeK/Ctv6qRpGaeMyCTLD+UUyT6Iw==",
+    "height": 1080,
+    "lab": [
+     48.68,
+     2.47,
+     15.63
+    ],
+    "luma": 0.4655,
+    "motion": 6.7315,
+    "quality": 0.5566,
+    "ref_score": 0.3927,
+    "samples": 10,
+    "sharpness": 942.2657,
+    "shot_size": "wide",
+    "warmth": 15.14,
+    "width": 1920
+   },
+   "height": 1080,
+   "id": "qd2KPXuQY5",
+   "last_used": "2026-11-27T20:19:15+00:00",
+   "page_url": "https://coverr.co/videos/desert-view-qd2kpxuqy5",
+   "query": "sand dunes",
+   "runs": [
+    "46062134646"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "hamptons",
+   "title": "Desert view",
+   "width": 1920
+  },
+  "zou9AclC1y": {
+   "added": "2026-11-27T20:19:24+00:00",
+   "director": "lana",
+   "dna": {
+    "contrast": 0.5104,
+    "embedding": "hCXRLlwmC6Wnqq2YqiS/KFgZhaAdJVUl3p/QJnKsuKDjJIki5CD3qiIq4ahoqUCoW5wKqgWpuCLQKQcm26tnKFKohqAkln4mqZ6UqAUjWiSNiB2rbSUGpccrCaDGKaYleShXFO0sxCgeqRSRxLChmzSm9SQ/KogpBLE/qQCbQaz9G3Mfd5x2LDogW6Yhq60cxCdRKVgnKCriqd2jYBIqo+AoYyBokrEpV5+1KLCmsxV3Kamoy6hnoUgg5CRHILMqdqUXGhKnHipxJRIrS6gJqN+jGag0HlsayaONo5ShvShHo5iNVia9g5qikCcCpLKs3Z/YpMsl9CaIrJwnriaHohCrCypOl9+lsxb9HLicnCx8JpOqjyHAISEnO5sAJOUoxydJls2oSKAyKaWeLRhMndQ2Rqi5HVygfBfiInQo5yaXoDoiOJfLIhgdmye4J3wtCafVJD4sU6N4JhIcgaOJLZ6kCydkHS0lFikopo+nUKd2H+4brh8kqJgpDSuVFKshjx0kohkmeySnqTOl7yBBEROpfy0DIwOmTZ6lo0Ij8p8xKZWdeaNNqwcfNJ0+LpEpeCMSo5mkkylik5ogg6j0o88q1CRtEi0gBxkCJy8rsavzq2+k7CQjLPighKXrqBGdTyrPqVkpLKUgo/+ljik9K+opJh/0qX4Xn6YhqxEjuSOekNSndLA1p7ggeKzEKjYhVqR8KTohLaY9Kfuk3ikyKWmfDxG4pqalbSQilb+h8iSVKSAkQB24KJurXyTQmSKgxabVqYcrSaDsJ7EePKRXKmOna6YwpEcm5a7NpIikaBymKWuoaKnWtgGkKiWhlBsv4he9lIgpspSZq6GlRidooSugWhQMKHMvH6gmqGap7CauoE0Y7Ck8pdYaGCqRJecnSCLQIzEnzCarESkjGqEsJwuYHJ+fpjmgtaduo22tFR9npsYhmaipIeGfx5wdpg6jLKQ1pMWkUKa2qIygqSq4JFonJC7/JHQba6bvJNClpy+lJoUjIZWRIxokny3pHBsoTIt7L6UkHiA9H+sajyTRpvuixSyIJD8o9KR4IfcgbStbnNskcCPep+ycWSPPKoOdYaT2o9ygMheWIOIiSaXvIWUnZiPKKUeoIBPDJXWmzJ6koFwiSKPBqnYovZ9wIIIuLR/Mmmkom6a9ID0nByaupmSkwx3KJHOh8J+LpwqgzJwHrb4kAyjzFJel9SEnm0soHSbfJ3glvCYgKRMroaSkIWkiPaeIqgwdk6gAqOOlzKX1qoihqiEbrCiTE6S8Ki2o06galNAkSysCLNmodRUWpCWprqJzK0qoZyehKCqgMy4GIx6TaiA8I74lkB71JiWnrqZEp3yoM6L+J8OaH6Tfqw==",
+    "height": 1080,
+    "lab": [
+     68.55,
+     1.81,
+     6.64
+    ],
+    "luma": 0.6602,
+    "motion": 37.0442,
+    "quality": 0.4598,
+    "ref_score": 0.4151,
+    "samples": 12,
+    "sharpness": 404.5271,
+    "shot_size": "medium",
+    "warmth": 6.28,
+    "width": 1920
+   },
+   "height": 2160,
+   "id": "zou9AclC1y",
+   "last_used": "2026-11-27T20:19:24+00:00",
+   "page_url": "https://coverr.co/videos/walking-barefoot-on-the-beach-zou9aclc1y",
+   "query": "white dress",
+   "runs": [
+    "46062134646"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "hamptons",
+   "title": "Walking barefoot on the beach",
+   "width": 3840
+  }
+ },
+ "version": 1
+}
