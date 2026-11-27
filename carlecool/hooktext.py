@@ -18,22 +18,17 @@ from pathlib import Path
 
 HOOK_SECONDS = 2.6  # visible from the start, gone before the first musical phrase ends
 LINES = {
-    "lana": ("pov: summer, 1969. the radio's still on",
-             "for the summers you can't get back",
-             "pov: driving home with the windows down",
-             "for the nights you can't explain",
-             "pov: the last warm evening of the year"),
     "rubin": ("pov: 2 am, one more take",
               "for the quiet hours",
               "pov: the studio after everyone left",
               "music for thinking in the dark",
               "pov: sunday morning, nowhere to be"),
-    "night": ("pov: 2 am, driving nowhere",
-              "for the city at 3 am",
-              "pov: the last diner still open",
-              "the drive home you don't want to end",
-              "pov: empty freeway, full moon"),
 }
+# Creative Directors (27 Nov): fallback lines per director (themes bring their own).
+from . import directors as _directors  # noqa: E402
+for _n, _d in _directors.load_all().items():
+    if _d.get("hook_lines"):
+        LINES[_n] = tuple(_d["hook_lines"])
 FONTS = (
     "/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf",   # GitHub ubuntu runners
     "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf",
@@ -59,7 +54,8 @@ def choose(world: str | None, variant: str | None, run_key: str, prefer: str | N
     mode = os.getenv("CARLECOOL_TEXT_HOOK", "test").strip().lower()
     if mode in ("off", "false", "0", "no"):
         return ""
-    key = "night" if variant == "night" else (world if world in LINES else "lana")
+    key = _directors.key(world, variant)
+    key = key if key in LINES else "lana"
     pool = tuple(lines) if lines else LINES[key]  # theme lines: only what the pictures can keep
     line = pool[int.from_bytes(hashlib.sha256(f"{run_key}|hookline".encode()).digest()[:2], "big") % len(pool)]
     if mode == "always":

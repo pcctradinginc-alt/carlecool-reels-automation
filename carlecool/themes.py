@@ -18,45 +18,6 @@ import hashlib
 # archive: max. public-domain home movies (they are sunny 1940s–70s daylight footage)
 # lines: on-screen text hook candidates (hooktext.py) — only lines the pictures can keep
 THEMES: dict[str, dict[str, dict]] = {
-    # owner's video guide (27 Nov): melancholic decadence, Old-Hollywood glamour against
-    # motel / gas-station Americana, hypnotic summer heat, analog home-movie texture,
-    # California + desert + East Coast, water, classic cars, US flag; plus Old Money Hamptons.
-    # People on screen: women only (owner, 27 Nov).
-    "lana": {
-        "california": {"label": "Kalifornien & Pool",
-                       "words": ("palm trees", "swimming pool", "malibu", "venice beach", "convertible",
-                                 "sunset boulevard", "pier", "surfer", "underwater", "ocean cliff"),
-                       "roles": ("woman", "americana"), "archive": 2,
-                       "lines": ("pov: summer, 1969. the radio's still on",
-                                 "for the summers you can't get back",
-                                 "pov: the pool after the party")},
-        "desert": {"label": "Wüste & Motel",
-                   "words": ("desert highway", "motel", "neon motel", "diner", "gas station", "empty pool",
-                             "route 66", "vintage sign", "motorcycle", "desert sunset"),
-                   "roles": ("woman", "americana"), "archive": 2,
-                   "lines": ("pov: motel pool, 104 degrees",
-                             "pov: driving home with the windows down",
-                             "for the summers you can't get back")},
-        "glamour": {"label": "Old Hollywood Glamour",
-                    "words": ("chandelier", "mansion", "pearls", "champagne", "silk dress", "vintage dress",
-                              "ballroom", "red lipstick", "vintage car", "marble staircase"),
-                    "roles": ("woman", "friends"), "archive": 1,
-                    "lines": ("for the nights you can't explain",
-                              "pov: the last party at the mansion")},
-        "hamptons": {"label": "Old Money Hamptons",
-                     "words": ("beach house", "classic sailboat", "tennis", "country club", "white dress",
-                               "lighthouse", "sand dunes", "estate lawn", "cable knit", "polo"),
-                     "roles": ("woman", "friends"), "archive": 2,
-                     "lines": ("pov: the last summer at the beach house",
-                               "pov: the last warm evening of the year",
-                               "for the summers you can't get back")},
-        "homemovie": {"label": "Super-8-Erinnerung",
-                      "words": ("home movie", "super 8", "polaroid", "lawn", "picket fence", "swing",
-                                "lemonade", "vintage dress", "hair wind", "summer"),
-                      "roles": ("friends", "woman"), "archive": 4,
-                      "lines": ("pov: summer, 1969. the radio's still on",
-                                "for the summers you can't get back")},
-    },
     "rubin": {
         "studio": {"label": "Studio",
                    "words": ("record player", "turntable", "mixing console", "tape recorder", "reel tape",
@@ -79,32 +40,11 @@ THEMES: dict[str, dict[str, dict]] = {
                   "roles": ("woman", "gear"), "archive": 0,
                   "lines": ("for the quiet hours", "pov: sunday morning, nowhere to be")},
     },
-    # owner's night bible (27 Nov, "Concrete Crown & Midnight Horsepower"): old money ×
-    # 90s NYC at night × stadium floodlights × air-cooled Porsche 993. Women only on screen.
-    "night": {
-        "drive": {"label": "993 Nachtfahrt",
-                  "words": ("porsche", "night drive", "tunnel", "brooklyn bridge", "light trails", "east river",
-                            "dashboard", "rearview mirror", "wet road", "skyline night"),
-                  "roles": ("woman",), "archive": 0,
-                  "lines": ("pov: 2 am, driving nowhere", "the drive home you don't want to end",
-                            "pov: empty freeway, full moon")},
-        "projects": {"label": "Brooklyn & Harlem bei Nacht",
-                     "words": ("brooklyn", "harlem", "brick building", "fire escape", "steam street",
-                               "street lamp", "basketball court", "chain fence", "alley night", "window lights"),
-                     "roles": ("woman", "americana"), "archive": 0,
-                     "lines": ("for the city at 3 am", "pov: brooklyn, 1996, the block is quiet")},
-        "stadium": {"label": "Baseball unter Flutlicht",
-                    "words": ("baseball field", "stadium lights", "floodlights", "stadium night", "baseball",
-                              "bleachers", "dugout", "night fog", "baseball bat", "empty stadium"),
-                    "roles": ("woman", "americana"), "archive": 0,
-                    "lines": ("pov: the lights are still on at the ballpark", "for the city at 3 am")},
-        "gilded": {"label": "Old Money bei Nacht",
-                   "words": ("pool night", "mansion night", "chandelier", "camera flash", "pearls",
-                             "velvet dress", "black dress", "limousine", "city lights", "rooftop"),
-                   "roles": ("woman", "friends"), "archive": 0,
-                   "lines": ("pov: the last party at the mansion", "for the nights you can't explain")},
-    },
 }
+# Creative Directors (27 Nov): every director file brings its own themes (directors/*.json).
+from . import directors as _directors  # noqa: E402
+for _name, _themes in _directors.table("themes").items():
+    THEMES[_name] = {t: {k: v for k, v in info.items() if k != "music"} for t, info in _themes.items()}
 ALWAYS_ROLES = ("flag", "car")  # owner: US flag and a classic car in every Reel
 
 # Music first (26 Nov): which kind of song suits a theme. Classes from analysis.py:
@@ -112,20 +52,13 @@ ALWAYS_ROLES = ("flag", "car")  # owner: US flag and a classic car in every Reel
 # (spectral centroid); percussion sparse < 0.15 ≤ groove; spacious = loud/quiet ≥ 2.8.
 # "Energy" is left out: it reads 1.0 for every song of the EP (saturated, no signal).
 MUSIC = {
-    ("lana", "california"): {"tempo": "mid", "sound": "bright"},
-    ("lana", "desert"): {"tempo": "fast", "drive": "groove"},
-    ("lana", "glamour"): {"tempo": "slow", "sound": "dark", "space": "spacious"},
-    ("lana", "hamptons"): {"tempo": "mid", "sound": "warm"},
-    ("lana", "homemovie"): {"tempo": "slow", "sound": "warm", "drive": "sparse"},
     ("rubin", "studio"): {"tempo": "mid", "drive": "groove"},
     ("rubin", "coast"): {"tempo": "slow", "space": "spacious"},
     ("rubin", "road"): {"tempo": "mid", "sound": "warm"},
     ("rubin", "quiet"): {"tempo": "slow", "sound": "dark", "drive": "sparse"},
-    ("night", "drive"): {"tempo": "fast", "drive": "groove"},
-    ("night", "projects"): {"tempo": "mid", "sound": "dark", "drive": "groove"},
-    ("night", "stadium"): {"tempo": "mid", "sound": "bright", "space": "spacious"},
-    ("night", "gilded"): {"tempo": "slow", "sound": "warm", "space": "spacious"},
 }
+for _name, _themes in _directors.table("themes").items():
+    MUSIC.update({(_name, t): dict(info.get("music") or {}) for t, info in _themes.items()})
 ORDER = {"tempo": ("slow", "mid", "fast"), "sound": ("dark", "warm", "bright"),
          "drive": ("sparse", "groove"), "space": ("tight", "spacious")}
 WEIGHT = {"tempo": 0.35, "sound": 0.3, "drive": 0.2, "space": 0.15}  # energy, cover: no usable signal
@@ -165,9 +98,8 @@ def music_fit(key: str, theme: str, classes: dict[str, str]) -> float | None:
 
 
 def key_for(style: str | None, variant: str | None) -> str | None:
-    if variant == "night":
-        return "night"
-    return style if style in THEMES else None
+    key = _directors.key(style, variant)
+    return key if key in THEMES else None
 
 
 def choose(style: str | None, variant: str | None, previews: list[dict], run_key: str,
