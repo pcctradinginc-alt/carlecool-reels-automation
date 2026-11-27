@@ -83,7 +83,7 @@ def _bars_for_energy(level: float, pace: str) -> float:
     return 1.0 if level >= 0.45 else 2.0
 
 
-FIRST_SHOT_MAX = 1.6  # seconds; first cut inside the window where viewers decide
+FIRST_SHOT_MAX = 1.3  # seconds; first cut inside the window where viewers decide (27 Nov: avg watch ~2 s)
 
 
 def plan_cuts_from_beats(duration: float, beats: tuple[float, ...] | list[float],

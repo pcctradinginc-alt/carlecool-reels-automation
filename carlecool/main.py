@@ -581,6 +581,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "theme": theme,
         "hook_at": round(float(getattr(features, "hook_at", 0.0) or 0.0), 2),
         "first_shot_s": details.get("first_shot_s"),
+        # 27 Nov: reach effects (moving camera, opening push, flash cuts) — compare views before/after
+        "reach_fx": bool(details.get("moving_shots")),
         "opening_source": (selected[details["opening_clip"]].source if details.get("opening_clip") is not None else None),
         "opening_motif": (selected[details["opening_clip"]].query if details.get("opening_clip") is not None else None),
     }

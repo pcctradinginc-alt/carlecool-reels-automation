@@ -13,8 +13,8 @@ on:
     # check 09:45 UTC → 17-21 h, statistics 15:00 → 23-02 h, Reel 08:00 → 19:16) and drops a
     # queued run when this file changes before it starts (22 + 23 Nov). So the slots are
     # early (02:17 and 05:47 Berlin, odd minutes — GitHub advises against the full hour):
-    # with the usual delay the mail arrives during the day. The `guard` job keeps it to ONE
-    # Reel per Berlin day. Always REVIEW, never auto-publish.
+    # with the usual delay the mail arrives during the day. The `guard` job allows up to TWO
+    # Reels per Berlin day (owner, 27 Nov). Always REVIEW, never auto-publish.
     - cron: '17 2 * * *'
       timezone: 'Europe/Berlin'
     - cron: '47 5 * * *'
@@ -78,26 +78,32 @@ jobs:
         run: |
           skip=false
           day=$(TZ=Europe/Berlin date +%F)
-          echo "date=$day" >> "$GITHUB_OUTPUT"
           if [ "$EVENT" = "schedule" ]; then
-            journal_result=$(python -c 'import sys; from carlecool.production_journal import check; print(check(sys.argv[1]))' "$day")
-            if [ "$journal_result" = "True" ]; then
+            # Up to 2 Reels per Berlin day (owner, 27 Nov): journal keys <day> and <day>-2.
+            slot=$(python -c 'import sys; from carlecool.production_journal import free_slot; print(free_slot(sys.argv[1]) or "")' "$day")
+            if [ -z "$slot" ]; then
+              echo "Both daily Reels already delivered"
               echo "skip=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
+            echo "date=$slot" >> "$GITHUB_OUTPUT"
             since=$(date -u -d "$(TZ=Europe/Berlin date +%Y-%m-%d) 00:00 $(TZ=Europe/Berlin date +%z)" +%Y-%m-%dT%H:%M:%SZ)
             # The concurrency group serializes runs. Queued runs are not deliveries.
             # Include push-triggered review runs and exclude manual dry runs.
             # Inspect the actual delivery step rather than the aggregate conclusion.
             ids=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/workflows/daily-reel.yml/runs?status=completed&created=%3E%3D${since}&per_page=100" \
               --jq ".workflow_runs[] | select(.id != ${GITHUB_RUN_ID}) | .id")
+            count=0
             for id in $ids; do
               delivered=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/runs/${id}/jobs?per_page=100" \
                 --jq '[.jobs[] | select(.name == "reel") | .steps[]? | select(.name == "Deliver private approval email" and .conclusion == "success")] | length')
               if echo "$delivered" | grep -q '[1-9]'; then
-                skip=true; echo "Verified review delivery in run $id"; break
+                count=$((count + 1)); echo "Verified review delivery in run $id"
               fi
             done
+            if [ "$count" -ge 2 ]; then skip=true; fi
+          else
+            echo "date=$day" >> "$GITHUB_OUTPUT"
           fi
           echo "skip=$skip" >> "$GITHUB_OUTPUT"
   reel:
