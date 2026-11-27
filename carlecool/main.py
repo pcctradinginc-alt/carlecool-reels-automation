@@ -718,7 +718,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                             for i, v in enumerate(selected)],
         "caption": caption_for(track, selected, caption_copy), "caption_variant": caption_copy,
         "reel_facts": reel_facts, "length_bucket": reel_facts["length_bucket"],
-        "creative_plan": creative_plan.as_dict(),
+        "creative_plan": dict(creative_plan.as_dict(), storyboard=details.get("slot_functions") or []),
         "performance_summary": performance.summary(perf_model),
         "search_keywords": keywords,
         "visual_direction": editorial_brief(features.mood, features.energy, features.bpm),

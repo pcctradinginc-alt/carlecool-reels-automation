@@ -53,10 +53,24 @@ def _weights(emphasis: dict | None) -> dict:
     return {k: v / total for k, v in w.items()}
 
 
+def _edge(dna: dict, side: str) -> dict:
+    """Phase 3: the concrete last / first frame of the window, if the DNA has it."""
+    e = (dna or {}).get(side) or {}
+    return e if e.get("lab") else {}
+
+
 def transition(a: dict | None, b: dict | None, ea=None, eb=None, weights: dict | None = None) -> dict:
-    """Component scores (0..1) and the weighted total for cutting from clip a to clip b."""
+    """Component scores (0..1) and the weighted total for cutting from clip a to clip b.
+    Colour, light and the semantic link are judged on the real cut frames (end of a,
+    start of b) when the Shot DNA carries them, else on the window averages."""
     if not a or not b:
         return {"total": 0.5}
+    out_a, in_b = _edge(a, "edge_out"), _edge(b, "edge_in")
+    if out_a and in_b:
+        ea = _emb({"embedding": out_a.get("embedding")}) if out_a.get("embedding") else ea
+        eb = _emb({"embedding": in_b.get("embedding")}) if in_b.get("embedding") else eb
+        a = dict(a, lab=out_a["lab"], luma=out_a.get("luma", a.get("luma")))
+        b = dict(b, lab=in_b["lab"], luma=in_b.get("luma", b.get("luma")))
     parts = {}
     # emotion: closeness to the owner's references + mood (brightness / warmth) of both
     parts["emotion"] = 0.5 * _closeness(a.get("ref_score"), b.get("ref_score"), 0.12) + \
@@ -84,6 +98,59 @@ def transition(a: dict | None, b: dict | None, ea=None, eb=None, weights: dict |
     return parts
 
 
+FUNCTIONS = ("hook", "establishing", "atmosphere", "development", "contrast", "accent", "climax",
+             "resolution", "loop")
+
+
+def slot_functions(energies: list[float], starts: list[float], accents: set[int] | None = None) -> list[str]:
+    """Dramaturgic function per slot from the music: hook (first), loop (last), climax (the
+    loudest), accent (cuts on a kick / the drop), atmosphere (the calmest), establishing
+    (second shot), resolution (second to last), contrast (a calm shot right after a loud
+    one), development otherwise."""
+    n = len(energies)
+    if n == 0:
+        return []
+    out = ["development"] * n
+    order = sorted(range(n), key=lambda i: energies[i])
+    if n > 2:
+        out[order[0]] = "atmosphere"
+        out[order[-1]] = "climax"
+    for i in (accents or set()):
+        if 0 < i < n - 1 and out[i] == "development":
+            out[i] = "accent"
+    for i in range(1, n - 1):
+        if out[i] == "development" and energies[i] < energies[i - 1] - 0.25:
+            out[i] = "contrast"
+    if n > 3:
+        out[1] = "establishing"
+        out[-2] = "resolution"
+    out[0], out[-1] = "hook", "loop"
+    return out
+
+
+# what a function wants from a clip (shot size, motion rank)
+FUNCTION_WANTS = {"establishing": ({"wide"}, None), "accent": ({"close", "detail"}, None),
+                  "climax": (None, 1.0), "atmosphere": (None, 0.0), "contrast": (None, 0.2),
+                  "resolution": ({"wide", "medium"}, 0.3)}
+
+
+def function_fit(function: str, dna: dict | None, motion_rank: float | None) -> float:
+    sizes, motion = FUNCTION_WANTS.get(function, (None, None))
+    if not dna:
+        return 0.5
+    score, parts = 0.0, 0
+    if sizes is not None:
+        parts += 1
+        score += 1.0 if dna.get("shot_size") in sizes else 0.3
+    if motion is not None and motion_rank is not None:
+        parts += 1
+        score += 1.0 - abs(motion - motion_rank)
+    return score / parts if parts else 0.5
+
+
+MATCH_CUT_BONUS = 0.08  # a strong visual link (form / colour / subject) on a musical accent
+
+
 def _music_fit(dna, energy_rank: float, motion_ranks: dict[int, float], src: int) -> float:
     if not dna or src not in motion_ranks:
         return 0.5
@@ -91,7 +158,8 @@ def _music_fit(dna, energy_rank: float, motion_ranks: dict[int, float], src: int
 
 
 def sequence(shots, energies: list[float], dna: list[dict | None], source_durations: list[float],
-             locked: set[int], beam: int = BEAM, emphasis: dict | None = None):
+             locked: set[int], beam: int = BEAM, emphasis: dict | None = None,
+             accents: set[int] | None = None, functions: list[str] | None = None):
     """Re-pair sources and free slots so the whole Reel flows; returns (shots, mean score)."""
     from .cinematic import Shot
     n = len(shots)
@@ -132,8 +200,13 @@ def sequence(shots, energies: list[float], dna: list[dict | None], source_durati
                     continue
                 tried.add(src)
                 s = score + weights["music"] * _music_fit(dna[src], e_rank[i], motion_ranks, src)
+                if functions:
+                    s += 0.1 * function_fit(functions[i], dna[src], motion_ranks.get(src))
                 if prev is not None:
-                    s += pair(prev, src)
+                    link = pair(prev, src)
+                    s += link
+                    if accents and i in accents and prev != src and link > 0.7:
+                        s += MATCH_CUT_BONUS  # match cut: strong visual link exactly on the beat accent
                 nxt = i + 1
                 if nxt < n and nxt in locked:
                     s += pair(src, shots[nxt].source_index)

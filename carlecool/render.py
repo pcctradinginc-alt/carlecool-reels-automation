@@ -261,6 +261,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             no_bookend = set(no_bookend) - {opening}
     from .cinematic import Shot
     motion_on = os.getenv("CARLECOOL_MOTION_MATCH", "true").lower() in ("true", "1", "yes", "on")
+    slot_plan: list[str] = []  # Phase 3: dramaturgic function of each slot (for the Creative Plan)
 
     def make_board(seed: str, emphasis: dict | None = None):
         board = build_storyboard(intervals, [source_durations[i] for i in base], seed=seed,
@@ -282,8 +283,15 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             if dna and len(dna) == len(videos) and any(dna):
                 # Package C (27 Nov): the whole order optimised for visual coherence + music.
                 from . import coherence
+                kicks = [float(k) for k in (getattr(features, "kicks", ()) or ())]
+                hook_at = float(getattr(features, "hook_at", 0.0) or 0.0)
+                accents = {i for i, a in enumerate(starts0)
+                           if any(abs(a - k) < 0.06 for k in kicks) or (hook_at and abs(a - hook_at) < 0.15)}
+                functions = coherence.slot_functions(energies, starts0, accents)
+                slot_plan.clear()
+                slot_plan.extend(functions)
                 matched, _score = coherence.sequence(board, energies, dna, source_durations, locked,
-                                                     emphasis=emphasis)
+                                                     emphasis=emphasis, accents=accents, functions=functions)
             if matched is None:
                 matched = look_mod.match_motion(board, energies, motion, source_durations, locked)
             matched_any = matched != board
@@ -611,7 +619,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "smart_cropped_shots": reframed,
             "dissolves": sum(1 for d in dissolves if d > 0), "slowmo_shots": slowed,
             "light_leaks": leaks, "punch_ins": punched, "moving_shots": zoomed, "hook_strategy": hook_strategy,
-            "coherence": final_coherence, "storyboards": storyboard_scores, "variant_rank": variant_rank, "flash_cuts": flashes, "bw_shots": bw_shots,
+            "coherence": final_coherence, "storyboards": storyboard_scores, "variant_rank": variant_rank,
+            "slot_functions": list(slot_plan), "flash_cuts": flashes, "bw_shots": bw_shots,
             "hook_text": hook_text if hook_png is not None else "",
             "first_shot_s": round(storyboard[0].duration, 2) if storyboard else None,
             "framed_shots": framed,
