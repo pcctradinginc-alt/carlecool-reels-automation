@@ -1002,6 +1002,126 @@
      "used": true
     }
    ]
+  },
+  {
+   "at": "2026-11-27T15:24:25+00:00",
+   "run_id": 46023409844,
+   "song": "carl e cool - nastro azzuro",
+   "sha256": "e6d930638367642b1bbd6749819d8936d766920f554492c8a114d787008e75cf",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co",
+    "🎬 Archive footage: California Revealed, public domain (archive.org)"
+   ],
+   "clips": [
+    {
+     "id": "l3ylado2hv",
+     "provider": "coverr",
+     "title": "Road in California",
+     "page": "https://coverr.co/videos/road-in-california-l3ylado2hv",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "desert road",
+     "used": true
+    },
+    {
+     "id": "VEmqRkeUZK",
+     "provider": "coverr",
+     "title": "Clouds above a road",
+     "page": "https://coverr.co/videos/clouds-above-a-road-vemqrkeuzk",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "empty road",
+     "used": true
+    },
+    {
+     "id": "pl-cahuca_000008",
+     "provider": "prelinger",
+     "title": "Downtown, Huntington Beach, ~1974",
+     "page": "https://archive.org/details/cahuca_000008",
+     "creator": "California Revealed (public domain)",
+     "licence": "Public domain (California Revealed)",
+     "licence_url": "http://creativecommons.org/publicdomain/mark/1.0/",
+     "used_at": "2026-11-27",
+     "motif": "vintage americana",
+     "used": false
+    },
+    {
+     "id": "Dtm8IO163G",
+     "provider": "coverr",
+     "title": "Driving in the desert",
+     "page": "https://coverr.co/videos/driving-in-the-desert-dtm8io163g",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "desert road",
+     "used": true
+    },
+    {
+     "id": "ai-46023409844-0",
+     "provider": "ai",
+     "title": "LTX 2.3 original AI footage",
+     "page": "",
+     "creator": "",
+     "licence": "AI-generated footage (LTX-2.3); distribution subject to applicable terms",
+     "licence_url": "https://huggingface.co/Lightricks/LTX-2.3/blob/main/LICENSE",
+     "used_at": "2026-11-27",
+     "motif": "",
+     "used": true
+    },
+    {
+     "id": "UVS4iEdEiO",
+     "provider": "coverr",
+     "title": "Empty highway",
+     "page": "https://coverr.co/videos/empty-highway-uvs4iedeio",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "empty road",
+     "used": true
+    },
+    {
+     "id": "ai-46023409844-1",
+     "provider": "ai",
+     "title": "LTX 2.3 original AI footage",
+     "page": "",
+     "creator": "",
+     "licence": "AI-generated footage (LTX-2.3); distribution subject to applicable terms",
+     "licence_url": "https://huggingface.co/Lightricks/LTX-2.3/blob/main/LICENSE",
+     "used_at": "2026-11-27",
+     "motif": "",
+     "used": true
+    },
+    {
+     "id": "aYQn3UaOmV",
+     "provider": "coverr",
+     "title": "Couple kissing during golden hour ",
+     "page": "https://coverr.co/videos/couple-kissing-during-golden-hour-ayqn3uaomv",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "golden hour",
+     "used": true
+    },
+    {
+     "id": "EIO3TpjAzg",
+     "provider": "coverr",
+     "title": "Two friends sitting at a table and playing a board game outside",
+     "page": "https://coverr.co/videos/two-friends-sitting-at-a-table-and-playing-a-board-game-outside-eio3tpjazg",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "friends sitting",
+     "used": true
+    }
+   ]
   }
  ]
 }
