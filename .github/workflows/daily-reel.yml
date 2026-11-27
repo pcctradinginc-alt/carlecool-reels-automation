@@ -41,6 +41,16 @@ on:
         type: string
         required: false
         default: ''
+      theme:
+        description: 'Optional: theme of the director (e.g. hamptons); empty = automatic'
+        type: string
+        required: false
+        default: ''
+      length:
+        description: 'Reel length: auto / short / long'
+        type: string
+        required: false
+        default: auto
 concurrency:
   group: carlecool-daily-reel
   cancel-in-progress: false
@@ -120,6 +130,8 @@ jobs:
       # Which Creative Directors take turns (comma list of directors/*.json); empty = all active
       CARLECOOL_DIRECTORS: ${{ vars.CARLECOOL_DIRECTORS || '' }}
       CARLECOOL_SONG: ${{ inputs.song || '' }}
+      CARLECOOL_THEME: ${{ inputs.theme || '' }}
+      CARLECOOL_LENGTH: ${{ inputs.length || 'auto' }}
       # Song pool override without a commit: repo variable CARLECOOL_SONG_POOL=all (see data/song-pool.json)
       CARLECOOL_SONG_POOL: ${{ vars.CARLECOOL_SONG_POOL || '' }}
       CARLECOOL_SEMANTIC: ${{ vars.CARLECOOL_SEMANTIC == 'off' && 'off' || 'on' }}

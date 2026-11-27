@@ -1,0 +1,24 @@
+{
+ "note": "Owner's favourite Reels: their shown clips and search motifs count like three publications each (decisions.py).",
+ "reels": [
+  {
+   "issue": 73,
+   "director": "lana",
+   "theme": "hamptons",
+   "clips": [
+    "w7ZdjFecqV",
+    "sUKkOAjAZv",
+    "DnBhCNa6Tl",
+    "TcWdXNDOWb",
+    "PHHyGtc7L7"
+   ],
+   "motifs": [
+    "lighthouse",
+    "white dress",
+    "sand dunes",
+    "women sailing",
+    "woman horse"
+   ]
+  }
+ ]
+}
