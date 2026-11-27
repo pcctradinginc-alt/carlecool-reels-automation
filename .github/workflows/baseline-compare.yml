@@ -1,0 +1,96 @@
+name: CarleCool — baseline comparison (old vs new pipeline)
+# Owner brief 27 Nov, §17: identical song excerpt, length and footage pool; both versions
+# measured by the same instruments; a blind A/B pair mailed privately. Manual only;
+# no Coverr requests, no approval issue, no publication.
+on:
+  workflow_dispatch:
+    inputs:
+      song:
+        description: 'Song (part of the title or SoundCloud id)'
+        type: string
+        required: true
+      length:
+        description: 'Reel length in seconds'
+        type: string
+        default: '18'
+      director:
+        description: 'Creative Director'
+        type: string
+        default: 'lana'
+      baseline_ref:
+        description: 'Baseline commit (old pipeline)'
+        type: string
+        default: '6c75a7c'
+      mail:
+        description: 'Mail the blind A/B pair to the owner'
+        type: boolean
+        default: true
+permissions:
+  contents: read
+concurrency:
+  group: carlecool-daily-reel   # shares the slot with the daily Reel (no parallel load)
+  cancel-in-progress: false
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Dependencies and portable FFmpeg
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check -r requirements.txt 'imageio-ffmpeg==0.6.0' 'open_clip_torch>=3,<4'
+          python scripts/setup_ffmpeg.py
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/huggingface/hub
+            ~/.cache/torch/hub/checkpoints
+          key: carlecool-public-openclip-v1-${{ runner.os }}
+      - name: Footage library files (read only)
+        uses: actions/cache/restore@v4
+        with:
+          path: footage-cache
+          key: footage-none
+          restore-keys: footage-
+      - name: Old pipeline source
+        run: git worktree add ../old "${{ inputs.baseline_ref }}"
+      - name: Frozen inputs (song audio + pool)
+        env:
+          SOUNDCLOUD_CLIENT_ID: ${{ secrets.SOUNDCLOUD_CLIENT_ID }}
+          SOUNDCLOUD_CLIENT_SECRET: ${{ secrets.SOUNDCLOUD_CLIENT_SECRET }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          WIKIMEDIA_USER_AGENT: ${{ secrets.WIKIMEDIA_USER_AGENT || vars.WIKIMEDIA_USER_AGENT }}
+          AUDIO_S3_BUCKET: ${{ vars.AUDIO_S3_BUCKET }}
+          AUDIO_S3_PREFIX: ${{ vars.AUDIO_S3_PREFIX }}
+          SC_ALLOW_OFFICIAL_DOWNLOADS: ${{ vars.SC_ALLOW_OFFICIAL_DOWNLOADS }}
+        run: python scripts/baseline_inputs.py --song "${{ inputs.song }}" --director "${{ inputs.director }}" --out baseline
+      - name: Render both pipelines under identical conditions
+        run: |
+          python scripts/compare_pipelines.py --audio baseline/song.mp3 --pool baseline/pool --old ../old --new . \
+            --length "${{ inputs.length }}" --director "${{ inputs.director }}" --out compare
+          cat compare/report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Mail the blind A/B pair privately
+        if: ${{ inputs.mail }}
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+        run: python scripts/mail_comparison.py compare
+      - name: Keep the report (no media) in the log
+        run: |
+          python - <<'PY'
+          import base64, json; r = json.load(open("compare/report.json"))
+          key = r.pop("blind_key", None)
+          print(json.dumps(r, indent=1))
+          # sealed (base64) so the owner is not told before rating; revealed afterwards
+          print("SEALED A/B KEY:", base64.b64encode(json.dumps(key).encode()).decode())
+          PY
