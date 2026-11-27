@@ -68,7 +68,11 @@ PRELINGER_EXCLUDE = ("crash", "accident", "signal 30", "war", "atomic", "bomb", 
                      "halloween", "christmas", "santa", "easter", "haunt", "ghoul", "church",
                      "baptist", "sunday school", "funeral", "storm", "flood", "armistice",
                      "germany", "v-e day", "veteran", "police", "lecture", "interview",
-                     "oral history", "council", "meeting", "hearing", "disney", "knott")
+                     "oral history", "council", "meeting", "hearing", "disney", "knott",
+                     # 27 Nov (Reel #82: "Kids in Snow … First Communion"): no winter, no
+                     # children / church rites — women only, summer light (owner's rules)
+                     "snow", "winter", "communion", "baptism", "kids", "children",
+                     "baby", "babies", "birthday", "school")
 THIRD_PARTY = ("esa", "european space agency", "jaxa", "csa", "dlr", "herschel", "planck", "gaia",
                "sofia", "courtesy of", "copyright", "©", "getty", "ap photo", "reuters")
 POSITIVE = {
