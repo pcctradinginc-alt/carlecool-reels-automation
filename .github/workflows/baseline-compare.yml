@@ -33,6 +33,8 @@ concurrency:
 jobs:
   compare:
     runs-on: ubuntu-24.04
+    env:
+      CARLECOOL_SEMANTIC: 'on'   # archive content gate and Shot DNA need OpenCLIP
     timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
