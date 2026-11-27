@@ -21,16 +21,16 @@ def test_one_theme_per_reel_with_car_and_flag():
     assert w[0] in ("porsche", "land rover", "range rover", "classic car")
     assert all(x in themes.THEMES["rubin"]["studio"]["words"] for x in w[2:])
     assert themes.roles("rubin", None, "studio")[:2] == ("flag", "car")
-    assert "skater" not in themes.roles("lana", None, "coast")
+    assert "skater" not in themes.roles("lana", None, "hamptons")
     # night uses the night themes whatever the world
     assert themes.get("lana", "night", "drive") is themes.THEMES["night"]["drive"]
     assert themes.archive_films("lana", "night", "drive", 4) == 0
-    assert themes.archive_films("lana", None, "family", 4) == 4
+    assert themes.archive_films("lana", None, "homemovie", 4) == 4
 
 
 def test_themes_rotate_evenly_per_style():
     hist, seen = [], []
-    for k in range(4):
+    for k in range(len(themes.THEMES["lana"])):
         t = themes.choose("lana", None, hist, f"r{k}")
         seen.append(t)
         hist.append({"style": "lana", "theme": t})
@@ -75,10 +75,19 @@ def test_music_first_theme_choice():
     assert themes.music_classes(quiet) == {"tempo": "slow", "sound": "dark", "drive": "sparse", "space": "spacious"}
     # fresh history: the song decides
     assert themes.choose("rubin", None, [], "r", quiet) == "quiet"
-    assert themes.choose("lana", None, [], "r", groove) == "roadtrip"
+    assert themes.choose("lana", None, [], "r", groove) == "desert"
     assert themes.choose("lana", "night", [], "r", groove) == "drive"
     # rotation still wins over time: a theme never gets 2 Reels ahead of the least used
     hist = [{"style": "rubin", "theme": "quiet"}] * 2
     assert themes.choose("rubin", None, hist, "r", quiet) != "quiet"
     # missing measurements: no class, pure rotation
     assert themes.music_classes(SimpleNamespace(bpm=0, timbre_hz=0, percussive=0, dynamics=0)) == {}
+
+
+def test_owner_video_guide_themes_27_nov():
+    """Owner's guide: California, desert motels, Old-Hollywood glamour, home movies + Old Money Hamptons."""
+    assert set(themes.THEMES["lana"]) == {"california", "desert", "glamour", "hamptons", "homemovie"}
+    assert "champagne" in themes.THEMES["lana"]["glamour"]["words"]
+    assert any("hamptons" in p for p in stylegate.WANTED["lana"])
+    from carlecool import style
+    assert style.look("lana")["chroma_shift"] and style.look("lana")["dissolve_below"] >= 0.7

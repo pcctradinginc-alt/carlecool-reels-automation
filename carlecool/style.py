@@ -104,10 +104,13 @@ LOOKS = {
     # Owner's video reference "Video Games" (2011): home-movie collage, slow crossfades,
     # flickering Super 8 / VHS exposure, found-footage feel → longer dissolves on more cuts,
     # a little more slow motion, gentle exposure flicker, more public-domain home movies.
-    "lana": {"dissolve": 0.7, "dissolve_below": 0.6,    # soft crossfades in quiet passages
+    # Owner's guide (27 Nov): slow, flowing, hypnotic — long takes, soft dissolves,
+    # pronounced slow motion, light leaks, slight chromatic aberration (Super 8 / VHS).
+    "lana": {"dissolve": 0.7, "dissolve_below": 0.75,   # soft crossfades (most of the Reel)
+             "chroma_shift": 2,                             # px red/blue fringe, analog lens
              "bw_share": 0.2,  # 16/54 stills B/W + "West Coast" (mostly B/W) → ~20 % of the shots
              "bw_contrast": 1.08,
-             "slowmo": 1.25, "slowmo_below": 0.45,          # subtle slow motion when it breathes
+             "slowmo": 1.3, "slowmo_below": 0.65,           # trance-like slow motion
              "home_movie_flicker": True, "archive_films": 4, "gate_weave": True,
              "light_leaks": True, "grain_boost": 2, "punch_in_above": None, "exposure_jitter": 0.0},
     "rubin": {"dissolve": 0.0, "dissolve_below": 0.0,      # hard, restrained cuts
