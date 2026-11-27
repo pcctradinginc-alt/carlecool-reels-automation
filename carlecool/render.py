@@ -320,7 +320,11 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     shot_start = 0.0
     starts = [sum(s.duration for s in storyboard[:i]) for i in range(len(storyboard))]
     if look and ref_world == "night":
-        look = dict(look, bw_share=0, bw_shots=0)  # night lives on neon and colour light
+        # Night bible (27 Nov): mostly colour (neon, floodlights, amber gauges); some Reels
+        # as grainy high-contrast 16mm B/W — always the whole Reel. Step-printing (12 fps
+        # held frames) on every third shot: the "shutter drag" of the tunnel drives.
+        look = dict(look, bw_share=0.2, bw_shots=0, bw_contrast=1.18, light_leaks=False,
+                    home_movie_flicker=False, gate_weave=False, step_print=True)
     shot_look = look_mod.plan_look(look, features, starts, [s.duration for s in storyboard],
                                    seed=f"{features.excerpt_start}|{os.getenv('GITHUB_RUN_ID', '')}")
     for item in shot_look:  # frame-exact transitions keep the cuts on the beat grid
@@ -394,6 +398,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             if speed > 1.0:
                 chain.append(f"setpts={speed}*PTS")
                 slowed += 1
+        if look and look.get("step_print") and index % 3 == 2 and 0 < index < len(storyboard) - 1:
+            chain.append("fps=12")  # step-printing: every frame held twice
         chain.append(f"fps={FPS}")
         if CLEAN_UP:
             # Light spatial + temporal denoise BEFORE the look: removes the stock clips'
