@@ -73,6 +73,10 @@ BLOCK_WORDS = (
     "businessman", "his",
     # Reel #62: nudity (AI clip) — never
     "nude", "naked", "topless",
+    # Reel #67 (owner: "die Frau auf dem Balkon passt nicht"): posed influencer / ad-copy
+    # portraits ("Elegant Nightscape: A Woman on a Balcony", "Posing on the street",
+    # "Stylish Night Portrait") and off-brief objects ("Set of bits in a toolbox")
+    "balcony", "posing", "poses", "stylish", "elegant", "toolbox", "tools", "drill bits",
 )
 UNWANTED = (
     "a cartoon or an animated film", "a 3d computer rendering", "an ai generated cartoon character",
@@ -240,8 +244,26 @@ TAG_BLOCK = ("anthropomorphic", "animated", "animation", "cartoon", "3d", "cgi",
              "ai generated", "ai-generated", "illustration", "motion graphic", "claymation", "anime")
 
 
+_BLOCKED_CLIPS: dict[str, str] | None = None
+
+
+def blocked_clips() -> dict[str, str]:
+    """Clips the owner rejected by name (data/blocked-clips.json)."""
+    global _BLOCKED_CLIPS
+    if _BLOCKED_CLIPS is None:
+        try:
+            import json
+            path = Path(__file__).resolve().parent.parent / "data" / "blocked-clips.json"
+            _BLOCKED_CLIPS = dict(json.loads(path.read_text(encoding="utf-8")).get("clips") or {})
+        except (OSError, ValueError):
+            _BLOCKED_CLIPS = {}
+    return _BLOCKED_CLIPS
+
+
 def blocked_words(video) -> str | None:
     """The first block word in the title (any list) or in the tags (synthetic looks only)."""
+    if str(getattr(video, "id", "") or "") in blocked_clips():
+        return "rejected by the owner"
     title = _norm(getattr(video, "title", "") or "")
     for word in BLOCK_WORDS:
         if _norm(word) in title:

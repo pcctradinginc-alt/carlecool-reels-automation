@@ -76,3 +76,13 @@ def test_provider_usage_merges_runs_from_main():
     merged = providers.merge(remote, local)
     assert [e["run"] for e in merged["coverr"]["events"]] == ["0", "1", "2"]
     assert providers.merge(merged, merged) == merged
+
+
+def test_reel_67_balcony_and_posing_blocked():
+    from carlecool import stylegate
+    from carlecool.video import Video
+    assert stylegate.blocked_words(Video("6kxRdq6Z1t", "coverr", title="Anything")) == "rejected by the owner"
+    for t in ("Elegant Nightscape: A Woman on a Balcony", "Posing on the street ",
+              "Stylish Night Portrait in Urban Setting", "Set of bits in a toolbox"):
+        assert stylegate.blocked_words(Video("x", "coverr", title=t)), t
+    assert stylegate.blocked_words(Video("x", "coverr", title="Woman walking at night")) is None
