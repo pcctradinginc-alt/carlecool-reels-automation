@@ -318,6 +318,7 @@ def send_review_email(issue_url: str, metadata: dict, original_path: Path | None
         if preview is None:
             raise RuntimeError('Email preview too large for Gmail')
         video_bytes, video_name = preview.read_bytes(), 'CarleCool-Preview.mp4'
+        metadata = dict(metadata, preview_sha256=hashlib.sha256(video_bytes).hexdigest())
     else:
         video_bytes, video_name = original_path.read_bytes(), 'CarleCool-Original.mp4'
     if len(video_bytes) > MAX_ATTACHMENT_BYTES:

@@ -28,6 +28,12 @@ DENOISE = "hqdn3d=1.2:0.9:4:3"
 SOFTEN = "gblur=sigma=0.7"
 FILM_TEXTURE = os.getenv("CARLECOOL_FILM_TEXTURE", "on").strip().lower() not in ("off", "false", "0", "no")
 SHARPEN = "unsharp=5:5:0.45:5:5:0.0"
+def hdr_to_sdr(transfer: str = "smpte2084") -> str:
+    """PQ / HLG BT.2020 → SDR BT.709 (input colourimetry given explicitly: stock files
+    often carry incomplete metadata)."""
+    return (f"setparams=color_primaries=bt2020:color_trc={transfer}:colorspace=bt2020nc:range=tv,"
+            "format=yuv420p10le,zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,"
+            "tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p")
 LOOP_BRIDGE_SECONDS = 0.38   # cover card fading out at the start (matches the last frame)
 LOOP_CROSSFADE = 0.25        # audio: the end blends into the bar just before the start
 CARD_OUT = 0.4               # cover card fades out before the end → last frame = clean footage
@@ -210,6 +216,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 opening_fit: dict[int, float] | None = None, hook_text: str = "",
                 ref_world: str | None = None, soft_sources: set[int] | frozenset[int] = frozenset(),
                 hook_strategy: str = "push", dna: list[dict | None] | None = None,
+                hdr_sources: dict[int, str] | None = None,
                 variant_rank: int = 0) -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
@@ -254,6 +261,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             no_bookend = set(no_bookend) - {opening}
     from .cinematic import Shot
     motion_on = os.getenv("CARLECOOL_MOTION_MATCH", "true").lower() in ("true", "1", "yes", "on")
+    slot_plan: list[str] = []  # Phase 3: dramaturgic function of each slot (for the Creative Plan)
 
     def make_board(seed: str, emphasis: dict | None = None):
         board = build_storyboard(intervals, [source_durations[i] for i in base], seed=seed,
@@ -275,8 +283,15 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             if dna and len(dna) == len(videos) and any(dna):
                 # Package C (27 Nov): the whole order optimised for visual coherence + music.
                 from . import coherence
+                kicks = [float(k) for k in (getattr(features, "kicks", ()) or ())]
+                hook_at = float(getattr(features, "hook_at", 0.0) or 0.0)
+                accents = {i for i, a in enumerate(starts0)
+                           if any(abs(a - k) < 0.06 for k in kicks) or (hook_at and abs(a - hook_at) < 0.15)}
+                functions = coherence.slot_functions(energies, starts0, accents)
+                slot_plan.clear()
+                slot_plan.extend(functions)
                 matched, _score = coherence.sequence(board, energies, dna, source_durations, locked,
-                                                     emphasis=emphasis)
+                                                     emphasis=emphasis, accents=accents, functions=functions)
             if matched is None:
                 matched = look_mod.match_motion(board, energies, motion, source_durations, locked)
             matched_any = matched != board
@@ -417,15 +432,19 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 print("Smart crop unavailable; centre crop:", type(exc).__name__)
         chain = list(smart or [f"scale={width}:{height}:force_original_aspect_ratio=increase:flags=lanczos",
                                f"crop={width}:{height}"])
-        if styling["punch_in"] and not (src_w > src_h > 0 and chain and chain[0].startswith("split")):
-            # Rubin: peaks get closer, not busier.
-            chain += [f"crop=iw*0.9:ih*0.9", f"scale={width}:{height}:flags=lanczos"]
-            punched += 1
+        if hdr_sources and shot.source_index in hdr_sources:
+            # Phase 4: HDR (PQ / HLG) stock → SDR BT.709 before any grade (else washed-out colour)
+            chain = [hdr_to_sdr(hdr_sources[shot.source_index])] + chain
         fx = reach_fx[index]
-        if fx["zoom"]:
-            # Reach (27 Nov): the camera never stands still; shot 0 pushes in from frame 1.
-            chain += reach.zoom_filters(fx["zoom"], shot.duration, width, height)
-            zoomed += 1
+        punch = styling["punch_in"] and not (src_w > src_h > 0 and chain and chain[0].startswith("split"))
+        if punch:
+            punched += 1  # peaks get closer, not busier
+        if fx["zoom"] or punch:
+            # Phase 4 (audit E2): punch-in and push / drift are ONE per-frame scale + crop
+            # (the punch-in no longer adds its own crop + rescale).
+            chain += reach.zoom_filters(fx["zoom"] or ("hold", 0.0), shot.duration, width, height,
+                                        base=1.111 if punch else 1.0)
+            zoomed += 1 if fx["zoom"] else 0
         chain.append("setsar=1")
         speed = 1.0
         if styling["slowmo"] > 1.0:
@@ -601,7 +620,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "smart_cropped_shots": reframed,
             "dissolves": sum(1 for d in dissolves if d > 0), "slowmo_shots": slowed,
             "light_leaks": leaks, "punch_ins": punched, "moving_shots": zoomed, "hook_strategy": hook_strategy,
-            "coherence": final_coherence, "storyboards": storyboard_scores, "variant_rank": variant_rank, "flash_cuts": flashes, "bw_shots": bw_shots,
+            "coherence": final_coherence, "storyboards": storyboard_scores, "variant_rank": variant_rank,
+            "slot_functions": list(slot_plan), "flash_cuts": flashes, "bw_shots": bw_shots,
             "hook_text": hook_text if hook_png is not None else "",
             "first_shot_s": round(storyboard[0].duration, 2) if storyboard else None,
             "framed_shots": framed,

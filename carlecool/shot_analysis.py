@@ -16,12 +16,14 @@ no paid service, no upload.
 from __future__ import annotations
 
 import base64
+import os
 import subprocess
 from pathlib import Path
 
 SAMPLE_W, SAMPLE_H = 72, 128          # tiny 9:16 frames for the pixel statistics
-MAX_SAMPLES = 24
-EMBED_SAMPLES = 8                      # CLIP frames per clip (CPU budget)
+from .budgets import CLIP_FRAMES_PER_CLIP, DNA_SAMPLES
+MAX_SAMPLES = DNA_SAMPLES
+EMBED_SAMPLES = CLIP_FRAMES_PER_CLIP    # CLIP frames per clip (CPU budget, budgets.py)
 WINDOW = 8.0                           # s kept per clip (opening clip needs ≥ 6 s for the loop)
 CUT_JUMP = 28.0                        # mean grey difference that means a hard cut inside the clip
 SHOT_SIZES = {
@@ -167,6 +169,93 @@ def best_window(times: list[float], scores: list[float], stats: list[dict], dura
     return round(best, 2), round(length, 2)
 
 
+ANALYSIS_VERSION = 2  # Phase 2: camera vs subject motion, direction, noise, blockiness, subject position, edges, HDR
+
+
+def flow_stats(frames) -> dict:
+    """OpenCV Farneback flow between consecutive samples (72×128): camera motion = median
+    vector, subject motion = residual magnitude, direction of the camera move in degrees."""
+    import numpy as np
+    try:
+        import cv2
+    except ImportError:
+        return {}
+    grays = [cv2.cvtColor(f, cv2.COLOR_RGB2GRAY) for f in frames]
+    cams, subj, angles = [], [], []
+    for a, b in zip(grays, grays[1:]):
+        flow = cv2.calcOpticalFlowFarneback(a, b, None, 0.5, 2, 9, 2, 5, 1.1, 0)
+        med = np.median(flow.reshape(-1, 2), axis=0)
+        cams.append(float(np.hypot(*med)))
+        subj.append(float(np.hypot(flow[..., 0] - med[0], flow[..., 1] - med[1]).mean()))
+        angles.append(float(np.degrees(np.arctan2(med[1], med[0]))))
+    if not cams:
+        return {}
+    return {"camera_motion": round(float(np.mean(cams)), 3), "subject_motion": round(float(np.mean(subj)), 3),
+            "camera_direction": round(float(np.median(angles)), 1)}
+
+
+def texture_stats(frames) -> dict:
+    """Noise / grain (high-pass residual), compression blockiness (8-px grid), subject
+    position (centre of edge energy, 0..1)."""
+    import numpy as np
+    try:
+        import cv2
+    except ImportError:
+        return {}
+    noise, block, cx, cy = [], [], [], []
+    for f in frames:
+        g = cv2.cvtColor(f, cv2.COLOR_RGB2GRAY).astype(np.float32)
+        noise.append(float(np.std(g - cv2.GaussianBlur(g, (3, 3), 0))))
+        dx = np.abs(np.diff(g, axis=1))
+        grid = dx[:, 7::8].mean() if dx.shape[1] > 8 else 0.0
+        block.append(float(grid / (dx.mean() + 1e-6)))
+        sob = np.hypot(cv2.Sobel(g, cv2.CV_32F, 1, 0), cv2.Sobel(g, cv2.CV_32F, 0, 1))
+        total = sob.sum() + 1e-6
+        ys, xs = np.mgrid[0:g.shape[0], 0:g.shape[1]]
+        cx.append(float((sob * xs).sum() / total / g.shape[1]))
+        cy.append(float((sob * ys).sum() / total / g.shape[0]))
+    return {"noise": round(float(np.mean(noise)), 3), "blockiness": round(float(np.mean(block)), 3),
+            "subject_x": round(float(np.mean(cx)), 3), "subject_y": round(float(np.mean(cy)), 3)}
+
+
+def is_hdr(path: Path) -> str | bool:
+    """HDR transfer of the clip ("smpte2084" = PQ, "arib-std-b67" = HLG) or False."""
+    try:
+        p = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(path)], capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return next((t for t in ("smpte2084", "arib-std-b67") if t in p.stderr), False)
+
+
+def _file_key(path: Path) -> str:
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()[:20]
+
+
+def cached_analyze(path: Path, *, clip=None, references=None, cache_dir: Path | None = None) -> dict:
+    """analyze() cached by file hash + analysis version (+ whether CLIP / references were used)."""
+    import json
+    cache_dir = cache_dir or Path(os.getenv("CARLECOOL_LIBRARY_DIR", "footage-cache")) / "dna"
+    tag = f"{_file_key(Path(path))}_v{ANALYSIS_VERSION}_{'c' if clip is not None else 'n'}{'r' if references is not None else ''}"
+    target = cache_dir / f"{tag}.json"
+    if target.is_file():
+        try:
+            return json.loads(target.read_text(encoding="utf-8"))
+        except ValueError:
+            pass
+    dna = analyze(path, clip=clip, references=references)
+    try:
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(dna), encoding="utf-8")
+    except OSError:
+        pass
+    return dna
+
+
 def _b64(vec) -> str:
     import numpy as np
     return base64.b64encode(np.asarray(vec, dtype=np.float16).tobytes()).decode("ascii")
@@ -206,6 +295,19 @@ def analyze(path: Path, *, clip=None, references=None) -> dict:
     scores = frame_scores(stats, ref)
     start, length = best_window(times, scores, stats, duration)
     inside = [i for i, t in enumerate(times) if start <= t <= start + length] or list(range(len(stats)))
+    extra = {}
+    if len(stats):
+        win = frames[inside[0]:inside[-1] + 1]
+        extra.update(flow_stats(win))
+        extra.update(texture_stats(win))
+        # edge frames of the window: transitions are judged on the real cut frames (Phase 3)
+        edge_vecs = clip_embeddings(frames, clip, [inside[0], inside[-1]]) if clip is not None else None
+        extra["edge_in"] = {"lab": stats[inside[0]]["lab"], "luma": stats[inside[0]]["luma"],
+                            "embedding": _b64(edge_vecs[0].tolist()) if edge_vecs is not None else None}
+        extra["edge_out"] = {"lab": stats[inside[-1]]["lab"], "luma": stats[inside[-1]]["luma"],
+                             "embedding": _b64(edge_vecs[1].tolist()) if edge_vecs is not None else None}
+    extra["hdr"] = is_hdr(Path(path))
+    extra["version"] = ANALYSIS_VERSION
 
     def avg(key, idx=inside):
         vals = [stats[i][key] for i in idx if stats[i][key] is not None]
@@ -220,7 +322,7 @@ def analyze(path: Path, *, clip=None, references=None) -> dict:
         "ref_score": round(sum(refs) / len(refs), 4) if refs else None,
         "quality": round(sum(scores[i] for i in inside) / len(inside), 4) if scores and inside else None,
         "shot_size": size, "embedding": _b64(emb_mean) if emb_mean is not None else None,
-        "samples": len(stats),
+        "samples": len(stats), **extra,
     }
 
 

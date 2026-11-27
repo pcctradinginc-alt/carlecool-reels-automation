@@ -22,7 +22,7 @@ from pathlib import Path
 
 PATH = Path("data/provider-usage.json")
 WINDOW = timedelta(hours=1)
-HOURLY_LIMIT = 50          # Coverr's documented allowance
+from .budgets import COVERR_PER_HOUR as HOURLY_LIMIT  # Coverr's documented allowance
 MIN_FOR_A_REEL = 20        # search lanes + fallbacks + signature roles + download stats
 MAX_WAIT = timedelta(minutes=60)  # public repo: runner minutes are free; job timeout 90 min
 KEEP = timedelta(days=2)

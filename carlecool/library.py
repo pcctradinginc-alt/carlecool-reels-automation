@@ -26,7 +26,7 @@ import subprocess
 
 PATH = Path("data/footage-library.json")
 CACHE = Path(os.getenv("CARLECOOL_LIBRARY_DIR", "footage-cache"))
-MAX_FILES = 220            # ~10–15 MB each → well inside the free Actions cache
+from .budgets import LIBRARY_FILES as MAX_FILES  # ~10–15 MB each → well inside the free Actions cache
 LIBRARY_SHARE = 0.5        # at most half of a Reel's stock clips come from the library
 MIN_QUALITY = 0.35         # shot_analysis quality of the kept window
 FIELDS = ("id", "source", "title", "query", "page_url", "licence", "licence_url", "creator_name",
@@ -120,6 +120,9 @@ def candidates(data: dict, *, director: str | None, theme: str | None, exclude: 
         score = float(dna.get("ref_score") or 0) + 0.5 * float(dna.get("quality") or 0)
         score += 0.05 if theme and e.get("theme") == theme else 0.0
         score += 0.03 * max(0, clip_scores.get(cid, 0))  # published before
+        series = [x for x in (data.get("clips") or {}).values()
+                  if e.get("creator_name") and x.get("creator_name") == e.get("creator_name")]
+        score += 0.02 * min(3, len(series) - 1)  # Phase 2: clips of the same producer / series fit together
         pool.append((score, video))
     pool.sort(key=lambda x: -x[0])
     # one clip per search motif first (variety), then the rest by score

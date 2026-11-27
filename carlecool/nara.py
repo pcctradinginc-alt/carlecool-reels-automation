@@ -31,10 +31,10 @@ import requests
 
 API = "https://catalog.archives.gov/api/v2/records/search"
 MEDIA_HOST = "catalog.archives.gov"
-MONTHLY_LIMIT = 10_000
+from .budgets import NARA_MONTHLY as MONTHLY_LIMIT, NARA_PER_RUN
 RESERVE = 0.10            # never plan with the last 10 % of the month
 RUNS_PER_DAY = 2          # the guard allows two Reels per Berlin day
-RUN_CAP = 40              # hard cap per run
+RUN_CAP = NARA_PER_RUN    # hard cap per run (budgets.py)
 PAGE_SIZE = 50
 KEEP = timedelta(days=40)
 RUN_CALLS = 0             # API calls of this process (recorded by main.record_provider_usage)
