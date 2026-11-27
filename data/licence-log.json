@@ -907,6 +907,101 @@
      "used": true
     }
    ]
+  },
+  {
+   "at": "2026-11-27T09:49:52+00:00",
+   "run_id": 45976093191,
+   "song": "carl e cool - donkey (eah)",
+   "sha256": "02ff2d23a60d142310a2c97c876b2b76751f402103ca52ef83c2b3eabbf3f58b",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co"
+   ],
+   "clips": [
+    {
+     "id": "RUouWxOq1f",
+     "provider": "coverr",
+     "title": "Rain on a puddle",
+     "page": "https://coverr.co/videos/rain-on-a-puddle-ruouwxoq1f",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "rain",
+     "used": true
+    },
+    {
+     "id": "9cfC4qODSN",
+     "provider": "coverr",
+     "title": "View of a city from plane window",
+     "page": "https://coverr.co/videos/view-of-a-city-from-plane-window-9cfc4qodsn",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "window light",
+     "used": true
+    },
+    {
+     "id": "KGlm0yZAD1",
+     "provider": "coverr",
+     "title": "Gloomy city at night",
+     "page": "https://coverr.co/videos/gloomy-city-at-night-kglm0yzad1",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "rain",
+     "used": true
+    },
+    {
+     "id": "IoZXsbfSEU",
+     "provider": "coverr",
+     "title": "Villa with a swimming pool",
+     "page": "https://coverr.co/videos/villa-with-a-swimming-pool-iozxsbfseu",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "sunlight window",
+     "used": true
+    },
+    {
+     "id": "pEeGts0hP9",
+     "provider": "coverr",
+     "title": "Empty room with a window",
+     "page": "https://coverr.co/videos/empty-room-with-a-window-peegts0hp9",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "sunlight window",
+     "used": true
+    },
+    {
+     "id": "C5eKrEFtIf",
+     "provider": "coverr",
+     "title": "Pregnant woman arranging a baby room",
+     "page": "https://coverr.co/videos/pregnant-woman-arranging-a-baby-room-c5ekreftif",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "bedroom",
+     "used": false
+    },
+    {
+     "id": "inqghNWZPc",
+     "provider": "coverr",
+     "title": "Woman posing by the window",
+     "page": "https://coverr.co/videos/woman-posing-by-the-window-inqghnwzpc",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "woman window",
+     "used": true
+    }
+   ]
   }
  ]
 }
