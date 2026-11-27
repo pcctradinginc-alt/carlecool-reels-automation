@@ -1,9 +1,9 @@
 {
-  "observations": 10,
+  "observations": 9,
   "min_posts": 30,
   "min_lift": 0.15,
   "length": {
-    "n_yes": 5,
+    "n_yes": 4,
     "n_no": 5,
     "decided": false,
     "prefer": null
@@ -11,70 +11,71 @@
   "roles": {
     "gear": {
       "n_yes": 2,
-      "n_no": 3,
+      "n_no": 4,
       "decided": false
     },
     "friends": {
-      "n_yes": 5,
+      "n_yes": 6,
       "n_no": 0,
       "decided": false
     },
     "flag": {
       "n_yes": 2,
-      "n_no": 3,
+      "n_no": 4,
       "decided": false
     },
     "car": {
-      "n_yes": 1,
+      "n_yes": 2,
       "n_no": 4,
       "decided": false
     },
     "americana": {
-      "n_yes": 0,
+      "n_yes": 1,
       "n_no": 5,
       "decided": false
     },
     "skater": {
-      "n_yes": 5,
+      "n_yes": 6,
       "n_no": 0,
       "decided": false
     },
     "woman": {
-      "n_yes": 3,
+      "n_yes": 4,
       "n_no": 2,
       "decided": false
     },
     "friends2": {
       "n_yes": 0,
-      "n_no": 5,
+      "n_no": 6,
       "decided": false
     }
   },
   "question": {
     "n_yes": 1,
-    "n_no": 9,
+    "n_no": 8,
     "decided": false
   },
   "text": {
     "n_yes": 0,
-    "n_no": 10,
+    "n_no": 8,
     "decided": false,
     "prefer": null
   },
   "styles": {
     "lana": {
       "n": 2,
-      "median_relative": 1.07
+      "median_relative": 1.101
     },
     "rubin": {
       "n": 2,
-      "median_relative": 1.312
+      "median_relative": 1.37
     },
     "night": {
-      "n": 1,
-      "median_relative": 0.929
+      "n": 2,
+      "median_relative": 0.938
     }
   },
+  "report": {},
   "version": 2,
   "platform": "tiktok",
   "platforms": {
@@ -146,14 +147,15 @@
           "n": 1,
           "median_relative": 1.0
         }
-      }
+      },
+      "report": {}
     },
     "tiktok": {
-      "observations": 10,
+      "observations": 9,
       "min_posts": 30,
       "min_lift": 0.15,
       "length": {
-        "n_yes": 5,
+        "n_yes": 4,
         "n_no": 5,
         "decided": false,
         "prefer": null
@@ -161,71 +163,72 @@
       "roles": {
         "gear": {
           "n_yes": 2,
-          "n_no": 3,
+          "n_no": 4,
           "decided": false
         },
         "friends": {
-          "n_yes": 5,
+          "n_yes": 6,
           "n_no": 0,
           "decided": false
         },
         "flag": {
           "n_yes": 2,
-          "n_no": 3,
+          "n_no": 4,
           "decided": false
         },
         "car": {
-          "n_yes": 1,
+          "n_yes": 2,
           "n_no": 4,
           "decided": false
         },
         "americana": {
-          "n_yes": 0,
+          "n_yes": 1,
           "n_no": 5,
           "decided": false
         },
         "skater": {
-          "n_yes": 5,
+          "n_yes": 6,
           "n_no": 0,
           "decided": false
         },
         "woman": {
-          "n_yes": 3,
+          "n_yes": 4,
           "n_no": 2,
           "decided": false
         },
         "friends2": {
           "n_yes": 0,
-          "n_no": 5,
+          "n_no": 6,
           "decided": false
         }
       },
       "question": {
         "n_yes": 1,
-        "n_no": 9,
+        "n_no": 8,
         "decided": false
       },
       "text": {
         "n_yes": 0,
-        "n_no": 10,
+        "n_no": 8,
         "decided": false,
         "prefer": null
       },
       "styles": {
         "lana": {
           "n": 2,
-          "median_relative": 1.07
+          "median_relative": 1.101
         },
         "rubin": {
           "n": 2,
-          "median_relative": 1.312
+          "median_relative": 1.37
         },
         "night": {
-          "n": 1,
-          "median_relative": 0.929
+          "n": 2,
+          "median_relative": 0.938
         }
-      }
+      },
+      "report": {}
     }
   },
-  "observations_all": 11
+  "observations_all": 10
 }
