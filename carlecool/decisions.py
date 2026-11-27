@@ -39,19 +39,26 @@ def collect(issues: list[dict], published_issues: set[int], comments_of) -> dict
         except (ValueError, json.JSONDecodeError):
             continue
         number = int(issue["number"])
+        comments = None
         if number in published_issues:
             decision = "published"
-        elif issue.get("state") == "closed" and any("Reel verworfen" in c for c in comments_of(number)):
-            decision = "discarded"
         else:
-            continue  # open / undecided: no signal
+            comments = comments_of(number)
+            if issue.get("state") == "closed" and any("Reel verworfen" in c for c in comments):
+                decision = "discarded"
+            elif any(c.strip().startswith("/revise") for c in comments):
+                decision = "revision"  # Phase 5: a revision request is an artistic signal (sign 0)
+            else:
+                continue  # open / undecided: no signal
         facts = data.get("reel_facts") or {}
         sources = [s for s in data.get("footage_sources") or [] if s.get("used", True)]  # only clips really shown
         motifs = sorted({str(s.get("motif")).lower() for s in sources if s.get("motif")})
         shown = [str(s["id"]) for s in sources if s.get("id")] or list(data.get("video_ids") or [])
         out.append({"issue": number, "decision": decision, "video_ids": shown,
                     "motifs": motifs, "style": facts.get("style"), "variant": facts.get("variant"),
-                    "theme": facts.get("theme"), "opening_clip": facts.get("opening_clip")})
+                    "theme": facts.get("theme"), "opening_clip": facts.get("opening_clip"),
+                    "pipeline": facts.get("pipeline"), "critic": (facts.get("critic") or {}).get("score"),
+                    "coherence": facts.get("coherence")})
     return {"version": 1, "decisions": sorted(out, key=lambda d: d["issue"])}
 
 

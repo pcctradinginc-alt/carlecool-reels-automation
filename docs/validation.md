@@ -28,3 +28,32 @@ This Reel is the reference that the next versions are measured against.
 - **Owner verdict:** **worse than #73.**
 - **Causes found:** an off-brief archive home movie (snow, children; now blocked), a song that only half fits the theme (music fit 0.5), only 5 scenes used.
 - **Conclusion:** two owner verdicts in a row favour the old pipeline (blind test B = old, and #73). There is no evidence yet that packages A–D improve the films.
+
+## 4 · Phases 2–5 implemented (dev branch, 27 Nov) – not yet validated
+
+Built on the #73 state, as the owner chose. The cinematic pipeline (`CARLECOOL_PIPELINE=cinematic`) contains everything below. Production stays on `classic` until a blind comparison shows a benefit.
+
+- **Phase 2:**
+  - Shot DNA v2: camera vs subject motion, direction, noise, blockiness, subject position, edge frames, HDR.
+  - DNA cache keyed by file hash and version.
+  - Era negatives per director.
+  - Plan-led search.
+  - Series bonus in the library.
+- **Phase 3:**
+  - Transitions measured on the real cut frames.
+  - Nine dramaturgic slot functions taken from the music.
+  - Function fit and match cuts on musical accents.
+- **Phase 4:**
+  - Free full-quality master in the Actions cache, with a verified preview fallback.
+  - One transform for punch-in plus zoom.
+  - HDR tone mapping.
+  - Safe zones for text.
+  - Critic split into technical and aesthetic parts (true peak, A/V length, simulated platform SSIM, opening, colour at cuts), with at most 2 re-edits.
+- **Phase 5:**
+  - Checkpoint fix with a migration log; only same-age snapshots are compared.
+  - Factor report (pipeline, director, theme, hook) as report only.
+  - Revision requests as a signal.
+  - Critic calibration from n ≥ 20 verdicts.
+  - Central budgets.
+
+**Evidence of better quality: none yet.** It can only come from blind comparisons against #73 and the owner's verdicts.

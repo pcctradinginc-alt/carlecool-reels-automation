@@ -21,8 +21,9 @@ import subprocess
 from pathlib import Path
 
 SAMPLE_W, SAMPLE_H = 72, 128          # tiny 9:16 frames for the pixel statistics
-MAX_SAMPLES = 24
-EMBED_SAMPLES = 8                      # CLIP frames per clip (CPU budget)
+from .budgets import CLIP_FRAMES_PER_CLIP, DNA_SAMPLES
+MAX_SAMPLES = DNA_SAMPLES
+EMBED_SAMPLES = CLIP_FRAMES_PER_CLIP    # CLIP frames per clip (CPU budget, budgets.py)
 WINDOW = 8.0                           # s kept per clip (opening clip needs ≥ 6 s for the loop)
 CUT_JUMP = 28.0                        # mean grey difference that means a hard cut inside the clip
 SHOT_SIZES = {

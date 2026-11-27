@@ -26,7 +26,7 @@ import subprocess
 
 PATH = Path("data/footage-library.json")
 CACHE = Path(os.getenv("CARLECOOL_LIBRARY_DIR", "footage-cache"))
-MAX_FILES = 220            # ~10–15 MB each → well inside the free Actions cache
+from .budgets import LIBRARY_FILES as MAX_FILES  # ~10–15 MB each → well inside the free Actions cache
 LIBRARY_SHARE = 0.5        # at most half of a Reel's stock clips come from the library
 MIN_QUALITY = 0.35         # shot_analysis quality of the kept window
 FIELDS = ("id", "source", "title", "query", "page_url", "licence", "licence_url", "creator_name",

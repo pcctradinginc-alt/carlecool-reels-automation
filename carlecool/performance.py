@@ -192,19 +192,74 @@ def post_score(metrics: dict) -> float | None:
     return sum(WEIGHTS[k] * v for k, v in parts.items() if k != "reach") + WEIGHTS["reach"] * (parts["reach"] / 1000.0)
 
 
-def _latest(entry: dict) -> dict:
-    for name in ("d28", "d7", "d2"):
-        if name in entry.get("checkpoints", {}):
-            return entry["checkpoints"][name]["platforms"]
-    return {}
+# Phase 5 (audit D1): a checkpoint label must match the real age of the measurement.
+WINDOWS = {"d1": (18, 36), "d2": (40, 60), "d7": (144, 192), "d28": (600, 720)}
+COMPARE_AT = "d2"  # the model only compares posts measured at the same age
+
+
+def _label_for(age_h: float | None) -> str | None:
+    if age_h is None:
+        return None
+    return next((name for name, (lo, hi) in WINDOWS.items() if lo <= age_h <= hi), None)
+
+
+def normalize_checkpoints(data: dict) -> list[str]:
+    """Give every snapshot its real age and mark it valid only if the age fits its label.
+    Wrongly labelled snapshots are relabelled when the right slot is free; the rest stay
+    stored but are excluded from comparisons. Returns a migration log (also kept in data)."""
+    log = []
+    for post_id, entry in (data.get("posts") or {}).items():
+        try:
+            at = datetime.fromisoformat(str(entry.get("at")))
+        except (TypeError, ValueError):
+            continue
+        cps = entry.get("checkpoints") or {}
+        for name in list(cps):
+            cp = cps[name]
+            age = cp.get("age_hours")
+            if age is None and cp.get("fetched"):
+                try:
+                    age = round((datetime.fromisoformat(cp["fetched"]) - at).total_seconds() / 3600, 1)
+                    cp["age_hours"], cp["age_derived"] = age, True
+                except (TypeError, ValueError):
+                    pass
+            true = _label_for(age)
+            cp["valid"] = true == name
+            if true and true != name and true not in cps:
+                cps[true] = dict(cp, valid=True, relabelled_from=name)
+                del cps[name]
+                log.append(f"{post_id}: {name} → {true} (age {age} h)")
+            elif not cp["valid"]:
+                log.append(f"{post_id}: {name} invalid (age {age} h)")
+    if log:
+        data.setdefault("migrations", []).append(
+            {"at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "checkpoint_fix": log})
+    return log
+
+
+def _latest(entry: dict, name: str | None = COMPARE_AT) -> dict:
+    """Platforms of the comparable checkpoint (valid, at the same age for every post)."""
+    cps = entry.get("checkpoints", {})
+    if name is None:
+        for n in ("d28", "d7", "d2"):
+            if n in cps and cps[n].get("valid", True):
+                return cps[n]["platforms"]
+        return {}
+    cp = cps.get(name) or {}
+    return cp.get("platforms", {}) if cp.get("valid", True) and cp else {}
 
 
 def observations(data: dict) -> list[dict]:
     """One row per (post, platform). `relative` = weighted mean of each score part divided
     by that platform's median of the part (1.0 = a typical post of the owner)."""
     rows = []
+    # compare only snapshots of the same age: the checkpoint most posts have (valid ones)
+    from collections import Counter
+    counts = Counter(n for e in (data.get("posts") or {}).values()
+                     for n, cp in (e.get("checkpoints") or {}).items() if cp.get("valid", True))
+    at = max(counts, key=lambda n: (counts[n], n == COMPARE_AT)) if counts else COMPARE_AT
     for post_id, entry in (data.get("posts") or {}).items():
-        for platform, metrics in _latest(entry).items():
+        for platform, metrics in _latest(entry, at).items():
             if platform == "all":
                 continue
             parts = components(metrics)
@@ -270,6 +325,19 @@ def _model_for(rows: list[dict]) -> dict:
     if text:
         model["text"] = dict(text, prefer=("text" if text.get("lift", 0) > 0 else "none")
                              if text.get("decided") else None)
+    # Phase 5: factors of the new pipeline — REPORTED only (no automatic weight change below
+    # MIN_POSTS per side; too few posts give spurious correlations).
+    report = {}
+    for factor in ("pipeline", "director", "theme", "hook_strategy"):
+        groups: dict = {}
+        for r in rows:
+            v = r["facts"].get(factor)
+            if v:
+                groups.setdefault(str(v), []).append(r["relative"])
+        if groups:
+            report[factor] = {k: {"n": len(v), "median_relative": round(statistics.median(v), 3),
+                                  "enough": len(v) >= MIN_POSTS} for k, v in groups.items()}
+    model["report"] = report
     for world in ("lana", "rubin", "night"):  # report only
         vals = [r["relative"] for r in rows
                 if (("night" if r["facts"].get("variant") == "night" else r["facts"].get("style")) == world)]
@@ -410,6 +478,9 @@ def main() -> int:
     except AnalyticsUnavailable as exc:
         print(f"Performance collection skipped: {exc}")
         return 0
+    fixed = normalize_checkpoints(data)
+    if fixed:
+        print(f"Checkpoint fix: {len(fixed)} snapshots relabelled or marked invalid")
     model = build_model(data)
     DATA_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     MODEL_PATH.write_text(json.dumps(model, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -419,8 +490,12 @@ def main() -> int:
         commit_json(MODEL_PATH, "performance: update learned model [skip ci]")
         try:  # owner's publish / discard decisions (decisions.py, 26 Nov)
             from . import decisions
-            decisions.refresh()
+            data_d = decisions.refresh()
             commit_json(decisions.PATH, "decisions: owner's publish / discard decisions [skip ci]")
+            from . import calibration, verdicts  # Phase 5: critic vs the owner's verdicts
+            cal = calibration.calibrate(data_d, verdicts.load())
+            calibration.PATH.write_text(json.dumps(cal, indent=1) + "\n", encoding="utf-8")
+            commit_json(calibration.PATH, f"calibration: critic {cal['status']} [skip ci]")
         except Exception as exc:
             print("Decisions not refreshed:", type(exc).__name__)
     return 0

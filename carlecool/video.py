@@ -126,7 +126,7 @@ def _coverr_creator_metadata(item: dict) -> tuple[str, str]:
 # burning more requests, and the quality check before the review mail knows why.
 COVERR_BLOCK: dict[str, int | None] = {"status": None}
 COVERR_REQUESTS = 0
-COVERR_MAX_REQUESTS = 35  # leave headroom below the documented hourly allowance
+from .budgets import COVERR_PER_RUN as COVERR_MAX_REQUESTS  # headroom below the hourly allowance
 
 
 def reserve_coverr_request():

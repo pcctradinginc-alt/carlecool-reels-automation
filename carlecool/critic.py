@@ -22,7 +22,7 @@ from pathlib import Path
 
 SAMPLE_FPS = 4
 W, H = 54, 96
-RETRY_BELOW = 0.55          # critic score that triggers one re-edit
+RETRY_BELOW = 0.55          # starting value; calibration.retry_threshold() replaces it once calibrated
 SIZES = ("wide", "medium", "close", "detail")
 
 
@@ -193,5 +193,6 @@ def review(path: Path, details: dict, *, compression: bool = True) -> dict:
         score = 0.7 * score + 0.3 * min(1.0, coh / 0.75)
     score = round(score, 3)
     serious = any(i.startswith(("incoherent", "monotonous", "over-processed", "the same clip")) for i in issues)
+    from .calibration import retry_threshold
     return {"score": score, "technical": technical, "aesthetic": issues, "issues": technical + issues,
-            "retry": serious or score < RETRY_BELOW, "measures": measures}
+            "retry": serious or score < retry_threshold(RETRY_BELOW), "measures": measures}
