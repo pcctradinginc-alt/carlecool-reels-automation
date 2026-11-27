@@ -57,3 +57,19 @@ Built on the #73 state, as the owner chose. The cinematic pipeline (`CARLECOOL_P
   - Central budgets.
 
 **Evidence of better quality: none yet.** It can only come from blind comparisons against #73 and the owner's verdicts.
+
+## 5 · Blind comparison classic (#73 basis) vs phases 1–5 – 27 Nov 2026 (run 46069810550)
+
+- **Conditions:** song "sleepwell" (the song of #73), 16 s, Lana. Frozen pool of 17 clips (archive films + footage library). Old = main `673dc0f` (classic). New = `dev/cinematic-system` with phases 1–5.
+- **Measured:**
+
+| measure | classic | new |
+|---|---|---|
+| coherence (neutral) | 0.502 | 0.595 |
+| critic score | 0.901 | 0.812 |
+| critic issues | – | "colour jumps at most cuts" |
+| render time | 116 s | 122 s |
+| peak memory | 0.65 GB | 2.15 GB |
+
+  Duration, scenes, loudness and true peak are identical.
+- **Reading:** the measurements contradict each other. Coherence is clearly higher for the new pipeline, but the critic flags colour jumps at its cuts. Neither measure is calibrated yet. Only the owner's blind verdict decides; it is pending, and the key is sealed in the run log.
