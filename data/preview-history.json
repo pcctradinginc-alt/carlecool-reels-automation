@@ -943,6 +943,25 @@
       "style": "lana",
       "theme": "family",
       "length_bucket": "short"
+    },
+    {
+      "at": "2026-11-27T09:49:50+00:00",
+      "kind": "daily",
+      "run_id": 45976093191,
+      "track_id": "2437525059",
+      "video_ids": [
+        "RUouWxOq1f",
+        "9cfC4qODSN",
+        "KGlm0yZAD1",
+        "IoZXsbfSEU",
+        "pEeGts0hP9",
+        "C5eKrEFtIf",
+        "inqghNWZPc"
+      ],
+      "sha256": "02ff2d23a60d142310a2c97c876b2b76751f402103ca52ef83c2b3eabbf3f58b",
+      "style": "rubin",
+      "theme": "quiet",
+      "length_bucket": "long"
     }
   ]
 }
