@@ -226,7 +226,7 @@ def segment_start(duration: float, key: str) -> float:
 
 def cut_segment(url: str, start: float, destination: Path, seconds: float = SEGMENT_SECONDS) -> Path:
     host = (urlparse(url).hostname or "").lower()
-    if urlparse(url).scheme != "https" or host not in (NASA_HOST, "archive.org"):
+    if urlparse(url).scheme != "https" or host not in (NASA_HOST, "archive.org", "catalog.archives.gov"):
         raise ValueError("Archive segment host not allowed")
     destination.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-reconnect", "1", "-reconnect_streamed", "1",

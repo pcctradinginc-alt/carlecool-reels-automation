@@ -24,6 +24,9 @@ DEFAULTS = {
              "https://www.nasa.gov/nasa-brand-center/images-and-media/"),
     "prelinger": ("Public domain (Internet Archive)", "https://creativecommons.org/publicdomain/mark/1.0/"),
     "wikimedia": ("Wikimedia Commons free licence", "https://commons.wikimedia.org/wiki/Commons:Licensing"),
+    "nara": ("Public domain – U.S. National Archives (use restriction: Unrestricted). This product uses the "
+             "National Archives Catalog API but is not endorsed or certified by the National Archives and "
+             "Records Administration.", "https://www.archives.gov/research/catalog/help/api"),
     "owned": ("Own footage (CarleCool)", ""),
     "ai": ("AI-generated footage (LTX-2.3); distribution subject to applicable terms", "https://huggingface.co/Lightricks/LTX-2.3/blob/main/LICENSE"),
 }
