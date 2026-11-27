@@ -1122,6 +1122,101 @@
      "used": true
     }
    ]
+  },
+  {
+   "at": "2026-11-27T15:59:21+00:00",
+   "run_id": 46028777890,
+   "song": "carl e cool - ducktales (da da da ddd)",
+   "sha256": "2ae655eb7b2b4d99e10a269ae1b9c11ccd1e3a4b982694e458d39709201f0dd8",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co"
+   ],
+   "clips": [
+    {
+     "id": "LviCUH3V0W",
+     "provider": "coverr",
+     "title": "Silhouette of a girl dancing",
+     "page": "https://coverr.co/videos/silhouette-of-a-girl-dancing-lvicuh3v0w",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "pool night",
+     "used": true
+    },
+    {
+     "id": "Lz6bwKBNYE",
+     "provider": "coverr",
+     "title": "Set of bits in a toolbox",
+     "page": "https://coverr.co/videos/set-of-bits-in-a-toolbox-lz6bwkbnye",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "pool night",
+     "used": true
+    },
+    {
+     "id": "f7eTFXQbvz",
+     "provider": "coverr",
+     "title": "A city at night",
+     "page": "https://coverr.co/videos/a-city-at-night-f7etfxqbvz",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "city lights",
+     "used": true
+    },
+    {
+     "id": "dOHnEzsqLT",
+     "provider": "coverr",
+     "title": "Stylish Night Portrait in Urban Setting",
+     "page": "https://coverr.co/videos/stylish-night-portrait-in-urban-setting",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "city lights",
+     "used": false
+    },
+    {
+     "id": "6kxRdq6Z1t",
+     "provider": "coverr",
+     "title": "Elegant Nightscape: A Woman on a Balcony",
+     "page": "https://coverr.co/videos/elegant-nightscape-a-woman-on-a-balcony",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "women night",
+     "used": true
+    },
+    {
+     "id": "fWXjZsXF5h",
+     "provider": "coverr",
+     "title": "Posing on the street ",
+     "page": "https://coverr.co/videos/posing-on-the-street-fwxjzsxf5h",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "woman city night",
+     "used": true
+    },
+    {
+     "id": "wV5xiLVt8D",
+     "provider": "coverr",
+     "title": "Sunset over the sea",
+     "page": "https://coverr.co/videos/sunset-over-the-sea-wv5xilvt8d",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "range rover",
+     "used": true
+    }
+   ]
   }
  ]
 }
