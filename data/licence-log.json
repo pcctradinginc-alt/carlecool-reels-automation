@@ -1527,6 +1527,168 @@
      "quality": 0.5188
     }
    ]
+  },
+  {
+   "at": "2026-11-27T21:14:09+00:00",
+   "run_id": 46067975122,
+   "song": "carl e cool - get there",
+   "sha256": "dfd305265ee46883bb8b76eaf244ea3086ce7dd74f259929b6f6ae51466788fc",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co",
+    "🎬 Archive footage: Prelinger Archives, Internet Archive Home Movies, public domain (archive.org)"
+   ],
+   "clips": [
+    {
+     "id": "pl-sylacauga_saga",
+     "provider": "prelinger",
+     "title": "Industry on Parade: Sylacauga Saga",
+     "page": "https://archive.org/details/sylacauga_saga",
+     "creator": "Prelinger Archives (public domain)",
+     "licence": "Public domain (Prelinger Archives)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-27",
+     "motif": "vintage americana",
+     "used": true,
+     "library": false,
+     "shot_size": null,
+     "quality": null
+    },
+    {
+     "id": "aE5qAYzGcL",
+     "provider": "coverr",
+     "title": "Pool party",
+     "page": "https://coverr.co/videos/pool-party-ae5qayzgcl",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "polo",
+     "used": true,
+     "library": false,
+     "shot_size": null,
+     "quality": null
+    },
+    {
+     "id": "pl-Bamelhomemovie01",
+     "provider": "prelinger",
+     "title": "Bamel home movie 01",
+     "page": "https://archive.org/details/Bamelhomemovie01",
+     "creator": "Internet Archive Home Movies (public domain)",
+     "licence": "Public domain (Internet Archive Home Movies)",
+     "licence_url": "http://creativecommons.org/licenses/publicdomain/",
+     "used_at": "2026-11-27",
+     "motif": "vintage americana",
+     "used": false,
+     "library": false,
+     "shot_size": null,
+     "quality": null
+    },
+    {
+     "id": "RdmOkSgF4I",
+     "provider": "coverr",
+     "title": "Living by the ocean",
+     "page": "https://coverr.co/videos/living-by-the-ocean-rdmoksgf4i",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "beach house",
+     "used": true,
+     "library": false,
+     "shot_size": null,
+     "quality": null
+    },
+    {
+     "id": "xn02yJjeZg",
+     "provider": "coverr",
+     "title": "From the side of a boat ",
+     "page": "https://coverr.co/videos/from-the-side-of-a-boat-xn02yjjezg",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "classic sailboat",
+     "used": true,
+     "library": false,
+     "shot_size": null,
+     "quality": null
+    },
+    {
+     "id": "jp59ZoJwcb",
+     "provider": "coverr",
+     "title": "Two tennis balls",
+     "page": "https://coverr.co/videos/two-tennis-balls-jp59zojwcb",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "tennis",
+     "used": true,
+     "library": false,
+     "shot_size": null,
+     "quality": null
+    },
+    {
+     "id": "2sNG5S7ORE",
+     "provider": "coverr",
+     "title": "Capybara Enjoys a Swim in a Pool",
+     "page": "https://coverr.co/videos/capybara-enjoys-a-swim-in-a-pool",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "polo",
+     "used": false,
+     "library": false,
+     "shot_size": null,
+     "quality": null
+    },
+    {
+     "id": "GkAzOWXj9j",
+     "provider": "coverr",
+     "title": "Friends arriving at a tennis court",
+     "page": "https://coverr.co/videos/friends-arriving-at-a-tennis-court-gkazowxj9j",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "tennis",
+     "used": true,
+     "library": false,
+     "shot_size": null,
+     "quality": null
+    },
+    {
+     "id": "2ShBQXOjRg",
+     "provider": "coverr",
+     "title": "Woman enjoying a picnic",
+     "page": "https://coverr.co/videos/woman-enjoying-a-picnic-2shbqxojrg",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "women picnic",
+     "used": true,
+     "library": false,
+     "shot_size": null,
+     "quality": null
+    },
+    {
+     "id": "by9nchKLB4",
+     "provider": "coverr",
+     "title": "Woman on an outdoor terrace ",
+     "page": "https://coverr.co/videos/woman-on-an-outdoor-terrace-by9nchklb4",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-27",
+     "motif": "woman horse",
+     "used": true,
+     "library": false,
+     "shot_size": null,
+     "quality": null
+    }
+   ]
   }
  ]
 }
