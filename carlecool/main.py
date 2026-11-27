@@ -117,6 +117,29 @@ def fill_up(reserve, accept, full) -> None:
             print(f"Clip unavailable (skipped): {video.id}: {describe_error(exc)}")
 
 
+def analyse_shots(selected, paths: list, output_dir: Path, ref_world: str | None) -> list[dict | None]:
+    """Shot DNA per clip (shot_analysis.py); each path is replaced by its best window."""
+    from . import shot_analysis
+    from .semantic import load_clip, semantic_enabled
+    from .stylegate import load_neighbors
+    clip = load_clip() if semantic_enabled() else None
+    refs = load_neighbors(ref_world) if clip is not None else None
+    out: list[dict | None] = []
+    for i, path in enumerate(paths):
+        try:
+            dna = shot_analysis.analyze(Path(path), clip=clip, references=refs)
+            cut = shot_analysis.cut_to_window(Path(path), dna, output_dir / f"window_{i:02d}.mp4")
+            if Path(cut) != Path(path):
+                print(f"Best window of {selected[i].id}: {dna['best_start']:.1f}s + {dna['best_length']:.1f}s"
+                      f" (quality {dna.get('quality')}, {dna.get('shot_size') or '?'})")
+                paths[i] = Path(cut)
+            out.append(dna)
+        except Exception as exc:  # analysis is an improvement, never a reason to fail
+            print(f"Shot analysis skipped for {selected[i].id}: {type(exc).__name__}")
+            out.append(None)
+    return out
+
+
 def pick_song(tracks, wanted: str) -> str | None:
     """Manual run for one song (workflow input `song`): SoundCloud track id or part of the title."""
     wanted = (wanted or "").strip().lower()
@@ -315,12 +338,12 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     from .dedupe import Library
     seen_pictures = Library()
 
-    def unique(video, path) -> bool:
+    def unique(video, path, keep: bool = False) -> bool:
         """False (and file removed) when the clip shows the same picture as one we have."""
         twin, sig = seen_pictures.duplicate_of(Path(path))
         if twin is not None:
             print(f"Clip skipped (same picture as {twin}): {video.id}")
-            if video.source != "owned":
+            if video.source != "owned" and not keep:
                 Path(path).unlink(missing_ok=True)
             return False
         seen_pictures.add(video.id, sig)
@@ -335,6 +358,28 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     from .video import coverr_blocked
     from collections import Counter
     motif_count: Counter = Counter()  # Reel #46: five boats from one search word
+    # Footage Library (package B, 27 Nov): proven clips of this director first — already
+    # analysed and cut to their best window, no Coverr request (not a new download).
+    from . import library
+    footage_library = library.load()
+    library_ids: set[str] = set()
+    for video in library.candidates(footage_library, director=directors.current(), theme=theme,
+                                    exclude=set(long_memory) | set(recent),
+                                    limit=int(stock_limit * library.LIBRARY_SHARE)):
+        motif = motif_of(video)
+        if motif and motif_count[motif] >= MAX_PER_MOTIF:
+            continue
+        if not unique(video, Path(video.path), keep=True):
+            continue
+        if motif:
+            motif_count[motif] += 1
+        selected.append(video)
+        paths.append(Path(video.path))
+        library_ids.add(video.id)
+    if library_ids:
+        print(f"Footage library: {len(library_ids)} proven clips "
+              f"({len(footage_library.get('clips', {}))} catalogued)")
+    candidates = [v for v in candidates if v.id not in library_ids]
     for video in candidates:
         if len(paths) >= stock_limit:
             break
@@ -545,6 +590,13 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                 if role not in signature_slots:
                     print(f"Signature {role}: no suitable clip this time")
     check_quality(paths, planned_shots, signature_slots)
+    # Shot Intelligence (package B): Shot DNA of every clip, cut to its strongest window.
+    shot_dna = analyse_shots(selected, paths, output_dir, ref_world)
+    for i, video in enumerate(selected):
+        if video.id not in library_ids and shot_dna[i]:
+            library.add(footage_library, video, paths[i], shot_dna[i], director=directors.current(),
+                        theme=theme, run_id=os.getenv("GITHUB_RUN_ID"))
+    library.save(footage_library)
     from . import masterstore
     from .naming import artist_name
     from .titlecard import enabled as title_card_enabled
@@ -581,7 +633,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         caption_copy["question"] = (captions.QUESTIONS[0] if not caption_copy["question"] else "")
     reel_facts = {
         "style": style_name, "variant": style_variant, "style_basis": style_decision.get("basis"),
-        "director": directors.current(), "hook_strategy": hook_strategy,
+        "director": directors.current(), "hook_strategy": hook_strategy, "library_clips": len(library_ids),
         "length_s": round(reel_length, 2), "length_bucket": performance.bucket(reel_length),
         "scenes": details.get("scenes"), "bpm": features.bpm,
         "roles": sorted(r for r, n in (details.get("signature_shots") or {}).items() if n),
@@ -604,7 +656,10 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "features": vars(features), "video_ids": [v.id for v in selected],
         # licence proof per clip (+ search motif, so decisions.py can learn per motif)
         "footage_sources": [dict(licences.proof(v), motif=v.query or "",
-                                 used=(i in set(details.get("used_sources") or range(len(selected)))))
+                                 used=(i in set(details.get("used_sources") or range(len(selected)))),
+                                 library=v.id in library_ids,
+                                 shot_size=(shot_dna[i] or {}).get("shot_size") if i < len(shot_dna) else None,
+                                 quality=(shot_dna[i] or {}).get("quality") if i < len(shot_dna) else None)
                             for i, v in enumerate(selected)],
         "caption": caption_for(track, selected, caption_copy), "caption_variant": caption_copy,
         "reel_facts": reel_facts, "length_bucket": reel_facts["length_bucket"],
