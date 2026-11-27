@@ -1047,6 +1047,28 @@
       "style": "lana",
       "theme": "hamptons",
       "length_bucket": "short"
+    },
+    {
+      "at": "2026-11-27T21:14:07+00:00",
+      "kind": "daily",
+      "run_id": 46067975122,
+      "track_id": "2437525056",
+      "video_ids": [
+        "pl-sylacauga_saga",
+        "aE5qAYzGcL",
+        "pl-Bamelhomemovie01",
+        "RdmOkSgF4I",
+        "xn02yJjeZg",
+        "jp59ZoJwcb",
+        "2sNG5S7ORE",
+        "GkAzOWXj9j",
+        "2ShBQXOjRg",
+        "by9nchKLB4"
+      ],
+      "sha256": "dfd305265ee46883bb8b76eaf244ea3086ce7dd74f259929b6f6ae51466788fc",
+      "style": "lana",
+      "theme": "hamptons",
+      "length_bucket": "long"
     }
   ]
 }
