@@ -206,7 +206,9 @@ def clip_verdicts(images, world: str | None, clip) -> list[tuple[float, str] | N
         from PIL import Image
         model, preprocess, tokenizer = clip
         wanted = WANTED.get(_directors.key(world) or "") or WANTED.get(world or "", WANTED["lana"])
-        prompts = [f"a photo of {p}" for p in wanted] + list(UNWANTED)
+        # Phase 2: era / clothing / vehicle negatives of the director (e.g. modern smartphones)
+        unwanted = list(UNWANTED) + list((_directors.get(_directors.key(world)) or {}).get("unwanted") or [])
+        prompts = [f"a photo of {p}" for p in wanted] + unwanted
         with torch.no_grad():
             text = torch.nn.functional.normalize(model.encode_text(tokenizer(prompts)), dim=-1)
             out = []
@@ -220,7 +222,7 @@ def clip_verdicts(images, world: str | None, clip) -> list[tuple[float, str] | N
                 sims = (v @ text.T)[0].tolist()
                 good, bad = sims[:len(wanted)], sims[len(wanted):]
                 worst = max(range(len(bad)), key=lambda k: bad[k])
-                out.append((max(good) - bad[worst], UNWANTED[worst]))
+                out.append((max(good) - bad[worst], unwanted[worst]))
         return out
     except Exception as exc:
         print("Style gate unavailable:", type(exc).__name__)

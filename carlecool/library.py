@@ -120,6 +120,9 @@ def candidates(data: dict, *, director: str | None, theme: str | None, exclude: 
         score = float(dna.get("ref_score") or 0) + 0.5 * float(dna.get("quality") or 0)
         score += 0.05 if theme and e.get("theme") == theme else 0.0
         score += 0.03 * max(0, clip_scores.get(cid, 0))  # published before
+        series = [x for x in (data.get("clips") or {}).values()
+                  if e.get("creator_name") and x.get("creator_name") == e.get("creator_name")]
+        score += 0.02 * min(3, len(series) - 1)  # Phase 2: clips of the same producer / series fit together
         pool.append((score, video))
     pool.sort(key=lambda x: -x[0])
     # one clip per search motif first (variety), then the rest by score

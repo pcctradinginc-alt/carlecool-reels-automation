@@ -524,5 +524,11 @@
   "KI-Clips",
   "Markenlogos",
   "Schnee / Winter"
+ ],
+ "unwanted": [
+  "a person holding a modern smartphone",
+  "a modern car from the 2020s",
+  "a modern glass office tower",
+  "modern athleisure sportswear and sneakers"
  ]
 }

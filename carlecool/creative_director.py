@@ -52,6 +52,15 @@ class CreativePlan:
                 f"leitmotif '{self.leitmotif}' · {self.length_s:.1f}s · pipeline {self.pipeline}")
 
 
+def search_order(dominant: list[str], words: list[str]) -> list[str]:
+    """Phase 2: the film idea leads the search — dominant motifs first, then the rest
+    (car and flag, which every Reel needs, keep their place at the front)."""
+    fixed = [w for w in words[:2]]
+    rest = [w for w in words[2:]]
+    lead = [w for w in dominant if w in rest]
+    return fixed + lead + [w for w in rest if w not in lead]
+
+
 def musical_arc(features) -> dict:
     """Sections the edit follows: hook (drop), structure changes, kicks count (measured)."""
     hook = float(getattr(features, "hook_at", 0.0) or 0.0)

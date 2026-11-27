@@ -134,7 +134,7 @@ def analyse_shots(selected, paths: list, output_dir: Path, ref_world: str | None
     out: list[dict | None] = []
     for i, path in enumerate(paths):
         try:
-            dna = shot_analysis.analyze(Path(path), clip=clip, references=refs)
+            dna = shot_analysis.cached_analyze(Path(path), clip=clip, references=refs)
             cut = shot_analysis.cut_to_window(Path(path), dna, output_dir / f"window_{i:02d}.mp4")
             if Path(cut) != Path(path):
                 print(f"Best window of {selected[i].id}: {dna['best_start']:.1f}s + {dna['best_length']:.1f}s"
@@ -283,6 +283,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     trend_signals = {"status": "not used (theme-led search)" if theme else "disabled", "topics": []}
     if theme:
         keywords = style_words  # no off-theme cover/profile phrase (Reel #54)
+        if not classic_pipeline():
+            # Phase 2: the film idea leads — the theme's dominant motifs are searched first
+            from .creative_director import search_order
+            dominant = list((themes.get(style_name, style_variant, theme) or {}).get("words") or [])[:4]
+            keywords = search_order(dominant, keywords)
     else:
         # Without a theme (theme rotation off): profile lanes + cover phrases as before.
         style_profile = validate_profile(dict(profile, weights=style_pkg.blended_weights(
@@ -645,6 +650,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                            signature_slots=signature_slots, look=style_pkg.look(style_name, style_variant),
                            opening_pool=opening_pool, opening_fit=opening_fit, hook_text=hook_line,
                            ref_world=ref_world, hook_strategy=hook_strategy, dna=shot_dna, variant_rank=rank,
+                           hdr_sources={i: d["hdr"] for i, d in enumerate(shot_dna) if d and d.get("hdr")},
                            soft_sources={i for i, v in enumerate(selected) if v.source in ("coverr", "pexels")})
     from . import critic
     try:
