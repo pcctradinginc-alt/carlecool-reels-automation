@@ -64,7 +64,10 @@ def plan(style: str | None, features, starts: list[float], durations: list[float
         return out
     from .look import shot_energy
     fx = FX.get(_directors.current() or "") or FX.get(style or "", DEFAULT)
-    still = [is_static(motion[i]) if motion is not None and i < len(motion) else False for i in range(n)]
+    if os.getenv("CARLECOOL_PIPELINE", "").strip().lower() == "classic":
+        still = [True] * n  # #73 code: push on the opener, drift on every interior shot
+    else:
+        still = [is_static(motion[i]) if motion is not None and i < len(motion) else False for i in range(n)]
     if strategy == "push" and still[0]:
         out[0]["zoom"] = ("push", fx["push"])
     direction = "in"

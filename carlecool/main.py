@@ -120,6 +120,10 @@ def fill_up(reserve, accept, full) -> None:
             print(f"Clip unavailable (skipped): {video.id}: {describe_error(exc)}")
 
 
+def classic_pipeline() -> bool:
+    return os.getenv("CARLECOOL_PIPELINE", "").strip().lower() == "classic"
+
+
 def analyse_shots(selected, paths: list, output_dir: Path, ref_world: str | None) -> list[dict | None]:
     """Shot DNA per clip (shot_analysis.py); each path is replaced by its best window."""
     from . import shot_analysis
@@ -366,9 +370,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     from . import library
     footage_library = library.load()
     library_ids: set[str] = set()
-    for video in library.candidates(footage_library, director=directors.current(), theme=theme,
-                                    exclude=set(long_memory) | set(recent),
-                                    limit=int(stock_limit * library.LIBRARY_SHARE)):
+    for video in ([] if classic_pipeline() else library.candidates(
+            footage_library, director=directors.current(), theme=theme,
+            exclude=set(long_memory) | set(recent), limit=int(stock_limit * library.LIBRARY_SHARE))):
         motif = motif_of(video)
         if motif and motif_count[motif] >= MAX_PER_MOTIF:
             continue
@@ -602,7 +606,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                     print(f"Signature {role}: no suitable clip this time")
     check_quality(paths, planned_shots, signature_slots)
     # Shot Intelligence (package B): Shot DNA of every clip, cut to its strongest window.
-    shot_dna = analyse_shots(selected, paths, output_dir, ref_world)
+    # Owner verdicts 27 Nov (blind test: old preferred; #82 worse than #73): the "classic"
+    # pipeline renders like the #73 code — no Shot DNA windows, no coherence re-order, one
+    # storyboard, no library. CARLECOOL_PIPELINE=classic (repo variable or workflow input).
+    shot_dna = ([None] * len(paths) if classic_pipeline()
+                else analyse_shots(selected, paths, output_dir, ref_world))
     for i, video in enumerate(selected):
         if video.id not in library_ids and shot_dna[i]:
             library.add(footage_library, video, paths[i], shot_dna[i], director=directors.current(),
@@ -619,7 +627,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                                 lines=themes.lines(style_name, style_variant, theme) if theme else None)
     print(f"Text hook: {hook_line!r}" if hook_line else "Text hook: none (A/B test)")
     from . import reach
-    hook_strategy = reach.hook_strategy(edition, (directors.get(director) or {}).get("hook_strategies"))
+    hook_strategy = ("push" if classic_pipeline()
+                     else reach.hook_strategy(edition, (directors.get(director) or {}).get("hook_strategies")))
     print(f"Hook strategy: {hook_strategy}")
     def render_variant(rank: int) -> dict:
         return render_reel(audio, paths, features, out, reel_length,
@@ -663,7 +672,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         caption_copy["question"] = (captions.QUESTIONS[0] if not caption_copy["question"] else "")
     reel_facts = {
         "style": style_name, "variant": style_variant, "style_basis": style_decision.get("basis"),
-        "director": directors.current(), "hook_strategy": hook_strategy, "library_clips": len(library_ids),
+        "director": directors.current(), "hook_strategy": hook_strategy,
+        "pipeline": "classic" if classic_pipeline() else "cinematic", "library_clips": len(library_ids),
         "coherence": details.get("coherence"),
         "critic": {k: details.get("critic", {}).get(k) for k in ("score", "issues", "re_edited")},
         "storyboard": details.get("variant_rank"),
