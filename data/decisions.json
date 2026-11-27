@@ -17,7 +17,10 @@
    "style": null,
    "variant": null,
    "theme": null,
-   "opening_clip": null
+   "opening_clip": null,
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 25,
@@ -35,7 +38,10 @@
    "style": null,
    "variant": null,
    "theme": null,
-   "opening_clip": null
+   "opening_clip": null,
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 30,
@@ -53,7 +59,10 @@
    "style": null,
    "variant": null,
    "theme": null,
-   "opening_clip": null
+   "opening_clip": null,
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 33,
@@ -79,7 +88,10 @@
    "style": null,
    "variant": null,
    "theme": null,
-   "opening_clip": null
+   "opening_clip": null,
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 34,
@@ -109,7 +121,10 @@
    "style": null,
    "variant": null,
    "theme": null,
-   "opening_clip": null
+   "opening_clip": null,
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 37,
@@ -128,7 +143,10 @@
    "style": null,
    "variant": null,
    "theme": null,
-   "opening_clip": null
+   "opening_clip": null,
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 38,
@@ -156,7 +174,10 @@
    "style": "lana",
    "variant": null,
    "theme": null,
-   "opening_clip": "se6A6GqTIm"
+   "opening_clip": "se6A6GqTIm",
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 40,
@@ -182,7 +203,10 @@
    "style": "rubin",
    "variant": null,
    "theme": null,
-   "opening_clip": "Fa1GhUWb97"
+   "opening_clip": "Fa1GhUWb97",
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 42,
@@ -207,7 +231,10 @@
    "style": "rubin",
    "variant": null,
    "theme": null,
-   "opening_clip": "ppURFfx7lL"
+   "opening_clip": "ppURFfx7lL",
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 45,
@@ -233,7 +260,10 @@
    "style": "rubin",
    "variant": "night",
    "theme": null,
-   "opening_clip": "hi5d328a8z"
+   "opening_clip": "hi5d328a8z",
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 46,
@@ -261,7 +291,10 @@
    "style": "lana",
    "variant": null,
    "theme": null,
-   "opening_clip": "JdbVWsyY0c"
+   "opening_clip": "JdbVWsyY0c",
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 48,
@@ -289,7 +322,10 @@
    "style": "lana",
    "variant": "night",
    "theme": null,
-   "opening_clip": "F9C1KBdRWo"
+   "opening_clip": "F9C1KBdRWo",
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 57,
@@ -308,7 +344,10 @@
    "style": "lana",
    "variant": "night",
    "theme": "drive",
-   "opening_clip": "2FQl41Kv9c"
+   "opening_clip": "2FQl41Kv9c",
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
   },
   {
    "issue": 59,
@@ -330,7 +369,117 @@
    "style": "lana",
    "variant": null,
    "theme": "family",
-   "opening_clip": "j9ZtGgPrC6"
+   "opening_clip": "j9ZtGgPrC6",
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
+  },
+  {
+   "issue": 60,
+   "decision": "published",
+   "video_ids": [
+    "RUouWxOq1f",
+    "9cfC4qODSN",
+    "KGlm0yZAD1",
+    "IoZXsbfSEU",
+    "pEeGts0hP9",
+    "inqghNWZPc"
+   ],
+   "motifs": [
+    "rain",
+    "sunlight window",
+    "window light",
+    "woman window"
+   ],
+   "style": "rubin",
+   "variant": null,
+   "theme": "quiet",
+   "opening_clip": "pEeGts0hP9",
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
+  },
+  {
+   "issue": 62,
+   "decision": "discarded",
+   "video_ids": [
+    "l3ylado2hv",
+    "VEmqRkeUZK",
+    "Dtm8IO163G",
+    "ai-46023409844-0",
+    "UVS4iEdEiO",
+    "ai-46023409844-1",
+    "aYQn3UaOmV",
+    "EIO3TpjAzg"
+   ],
+   "motifs": [
+    "desert road",
+    "empty road",
+    "friends sitting",
+    "golden hour"
+   ],
+   "style": "rubin",
+   "variant": null,
+   "theme": "road",
+   "opening_clip": "l3ylado2hv",
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
+  },
+  {
+   "issue": 73,
+   "decision": "published",
+   "video_ids": [
+    "w7ZdjFecqV",
+    "sUKkOAjAZv",
+    "DnBhCNa6Tl",
+    "TcWdXNDOWb",
+    "PHHyGtc7L7"
+   ],
+   "motifs": [
+    "lighthouse",
+    "sand dunes",
+    "white dress",
+    "woman horse",
+    "women sailing"
+   ],
+   "style": "lana",
+   "variant": null,
+   "theme": "hamptons",
+   "opening_clip": "sUKkOAjAZv",
+   "pipeline": null,
+   "critic": null,
+   "coherence": null
+  },
+  {
+   "issue": 86,
+   "decision": "discarded",
+   "video_ids": [
+    "pl-sylacauga_saga",
+    "aE5qAYzGcL",
+    "RdmOkSgF4I",
+    "xn02yJjeZg",
+    "jp59ZoJwcb",
+    "GkAzOWXj9j",
+    "2ShBQXOjRg",
+    "by9nchKLB4"
+   ],
+   "motifs": [
+    "beach house",
+    "classic sailboat",
+    "polo",
+    "tennis",
+    "vintage americana",
+    "woman horse",
+    "women picnic"
+   ],
+   "style": "lana",
+   "variant": null,
+   "theme": "hamptons",
+   "opening_clip": "RdmOkSgF4I",
+   "pipeline": "classic",
+   "critic": 1.0,
+   "coherence": null
   }
  ]
 }
