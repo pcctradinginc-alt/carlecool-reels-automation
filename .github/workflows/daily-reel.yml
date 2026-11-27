@@ -185,6 +185,20 @@ jobs:
           gh api "repos/${GITHUB_REPOSITORY}/contents/data/provider-usage.json?ref=main" --jq .content \
             | base64 -d > /tmp/provider-usage.json && mv /tmp/provider-usage.json data/provider-usage.json \
             || echo "Provider usage: keeping the checked-out file"
+      - name: Restore the footage library files
+        # Package B (27 Nov): proven clips stay between runs in the free Actions cache.
+        uses: actions/cache/restore@v4
+        with:
+          path: footage-cache
+          key: footage-${{ github.run_id }}
+          restore-keys: footage-
+      - name: Use the latest footage catalogue from main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/contents/data/footage-library.json?ref=main" --jq .content \
+            | base64 -d > /tmp/footage-library.json && mv /tmp/footage-library.json data/footage-library.json \
+            || echo "Footage library: starting a new catalogue"
       - name: Render a balanced random Reel (no Instagram calls)
         env:
           COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
@@ -204,6 +218,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python -m carlecool.providers
+      - name: Catalogue the footage library
+        if: ${{ always() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m carlecool.library
+      - name: Keep the footage library files
+        if: ${{ always() }}
+        uses: actions/cache/save@v4
+        with:
+          path: footage-cache
+          key: footage-${{ github.run_id }}
       - name: Deliver private approval email
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'review' }}
         env:
