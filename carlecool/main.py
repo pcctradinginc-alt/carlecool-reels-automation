@@ -657,19 +657,22 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         details = render_variant(0)
         verdict = critic.review(out, details)
         print(f"Visual critic: {verdict['score']} {verdict['issues'] or 'no issues'}")
-        if verdict["retry"] and len(details.get("storyboards") or []) > 1:
-            # Package D: one re-edit with the second-best storyboard; the better verdict wins.
-            first = out.with_name("first_edit.mp4")
-            os.replace(out, first)
-            second = render_variant(1)
-            second_verdict = critic.review(out, second)
-            print(f"Visual critic (re-edit): {second_verdict['score']} {second_verdict['issues'] or 'no issues'}")
-            if second_verdict["score"] > verdict["score"]:
-                details, verdict = second, second_verdict
-                first.unlink(missing_ok=True)
+        # Phase 4: at most TWO re-edits (next storyboards); the best verdict wins.
+        rounds = 0
+        while verdict["retry"] and rounds < min(2, len(details.get("storyboards") or []) - 1):
+            rounds += 1
+            best = out.with_name("best_edit.mp4")
+            os.replace(out, best)
+            again = render_variant(rounds)
+            again_verdict = critic.review(out, again)
+            print(f"Visual critic (re-edit {rounds}): {again_verdict['score']} {again_verdict['issues'] or 'no issues'}")
+            if again_verdict["score"] > verdict["score"]:
+                details, verdict = again, again_verdict
+                best.unlink(missing_ok=True)
             else:
-                os.replace(first, out)
-            verdict["re_edited"] = True
+                os.replace(best, out)
+                verdict["retry"] = verdict["retry"] and again_verdict["retry"]
+            verdict["re_edited"] = rounds
         details["critic"] = verdict
     finally:
         if cover is not None:
@@ -687,7 +690,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "director": directors.current(), "hook_strategy": hook_strategy,
         "pipeline": "classic" if classic_pipeline() else "cinematic", "library_clips": len(library_ids),
         "coherence": details.get("coherence"),
-        "critic": {k: details.get("critic", {}).get(k) for k in ("score", "issues", "re_edited")},
+        "critic": {k: details.get("critic", {}).get(k) for k in ("score", "technical", "aesthetic", "re_edited")},
         "storyboard": details.get("variant_rank"),
         "length_s": round(reel_length, 2), "length_bucket": performance.bucket(reel_length),
         "scenes": details.get("scenes"), "bpm": features.bpm,

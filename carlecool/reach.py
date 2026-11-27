@@ -98,18 +98,24 @@ def plan(style: str | None, features, starts: list[float], durations: list[float
     return out
 
 
-def zoom_filters(zoom, duration: float, width: int, height: int) -> list[str]:
-    """Per-frame scale + centre crop; t is the shot's local time (input seeked to 0)."""
+def zoom_filters(zoom, duration: float, width: int, height: int, base: float = 1.0) -> list[str]:
+    """Per-frame scale + centre crop; t is the shot's local time (input seeked to 0).
+    `base` > 1 folds a punch-in into the same transform (one resampling)."""
     if not zoom:
         return []
     kind, amount = zoom
     d = max(0.1, float(duration))
+    if kind == "hold":
+        if base <= 1.0:
+            return []
+        return [f"scale={int(round(width * base / 2) * 2)}:{int(round(height * base / 2) * 2)}:flags=lanczos",
+                f"crop={width}:{height}"]
     if kind == "push":
-        z = f"(1+{amount:.4f}*(1-exp(-t/{PUSH_TAU})))"
+        z = f"({base:.4f}+{amount:.4f}*(1-exp(-t/{PUSH_TAU})))"
     elif kind == "in":
-        z = f"(1+{amount:.4f}*min(t/{d:.3f},1))"
+        z = f"({base:.4f}+{amount:.4f}*min(t/{d:.3f},1))"
     else:
-        z = f"(1+{amount:.4f}*max(1-t/{d:.3f},0))"
+        z = f"({base:.4f}+{amount:.4f}*max(1-t/{d:.3f},0))"
     return [f"scale=w='trunc({width}*{z}/2)*2':h='trunc({height}*{z}/2)*2':eval=frame:flags=bicubic",
             f"crop={width}:{height}"]
 

@@ -69,8 +69,48 @@ def _frames(path: Path):
     return np.frombuffer(p.stdout[:count * size], dtype=np.uint8).reshape(count, H, W, 3).astype(np.float32) / 255
 
 
-def review(path: Path, details: dict) -> dict:
-    """Verdict on the rendered Reel: {"score", "issues", "retry", "measures"}."""
+def _audio_checks(path: Path) -> dict:
+    """True peak after the AAC encode and audio vs video duration (technical, measured)."""
+    import re
+    out = {}
+    try:
+        p = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", str(path), "-af", "ebur128=peak=true",
+                            "-f", "null", "-"], capture_output=True, text=True, timeout=300)
+        peaks = re.findall(r"Peak:\s*(-?[\d.]+|-inf) dBFS", p.stderr)
+        if peaks and peaks[-1] != "-inf":
+            out["true_peak_dbtp"] = float(peaks[-1])
+        dur = re.findall(r"Duration: (\d+):(\d+):([\d.]+)", p.stderr)
+        if dur:
+            h, m, s = dur[0]
+            out["container_s"] = int(h) * 3600 + int(m) * 60 + float(s)
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return out
+
+
+def compression_ssim(path: Path, kbps: int = 3000) -> float | None:
+    """SSIM of a simulated platform re-encode (~TikTok 1080p at 3 Mbit/s) vs the master."""
+    import re
+    import tempfile
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            sim = Path(tmp) / "sim.mp4"
+            subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(path), "-an", "-c:v", "libx264", "-preset",
+                            "veryfast", "-b:v", f"{kbps}k", "-maxrate", f"{kbps}k", "-bufsize", f"{2 * kbps}k",
+                            str(sim)], check=True, capture_output=True, timeout=600)
+            p = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(sim), "-i", str(path), "-lavfi",
+                                "[0:v]scale=540:960[a];[1:v]scale=540:960[b];[a][b]ssim", "-f", "null", "-"],
+                               capture_output=True, text=True, timeout=600)
+            m = re.findall(r"All:([\d.]+)", p.stderr)
+            return float(m[-1]) if m else None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def review(path: Path, details: dict, *, compression: bool = True) -> dict:
+    """Verdict on the rendered Reel. Technical errors (objective, measured) and aesthetic
+    indicators (starting values, to be calibrated on the owner's verdicts) are kept apart:
+    {"score", "technical", "aesthetic", "issues", "retry", "measures"}."""
     import numpy as np
     issues: list[str] = []
     measures: dict[str, float] = {}
@@ -96,6 +136,22 @@ def review(path: Path, details: dict) -> dict:
         measures["change_per_second"] = round(change, 4)
         if spread < 0.02 and change < 0.04:
             issues.append("monotonous: the picture barely changes")
+        # the first two seconds decide: does the picture move / change at all?
+        first = luma[: 2 * SAMPLE_FPS]
+        opening = float(np.abs(np.diff(first, axis=0)).mean()) if len(first) > 1 else 0.0
+        measures["opening_change"] = round(opening, 4)
+        if opening < 0.01:
+            issues.append("weak opening: the first two seconds hardly move")
+        # colour continuity at the cuts (Lab-ish mean of the frame before vs after each cut)
+        cuts, t = [], 0.0
+        for s in plan[:-1]:
+            t += float(s.get("duration") or 0)
+            cuts.append(int(round(t * SAMPLE_FPS)))
+        jumps = [float(np.abs(lab_means[c] - lab_means[c - 1]).mean()) for c in cuts if 0 < c < len(lab_means)]
+        if jumps:
+            measures["cut_colour_jump"] = round(float(np.median(jumps)), 4)
+            if float(np.median(jumps)) > 0.18:
+                issues.append("colour jumps at most cuts")
         # loop: last frame vs first frame
         jump = float(np.abs(luma[-1] - luma[0]).mean())
         measures["loop_jump"] = round(jump, 3)
@@ -115,9 +171,27 @@ def review(path: Path, details: dict) -> dict:
         measures["coherence"] = coh
         if coh < 0.45:
             issues.append("incoherent: scenes do not belong together")
+    technical: list[str] = []
+    audio = _audio_checks(Path(path))
+    measures.update(audio)
+    if audio.get("true_peak_dbtp") is not None and audio["true_peak_dbtp"] > -0.5:
+        technical.append(f"true peak {audio['true_peak_dbtp']} dBTP after AAC (limit −0.5)")
+    expected = details.get("duration")
+    if expected and audio.get("container_s") and abs(audio["container_s"] - float(expected)) > 1 / 24 + 0.02:
+        technical.append("audio / video length mismatch")
+    if compression:
+        ssim = compression_ssim(Path(path))
+        if ssim is not None:
+            measures["platform_ssim"] = round(ssim, 4)
+            if ssim < 0.90:
+                technical.append(f"platform compression visibly degrades the picture (SSIM {ssim:.3f})")
+    if frames is None:
+        technical.append("critic could not read the video")
+        issues = [i for i in issues if i != "critic could not read the video"]
     score = max(0.0, 1.0 - 0.18 * len(issues))
     if coh is not None:
         score = 0.7 * score + 0.3 * min(1.0, coh / 0.75)
     score = round(score, 3)
     serious = any(i.startswith(("incoherent", "monotonous", "over-processed", "the same clip")) for i in issues)
-    return {"score": score, "issues": issues, "retry": serious or score < RETRY_BELOW, "measures": measures}
+    return {"score": score, "technical": technical, "aesthetic": issues, "issues": technical + issues,
+            "retry": serious or score < RETRY_BELOW, "measures": measures}

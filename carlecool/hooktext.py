@@ -16,6 +16,7 @@ import hashlib
 import os
 from pathlib import Path
 
+SAFE_TOP, SAFE_BOTTOM = 0.12, 0.22
 HOOK_SECONDS = 2.6  # visible from the start, gone before the first musical phrase ends
 LINES = {
     "rubin": ("pov: 2 am, one more take",
@@ -101,7 +102,11 @@ def make_png(text: str, width: int, height: int, path: Path) -> Path | None:
             cur = w
     lines.append(cur)
     line_h = int(font.size * 1.3)
+    # Phase 4: platform safe zones — TikTok / Instagram UI covers ~12 % at the top and
+    # ~22 % at the bottom; the text block always starts at 20 % and must end above 78 %.
     y0 = int(height * 0.2)
+    if y0 + len(lines) * line_h > height * (1 - SAFE_BOTTOM):
+        y0 = max(int(height * SAFE_TOP), int(height * (1 - SAFE_BOTTOM)) - len(lines) * line_h)
     shadow = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     sdraw = ImageDraw.Draw(shadow)
     for i, ln in enumerate(lines):

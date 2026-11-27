@@ -435,15 +435,16 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         if hdr_sources and shot.source_index in hdr_sources:
             # Phase 4: HDR (PQ / HLG) stock → SDR BT.709 before any grade (else washed-out colour)
             chain = [hdr_to_sdr(hdr_sources[shot.source_index])] + chain
-        if styling["punch_in"] and not (src_w > src_h > 0 and chain and chain[0].startswith("split")):
-            # Rubin: peaks get closer, not busier.
-            chain += [f"crop=iw*0.9:ih*0.9", f"scale={width}:{height}:flags=lanczos"]
-            punched += 1
         fx = reach_fx[index]
-        if fx["zoom"]:
-            # Reach (27 Nov): the camera never stands still; shot 0 pushes in from frame 1.
-            chain += reach.zoom_filters(fx["zoom"], shot.duration, width, height)
-            zoomed += 1
+        punch = styling["punch_in"] and not (src_w > src_h > 0 and chain and chain[0].startswith("split"))
+        if punch:
+            punched += 1  # peaks get closer, not busier
+        if fx["zoom"] or punch:
+            # Phase 4 (audit E2): punch-in and push / drift are ONE per-frame scale + crop
+            # (the punch-in no longer adds its own crop + rescale).
+            chain += reach.zoom_filters(fx["zoom"] or ("hold", 0.0), shot.duration, width, height,
+                                        base=1.111 if punch else 1.0)
+            zoomed += 1 if fx["zoom"] else 0
         chain.append("setsar=1")
         speed = 1.0
         if styling["slowmo"] > 1.0:

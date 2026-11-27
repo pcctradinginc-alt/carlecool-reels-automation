@@ -110,7 +110,18 @@ def _fetch_reel_once(approval: dict, target: Path, *, connection=None) -> tuple[
         if metadata.get('master_storage') != storage:
             raise ValueError('Master storage location differs between email and approval')
         from .masterstore import download_master
-        download_master(storage, reel, expected_sha256=approval['sha256'])
+        try:
+            download_master(storage, reel, expected_sha256=approval['sha256'])
+        except FileNotFoundError:
+            # Actions-cache master expired (> 7 days unused): publish the e-mailed preview
+            # instead of failing — verified against the preview digest in the mailed metadata.
+            previews = [p for p in attachments if p.get_filename() == 'CarleCool-Preview.mp4']
+            data = previews[0].get_payload(decode=True) if len(previews) == 1 else b''
+            if not data or not metadata.get('preview_sha256') or \
+                    hashlib.sha256(data).hexdigest() != metadata['preview_sha256']:
+                raise
+            print('Master expired in the Actions cache; publishing the verified e-mail preview')
+            reel.write_bytes(data)
     else:
         videos = [part for part in attachments if part.get_filename() == 'CarleCool-Original.mp4']
         if len(videos) != 1:
