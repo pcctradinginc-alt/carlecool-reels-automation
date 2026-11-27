@@ -962,6 +962,27 @@
       "style": "rubin",
       "theme": "quiet",
       "length_bucket": "long"
+    },
+    {
+      "at": "2026-11-27T15:24:24+00:00",
+      "kind": "daily",
+      "run_id": 46023409844,
+      "track_id": "2437525041",
+      "video_ids": [
+        "l3ylado2hv",
+        "VEmqRkeUZK",
+        "pl-cahuca_000008",
+        "Dtm8IO163G",
+        "ai-46023409844-0",
+        "UVS4iEdEiO",
+        "ai-46023409844-1",
+        "aYQn3UaOmV",
+        "EIO3TpjAzg"
+      ],
+      "sha256": "e6d930638367642b1bbd6749819d8936d766920f554492c8a114d787008e75cf",
+      "style": "rubin",
+      "theme": "road",
+      "length_bucket": "long"
     }
   ]
 }
