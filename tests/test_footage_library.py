@@ -50,3 +50,13 @@ def test_library_add_reuse_skip_and_prune(tmp_path, monkeypatch):
     assert library.prune(data) == 1
     merged = library.merge({"clips": {"old": {"director": "night", "runs": ["0"]}}}, data)
     assert set(merged["clips"]) >= {"old", "abc123"}
+
+
+def test_spotify_line_in_caption_and_mail():
+    from carlecool import captions, review
+    chosen = captions.variant("lana", None, "r1")
+    head = captions.head("carl e cool - sleepwell", chosen)
+    lines = head.splitlines()
+    assert lines[0] == "🎧 carl e cool - sleepwell" and lines[1] == captions.SPOTIFY_LINE
+    assert "http" not in head  # caption links are not clickable: "link in bio"
+    assert review._spotify() == "https://open.spotify.com/artist/6qRtXVU6f3xhlmxTgwgoPy"

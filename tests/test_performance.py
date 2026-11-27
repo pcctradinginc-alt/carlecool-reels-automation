@@ -16,7 +16,7 @@ def test_caption_has_search_line_niche_tags_and_keeps_every_credit():
     text = caption_for(track, clips, copy)
     lines = text.splitlines()
     assert lines[0] == "🎧 carl e cool - chronocyte horizon"
-    assert lines[1] in captions.SEARCH_LINES["rubin"]
+    assert lines[1] == captions.SPOTIFY_LINE and lines[2] in captions.SEARCH_LINES["rubin"]
     assert lines[-1].split()[0] == "#carlecool" and 4 <= len(lines[-1].split()) <= 5
     assert "#rap" not in text
     validate_footage_rights({"caption": text, "footage_sources": [{"provider": "coverr"}, {"provider": "prelinger"}]})

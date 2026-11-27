@@ -57,6 +57,8 @@ def caption_for(track, videos, copy: dict | None = None) -> str:
                                        for v in videos if v.source == "prelinger"))
     if archives_used:
         caption += "🎬 Archive footage: " + ", ".join(archives_used) + ", public domain (archive.org)\n"
+    if any(v.source == "nara" for v in videos):
+        caption += "🎬 Archive footage: U.S. National Archives (catalog.archives.gov), public domain\n"
     tags = captions.tail(copy) if copy else "#carlecool #instrumental #electronic #rap #producer"
     return caption.rstrip() + "\n\n" + tags
 
