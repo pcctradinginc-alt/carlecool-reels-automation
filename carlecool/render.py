@@ -208,7 +208,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 signature_slots: dict[str, int] | None = None,
                 look: dict | None = None, opening_pool: set[int] | None = None,
                 opening_fit: dict[int, float] | None = None, hook_text: str = "",
-                ref_world: str | None = None, soft_sources: set[int] | frozenset[int] = frozenset()) -> dict:
+                ref_world: str | None = None, soft_sources: set[int] | frozenset[int] = frozenset(),
+                hook_strategy: str = "push") -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -246,7 +247,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 early_dims.append((0, 0))
         opening = look_mod.strongest_opening(
             [i for i in base if i in opening_pool], motion, early_dims, source_durations,
-            style_fit=opening_fit)
+            style_fit=opening_fit, prefer_motion=hook_strategy == "motion")
         if opening is not None:
             base = [opening] + [i for i in base if i != opening]
             no_bookend = set(no_bookend) - {opening}
@@ -326,7 +327,10 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     for item in shot_look:  # frame-exact transitions keep the cuts on the beat grid
         item["dissolve_in"] = round(item["dissolve_in"] * FPS) / FPS
     from . import reach
-    reach_fx = reach.plan(ref_world, features, starts, [s.duration for s in storyboard], shot_look)
+    if motion is None:
+        motion = [look_mod.motion_score(p) for p in videos]
+    reach_fx = reach.plan(ref_world, features, starts, [s.duration for s in storyboard], shot_look,
+                          motion=[motion[s.source_index] for s in storyboard], strategy=hook_strategy)
     if loop_sealed and len(storyboard) > 1:
         reach_fx[-1].update(zoom=None, flash=0.0)  # loop seam: last frame = first frame
     from . import hooktext
@@ -492,9 +496,9 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *inputs,
             "-frames:v", str(max(1, round((shot.duration + tail) * FPS))),
             *video_args,
-            "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-            "-tune", "grain" if grain else "film", "-profile:v", "high",
-            "-maxrate", "16M", "-bufsize", "24M",
+            # Lossless intermediate (unified bible, 27 Nov): the only lossy H.264 encode is
+            # the join below, so grain and fine texture are not compressed twice.
+            "-an", "-c:v", "libx264", "-preset", "ultrafast", "-qp", "0",
             "-g", str(FPS * 2), "-r", str(FPS), "-video_track_timescale", str(FPS * 1000), str(part),
         ])
         shot_start = shot_end
@@ -510,12 +514,15 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
               *[arg for f in files for arg in ("-i", str(f))],
               "-filter_complex", graph, "-map", f"[{label}]", "-an",
               "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-              "-tune", "grain" if grain else "film", "-profile:v", "high",
+              "-tune", "grain" if grain else "film", "-profile:v", "high", "-pix_fmt", "yuv420p",
               "-maxrate", "16M", "-bufsize", "24M", "-g", str(FPS * 2), "-r", str(FPS),
               "-video_track_timescale", str(FPS * 1000), str(video_only)])
     else:
         _run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0",
-              "-i", str(concat_path), "-c", "copy", str(video_only)])
+              "-i", str(concat_path), "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+              "-tune", "grain" if grain else "film", "-profile:v", "high", "-pix_fmt", "yuv420p",
+              "-maxrate", "16M", "-bufsize", "24M", "-g", str(FPS * 2), "-r", str(FPS),
+              "-video_track_timescale", str(FPS * 1000), str(video_only)])
     _run([
         "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(video_only), "-i", str(audio),
         "-filter_complex", loop_audio_graph(audio, features.excerpt_start, length),
@@ -556,7 +563,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                               "cover_bridge": loop_bridge},
             "smart_cropped_shots": reframed,
             "dissolves": sum(1 for d in dissolves if d > 0), "slowmo_shots": slowed,
-            "light_leaks": leaks, "punch_ins": punched, "moving_shots": zoomed, "flash_cuts": flashes, "bw_shots": bw_shots,
+            "light_leaks": leaks, "punch_ins": punched, "moving_shots": zoomed, "hook_strategy": hook_strategy, "flash_cuts": flashes, "bw_shots": bw_shots,
             "hook_text": hook_text if hook_png is not None else "",
             "first_shot_s": round(storyboard[0].duration, 2) if storyboard else None,
             "framed_shots": framed,

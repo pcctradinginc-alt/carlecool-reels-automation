@@ -4,7 +4,7 @@
  "label": "Lana × Americana (zeitlos-klassisch) · Night",
  "active": true,
  "order": 2,
- "summary": "Night: 'Concrete Crown & Midnight Horsepower' — old money × 90s NYC at night × stadium floodlights × air-cooled Porsche 993 (owner night bible 27 Nov).",
+ "summary": "NIGHT – Concrete Crown & Midnight Horsepower: old money × NYC underground rap × stadium floodlights × Porsche 993 × analog music (unified bible 27 Nov). Loneliness, power, darkness, freedom.",
  "world": "lana",
  "variant": "night",
  "references": "night",
@@ -36,7 +36,8 @@
    "music": {
     "drive": "groove",
     "tempo": "fast"
-   }
+   },
+   "weight": 15
   },
   "gilded": {
    "archive": 0,
@@ -65,7 +66,8 @@
     "sound": "warm",
     "space": "spacious",
     "tempo": "slow"
-   }
+   },
+   "weight": 15
   },
   "projects": {
    "archive": 0,
@@ -94,7 +96,8 @@
     "drive": "groove",
     "sound": "dark",
     "tempo": "mid"
-   }
+   },
+   "weight": 20
   },
   "stadium": {
    "archive": 0,
@@ -123,7 +126,66 @@
     "sound": "bright",
     "space": "spacious",
     "tempo": "mid"
-   }
+   },
+   "weight": 10
+  },
+  "skate": {
+   "label": "Nocturnal Street Skate",
+   "words": [
+    "parking garage",
+    "skateboard",
+    "concrete",
+    "underpass",
+    "street lights",
+    "night skate",
+    "skatepark",
+    "tunnel",
+    "curb",
+    "woman skateboard"
+   ],
+   "roles": [
+    "woman"
+   ],
+   "archive": 0,
+   "lines": [
+    "pov: 3 am, the garage is ours",
+    "for the city at 3 am"
+   ],
+   "music": {
+    "tempo": "fast",
+    "drive": "groove"
+   },
+   "weight": 15
+  },
+  "studio": {
+   "label": "Underground Analog Studio",
+   "words": [
+    "synthesizer",
+    "drum machine",
+    "mixing console",
+    "vu meter",
+    "vinyl record",
+    "dj mixer",
+    "piano",
+    "turntable",
+    "studio night",
+    "cassette"
+   ],
+   "roles": [
+    "gear",
+    "woman"
+   ],
+   "archive": 0,
+   "lines": [
+    "pov: the sample that started it",
+    "pov: 2 am, one more take"
+   ],
+   "music": {
+    "tempo": "mid",
+    "sound": "dark",
+    "drive": "groove"
+   },
+   "weight": 25
   }
  },
  "search": [
@@ -336,7 +398,14 @@
   "a woman in a black velvet dress and a pearl choker caught in paparazzi flash at night",
   "a woman in dark oversized sunglasses and a long fur coat on a city street at night",
   "a grainy black and white 16mm film of a new york street at night",
-  "a low-angle view up at brick towers against the night sky"
+  "a low-angle view up at brick towers against the night sky",
+  "fingers on the pads of an mpc sampler in a dark studio with hard side light",
+  "illuminated vu meters glowing on an analog mixing console in the dark",
+  "amber leds of a synthesizer in black shadows",
+  "a lone piano lit by a single lamp, black and white",
+  "a skateboarder in a dark parking garage under flickering neon, fisheye",
+  "a vinyl record and a sampler in a dark room, sample culture",
+  "a silver boombox on a basketball court at night"
  ],
  "look": {
   "archive_films": 4,
@@ -381,5 +450,14 @@
   "pov: the last diner still open",
   "the drive home you don't want to end",
   "pov: empty freeway, full moon"
+ ],
+ "always_roles": [
+  "flag",
+  "car",
+  "gear"
+ ],
+ "hook_strategies": [
+  "motion",
+  "push"
  ]
 }

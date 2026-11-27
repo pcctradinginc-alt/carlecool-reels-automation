@@ -8,7 +8,6 @@ from pathlib import Path
 
 from carlecool import directors, hooktext, reach, signature, style, stylegate, themes
 
-SNAPSHOT = json.loads(Path("tests/fixtures/directors-snapshot-27nov.json").read_text(encoding="utf-8"))
 ROLES = ("skater", "woman", "friends", "friends2", "americana", "flag", "car", "gear")
 
 
@@ -36,11 +35,24 @@ def _effective(name, variant, use):
         directors.use(None)
 
 
-def test_moving_lana_and_night_into_director_files_changed_nothing():
+def _from_file(name):
+    d = json.loads((Path("directors") / f"{name}.json").read_text(encoding="utf-8"))
+    prof = {k: 50 for k in d["weights"]}
+    return {"label": d["label"],
+            "themes": {t: {k: v for k, v in i.items() if k != "music"} for t, i in d["themes"].items()},
+            "music": {t: i["music"] for t, i in d["themes"].items()}, "wanted": d["wanted"], "look": d["look"],
+            "grade": d["grade"], "weights": {k: int(round(0.5 * 50 + 0.5 * v)) for k, v in d["weights"].items()},
+            "search": d["search"], "roles": {r: d["roles"][r] for r in ROLES}, "hook_lines": d["hook_lines"],
+            "fx": d["fx"], "references": d["references"], "pace": d["pace"]}
+
+
+def test_modules_follow_the_director_files():
+    """The PR-70 move was proven against a snapshot; now every module must say what the file says."""
     for name, variant in (("lana", None), ("night", "night")):
         for use in (True, False):  # with the director in use, and via the legacy style/variant key
             got = json.loads(json.dumps(_effective(name, variant, use), sort_keys=True))
-            assert got == SNAPSHOT[name], (name, use, [k for k in got if got[k] != SNAPSHOT[name][k]])
+            want = json.loads(json.dumps(_from_file(name), sort_keys=True))
+            assert got == want, (name, use, [k for k in got if got[k] != want[k]])
 
 
 def test_rotation_and_choice_by_director_name(monkeypatch):
@@ -57,7 +69,7 @@ def test_a_new_director_is_just_a_new_file(tmp_path):
         shutil.copy(f, tmp_path / f.name)
     doc = json.loads((tmp_path / "lana.json").read_text(encoding="utf-8"))
     doc.update(name="gilded", label="Gilded Rebels", order=3,
-               themes={"yacht": dict(doc["themes"]["hamptons"], label="Yacht & Riviera",
+               themes={"yacht": dict(doc["themes"]["dynasty"], label="Yacht & Riviera",
                                      lines=["pov: the last summer on the yacht"])},
                look=dict(doc["look"], chroma_shift=3), fx=dict(doc["fx"], flashes=2))
     (tmp_path / "gilded.json").write_text(json.dumps(doc), encoding="utf-8")

@@ -113,18 +113,23 @@ def choose(style: str | None, variant: str | None, previews: list[dict], run_key
     for entry in previews:
         if entry.get("style") == key and entry.get("theme") in used and entry.get("kind", "daily") == "daily":
             used[entry["theme"]] += 1
-    low, high = min(used.values()), max(used.values())
+    # Motif weights of the director (unified bible, 27 Nov: e.g. analog music 25 %, Royals
+    # 10 %): a theme's use is counted relative to its weight. Equal weights = plain rotation.
+    weight = {n: float(THEMES[key][n].get("weight") or 1.0) for n in names}
+    top = max(weight.values())
+    ahead = {n: used[n] * top / weight[n] for n in names}
+    low, high = min(ahead.values()), max(ahead.values())
     classes = music_classes(features) if features is not None else {}
 
     def score(n):
-        fair = 1.0 if high == low else (high - used[n]) / (high - low)
+        fair = 1.0 if high == low else (high - ahead[n]) / (high - low)
         fit = music_fit(key, n, classes)
         tie = int.from_bytes(hashlib.sha256(f"{run_key}|theme|{n}".encode()).digest()[:2], "big") / 65535 * 1e-3
         if fit is None:
             return fair + tie
         return MUSIC_SHARE * fit + (1 - MUSIC_SHARE) * fair + tie
     # never more than 2 Reels ahead of the least-used theme (no theme starves)
-    eligible = [n for n in names if used[n] - low < 2] or names
+    eligible = [n for n in names if ahead[n] - low < 2] or names
     return max(eligible, key=score)
 
 
@@ -147,8 +152,13 @@ def words(style, variant, theme, run_key: str, lanes: int) -> list[str]:
 
 
 def roles(style, variant, theme) -> tuple[str, ...]:
+    """Signature roles: the director's always-roles (flag, car, analog gear) + the theme's."""
     info = get(style, variant, theme)
-    return ALWAYS_ROLES + tuple(info["roles"]) if info else ()
+    if not info:
+        return ()
+    d = _directors.get(key_for(style, variant))
+    always = tuple((d or {}).get("always_roles") or ALWAYS_ROLES)
+    return always + tuple(r for r in info["roles"] if r not in always)
 
 
 def archive_films(style, variant, theme, default: int) -> int:

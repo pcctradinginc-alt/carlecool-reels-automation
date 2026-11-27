@@ -5,7 +5,7 @@ from carlecool.video import Video
 
 def test_theme_words_are_searchable_and_in_style():
     for key, group in themes.THEMES.items():
-        assert 3 <= len(group) <= 5
+        assert 3 <= len(group) <= 6
         for name, info in group.items():
             assert len(info["words"]) >= 8 and info["lines"] and info["label"]
             for w in info["words"]:
@@ -21,11 +21,11 @@ def test_one_theme_per_reel_with_car_and_flag():
     assert w[0] in ("porsche", "land rover", "range rover", "classic car")
     assert all(x in themes.THEMES["rubin"]["studio"]["words"] for x in w[2:])
     assert themes.roles("rubin", None, "studio")[:2] == ("flag", "car")
-    assert "skater" not in themes.roles("lana", None, "hamptons")
+    assert "skater" not in themes.roles("lana", None, "dynasty")
     # night uses the night themes whatever the world
     assert themes.get("lana", "night", "drive") is themes.THEMES["night"]["drive"]
     assert themes.archive_films("lana", "night", "drive", 4) == 0
-    assert themes.archive_films("lana", None, "homemovie", 4) == 4
+    assert themes.archive_films("lana", None, "dynasty", 4) == 2
 
 
 def test_themes_rotate_evenly_per_style():
@@ -75,7 +75,7 @@ def test_music_first_theme_choice():
     assert themes.music_classes(quiet) == {"tempo": "slow", "sound": "dark", "drive": "sparse", "space": "spacious"}
     # fresh history: the song decides
     assert themes.choose("rubin", None, [], "r", quiet) == "quiet"
-    assert themes.choose("lana", None, [], "r", groove) == "desert"
+    assert themes.choose("lana", None, [], "r", groove) == "street"
     assert themes.choose("lana", "night", [], "r", groove) == "drive"
     # rotation still wins over time: a theme never gets 2 Reels ahead of the least used
     hist = [{"style": "rubin", "theme": "quiet"}] * 2
@@ -84,13 +84,21 @@ def test_music_first_theme_choice():
     assert themes.music_classes(SimpleNamespace(bpm=0, timbre_hz=0, percussive=0, dynamics=0)) == {}
 
 
-def test_owner_video_guide_themes_27_nov():
-    """Owner's guide: California, desert motels, Old-Hollywood glamour, home movies + Old Money Hamptons."""
-    assert set(themes.THEMES["lana"]) == {"california", "desert", "glamour", "hamptons", "homemovie"}
-    assert "champagne" in themes.THEMES["lana"]["glamour"]["words"]
-    assert any("hamptons" in p for p in stylegate.WANTED["lana"])
+def test_unified_creative_director_bible_27_nov():
+    """Lana: dynasty, royals, 90s minimalism, street skate, analog music; analog gear in every Reel."""
+    assert set(themes.THEMES["lana"]) == {"dynasty", "royals", "minimal", "street", "studio"}
+    assert set(themes.THEMES["night"]) == {"drive", "projects", "stadium", "gilded", "skate", "studio"}
+    assert themes.roles("lana", None, "dynasty")[:3] == ("flag", "car", "gear")
+    assert themes.roles("lana", "night", "studio").count("gear") == 1
     from carlecool import style
     assert style.look("lana")["chroma_shift"] and style.look("lana")["dissolve_below"] >= 0.7
+    # motif weights: analog music (25) comes up more often than royals (10)
+    hist, seen = [], []
+    for k in range(40):
+        t = themes.choose("lana", None, hist, f"w{k}")
+        seen.append(t)
+        hist.append({"style": "lana", "theme": t})
+    assert seen.count("studio") > seen.count("royals")
 
 
 def test_owner_night_bible_27_nov(tmp_path, monkeypatch):
@@ -99,7 +107,7 @@ def test_owner_night_bible_27_nov(tmp_path, monkeypatch):
     from carlecool import style
     from carlecool.analysis import AudioFeatures
     from carlecool.render import render_reel
-    assert set(themes.THEMES["night"]) == {"drive", "projects", "stadium", "gilded"}
+    assert {"drive", "projects", "stadium", "gilded"} <= set(themes.THEMES["night"])
     assert any("993" in p for p in stylegate.WANTED["lana"])
     monkeypatch.setenv("REEL_WIDTH", "270")
     monkeypatch.setenv("REEL_HEIGHT", "480")

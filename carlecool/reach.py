@@ -31,6 +31,22 @@ FLASH_TAU = 0.07       # s: flash decay (3-4 frames visible)
 FLASH_RANK = 0.85      # relative beat energy for a peak flash
 FLASH_GAP = 3.0        # s between two flashes
 MIN_DRIFT_SHOT = 0.8   # s: shorter shots don't drift (would read as a jerk)
+# Unified Creative Director bible (27 Nov): "keine unnötigen Effekte oder künstlichen Zooms",
+# "unterschiedliche Hook-Strategien statt obligatorischer Bewegung". A slow zoom only gives
+# life to footage that stands still; moving footage keeps its own camera.
+STATIC_MOTION = 1.5    # look.motion_score (mean grey-level difference, 6 fps): below = static
+HOOK_STRATEGIES = ("motion", "push")  # motion: the liveliest clip opens as it is; push: push-in on a still opener
+
+
+def hook_strategy(run_key: str, strategies=None) -> str:
+    """Opening strategy of this Reel (A/B, recorded in reel_facts.hook_strategy)."""
+    import hashlib
+    pool = tuple(strategies or HOOK_STRATEGIES)
+    return pool[int.from_bytes(hashlib.sha256(f"{run_key}|hookstrategy".encode()).digest()[:2], "big") % len(pool)]
+
+
+def is_static(motion: float | None) -> bool:
+    return motion is not None and 0 <= float(motion) < STATIC_MOTION
 
 
 def enabled() -> bool:
@@ -38,18 +54,22 @@ def enabled() -> bool:
 
 
 def plan(style: str | None, features, starts: list[float], durations: list[float],
-         shot_look: list[dict]) -> list[dict]:
-    """Per shot: {"zoom": None | ("push"|"in"|"out", amount), "flash": 0..1}."""
+         shot_look: list[dict], motion: list[float] | None = None, strategy: str = "push") -> list[dict]:
+    """Per shot: {"zoom": None | ("push"|"in"|"out", amount), "flash": 0..1}.
+
+    `motion`: motion score of each shot's source (None = unknown → no zoom on it)."""
     n = len(starts)
     out = [{"zoom": None, "flash": 0.0} for _ in range(n)]
     if n == 0 or not enabled():
         return out
     from .look import shot_energy
     fx = FX.get(_directors.current() or "") or FX.get(style or "", DEFAULT)
-    out[0]["zoom"] = ("push", fx["push"])
+    still = [is_static(motion[i]) if motion is not None and i < len(motion) else False for i in range(n)]
+    if strategy == "push" and still[0]:
+        out[0]["zoom"] = ("push", fx["push"])
     direction = "in"
     for i in range(1, n - 1):
-        if durations[i] >= MIN_DRIFT_SHOT and not shot_look[i].get("punch_in"):
+        if still[i] and durations[i] >= MIN_DRIFT_SHOT and not shot_look[i].get("punch_in"):
             out[i]["zoom"] = (direction, fx["drift"])
             direction = "out" if direction == "in" else "in"
     energy = [shot_energy(features, s, d) for s, d in zip(starts, durations)]

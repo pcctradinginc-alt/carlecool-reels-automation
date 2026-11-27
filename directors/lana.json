@@ -4,156 +4,158 @@
  "label": "Lana × Americana (zeitlos-klassisch)",
  "active": true,
  "order": 1,
- "summary": "Lana × Americana, timeless-classic: melancholic decadence, Old-Hollywood glamour vs. motel Americana, hypnotic summer heat, analog home-movie texture, California / desert / East Coast, Old Money Hamptons (owner guide 27 Nov).",
+ "summary": "LANA – The Narrative Collision: dynastic elegance × Hollywood sadcore × 90s street culture × analog music (unified bible 27 Nov). Melancholy, freedom, longing, isolation, quiet rebellion.",
  "world": "lana",
  "variant": null,
  "references": "lana",
  "pace": "slow",
  "themes": {
-  "california": {
-   "archive": 2,
-   "label": "Kalifornien & Pool",
-   "lines": [
-    "pov: summer, 1969. the radio's still on",
-    "for the summers you can't get back",
-    "pov: the pool after the party"
-   ],
-   "roles": [
-    "woman",
-    "americana"
-   ],
+  "dynasty": {
+   "label": "Kennedy & Onassis",
    "words": [
-    "palm trees",
-    "swimming pool",
-    "malibu",
-    "venice beach",
-    "convertible",
-    "sunset boulevard",
-    "pier",
-    "surfer",
-    "underwater",
-    "ocean cliff"
-   ],
-   "music": {
-    "sound": "bright",
-    "tempo": "mid"
-   }
-  },
-  "desert": {
-   "archive": 2,
-   "label": "Wüste & Motel",
-   "lines": [
-    "pov: motel pool, 104 degrees",
-    "pov: driving home with the windows down",
-    "for the summers you can't get back"
-   ],
-   "roles": [
-    "woman",
-    "americana"
-   ],
-   "words": [
-    "desert highway",
-    "motel",
-    "neon motel",
-    "diner",
-    "gas station",
-    "empty pool",
-    "route 66",
-    "vintage sign",
-    "motorcycle",
-    "desert sunset"
-   ],
-   "music": {
-    "drive": "groove",
-    "tempo": "fast"
-   }
-  },
-  "glamour": {
-   "archive": 1,
-   "label": "Old Hollywood Glamour",
-   "lines": [
-    "for the nights you can't explain",
-    "pov: the last party at the mansion"
+    "classic sailboat",
+    "beach house",
+    "sand dunes",
+    "pearls",
+    "silk scarf",
+    "tennis",
+    "lighthouse",
+    "riva",
+    "white dress",
+    "cape cod"
    ],
    "roles": [
     "woman",
     "friends"
    ],
-   "words": [
-    "chandelier",
-    "mansion",
-    "pearls",
-    "champagne",
-    "silk dress",
-    "vintage dress",
-    "ballroom",
-    "red lipstick",
-    "vintage car",
-    "marble staircase"
-   ],
-   "music": {
-    "sound": "dark",
-    "space": "spacious",
-    "tempo": "slow"
-   }
-  },
-  "hamptons": {
    "archive": 2,
-   "label": "Old Money Hamptons",
    "lines": [
     "pov: the last summer at the beach house",
-    "pov: the last warm evening of the year",
     "for the summers you can't get back"
+   ],
+   "music": {
+    "tempo": "mid",
+    "sound": "warm"
+   },
+   "weight": 15
+  },
+  "royals": {
+   "label": "Royals & Highlands",
+   "words": [
+    "land rover",
+    "highlands",
+    "country house",
+    "estate",
+    "velvet dress",
+    "fog",
+    "horses",
+    "tweed",
+    "manor",
+    "stone wall"
+   ],
+   "roles": [
+    "woman",
+    "americana"
+   ],
+   "archive": 1,
+   "lines": [
+    "for the nights you can't explain",
+    "pov: the last party at the estate"
+   ],
+   "music": {
+    "tempo": "slow",
+    "sound": "dark",
+    "space": "spacious"
+   },
+   "weight": 10
+  },
+  "minimal": {
+   "label": "90s Minimalism",
+   "words": [
+    "silk dress",
+    "leather jacket",
+    "jeans",
+    "hotel room",
+    "window light",
+    "mirror",
+    "monochrome",
+    "city morning",
+    "bedroom",
+    "rooftop"
    ],
    "roles": [
     "woman",
     "friends"
    ],
-   "words": [
-    "beach house",
-    "classic sailboat",
-    "tennis",
-    "country club",
-    "white dress",
-    "lighthouse",
-    "sand dunes",
-    "estate lawn",
-    "cable knit",
-    "polo"
+   "archive": 0,
+   "lines": [
+    "pov: the morning after, 1995",
+    "for the quiet hours"
    ],
    "music": {
+    "tempo": "slow",
     "sound": "warm",
-    "tempo": "mid"
-   }
+    "drive": "sparse"
+   },
+   "weight": 15
   },
-  "homemovie": {
-   "archive": 4,
-   "label": "Super-8-Erinnerung",
-   "lines": [
-    "pov: summer, 1969. the radio's still on",
-    "for the summers you can't get back"
+  "street": {
+   "label": "Street Skate",
+   "words": [
+    "skateboard",
+    "skatepark",
+    "concrete",
+    "empty pool",
+    "boombox",
+    "baggy jeans",
+    "woman skateboard",
+    "plaza",
+    "skate",
+    "curb"
    ],
    "roles": [
-    "friends",
-    "woman"
+    "woman",
+    "friends"
    ],
-   "words": [
-    "home movie",
-    "super 8",
-    "polaroid",
-    "lawn",
-    "picket fence",
-    "swing",
-    "lemonade",
-    "vintage dress",
-    "hair wind",
-    "summer"
+   "archive": 0,
+   "lines": [
+    "pov: summer, 1996. the tape's still running",
+    "for the summers you can't get back"
    ],
    "music": {
-    "drive": "sparse",
-    "sound": "warm",
-    "tempo": "slow"
-   }
+    "tempo": "fast",
+    "drive": "groove"
+   },
+   "weight": 20
+  },
+  "studio": {
+   "label": "Analog Music",
+   "words": [
+    "synthesizer",
+    "drum machine",
+    "turntable",
+    "vinyl record",
+    "mixing console",
+    "tape recorder",
+    "rhodes",
+    "piano",
+    "cassette",
+    "boombox"
+   ],
+   "roles": [
+    "gear",
+    "woman"
+   ],
+   "archive": 0,
+   "lines": [
+    "pov: the sample that started it",
+    "pov: 2 am, one more take"
+   ],
+   "music": {
+    "tempo": "mid",
+    "drive": "groove"
+   },
+   "weight": 25
   }
  },
  "search": [
@@ -381,7 +383,22 @@
   "a woman in a black velvet dress and a pearl choker caught in paparazzi flash at night",
   "a woman in dark oversized sunglasses and a long fur coat on a city street at night",
   "a grainy black and white 16mm film of a new york street at night",
-  "a low-angle view up at brick towers against the night sky"
+  "a low-angle view up at brick towers against the night sky",
+  "a woman in a bouclé jacket, pearls and oversized tortoiseshell sunglasses on a sailboat deck",
+  "a land rover defender in the misty scottish highlands",
+  "a grand country estate in fog",
+  "a woman in a velvet evening gown in a stately home",
+  "a woman in an oversized college sweatshirt and biker shorts",
+  "a woman in a silk slip dress and a worn leather jacket, 1990s minimalism",
+  "a woman doing a flatground skateboard trick on a concrete plaza",
+  "an empty backyard swimming pool for skating",
+  "a silver 90s boombox on a shoulder",
+  "fingers pressing the rubber pads of an akai mpc sampler in warm window light",
+  "a moog analog synthesizer with warm wood panels and golden reflections",
+  "a close-up of a roland drum machine with colored buttons",
+  "hands on a rhodes electric piano in sunlight",
+  "a reel-to-reel tape recorder in a warm studio",
+  "a vinyl record spinning on a turntable in summer light"
  ],
  "look": {
   "archive_films": 4,
@@ -424,5 +441,14 @@
   "pov: driving home with the windows down",
   "for the nights you can't explain",
   "pov: the last warm evening of the year"
+ ],
+ "always_roles": [
+  "flag",
+  "car",
+  "gear"
+ ],
+ "hook_strategies": [
+  "motion",
+  "push"
  ]
 }
