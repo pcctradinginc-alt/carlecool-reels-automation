@@ -156,6 +156,42 @@
     "drive": "groove"
    },
    "weight": 25
+  },
+  "hamptons": {
+   "label": "Old Money Hamptons (Referenz #73)",
+   "words": [
+    "beach house",
+    "classic sailboat",
+    "tennis",
+    "country club",
+    "white dress",
+    "lighthouse",
+    "sand dunes",
+    "estate lawn",
+    "cable knit",
+    "polo"
+   ],
+   "roles": [
+    "woman",
+    "friends"
+   ],
+   "archive": 2,
+   "always_roles": [
+    "flag",
+    "car"
+   ],
+   "lines": [
+    "pov: the last summer at the beach house",
+    "pov: the last warm evening of the year",
+    "for the summers you can't get back"
+   ],
+   "music": {
+    "tempo": "mid",
+    "sound": "warm"
+   },
+   "weight": 30,
+   "length": "short",
+   "reference": "Owner's favourite Reel #73 (27 Nov): calm coastal light, women outdoors in nature, few motifs, 15.6 s"
   }
  },
  "search": [

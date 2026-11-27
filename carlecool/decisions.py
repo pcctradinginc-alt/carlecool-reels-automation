@@ -19,6 +19,14 @@ PATH = Path("data/decisions.json")
 CLIP_STEP, CLIP_CAP = 0.10, 0.30       # per discard / max. penalty for one clip
 MOTIF_STEP, MOTIF_CAP = 0.05, 0.25     # per net discard / max. penalty for a search motif
 BONUS_STEP, BONUS_CAP = 0.03, 0.10     # per publication / max. bonus
+FAVOURITE_WEIGHT = 3                    # an owner favourite (data/favourites.json) = 3 publications
+
+
+def _favourites() -> list[dict]:
+    try:
+        return list(json.loads(Path("data/favourites.json").read_text(encoding="utf-8")).get("reels") or [])
+    except (OSError, ValueError):
+        return []
 
 
 def collect(issues: list[dict], published_issues: set[int], comments_of) -> dict:
@@ -59,6 +67,11 @@ def scores(data: dict | None = None) -> tuple[dict[str, int], dict[str, int]]:
     """(clip id → net score, motif → net score); +1 per publication, −1 per discard."""
     clips: dict[str, int] = {}
     motifs: dict[str, int] = {}
+    for fav in _favourites():  # owner's favourite Reels: like three publications each
+        for vid in fav.get("clips") or []:
+            clips[str(vid)] = clips.get(str(vid), 0) + FAVOURITE_WEIGHT
+        for m in fav.get("motifs") or []:
+            motifs[str(m).lower()] = motifs.get(str(m).lower(), 0) + FAVOURITE_WEIGHT
     for d in (load() if data is None else data).get("decisions") or []:
         sign = 1 if d.get("decision") == "published" else -1 if d.get("decision") == "discarded" else 0
         for vid in d.get("video_ids") or []:
