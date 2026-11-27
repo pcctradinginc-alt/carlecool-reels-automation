@@ -319,8 +319,10 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     files = []
     shot_start = 0.0
     starts = [sum(s.duration for s in storyboard[:i]) for i in range(len(storyboard))]
+    if look and ref_world == "night":
+        look = dict(look, bw_share=0, bw_shots=0)  # night lives on neon and colour light
     shot_look = look_mod.plan_look(look, features, starts, [s.duration for s in storyboard],
-                                   seed=str(features.excerpt_start))
+                                   seed=f"{features.excerpt_start}|{os.getenv('GITHUB_RUN_ID', '')}")
     for item in shot_look:  # frame-exact transitions keep the cuts on the beat grid
         item["dissolve_in"] = round(item["dissolve_in"] * FPS) / FPS
     from . import reach

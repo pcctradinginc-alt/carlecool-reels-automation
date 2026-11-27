@@ -117,7 +117,8 @@ jobs:
     # Only non-secret configuration here. Secrets are passed to the two steps that
     # use them, never to dependency installation steps.
     env:
-      CARLECOOL_AI_VIDEO: ${{ vars.CARLECOOL_AI_VIDEO || 'multi' }}
+      # Owner, 27 Nov (Reel #62): AI clips were visibly AI (garbled text, nude figure) → off.
+      CARLECOOL_AI_VIDEO: ${{ vars.CARLECOOL_AI_VIDEO || 'off' }}
       CARLECOOL_TRENDS: 'true'
       CARLECOOL_COVER_MATCH: 'true' # Creative v3: enable safe, local album-art palette ranking
       CARLECOOL_STYLE: ${{ inputs.style || vars.CARLECOOL_STYLE || 'auto' }}

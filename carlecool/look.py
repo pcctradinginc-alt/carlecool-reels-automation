@@ -29,6 +29,12 @@ def shot_energy(features, start: float, duration: float) -> float:
     return sum(values) / len(values) if values else DEFAULT_ENERGY
 
 
+def reel_is_bw(seed: str, share: float) -> bool:
+    """Whole-Reel black and white for `share` of the Reels (stable per run key)."""
+    byte = int.from_bytes(hashlib.sha256(f"{seed}|bw-reel".encode()).digest()[:2], "big") / 65535
+    return byte < share
+
+
 def plan_look(look: dict | None, features, starts: list[float], durations: list[float],
               seed: str = "") -> list[dict]:
     """Per shot: dissolve_in (s), slowmo factor, leak, punch_in, brightness offset."""
@@ -63,21 +69,13 @@ def plan_look(look: dict | None, features, starts: list[float], durations: list[
             plan[i]["brightness"] = round((byte / 255.0 * 2 - 1) * jitter, 4)
         if look.get("light_leaks") and i % 3 == 1:
             plan[i]["leak"] = True
-    # Black-and-white moments (Lana references): the quietest interior shots, cut in and
-    # out hard (a dissolve between colour and B/W looks like a mistake).
-    bw = int(look.get("bw_shots") or 0)
-    if look.get("bw_share"):
-        bw = max(1, round(float(look["bw_share"]) * n))
-    if bw and n > 4:
-        # 25 Nov (homogeneous look): one contiguous B/W passage in the calmest stretch
-        # instead of single B/W shots scattered through the Reel.
-        bw = min(bw, n - 2)
-        start = min(range(1, n - bw), key=lambda s: (sum(rank[k] for k in range(s, s + bw)), s))
-        for i in range(start, start + bw):
-            plan[i].update(bw=True, leak=False, slowmo=1.0, dissolve_in=0.0,
-                           bw_contrast=float(look.get("bw_contrast") or 1.08))
-            if i + 1 < n:
-                plan[i + 1]["dissolve_in"] = 0.0
+    # Black and white (owner, 27 Nov: "entweder schwarzweiß oder farbe"): never mixed
+    # inside one Reel. The style's B/W share of the reference images becomes the share of
+    # Reels that are completely black and white; all others stay completely in colour.
+    share = float(look.get("bw_share") or 0.0) or (0.2 if look.get("bw_shots") else 0.0)
+    if share > 0 and reel_is_bw(seed, share):
+        for i in range(n):
+            plan[i].update(bw=True, leak=False, bw_contrast=float(look.get("bw_contrast") or 1.08))
     # The bookends form the loop seam (see seal_loop): keep them untouched, real-time.
     for i in {0, n - 1}:
         plan[i].update(slowmo=1.0, leak=False, punch_in=False, brightness=0.0)

@@ -155,9 +155,10 @@ def test_signature_never_dominates_short_edits():
 
 
 def test_friends_and_americana_queries_follow_world_and_night():
-    assert "couple sailing" in signature.queries_for("friends", "lana")  # timeless-classic
-    assert "friends walking" in signature.queries_for("friends", "rubin")
-    assert "friends night" in signature.queries_for("friends", "rubin", "night")
+    assert "women sailing" in signature.queries_for("friends", "lana")  # owner 27 Nov: women only
+    assert "women walking" in signature.queries_for("friends", "rubin")
+    assert "women night" in signature.queries_for("friends", "rubin", "night")
+    assert not any("couple" in q for r in ("lana", "rubin", None) for q in signature.queries_for("friends", r))
     assert signature.queries_for("flag", "rubin")[0] == "american flag"
     assert signature.queries_for("car", "lana")[:3] == ("land rover", "range rover", "porsche")
     assert "porch" in signature.queries_for("americana", "lana")  # Tough / National Anthem focus
@@ -255,7 +256,7 @@ def test_lana_look_renders_with_dissolves_slowmo_and_leaks(tmp_path, monkeypatch
     f = AudioFeatures(120.0, 1.0, 0.0, "cinematic", 12.0, beats=beats, downbeats=beats[::4],
                       beat_energy=tuple(0.9 if t < 3 else 0.3 for t in beats), hook_at=0.0)  # hard cuts, then dissolves
     d = render_reel(audio, [a, b], f, tmp_path / "out/r.mp4", 10.0, fit_email=False,
-                    look=style.look("lana"), style_grade=style.grade_filters("lana"))
+                    look=dict(style.look("lana"), bw_share=0), style_grade=style.grade_filters("lana"))  # colour Reel
     assert d["dissolves"] >= 1 and d["slowmo_shots"] >= 1 and d["light_leaks"] >= 1
     assert abs(probe_duration(tmp_path / "out/r.mp4") - 10.0) < 0.05  # length unchanged
     assert d["loop_sealed"] and d["cover_frame_ms"] == 0

@@ -44,12 +44,12 @@ SKATER_QUERIES = {
     "night": ("skateboard night", "skater night", "skateboard street"),
     None: ("skateboard feet", "skater silhouette", "skateboarding"),
 }
-FRIENDS_QUERIES = {  # timeless-classic (owner, 22 Nov): couples and friends, not trendy youth content
-    "lana": ("family picnic", "family lawn", "couple porch", "couple sailing", "couple countryside",
-             "friends countryside", "couple walking beach"),
-    "rubin": ("friends walking", "couple walking", "friends talking", "friends sitting", "friends beach"),
-    "night": ("friends night", "couple night", "friends walking night"),
-    None: ("couple walking", "friends walking", "friends together"),
+FRIENDS_QUERIES = {  # owner 27 Nov (Reel #62): women only, no romantic couples
+    "lana": ("women picnic", "women lawn", "women porch", "women sailing", "women countryside",
+             "women summer", "women walking beach"),
+    "rubin": ("women walking", "women talking", "women sitting", "women beach"),
+    "night": ("women night", "women city night", "women walking night"),
+    None: ("women walking", "women together"),
 }
 AMERICANA_QUERIES = {
     "lana": ("porch", "horse", "pickup truck", "farm", "barn", "lawn", "wooden boat", "picket fence",
@@ -126,11 +126,11 @@ PROMPTS = {
          "a man", "an empty landscape without people"),
     ),
     "friends": (
-        ("a small group of young friends laughing together outdoors, candid",
-         "young friends walking side by side on a city street",
-         "friends sitting close together on a curb or rooftop at sunset",
-         "young people hugging, natural documentary photo"),
-        ("an advertisement with models posing for the camera",
+        ("a small group of young women laughing together outdoors, candid",
+         "young women walking side by side on a city street",
+         "women friends sitting close together on a curb or rooftop at sunset",
+         "two young women together, natural documentary photo"),
+        ("an advertisement with models posing for the camera", "a man", "a romantic couple",
          "a crowd at a concert or a party", "a business meeting in an office",
          "a single person alone", "an empty street without people"),
     ),
@@ -236,8 +236,8 @@ def rank(role: str, candidates: list[Video], workdir: Path, world: str | None = 
     """Order by CLIP (positive − negative prompt similarity) plus closeness to the owner's
     reference images of the style world (people, wardrobe, era, light); keyword fallback."""
     prompts = PROMPTS.get(role)
-    keywords = {"skater": ("skate",), "woman": ("woman",), "friends": ("friend",),
-                "friends2": ("friend",), "flag": ("flag",),
+    keywords = {"skater": ("skate",), "woman": ("woman",), "friends": ("women", "friend"),
+                "friends2": ("women", "friend"), "flag": ("flag",),
                 "car": ("porsche", "land rover", "range rover", "defender"),
                 "gear": ("turntable", "vinyl", "mixer", "record", "synth", "drum")}.get(role, ("",))
     fallback = sorted(candidates, key=lambda v: (not any(k in " ".join(v.tags + (v.title.lower(),))
