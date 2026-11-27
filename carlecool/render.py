@@ -209,7 +209,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 look: dict | None = None, opening_pool: set[int] | None = None,
                 opening_fit: dict[int, float] | None = None, hook_text: str = "",
                 ref_world: str | None = None, soft_sources: set[int] | frozenset[int] = frozenset(),
-                hook_strategy: str = "push") -> dict:
+                hook_strategy: str = "push", dna: list[dict | None] | None = None) -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -267,10 +267,21 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         starts0 = [sum(sh.duration for sh in storyboard[:i]) for i in range(len(storyboard))]
         energies = [look_mod.shot_energy(features, a, sh.duration) for a, sh in zip(starts0, storyboard)]
         locked = {0, len(storyboard) - 1} | {i for i, sh in enumerate(storyboard) if sh.source_index in reserved}
-        matched = look_mod.match_motion(storyboard, energies, motion, source_durations, locked)
+        matched = None
+        if dna and len(dna) == len(videos) and any(dna):
+            # Package C (27 Nov): the whole order optimised for visual coherence + music.
+            from . import coherence
+            matched, coherence_score = coherence.sequence(storyboard, energies, dna, source_durations, locked)
+            print(f"Coherence: sequence optimised (mean transition {coherence_score})")
+        if matched is None:
+            matched = look_mod.match_motion(storyboard, energies, motion, source_durations, locked)
         motion_matched = matched != storyboard
         storyboard = matched
     storyboard = look_mod.frame_exact(storyboard, total_frames, FPS)
+    final_coherence = None
+    if dna and len(dna) == len(videos):
+        from . import coherence
+        final_coherence = coherence.reel_coherence(storyboard, dna)
     storyboard, loop_sealed = look_mod.seal_loop(storyboard, source_durations)
     from .grading import cover_luts
     from .grading import reference_stats
@@ -563,7 +574,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                               "cover_bridge": loop_bridge},
             "smart_cropped_shots": reframed,
             "dissolves": sum(1 for d in dissolves if d > 0), "slowmo_shots": slowed,
-            "light_leaks": leaks, "punch_ins": punched, "moving_shots": zoomed, "hook_strategy": hook_strategy, "flash_cuts": flashes, "bw_shots": bw_shots,
+            "light_leaks": leaks, "punch_ins": punched, "moving_shots": zoomed, "hook_strategy": hook_strategy,
+            "coherence": final_coherence, "flash_cuts": flashes, "bw_shots": bw_shots,
             "hook_text": hook_text if hook_png is not None else "",
             "first_shot_s": round(storyboard[0].duration, 2) if storyboard else None,
             "framed_shots": framed,
