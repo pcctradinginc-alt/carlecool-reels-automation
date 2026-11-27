@@ -1,7 +1,7 @@
 // CarleCool free Cloudflare Worker: 48-hour signed, single-use review decisions.
 // GET: presentation only. POST: owner authorisation via GitHub token, D1 atomic reservation.
 const commands = {instagram:"/publish instagram",tiktok:"/publish tiktok",both:"/publish both",discard:"/reject"};
-const names = {instagram:"Nur Instagram",tiktok:"Nur TikTok",both:"TikTok & Instagram",discard:"Nicht veröffentlichen – Entwurf löschen"};
+const names = {instagram:"Nur Instagram",tiktok:"Nur TikTok",both:"TikTok & Instagram",discard:"Schlechter als das letzte Video – nicht veröffentlichen"};
 const route = /^\/review\/([1-9]\d*)\/([1-9]\d*)\/([0-9a-f]{64})\/(instagram|tiktok|both|discard)\/(\d{10})\/([0-9a-f]{64})$/;
 const headers = {"Content-Type":"text/html; charset=utf-8","Cache-Control":"no-store, private","Referrer-Policy":"no-referrer","X-Content-Type-Options":"nosniff","X-Frame-Options":"DENY","Content-Security-Policy":"default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"};
 function esc(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");}
