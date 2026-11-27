@@ -180,9 +180,15 @@ def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | No
         f"ANALOG: {profile.get('analog', 65)}%\n\n"
         "Das MP4 ist nur dieser privaten Mail beigefügt. "
         "Ein Link allein löst niemals eine Veröffentlichung aus.\n\n"
-        f"Musik: {metadata.get('permalink', '')}\n\n"
+        f"Musik: {metadata.get('permalink', '')}\n"
+        + (f"Spotify (für die Bio): {_spotify()}\n" if _spotify() else "") + "\n"
         f"Caption:\n{metadata.get('caption', '')}\n"
     )
+
+
+def _spotify() -> str:
+    from .captions import links
+    return str(links().get("spotify_artist") or "")
 
 
 def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = None) -> str:

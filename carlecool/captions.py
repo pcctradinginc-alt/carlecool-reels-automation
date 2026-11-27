@@ -51,8 +51,25 @@ def variant(style: str | None, variant_name: str | None, run_key: str) -> dict:
             "hashtags": ["#carlecool", *tags]}
 
 
+SPOTIFY_LINE = "🟢 Out now on Spotify – link in bio"
+
+
+def links() -> dict:
+    """Owner's public streaming links (data/links.json)."""
+    import json
+    from pathlib import Path
+    try:
+        return json.loads(Path("data/links.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
 def head(song_label: str, chosen: dict) -> str:
-    text = f"🎧 {song_label}\n{chosen['search_line']}\n"
+    text = f"🎧 {song_label}\n"
+    if links().get("spotify_artist"):
+        # owner, 27 Nov: songs are on Spotify; caption links are not clickable → bio link
+        text += SPOTIFY_LINE + "\n"
+    text += f"{chosen['search_line']}\n"
     if chosen.get("question"):
         text += chosen["question"] + "\n"
     return text
