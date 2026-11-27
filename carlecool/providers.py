@@ -87,22 +87,31 @@ def record(requests: int, blocked: int | None, run_id: str | None, path: Path = 
     events = [{k: v for k, v in e.items() if k != "_at"} for e in _events(data, now)]
     events.append({"at": now.isoformat(timespec="seconds"), "run": str(run_id or ""),
                    "requests": int(requests), "blocked": int(blocked) if blocked else None})
-    data = {"version": 1, "coverr": {"hourly_limit": HOURLY_LIMIT, "events": events}}
+    data = dict(data, version=1, coverr={"hourly_limit": HOURLY_LIMIT, "events": events})  # keeps "nara"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=1) + "\n", encoding="utf-8")
     return data
 
 
-def merge(remote: dict, local: dict) -> dict:
-    """Union of both files' Coverr events (another run may have written main meanwhile)."""
-    seen, events = set(), []
-    for e in ((remote.get("coverr") or {}).get("events") or []) + ((local.get("coverr") or {}).get("events") or []):
+def _union(a: list, b: list) -> list:
+    seen, out = set(), []
+    for e in (a or []) + (b or []):
         key = (e.get("at"), str(e.get("run")))
         if key not in seen:
             seen.add(key)
-            events.append(e)
-    events.sort(key=lambda e: str(e.get("at")))
-    return {"version": 1, "coverr": {"hourly_limit": HOURLY_LIMIT, "events": events}}
+            out.append(e)
+    return sorted(out, key=lambda e: str(e.get("at")))
+
+
+def merge(remote: dict, local: dict) -> dict:
+    """Union of both files' events per provider (another run may have written main meanwhile)."""
+    out = {"version": 1, "coverr": {"hourly_limit": HOURLY_LIMIT,
+                                    "events": _union((remote.get("coverr") or {}).get("events"),
+                                                     (local.get("coverr") or {}).get("events"))}}
+    nara = _union((remote.get("nara") or {}).get("events"), (local.get("nara") or {}).get("events"))
+    if nara:
+        out["nara"] = dict(local.get("nara") or remote.get("nara") or {}, events=nara)
+    return out
 
 
 def main() -> int:

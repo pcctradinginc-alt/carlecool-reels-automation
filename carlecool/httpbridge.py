@@ -19,7 +19,7 @@ from urllib.parse import urlparse
 
 import requests
 
-ALLOWED_SUFFIXES = (".nasa.gov", "archive.org", ".wikimedia.org")
+ALLOWED_SUFFIXES = (".nasa.gov", "archive.org", ".wikimedia.org", "catalog.archives.gov")
 _lock = threading.Lock()
 _server: ThreadingHTTPServer | None = None
 _routes: dict[str, tuple[str, str | None]] = {}

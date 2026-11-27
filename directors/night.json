@@ -459,5 +459,17 @@
  "hook_strategies": [
   "motion",
   "push"
+ ],
+ "nara_queries": [
+  "new york night",
+  "times square",
+  "neon signs",
+  "brooklyn bridge",
+  "baseball game",
+  "yankee stadium",
+  "subway",
+  "harlem",
+  "night traffic",
+  "coney island"
  ]
 }
