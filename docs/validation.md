@@ -72,4 +72,5 @@ Built on the #73 state, as the owner chose. The cinematic pipeline (`CARLECOOL_P
 | peak memory | 0.65 GB | 2.15 GB |
 
   Duration, scenes, loudness and true peak are identical.
-- **Reading:** the measurements contradict each other. Coherence is clearly higher for the new pipeline, but the critic flags colour jumps at its cuts. Neither measure is calibrated yet. Only the owner's blind verdict decides; it is pending, and the key is sealed in the run log.
+- **Reading:** the measurements contradict each other. Coherence is clearly higher for the new pipeline, but the critic flags colour jumps at its cuts. Neither measure is calibrated yet. Only the owner's blind verdict decides.
+- **Owner's blind verdict: B preferred.** Key: A = classic, **B = new (phases 1–5)**. This is the first owner verdict in favour of the new pipeline. It is one comparison with one song, so a second comparison with another song would make it more robust.
