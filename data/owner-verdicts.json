@@ -1,0 +1,11 @@
+{
+ "version": 1,
+ "verdicts": [
+  {
+   "issue": 86,
+   "verdict": "worse_than_previous",
+   "previous": 82,
+   "at": "2026-11-27T21:35:34+00:00"
+  }
+ ]
+}
