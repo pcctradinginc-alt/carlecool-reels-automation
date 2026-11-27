@@ -35,9 +35,9 @@ def test_buttons_open_distinct_safe_links_and_offer_discard_option():
     plain = review_plain_text(ISSUE, META, direct_links=links)
     for choice, link in links.items():
         assert link in html and link in plain
-    assert "Nicht veröffentlichen – Entwurf löschen" in html
+    assert "Schlechter als das letzte Video – nicht veröffentlichen" in html
     assert "Ein Linkklick allein löst nichts aus" in html
-    assert "Entwurf löschen bedeutet Freigabe verwerfen" in plain
+    assert "meldet dein Urteil" in plain
 
 
 @pytest.mark.parametrize(("base", "key"), [
@@ -56,7 +56,7 @@ def test_invalid_or_partial_worker_config_is_fail_closed(base, key):
 def test_no_worker_config_preserves_fallback_without_forged_links():
     assert approval_links(ISSUE, META, 42, base_url="", secret="") == {}
     content = review_html(ISSUE, META)
-    assert "Nicht veröffentlichen – Entwurf löschen" in content
+    assert "Schlechter als das letzte Video – nicht veröffentlichen" in content
     assert "href=\"" + ISSUE + "\"" in content
     assert "/reject" in review_plain_text(ISSUE, META)
 
@@ -68,3 +68,12 @@ def test_bad_issue_or_sha_fails_closed():
     with pytest.raises(ValueError):
         approval_links(ISSUE, dict(META, sha256="invalid"), 42,
                        base_url="https://worker.example", secret=SECRET)
+
+
+def test_worse_verdict_is_recorded_with_the_previous_reel():
+    from carlecool import verdicts
+    req = lambda m, p: [{"number": 82}, {"number": 81, "pull_request": {}}, {"number": 73}, {"number": 67}]
+    assert verdicts.previous_issue(82, request=req) == 73
+    data = verdicts.add({"verdicts": []}, 82, "worse_than_previous", 73)
+    assert data["verdicts"][0]["issue"] == 82 and data["verdicts"][0]["previous"] == 73
+    assert len(verdicts.add(data, 82, "worse_than_previous", 73)["verdicts"]) == 1
