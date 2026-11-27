@@ -471,5 +471,29 @@
   "harlem",
   "night traffic",
   "coney island"
+ ],
+ "emotion": "Dunkelheit, urbane Melancholie, Macht, Einsamkeit, mechanische Freiheit",
+ "palette": [
+  "Tiefschwarz",
+  "Nachtblau",
+  "Silber",
+  "Bernstein",
+  "Rot"
+ ],
+ "light": "Flutlicht, Natriumdampf, Neon, Paparazzi-Blitz",
+ "camera": [
+  "16 mm Schwarzweiß / Hi8",
+  "Froschperspektive",
+  "Car-Mount",
+  "selektives Step-Printing"
+ ],
+ "exclusions": [
+  "Tageslicht",
+  "Influencer- und Werbe-Look",
+  "Prominente als Personen",
+  "Paare, Männer als Hauptmotiv, Nacktheit",
+  "KI-Clips",
+  "Markenlogos",
+  "Rauchen / Waffen"
  ]
 }

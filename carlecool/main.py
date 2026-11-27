@@ -268,41 +268,39 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     # Owner, 26 Nov: ONE theme per Reel (search words, roles, archive share, text line).
     from . import themes
     theme = themes.choose(style_name, style_variant, previews, edition, features) if themes_enabled() else None
+    theme_fit = None
     if theme:
         classes = themes.music_classes(features)
-        fit = themes.music_fit(themes.key_for(style_name, style_variant), theme, classes)
+        fit = theme_fit = themes.music_fit(themes.key_for(style_name, style_variant), theme, classes)
         print(f"Theme: {theme} ({themes.get(style_name, style_variant, theme)['label']}) — music {classes}"
               f", fit {fit if fit is None else round(fit, 2)}; timbre {getattr(features, 'timbre_hz', 0):.0f} Hz,"
               f" percussive {getattr(features, 'percussive', 0):.2f}, dynamics {getattr(features, 'dynamics', 0):.2f}")
-    # Styles only nudge v4: lane weights blended 50/50 with the owner's profile.
-    style_profile = validate_profile(dict(profile, weights=style_pkg.blended_weights(
-        profile["weights"], style_name, style_variant)))
-    profile_queries = choose_shots(style_profile, track_id=track.id, mood=features.mood,
-                                   energy=features.energy, limit=3, run_key=edition)
-    cover_choice = {"method": "disabled", "queries": [], "lanes": []}
-    if cover is not None:
-        from .curation import cover_queries
-        cover_choice = cover_queries(cover, style_profile["weights"], run_key=edition)
-    if cover_choice.get("queries"):
-        from .curation import merge_queries
-        keywords = merge_queries(cover_choice, profile_queries)
-        print(f"Cover-led search ({cover_choice['method']}): {cover_choice['queries']}")
-    else:
-        keywords = profile_queries
-    trend_signals = {"status": "disabled", "topics": []}
-    if os.getenv("CARLECOOL_TRENDS", "false").lower() in ("true", "1", "on"):
-        from .trend_signals import fetch_signals, apply_trend
-        trend_signals = fetch_signals()
-        keywords = apply_trend(keywords, trend_signals)
-    # Fixed style word lists lead the search (the cover-derived phrases often matched
-    # nothing, e.g. "guitar wood grain notebook paper", and drifted off-style); one
-    # cover/profile phrase stays as the fifth+1 lane.
+    # Phase 1 (audit A1): with a theme the search words come from the theme alone; the
+    # profile / cover / trend phrases were computed and then thrown away — now skipped.
     style_words = (themes.words(style_name, style_variant, theme, edition, style_pkg.SEARCH_LANES)
                    if theme else style_pkg.search_queries(style_decision, run_key=edition))
+    cover_choice = {"method": "theme" if theme else "disabled", "queries": [], "lanes": []}
+    trend_signals = {"status": "not used (theme-led search)" if theme else "disabled", "topics": []}
     if theme:
         keywords = style_words  # no off-theme cover/profile phrase (Reel #54)
-    elif style_words:
-        keywords = style_words + [k for k in keywords if k not in style_words][:1]
+    else:
+        # Without a theme (theme rotation off): profile lanes + cover phrases as before.
+        style_profile = validate_profile(dict(profile, weights=style_pkg.blended_weights(
+            profile["weights"], style_name, style_variant)))
+        keywords = choose_shots(style_profile, track_id=track.id, mood=features.mood,
+                                energy=features.energy, limit=3, run_key=edition)
+        if cover is not None:
+            from .curation import cover_queries, merge_queries
+            cover_choice = cover_queries(cover, style_profile["weights"], run_key=edition)
+            if cover_choice.get("queries"):
+                keywords = merge_queries(cover_choice, keywords)
+                print(f"Cover-led search ({cover_choice['method']}): {cover_choice['queries']}")
+        if os.getenv("CARLECOOL_TRENDS", "false").lower() in ("true", "1", "on"):
+            from .trend_signals import fetch_signals, apply_trend
+            trend_signals = fetch_signals()
+            keywords = apply_trend(keywords, trend_signals)
+        if style_words:
+            keywords = style_words + [k for k in keywords if k not in style_words][:1]
     print(f"Video search phrases: {keywords}")
     if config.coverr_key:
         apply_coverr_plan()
@@ -630,6 +628,14 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     hook_strategy = ("push" if classic_pipeline()
                      else reach.hook_strategy(edition, (directors.get(director) or {}).get("hook_strategies")))
     print(f"Hook strategy: {hook_strategy}")
+    # Phase 1: one Creative Plan records every creative decision and its reason (reproducible).
+    from .creative_director import build_plan
+    creative_plan = build_plan(director=directors.current(), style_decision=style_decision, theme=theme,
+                               features=features, length=reel_length, keywords=list(keywords),
+                               roles=list(signature_slots), hook_line=hook_line, hook_strategy=hook_strategy,
+                               pipeline="classic" if classic_pipeline() else "cinematic",
+                               music_fit=theme_fit, length_reason=str(length_choice.get("reason")))
+    print(creative_plan.summary())
     def render_variant(rank: int) -> dict:
         return render_reel(audio, paths, features, out, reel_length,
                            pace=style_pkg.pace_for(profile["pace"], style_name), analog=profile["analog"], cover=cover,
@@ -706,6 +712,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                             for i, v in enumerate(selected)],
         "caption": caption_for(track, selected, caption_copy), "caption_variant": caption_copy,
         "reel_facts": reel_facts, "length_bucket": reel_facts["length_bucket"],
+        "creative_plan": creative_plan.as_dict(),
         "performance_summary": performance.summary(perf_model),
         "search_keywords": keywords,
         "visual_direction": editorial_brief(features.mood, features.energy, features.bpm),

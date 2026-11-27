@@ -500,5 +500,29 @@
   "boardwalk",
   "skateboard",
   "piano"
+ ],
+ "emotion": "Melancholie, Sehnsucht, Isolation, Freiheit, stille Rebellion",
+ "palette": [
+  "cremeweiß",
+  "warmes Gold",
+  "Pastellblau",
+  "verblasstes Rot"
+ ],
+ "light": "Golden Hour, natürliches Licht, gelegentlich Paparazzi-Blitz",
+ "camera": [
+  "Kodachrome / Super 8 / 16 mm",
+  "Teleobjektiv-Distanz",
+  "intime Nahaufnahmen",
+  "selektive Zeitlupe"
+ ],
+ "exclusions": [
+  "Influencer- und Werbe-Look",
+  "beliebige Natur-/Landschaftsfüller",
+  "falsche Epoche",
+  "Prominente als Personen (nur ästhetische Referenz)",
+  "Paare, Männer als Hauptmotiv, Nacktheit",
+  "KI-Clips",
+  "Markenlogos",
+  "Schnee / Winter"
  ]
 }

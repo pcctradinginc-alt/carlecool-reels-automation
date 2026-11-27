@@ -15,7 +15,7 @@ This is an **interpretable, deterministic creative director**, not generative vi
 
 Defined at `data/creative-profile.json`; presets and strict parser at `carlecool/creative.py`. Weights are normalized and seed deterministic per track/revision. Style feedback is stored as public-only preference data after a successfully delivered revised email. No user account secrets are stored.
 
-Available presets: `rubin_analog_lana_skate` (default), `rubin_lana`, `sad_summer_americana`, `analog_california`, `skate_melancholy`, `rubin_calm`, `analog_studio`, `corecore_hybrid`, `minimal_apple_rubin`.
+Legacy presets (the Rubin world is retired since 27 Nov; styles now come from `directors/`): `rubin_analog_lana_skate` (default), `rubin_lana`, `sad_summer_americana`, `analog_california`, `skate_melancholy`, `rubin_calm`, `analog_studio`, `corecore_hybrid`, `minimal_apple_rubin`.
 
 ## Direct feedback from the approval email
 
