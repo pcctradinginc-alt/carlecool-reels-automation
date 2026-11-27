@@ -92,3 +92,14 @@ def test_reel_67_balcony_and_posing_blocked():
               "Stylish Night Portrait in Urban Setting", "Set of bits in a toolbox"):
         assert stylegate.blocked_words(Video("x", "coverr", title=t)), t
     assert stylegate.blocked_words(Video("x", "coverr", title="Woman walking at night")) is None
+
+
+def test_classic_pipeline_zooms_like_reel_73(monkeypatch):
+    starts, durs = [0, 2, 4, 6, 8], [2.0] * 5
+    moving = [6.0] * 5
+    assert all(p["zoom"] is None for p in reach.plan("lana", _features(), starts, durs, _look(5), motion=moving))
+    monkeypatch.setenv("CARLECOOL_PIPELINE", "classic")
+    plan = reach.plan("lana", _features(), starts, durs, _look(5), motion=moving, strategy="push")
+    assert plan[0]["zoom"][0] == "push" and all(p["zoom"] for p in plan[1:-1])
+    from carlecool import main
+    assert main.classic_pipeline()
