@@ -285,14 +285,15 @@ def test_styles_rotate_evenly():
     from carlecool import style
     hist = [{"style": "lana"}] * 5 + [{"style": "rubin"}] * 3 + [{"style": "night"}] * 2
     assert style.rotate_style(hist, "r1") == "night"
-    assert style.rotate_style(hist + [{"style": "night"}], "r1") in ("rubin", "night")
+    assert style.rotate_style(hist + [{"style": "night"}] * 3, "r1") in ("lana", "night")
+    assert "rubin" not in style.ROTATION  # owner 27 Nov: Rubin retired
     # revisions don't count, unknown entries don't count
     assert style.rotate_style([{"style": "lana", "kind": "revision"}, {"kind": "daily"}], "x") in style.ROTATION
     # three Reels in a row from an empty history use every style once
     seen, h = [], []
-    for k in range(3):
+    for k in range(2):
         s = style.rotate_style(h, f"k{k}"); seen.append(s); h.append({"style": s})
-    assert sorted(seen) == ["lana", "night", "rubin"]
+    assert sorted(seen) == ["lana", "night"]
 
 
 def test_history_records_the_style_for_rotation():

@@ -28,14 +28,14 @@ def test_clear_cover_wins_otherwise_the_music_decides():
     rider = "a rider on a horse with an american flag"
     clear = style.decide({"lana": (0.29, rider), "rubin": (0.22, "x")}, 0.5, _Music(bpm=90))
     assert clear["style"] == "lana" and style.motif_queries(clear)[0] == "horse riding"
+    # owner 27 Nov: Rubin retired — neither a Rubin cover nor Rubin-like music picks it
     planet = style.decide({"lana": (0.2, "a"), "rubin": (0.3, "a planet floating in outer space")}, 0.5)
-    assert planet["style"] == "rubin" and "planet" in style.motif_queries(planet)
+    assert planet["style"] == "lana" and planet["prompt"] == ""
     unclear = {"lana": (0.241, "a"), "rubin": (0.238, "b")}
-    assert style.decide(unclear, 0.5, _Music(bpm=96))["style"] == "rubin"       # slow → Rubin
-    assert style.decide(unclear, 0.5, _Music(bpm=152))["style"] == "lana"       # flowing → Lana
-    assert style.decide(unclear, 0.5, _Music(bpm=130, beat_energy=(0.2, 0.3, 0.4)))["style"] == "rubin"
-    assert style.decide({}, None, _Music(mood="calm"))["style"] == "rubin"
-    assert style.decide({}, None, None)["style"] == "lana"  # always one of the two worlds
+    assert style.decide(unclear, 0.5, _Music(bpm=96))["style"] == "lana"
+    assert style.decide(unclear, 0.5, _Music(bpm=152))["style"] == "lana"
+    assert style.decide({}, None, _Music(mood="calm"))["style"] == "lana"
+    assert style.decide({}, None, None)["style"] == "lana"
 
 
 def test_style_only_nudges_v4():
@@ -54,9 +54,9 @@ def test_style_only_nudges_v4():
 
 
 def test_manual_override_and_off(monkeypatch):
-    assert style.analyze(None, override="rubin")["style"] == "rubin"
+    assert style.analyze(None, override="rubin")["style"] == "lana"   # Rubin retired 27 Nov
     forced = style.analyze(None, override="night", features=_Music(bpm=90))
-    assert forced["style"] == "rubin" and forced["variant"] == "night"
+    assert forced["style"] == "lana" and forced["variant"] == "night"
     monkeypatch.setenv("CARLECOOL_STYLE", "off")
     assert style.analyze(Path("x.jpg"))["style"] is None
 

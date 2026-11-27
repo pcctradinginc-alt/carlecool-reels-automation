@@ -26,7 +26,10 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-STYLES = ("lana", "rubin")
+# Owner, 27 Nov: "schmeiß Rubin ganz raus" — Rubin is never chosen any more (cover, music,
+# rotation, manual). Its tables stay only so revisions of older Rubin previews still render.
+STYLES = ("lana", "rubin")  # cover scoring compares both; a Rubin result never wins
+RETIRED = ("rubin",)
 # Owner, 22 Nov: "zeitlos-klassisch" instead of Gen Z (the references are 1950s–90s icons).
 LABELS = {"lana": "Lana × Americana (zeitlos-klassisch)", "rubin": "Rick Rubin × Americana (zeitlos-klassisch)"}
 
@@ -172,17 +175,19 @@ def decide(scores: dict[str, tuple[float, str]], brightness: float | None, featu
     if ranked:
         best, (score, prompt) = ranked[0]
         second = ranked[1][1][0] if len(ranked) > 1 else 0.0
-        if score >= MIN_SCORE and score - second >= MIN_MARGIN:
+        if score >= MIN_SCORE and score - second >= MIN_MARGIN and best not in RETIRED:
             return {"style": best, "variant": variant, "basis": f"cover: {prompt}{night_note}",
                     "prompt": prompt, "score": round(score, 4), "margin": round(score - second, 4)}
     chosen, reason = music_style(features)
+    if chosen in RETIRED:
+        chosen, reason = "lana", reason + " → Lana (Rubin retired)"
     out = {"style": chosen, "variant": variant, "basis": f"{reason}{night_note}", "prompt": ""}
     if ranked:
         out.update(score=round(ranked[0][1][0], 4))
     return out
 
 
-ROTATION = ("lana", "rubin", "night")
+ROTATION = ("lana", "night")  # owner 27 Nov: Rubin retired
 
 
 def rotation_enabled() -> bool:
@@ -205,6 +210,8 @@ def rotate_style(previews: list[dict], run_key: str = "") -> str:
 def analyze(cover: Path | None, *, override: str = "auto", features=None) -> dict:
     """Choose world + variant for this Reel; never raises."""
     chosen = mode() if override in ("", "auto") else override
+    if chosen in RETIRED:
+        chosen = "lana"
     if chosen == "off":
         return {"style": None, "variant": None, "basis": "disabled", "prompt": ""}
     if chosen in STYLES:

@@ -32,14 +32,13 @@ on:
           - dry-run
           - review
       style:
-        description: 'Cover style: auto = detect from cover; lana / rubin / night = force for this run'
+        description: 'Style: auto = rotation (Lana / Night); lana / night = force for this run (Rubin retired 27 Nov)'
         type: choice
         required: false
         default: auto
         options:
           - auto
           - lana
-          - rubin
           - night
       song:
         description: 'Optional: one song for this run (part of the title or SoundCloud track id); empty = rotation'
