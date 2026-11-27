@@ -57,6 +57,6 @@ def test_spotify_line_in_caption_and_mail():
     chosen = captions.variant("lana", None, "r1")
     head = captions.head("carl e cool - sleepwell", chosen)
     lines = head.splitlines()
-    assert lines[0] == "🎧 carl e cool - sleepwell" and lines[1] == captions.SPOTIFY_LINE
-    assert "http" not in head  # caption links are not clickable: "link in bio"
+    assert lines[0] == "🎧 carl e cool - sleepwell"
+    assert lines[1] == "🟢 Out now on Spotify: https://open.spotify.com/artist/6qRtXVU6f3xhlmxTgwgoPy"
     assert review._spotify() == "https://open.spotify.com/artist/6qRtXVU6f3xhlmxTgwgoPy"
