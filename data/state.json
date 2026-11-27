@@ -600,20 +600,59 @@
       "platform_post_urls": {
         "instagram": "https://www.instagram.com/reel/DgOB2Z4gbS3/"
       }
+    },
+    {
+      "track_id": "2437525059",
+      "at": "2026-11-27T11:19:19.538263+00:00",
+      "video_ids": [
+        "RUouWxOq1f",
+        "9cfC4qODSN",
+        "KGlm0yZAD1",
+        "IoZXsbfSEU",
+        "pEeGts0hP9",
+        "C5eKrEFtIf",
+        "inqghNWZPc"
+      ],
+      "sha256": "02ff2d23a60d142310a2c97c876b2b76751f402103ca52ef83c2b3eabbf3f58b",
+      "approval_issue": 60,
+      "provider": "zernio",
+      "target": "tiktok",
+      "provider_post_id": "6b09673b6e2181073c0c2a67",
+      "platform_status": {
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 0,
+        "bpm": 76.0,
+        "first_shot_s": 1.5,
+        "hashtags": [
+          "#carlecool",
+          "#minimalmusic",
+          "#analogsynth",
+          "#studiolife",
+          "#instrumental"
+        ],
+        "hook_at": 0.0,
+        "hook_line": "",
+        "length_bucket": "long",
+        "length_s": 25.26,
+        "opening_clip": "pEeGts0hP9",
+        "opening_motif": "sunlight window",
+        "opening_source": "coverr",
+        "question": false,
+        "roles": [
+          "woman"
+        ],
+        "scenes": 8,
+        "style": "rubin",
+        "style_basis": "rotation (rubin)",
+        "text_hook": false,
+        "theme": "quiet",
+        "variant": null
+      }
     }
   ],
-  "pending": {
-    "track_id": "2437525059",
-    "sha256": "02ff2d23a60d142310a2c97c876b2b76751f402103ca52ef83c2b3eabbf3f58b",
-    "at": "2026-11-27T11:19:19.538263+00:00",
-    "issue_number": 60,
-    "target": "tiktok",
-    "provider": "zernio",
-    "provider_post_id": "6b09673b6e2181073c0c2a67",
-    "platform_status": {
-      "tiktok": "uploading"
-    }
-  },
+  "pending": null,
   "reconciled": [
     {
       "track_id": "2373071753",
