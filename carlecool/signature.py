@@ -150,6 +150,11 @@ PROMPTS = {
     ),
     "gear": (
         ("a dj turntable with a spinning vinyl record", "hands on a dj mixer with faders and knobs",
+         # unified bible (27 Nov): analog music in every Reel
+         "fingers pressing the rubber pads of an mpc sampler", "an analog synthesizer with knobs and patch cables",
+         "a vintage drum machine with colored step buttons", "hands playing a rhodes electric piano",
+         "a reel-to-reel tape recorder with spinning reels", "a cassette tape in a tape deck",
+         "a silver 1990s boombox", "glowing vu meters on an analog mixing console",
          "a vintage drum machine or sampler with rubber pads", "an analog synthesizer with knobs",
          "a large analog mixing console with many faders", "a piano or organ by a bright window",
          "a record player needle on vinyl in warm light"),

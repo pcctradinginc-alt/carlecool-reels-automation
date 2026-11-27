@@ -555,6 +555,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                                 prefer=performance.preferred(perf_model, "text"),
                                 lines=themes.lines(style_name, style_variant, theme) if theme else None)
     print(f"Text hook: {hook_line!r}" if hook_line else "Text hook: none (A/B test)")
+    from . import reach
+    hook_strategy = reach.hook_strategy(edition, (directors.get(director) or {}).get("hook_strategies"))
+    print(f"Hook strategy: {hook_strategy}")
     try:
         details = render_reel(audio, paths, features, out, reel_length,
                               pace=style_pkg.pace_for(profile["pace"], style_name), analog=profile["analog"], cover=cover,
@@ -563,7 +566,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                               style_grade=style_pkg.grade_filters(style_name, style_variant),
                               signature_slots=signature_slots, look=style_pkg.look(style_name, style_variant),
                               opening_pool=opening_pool, opening_fit=opening_fit, hook_text=hook_line,
-                              ref_world=ref_world,
+                              ref_world=ref_world, hook_strategy=hook_strategy,
                               soft_sources={i for i, v in enumerate(selected) if v.source in ("coverr", "pexels")})
     finally:
         if cover is not None:
@@ -578,7 +581,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         caption_copy["question"] = (captions.QUESTIONS[0] if not caption_copy["question"] else "")
     reel_facts = {
         "style": style_name, "variant": style_variant, "style_basis": style_decision.get("basis"),
-        "director": directors.current(),
+        "director": directors.current(), "hook_strategy": hook_strategy,
         "length_s": round(reel_length, 2), "length_bucket": performance.bucket(reel_length),
         "scenes": details.get("scenes"), "bpm": features.bpm,
         "roles": sorted(r for r, n in (details.get("signature_shots") or {}).items() if n),

@@ -241,7 +241,7 @@ def seal_loop(shots, source_durations: list[float]):
 
 def strongest_opening(pool: list[int], motion: list[float], dims: list[tuple[int, int]],
                       durations: list[float], *, min_seconds: float = 6.0,
-                      style_fit: dict[int, float] | None = None) -> int | None:
+                      style_fit: dict[int, float] | None = None, prefer_motion: bool = False) -> int | None:
     """Opening clip: lively, sharp, well matched to the cover — and long enough to also
     close the loop (seal_loop takes the footage just before the opening shot).
 
@@ -271,6 +271,7 @@ def strongest_opening(pool: list[int], motion: list[float], dims: list[tuple[int
                    for i in usable])
     if style_fit and all(i in style_fit for i in usable):
         fit = ranks([style_fit[i] for i in usable])
-        return max(usable, key=lambda i: (0.4 * fit[i] + 0.3 * move[i] + 0.15 * cover[i] + 0.15 * sharp[i],
+        w = (0.3, 0.5, 0.1, 0.1) if prefer_motion else (0.4, 0.3, 0.15, 0.15)  # hook strategy "motion"
+        return max(usable, key=lambda i: (w[0] * fit[i] + w[1] * move[i] + w[2] * cover[i] + w[3] * sharp[i],
                                           -usable.index(i)))
     return max(usable, key=lambda i: (0.45 * move[i] + 0.35 * cover[i] + 0.2 * sharp[i], -usable.index(i)))

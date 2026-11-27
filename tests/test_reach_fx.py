@@ -16,14 +16,20 @@ def _look(n):
     return [{"dissolve_in": 0.0, "punch_in": False} for _ in range(n)]
 
 
-def test_opening_pushes_and_interior_drifts_alternate():
+def test_zoom_only_on_static_footage_and_by_hook_strategy():
+    """Unified bible (27 Nov): no artificial zoom on footage that moves by itself."""
     starts = [0, 1.2, 4.0, 6.0, 8.0, 12.0, 14.0]
     durs = [1.2, 2.8, 2.0, 2.0, 4.0, 2.0, 2.0]
-    plan = reach.plan("lana", _features(), starts, durs, _look(7))
+    still = [0.5] * 7
+    plan = reach.plan("lana", _features(), starts, durs, _look(7), motion=still, strategy="push")
     assert plan[0]["zoom"][0] == "push"
-    kinds = [p["zoom"][0] for p in plan[1:-1]]
-    assert kinds == ["in", "out", "in", "out", "in"]
+    assert [p["zoom"][0] for p in plan[1:-1]] == ["in", "out", "in", "out", "in"]
     assert plan[-1]["zoom"] is None and plan[-1]["flash"] == 0  # loop seam untouched
+    moving = [6.0] * 7
+    assert all(p["zoom"] is None for p in reach.plan("lana", _features(), starts, durs, _look(7), motion=moving))
+    assert reach.plan("lana", _features(), starts, durs, _look(7), motion=still, strategy="motion")[0]["zoom"] is None
+    assert all(p["zoom"] is None for p in reach.plan("lana", _features(), starts, durs, _look(7)))  # unknown motion
+    assert {reach.hook_strategy(f"r{k}") for k in range(20)} == set(reach.HOOK_STRATEGIES)
 
 
 def test_flash_on_hook_and_peaks_spaced():
