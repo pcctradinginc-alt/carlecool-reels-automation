@@ -93,6 +93,18 @@ def record(requests: int, blocked: int | None, run_id: str | None, path: Path = 
     return data
 
 
+def merge(remote: dict, local: dict) -> dict:
+    """Union of both files' Coverr events (another run may have written main meanwhile)."""
+    seen, events = set(), []
+    for e in ((remote.get("coverr") or {}).get("events") or []) + ((local.get("coverr") or {}).get("events") or []):
+        key = (e.get("at"), str(e.get("run")))
+        if key not in seen:
+            seen.add(key)
+            events.append(e)
+    events.sort(key=lambda e: str(e.get("at")))
+    return {"version": 1, "coverr": {"hourly_limit": HOURLY_LIMIT, "events": events}}
+
+
 def main() -> int:
     """`python -m carlecool.providers` (workflow, always): commit the usage file."""
     if not PATH.is_file() or os.getenv("GITHUB_ACTIONS") != "true":
@@ -100,6 +112,14 @@ def main() -> int:
         return 0
     from .performance import commit_json
     try:
+        import base64
+        from .review import github_request
+        try:
+            item = github_request("GET", f"contents/{PATH.as_posix()}?ref=main")
+            remote = json.loads(base64.b64decode(item["content"]).decode("utf-8"))
+            PATH.write_text(json.dumps(merge(remote, load()), indent=1) + "\n", encoding="utf-8")
+        except Exception as exc:  # 404 / network: commit this run's file as it is
+            print("Provider usage: no merge with main:", type(exc).__name__)
         commit_json(PATH, "providers: record Coverr usage of this run [skip ci]")
         print("Provider usage recorded")
     except Exception as exc:  # never fail the run for bookkeeping

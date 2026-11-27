@@ -66,3 +66,13 @@ def test_two_journal_slots_per_day(monkeypatch):
     assert journal.free_slot("2026-11-27") == "2026-11-27-2"
     sent.add("2026-11-27-2")
     assert journal.free_slot("2026-11-27") is None
+
+
+def test_provider_usage_merges_runs_from_main():
+    from carlecool import providers
+    remote = {"coverr": {"events": [{"at": "2026-11-27T15:58:00+00:00", "run": "1", "requests": 27}]}}
+    local = {"coverr": {"events": [{"at": "2026-11-27T15:00:00+00:00", "run": "0", "requests": 20},
+                                   {"at": "2026-11-27T16:09:00+00:00", "run": "2", "requests": 5, "blocked": 403}]}}
+    merged = providers.merge(remote, local)
+    assert [e["run"] for e in merged["coverr"]["events"]] == ["0", "1", "2"]
+    assert providers.merge(merged, merged) == merged

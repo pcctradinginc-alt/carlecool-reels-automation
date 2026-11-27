@@ -178,6 +178,15 @@ jobs:
           fi
       # Every scheduled run creates a NEW proposal, even when older reviews
       # remain open. Only an explicit owner approval can ever publish.
+      - name: Use the latest Coverr usage from main
+        # 27 Nov: a dispatched run checks out the commit of its dispatch time, so a run
+        # queued behind another did not see that run's Coverr requests and was blocked.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/contents/data/provider-usage.json?ref=main" --jq .content \
+            | base64 -d > /tmp/provider-usage.json && mv /tmp/provider-usage.json data/provider-usage.json \
+            || echo "Provider usage: keeping the checked-out file"
       - name: Render a balanced random Reel (no Instagram calls)
         env:
           COVERR_API_KEY: ${{ secrets.COVERR_API_KEY }}
