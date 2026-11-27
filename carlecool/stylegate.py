@@ -35,8 +35,9 @@ BLOCK_WORDS = (
     # holidays / seasons that date a Reel (Reel #39: two Christmas clips)
     "christmas", "xmas", "santa", "christmas tree", "gift bags", "new year", "halloween",
     "easter", "valentine",
-    # brand products / ad looks (Reel #39: Coca-Cola, champagne)
-    "coca cola", "coca-cola", "coke", "pepsi", "champagne", "starbucks", "mcdonald", "red bull",
+    # brand products / ad looks (Reel #39: Coca-Cola). Champagne is back (owner's guide,
+    # 27 Nov: Old-Hollywood glamour) — brand logos stay out.
+    "coca cola", "coca-cola", "coke", "pepsi", "starbucks", "mcdonald", "red bull",
     # work / everyday scenes outside the brief (Reel #39: construction workers, video call)
     "construction", "workers", "welding", "welder", "factory", "video call", "video calling", "zoom call", "warehouse",
     # studio fashion shoots (Reel #41 opened on "Chic Studio Fashion Portrait with Unique Backdrop")
@@ -139,7 +140,29 @@ WANTED = {
              "the inside of a car driving at night with city lights outside",
              "a driver's eyes in a rearview mirror at night", "an empty road under sodium street lights",
              "a night city skyline seen from an apartment window", "a dim garage with a classic car",
-             "a woman in a warm-lit hallway at night"),
+             "a woman in a warm-lit hallway at night",
+             # owner's video guide (27 Nov): melancholic decadence, glamour vs. motel Americana,
+             # hypnotic summer heat, analog home movies, California / desert / East Coast, water
+             "a woman in a white lace dress in hazy summer light, faded film photo",
+             "a woman in a flowing silk gown by a swimming pool at sunset",
+             "a woman with a 1960s beehive hairstyle and black winged eyeliner",
+             "a woman in cat-eye sunglasses and gold hoop earrings in a convertible",
+             "a woman in denim shorts and a vintage band t-shirt at a desert motel",
+             "a woman in a leather biker jacket by a motorcycle on a desert highway",
+             "a woman with soft hollywood waves and red lipstick, old hollywood glamour",
+             "pearls and a glass of champagne in an old mansion with a chandelier",
+             "an empty swimming pool at a desert motel", "a neon motel sign in the desert at dusk",
+             "an abandoned gas station on a dusty highway", "a palm-lined boulevard in los angeles at sunset",
+             "venice beach or malibu in faded summer light", "a woman floating underwater in a swimming pool",
+             "slow motion of a woman throwing back her hair", "big ocean waves in slow motion",
+             "a coney island amusement park at dusk", "a suburban garden in a faded 1960s home movie",
+             "a classic american convertible on a desert road", "a surfer walking into the sea at sunset",
+             "a grainy super 8 film of a summer day", "a sun-bleached memory of a better summer",
+             # Old Money Hamptons (owner, 27 Nov)
+             "an old money hamptons estate with a manicured lawn and a white shingled house",
+             "a woman in a cable-knit sweater over the shoulders by the sea",
+             "a woman in tennis whites at a country club", "a classic wooden sailboat on a calm bay",
+             "a woman in a linen dress on the porch of a beach house", "a polo match on a summer lawn"),
     "rubin": ("young friends sitting together in silence", "an empty parking lot at dusk",
               "an american flag on a fence", "a classic land rover defender",
               "a classic air-cooled porsche 911 from the 1990s", "a neon diner or motel sign at night",

@@ -419,6 +419,10 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             # Documentary black-and-white moment (Lana references): neutral grey, a touch of contrast.
             chain += ["hue=s=0", f"eq=contrast={styling.get('bw_contrast', 1.08):.2f}:brightness=0.01"]
             bw_shots += 1
+        if look and look.get("chroma_shift") and not styling.get("bw"):
+            # Owner's guide (27 Nov): slight chromatic aberration of old lenses / VHS.
+            px = int(look["chroma_shift"]) * width // 1080 or 1
+            chain.append(f"rgbashift=rh={px}:bh=-{px}:edge=smear")
         if shot.source_index in soft_sources:
             # 25 Nov: modern digital stock is much crisper than the archive films; a slight
             # softening puts both on the same "film" (no extra sharpening for it).

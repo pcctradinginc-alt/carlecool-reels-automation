@@ -21,7 +21,7 @@ import os
 
 # per reference world (render's ref_world: lana / rubin / night)
 FX = {
-    "lana": {"push": 0.08, "drift": 0.05, "flash": 0.16, "flashes": 3},
+    "lana": {"push": 0.08, "drift": 0.04, "flash": 0.14, "flashes": 1},  # guide: slow, hypnotic → drop only
     "rubin": {"push": 0.06, "drift": 0.035, "flash": 0.12, "flashes": 2},  # restrained
     "night": {"push": 0.07, "drift": 0.04, "flash": 0.14, "flashes": 3},   # neon flashes
 }
