@@ -46,7 +46,8 @@ def test_word_gate_blocks_cartoons_modern_supercars_and_off_world_places():
                   "Rear view of a Porsche 911 Turbo S", "Street in Mexico City ", "'Hi there' sign",
                   "Volcano and palm trees", "Timelapse journey in Sweden"):
         assert stylegate.blocked_words(v(title)), title
-    for title in ("Couple getting out of a Land Rover", "Ripped USA flag", "Bar neon sign",
+    assert stylegate.blocked_words(v("Couple getting out of a Land Rover")) == "couple"  # owner 27 Nov
+    for title in ("Woman getting out of a Land Rover", "Ripped USA flag", "Bar neon sign",
                   "Group of friends laughing", "Classic Porsche on a country road"):
         assert stylegate.blocked_words(v(title)) is None, title
     assert stylegate.blocked_words(v("City drive", tags=("cartoon",))) == "cartoon"
@@ -134,8 +135,9 @@ def test_reel_39_offbrief_clips_are_blocked_and_people_are_not_judged():
     assert stylegate.flag_mismatch(v("Philippines flag")) == "not a US flag"  # Reel #44
     assert stylegate.flag_mismatch(v("Woman laughing in the car")) is None
     assert stylegate.blocked_words(v("Taking selfies at night"))
-    # couples / friends are never filtered for who they are
-    assert stylegate.blocked_words(v("Gay couple representing LGBT community")) is None
+    # owner 27 Nov: no romantic couples of ANY kind — the word "couple", never who is in it
+    assert stylegate.blocked_words(v("Gay couple representing LGBT community")) == "couple"
+    assert stylegate.blocked_words(v("Two women representing LGBT community")) is None
     assert stylegate.blocked_words(v("Friends meeting at a cafe")) is None
     assert stylegate.blocked_words(v("Summer holiday road trip")) is None
 
@@ -160,20 +162,23 @@ def test_lana_reference_profile_is_stored_without_images():
     assert "vignette" not in grade and "saturation=1.28" in grade
 
 
-def test_lana_gets_one_black_and_white_moment_on_a_clean_cut():
+def test_black_and_white_is_a_whole_reel_never_mixed():
+    """Owner 27 Nov: "entweder schwarzweiß oder farbe" — all shots B/W or none."""
     from carlecool import look
     from carlecool.analysis import AudioFeatures
     beats = tuple(i * 0.5 for i in range(40))
     f = AudioFeatures(120.0, 1.0, 0.0, "cinematic", 20.0, beats=beats,
                       beat_energy=tuple(0.2 + 0.02 * (i % 9) for i in range(40)), hook_at=8.0)
     starts, durs = [0, 2, 4, 6, 8, 10, 12, 14], [2.0] * 8
-    plan = look.plan_look(style.look("lana"), f, starts, durs)
-    bw = [i for i, p in enumerate(plan) if p["bw"]]
-    assert len(bw) == 2 and 0 not in bw and 7 not in bw   # 20 % of 8 shots → 2
-    i = bw[0]
-    assert plan[i]["dissolve_in"] == 0 and plan[i + 1]["dissolve_in"] == 0 and not plan[i]["leak"]
-    rubin = look.plan_look(style.look("rubin"), f, starts, durs)
-    assert sum(p["bw"] for p in rubin) == 2 and all(p.get("bw_contrast", 0) > 1.1 for p in rubin if p["bw"])
+    counts = {"bw": 0, "colour": 0}
+    for seed in range(200):
+        plan = look.plan_look(style.look("rubin"), f, starts, durs, seed=str(seed))
+        n_bw = sum(p["bw"] for p in plan)
+        assert n_bw in (0, len(plan))
+        counts["bw" if n_bw else "colour"] += 1
+        if n_bw:
+            assert all(p["bw_contrast"] > 1.1 and not p["leak"] for p in plan)
+    assert 0.15 < counts["bw"] / 200 < 0.35   # rubin share 0.25
 
 
 def test_rubin_reference_profile_and_look():
@@ -194,7 +199,8 @@ def test_tags_do_not_exclude_harmless_clips_or_people():
     assert stylegate.blocked_words(v("Skate park by the beach", ["santa monica", "beach"])) is None
     assert stylegate.blocked_words(v("Hands on a Land Rover steering wheel", ["jungle", "car"])) is None
     assert stylegate.blocked_words(v("Best friends walking to class", ["laptop", "school"])) is None
-    assert stylegate.blocked_words(v("Couple kissing during golden hour", ["valentine"])) is None
+    assert stylegate.blocked_words(v("Couple kissing during golden hour", ["valentine"])) == "couple"  # Reel #62
+    assert stylegate.blocked_words(v("Woman during golden hour", ["valentine"])) is None
     assert stylegate.flag_mismatch(v("A gay couple holding hands", ["pride", "lgbt"])) is None
     assert stylegate.flag_mismatch(v("Running with a pride flag")) == "pride flag"
     assert stylegate.blocked_words(v("City drive", ["cartoon"])) == "cartoon"   # synthetic looks still via tags
@@ -232,7 +238,7 @@ def test_singer_911_and_owner_people_style():
     from carlecool import signature
     assert "classic porsche" in signature.queries_for("car", "lana")
     assert "woman rain boots" in signature.queries_for("woman", "lana")
-    assert "couple walking beach" in signature.queries_for("friends", "lana")
+    assert "women walking beach" in signature.queries_for("friends", "lana")
     assert any("wellington" in w for w in stylegate.WANTED["lana"])
     assert any("waxed field jacket" in p for p in signature.PROMPTS["woman"][0])
 
@@ -317,11 +323,11 @@ def test_homogeneous_look_parts():
     # halation is blended in RGB (a YUV screen blend tinted everything magenta)
     f = halation_filter(3)
     assert "format=gbrp[hh3]" in f and "blend=all_mode=screen" in f
-    # B/W as ONE contiguous passage, never on the loop bookends
+    # B/W: the whole Reel or nothing (owner 27 Nov)
     lana = dict(style.LOOKS["lana"])
-    plan = look.plan_look(lana, None, [i * 1.5 for i in range(12)], [1.5] * 12, seed="x")
-    bw = [i for i, p in enumerate(plan) if p["bw"]]
-    assert bw and bw == list(range(bw[0], bw[0] + len(bw))) and 0 not in bw and 11 not in bw
+    for seed in ("x", "y", "z", "w"):
+        plan = look.plan_look(lana, None, [i * 1.5 for i in range(12)], [1.5] * 12, seed=seed)
+        assert sum(p["bw"] for p in plan) in (0, 12)
 
 
 def test_reel_48_offbrief_titles_are_blocked():
