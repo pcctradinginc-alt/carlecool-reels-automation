@@ -220,13 +220,21 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         rotated = style_pkg.rotate_style(previews, edition)
         style_override = rotated
     style_decision = style_pkg.analyze(cover, override=style_override, features=features)
+    from . import directors
     if rotated:
-        if rotated != "night":
-            style_decision["variant"] = None  # a dark cover no longer turns Lana / Rubin into Night
+        if (directors.get(rotated) or {}).get("variant") != "night":
+            style_decision["variant"] = None  # a dark cover no longer turns Lana into Night
         style_decision["basis"] = f"rotation ({rotated})"
     style_name = style_decision.get("style")
     style_variant = style_decision.get("variant")
-    print(f"Style: {style_pkg.label(style_decision)} ({style_decision.get('basis')})")
+    # Creative Director (27 Nov): one file in directors/ steers themes, search, look, effects.
+    director = style_decision.get("director") or directors.for_style(style_name, style_variant)
+    directors.use(director)
+    style_decision["director"] = directors.current()
+    ref_world = ((directors.get(director) or {}).get("references")
+                 or ("night" if style_variant == "night" else style_name))
+    print(f"Style: {style_pkg.label(style_decision)} ({style_decision.get('basis')})"
+          f" · Creative Director: {directors.current() or 'legacy'}")
     # Owner, 26 Nov: ONE theme per Reel (search words, roles, archive share, text line).
     from . import themes
     theme = themes.choose(style_name, style_variant, previews, edition, features) if themes_enabled() else None
@@ -284,7 +292,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     style_fit: dict[str, float] = {}
     candidates, prerank = rank_candidates(candidates, cover, output_dir / "thumbs", keep=18,
                                           world=style_name, style_fit=style_fit,
-                                          ref_world="night" if style_variant == "night" else style_name)
+                                          ref_world=ref_world)
     if len(fresh) < 16:  # ranking must not pull stale clips in front of fresh ones
         candidates = ([v for v in candidates if v.id not in long_memory]
                       + [v for v in candidates if v.id in long_memory])
@@ -367,7 +375,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         # segment each); films from the last 12 Reels are skipped so the pool lasts.
         # Reel #46: no portrait stock at all → 10 cropped landscape fillers. Then more
         # public-domain home movies (178 since 24 Nov) instead of random filler clips.
-        films = int((style_pkg.look(style_name) or {}).get("archive_films") or PRELINGER_CLIPS)
+        films = int((style_pkg.look(style_name, style_variant) or {}).get("archive_films") or PRELINGER_CLIPS)
         if theme:  # sunny 1940s–70s home movies only where the theme is that kind of scene
             films = themes.archive_films(style_name, style_variant, theme, films)
         if films and len(paths) < MIN_PORTRAIT_CLIPS:
@@ -553,9 +561,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                               no_bookend=no_bookend, fit_email=not masterstore.configured(),
                               title_card=title_card,
                               style_grade=style_pkg.grade_filters(style_name, style_variant),
-                              signature_slots=signature_slots, look=style_pkg.look(style_name),
+                              signature_slots=signature_slots, look=style_pkg.look(style_name, style_variant),
                               opening_pool=opening_pool, opening_fit=opening_fit, hook_text=hook_line,
-                              ref_world=("night" if style_variant == "night" else style_name),
+                              ref_world=ref_world,
                               soft_sources={i for i, v in enumerate(selected) if v.source in ("coverr", "pexels")})
     finally:
         if cover is not None:
@@ -570,6 +578,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         caption_copy["question"] = (captions.QUESTIONS[0] if not caption_copy["question"] else "")
     reel_facts = {
         "style": style_name, "variant": style_variant, "style_basis": style_decision.get("basis"),
+        "director": directors.current(),
         "length_s": round(reel_length, 2), "length_bucket": performance.bucket(reel_length),
         "scenes": details.get("scenes"), "bpm": features.bpm,
         "roles": sorted(r for r, n in (details.get("signature_shots") or {}).items() if n),

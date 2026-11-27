@@ -1,0 +1,805 @@
+{
+ "lana": {
+  "fx": {
+   "drift": 0.04,
+   "flash": 0.14,
+   "flashes": 1,
+   "push": 0.08
+  },
+  "grade": [
+   "colortemperature=temperature=6000:mix=0.1",
+   "curves=r='0/0.075 0.5/0.62 1/0.97':g='0/0.055 0.5/0.605 1/0.965':b='0/0.085 0.5/0.60 1/0.97'",
+   "eq=saturation=1.28"
+  ],
+  "hook_lines": [
+   "pov: summer, 1969. the radio's still on",
+   "for the summers you can't get back",
+   "pov: driving home with the windows down",
+   "for the nights you can't explain",
+   "pov: the last warm evening of the year"
+  ],
+  "label": "Lana × Americana (zeitlos-klassisch)",
+  "look": {
+   "archive_films": 4,
+   "bw_contrast": 1.08,
+   "bw_share": 0.2,
+   "chroma_shift": 2,
+   "dissolve": 0.7,
+   "dissolve_below": 0.75,
+   "exposure_jitter": 0.0,
+   "gate_weave": true,
+   "grain_boost": 2,
+   "home_movie_flicker": true,
+   "light_leaks": true,
+   "punch_in_above": null,
+   "slowmo": 1.3,
+   "slowmo_below": 0.65
+  },
+  "music": {
+   "california": {
+    "sound": "bright",
+    "tempo": "mid"
+   },
+   "desert": {
+    "drive": "groove",
+    "tempo": "fast"
+   },
+   "glamour": {
+    "sound": "dark",
+    "space": "spacious",
+    "tempo": "slow"
+   },
+   "hamptons": {
+    "sound": "warm",
+    "tempo": "mid"
+   },
+   "homemovie": {
+    "drive": "sparse",
+    "sound": "warm",
+    "tempo": "slow"
+   }
+  },
+  "pace": "slow",
+  "references": "lana",
+  "roles": {
+   "americana": [
+    "porch",
+    "horse",
+    "pickup truck",
+    "farm",
+    "barn",
+    "lawn",
+    "wooden boat",
+    "picket fence",
+    "beach house",
+    "sand dunes"
+   ],
+   "car": [
+    "land rover",
+    "range rover",
+    "porsche",
+    "defender",
+    "classic porsche",
+    "porsche 911",
+    "classic car"
+   ],
+   "flag": [
+    "american flag",
+    "usa flag",
+    "flag waving"
+   ],
+   "friends": [
+    "women picnic",
+    "women lawn",
+    "women porch",
+    "women sailing",
+    "women countryside",
+    "women summer",
+    "women walking beach"
+   ],
+   "friends2": [
+    "women picnic",
+    "women lawn",
+    "women porch",
+    "women sailing",
+    "women countryside",
+    "women summer",
+    "women walking beach"
+   ],
+   "gear": [
+    "turntable",
+    "vinyl record",
+    "dj mixer",
+    "drum machine",
+    "record player"
+   ],
+   "skater": [
+    "skateboard sunset",
+    "skater silhouette",
+    "skateboard road"
+   ],
+   "woman": [
+    "woman porch",
+    "woman horse",
+    "woman countryside",
+    "woman sunglasses",
+    "woman sailboat",
+    "woman hair wind",
+    "woman field sunset",
+    "woman rain boots"
+   ]
+  },
+  "search": [
+   "american flag",
+   "family picnic",
+   "lawn",
+   "garden party",
+   "classic sailboat",
+   "wooden boat",
+   "porch",
+   "pickup truck",
+   "horse",
+   "picket fence",
+   "beach house",
+   "summer family",
+   "vintage",
+   "land rover",
+   "range rover",
+   "porsche",
+   "classic car",
+   "convertible",
+   "ocean",
+   "white dress",
+   "boardwalk",
+   "sunset beach",
+   "home movie",
+   "canoe",
+   "vintage dress",
+   "beach towel",
+   "sand dunes",
+   "beach umbrella",
+   "lifeguard",
+   "lemonade",
+   "couple car",
+   "polaroid",
+   "mansion",
+   "swing",
+   "hair wind",
+   "white t-shirt",
+   "sunglasses",
+   "hitchhiking",
+   "radio",
+   "leather jacket",
+   "hammock",
+   "lighthouse",
+   "dock",
+   "ranch",
+   "road trip",
+   "drive in",
+   "pier",
+   "stable",
+   "diner",
+   "rain",
+   "denim"
+  ],
+  "themes": {
+   "california": {
+    "archive": 2,
+    "label": "Kalifornien & Pool",
+    "lines": [
+     "pov: summer, 1969. the radio's still on",
+     "for the summers you can't get back",
+     "pov: the pool after the party"
+    ],
+    "roles": [
+     "woman",
+     "americana"
+    ],
+    "words": [
+     "palm trees",
+     "swimming pool",
+     "malibu",
+     "venice beach",
+     "convertible",
+     "sunset boulevard",
+     "pier",
+     "surfer",
+     "underwater",
+     "ocean cliff"
+    ]
+   },
+   "desert": {
+    "archive": 2,
+    "label": "Wüste & Motel",
+    "lines": [
+     "pov: motel pool, 104 degrees",
+     "pov: driving home with the windows down",
+     "for the summers you can't get back"
+    ],
+    "roles": [
+     "woman",
+     "americana"
+    ],
+    "words": [
+     "desert highway",
+     "motel",
+     "neon motel",
+     "diner",
+     "gas station",
+     "empty pool",
+     "route 66",
+     "vintage sign",
+     "motorcycle",
+     "desert sunset"
+    ]
+   },
+   "glamour": {
+    "archive": 1,
+    "label": "Old Hollywood Glamour",
+    "lines": [
+     "for the nights you can't explain",
+     "pov: the last party at the mansion"
+    ],
+    "roles": [
+     "woman",
+     "friends"
+    ],
+    "words": [
+     "chandelier",
+     "mansion",
+     "pearls",
+     "champagne",
+     "silk dress",
+     "vintage dress",
+     "ballroom",
+     "red lipstick",
+     "vintage car",
+     "marble staircase"
+    ]
+   },
+   "hamptons": {
+    "archive": 2,
+    "label": "Old Money Hamptons",
+    "lines": [
+     "pov: the last summer at the beach house",
+     "pov: the last warm evening of the year",
+     "for the summers you can't get back"
+    ],
+    "roles": [
+     "woman",
+     "friends"
+    ],
+    "words": [
+     "beach house",
+     "classic sailboat",
+     "tennis",
+     "country club",
+     "white dress",
+     "lighthouse",
+     "sand dunes",
+     "estate lawn",
+     "cable knit",
+     "polo"
+    ]
+   },
+   "homemovie": {
+    "archive": 4,
+    "label": "Super-8-Erinnerung",
+    "lines": [
+     "pov: summer, 1969. the radio's still on",
+     "for the summers you can't get back"
+    ],
+    "roles": [
+     "friends",
+     "woman"
+    ],
+    "words": [
+     "home movie",
+     "super 8",
+     "polaroid",
+     "lawn",
+     "picket fence",
+     "swing",
+     "lemonade",
+     "vintage dress",
+     "hair wind",
+     "summer"
+    ]
+   }
+  },
+  "wanted": [
+   "young friends together outdoors at golden hour",
+   "a neon motel or diner sign at dusk",
+   "an american flag waving",
+   "a classic air-cooled porsche 911 from the 1990s",
+   "a classic land rover defender",
+   "a road trip on an empty american highway",
+   "palm trees and a pale summer sky",
+   "a skateboarder on a street",
+   "a woman in natural light",
+   "a vintage color home movie",
+   "a city street at night with lights",
+   "a sunset over a calm landscape",
+   "a dj turntable with a vinyl record",
+   "a vintage dj mixer or drum machine",
+   "a woman on a sailboat on a sunny day",
+   "white sails against a blue sky and the sea",
+   "a 1960s kodachrome color photo of people on a boat",
+   "a woman with sunglasses and a headscarf",
+   "a convertible car in california sunshine",
+   "a swimming pool with palm trees",
+   "a black and white documentary photo of two women",
+   "a woman on a swing in golden backlight by a white picket fence",
+   "an american flag against a pale teal sky",
+   "a black and white street photo from the 1970s",
+   "a classic black sedan parked on a street",
+   "a backstage mirror with bulbs at night",
+   "an american flag on a pole above sand dunes and a beach fence",
+   "a weathered shingled beach house by the ocean",
+   "a white colonial house with a flag and a lawn",
+   "blue beach umbrellas under a clear blue sky",
+   "a preppy outfit with a sweater over the shoulders",
+   "a 1950s college group photo in black and white",
+   "a woman in a waxed jacket and wellington boots walking on a beach with a dog",
+   "a woman in a waxed field jacket and rubber boots at a muddy festival",
+   "a woman in a field jacket, turtleneck and tweed in the countryside",
+   "a woman on the deck of a classic sailboat by the sea",
+   "friends at a music festival in the mud",
+   "a woman in a white t-shirt and denim with gold jewelry and long wavy hair",
+   "a 1990s black and white portrait of a young woman with slicked-back hair",
+   "a young woman in a tank top and jeans, 1990s documentary photo",
+   "a woman swimming in a calm lake, black and white photo",
+   "bikers on motorcycles on an open desert highway at golden hour",
+   "black and white slow motion of waves on a beach",
+   "a 1960s super 8 home movie of a family on a lawn",
+   "a horse, a pickup truck and a wooden porch in the countryside at sunset",
+   "a woman on a porch swing in warm evening light",
+   "a family picnic on a lawn in a 1960s home movie",
+   "a garden party on a summer lawn with a flag",
+   "horses in a field at golden hour",
+   "a red barn and a farmhouse at sunset",
+   "a neon-lit american diner at blue hour",
+   "a lonely late-night diner seen through a window",
+   "palm trees against a deep blue evening sky",
+   "car light trails on a city freeway at night",
+   "an elevated train viaduct lit at night",
+   "brownstones and lit apartment windows at night",
+   "an american flag at night with city lights",
+   "a starry sky over a beach fence",
+   "the inside of a car driving at night with city lights outside",
+   "a driver's eyes in a rearview mirror at night",
+   "an empty road under sodium street lights",
+   "a night city skyline seen from an apartment window",
+   "a dim garage with a classic car",
+   "a woman in a warm-lit hallway at night",
+   "a woman in a white lace dress in hazy summer light, faded film photo",
+   "a woman in a flowing silk gown by a swimming pool at sunset",
+   "a woman with a 1960s beehive hairstyle and black winged eyeliner",
+   "a woman in cat-eye sunglasses and gold hoop earrings in a convertible",
+   "a woman in denim shorts and a vintage band t-shirt at a desert motel",
+   "a woman in a leather biker jacket by a motorcycle on a desert highway",
+   "a woman with soft hollywood waves and red lipstick, old hollywood glamour",
+   "pearls and a glass of champagne in an old mansion with a chandelier",
+   "an empty swimming pool at a desert motel",
+   "a neon motel sign in the desert at dusk",
+   "an abandoned gas station on a dusty highway",
+   "a palm-lined boulevard in los angeles at sunset",
+   "venice beach or malibu in faded summer light",
+   "a woman floating underwater in a swimming pool",
+   "slow motion of a woman throwing back her hair",
+   "big ocean waves in slow motion",
+   "a coney island amusement park at dusk",
+   "a suburban garden in a faded 1960s home movie",
+   "a classic american convertible on a desert road",
+   "a surfer walking into the sea at sunset",
+   "a grainy super 8 film of a summer day",
+   "a sun-bleached memory of a better summer",
+   "an old money hamptons estate with a manicured lawn and a white shingled house",
+   "a woman in a cable-knit sweater over the shoulders by the sea",
+   "a woman in tennis whites at a country club",
+   "a classic wooden sailboat on a calm bay",
+   "a woman in a linen dress on the porch of a beach house",
+   "a polo match on a summer lawn",
+   "dark brick housing towers in brooklyn at night with a few yellow lit windows",
+   "steam rising from a manhole on a new york street at night",
+   "a chain-link fence around a basketball court at night under a street lamp",
+   "a baseball field under bright stadium floodlights at night with fog and lens flare",
+   "a woman in an oversized vintage baseball jersey over a silk slip dress with pearls",
+   "a black porsche 911 993 driving over a bridge at night with the manhattan skyline",
+   "warm amber glow of round analog gauges in a dark car cockpit at night",
+   "golden light streaks of a tunnel ceiling reflected on a glossy black car",
+   "a woman in a black velvet dress and a pearl choker caught in paparazzi flash at night",
+   "a woman in dark oversized sunglasses and a long fur coat on a city street at night",
+   "a grainy black and white 16mm film of a new york street at night",
+   "a low-angle view up at brick towers against the night sky"
+  ],
+  "weights": {
+   "americana": 50,
+   "nature": 35,
+   "night": 30,
+   "skate": 30,
+   "studio": 28,
+   "y2k": 28
+  }
+ },
+ "night": {
+  "fx": {
+   "drift": 0.04,
+   "flash": 0.14,
+   "flashes": 3,
+   "push": 0.07
+  },
+  "grade": [
+   "colorbalance=bs=0.04:gs=0.015:rs=-0.01:rh=0.07:gh=0.03:bh=-0.065",
+   "curves=all='0/0.008 0.5/0.48 1/0.95'",
+   "eq=saturation=1.2:gamma=0.97"
+  ],
+  "hook_lines": [
+   "pov: 2 am, driving nowhere",
+   "for the city at 3 am",
+   "pov: the last diner still open",
+   "the drive home you don't want to end",
+   "pov: empty freeway, full moon"
+  ],
+  "label": "Lana × Americana (zeitlos-klassisch) · Night",
+  "look": {
+   "archive_films": 4,
+   "bw_contrast": 1.18,
+   "bw_share": 0.2,
+   "bw_shots": 0,
+   "chroma_shift": 2,
+   "dissolve": 0.7,
+   "dissolve_below": 0.75,
+   "exposure_jitter": 0.0,
+   "gate_weave": false,
+   "grain_boost": 2,
+   "home_movie_flicker": false,
+   "light_leaks": false,
+   "punch_in_above": null,
+   "slowmo": 1.3,
+   "slowmo_below": 0.65,
+   "step_print": true
+  },
+  "music": {
+   "drive": {
+    "drive": "groove",
+    "tempo": "fast"
+   },
+   "gilded": {
+    "sound": "warm",
+    "space": "spacious",
+    "tempo": "slow"
+   },
+   "projects": {
+    "drive": "groove",
+    "sound": "dark",
+    "tempo": "mid"
+   },
+   "stadium": {
+    "sound": "bright",
+    "space": "spacious",
+    "tempo": "mid"
+   }
+  },
+  "pace": "slow",
+  "references": "night",
+  "roles": {
+   "americana": [
+    "diner night",
+    "neon sign",
+    "palm trees night",
+    "light trails",
+    "driving night",
+    "night drive",
+    "gas station",
+    "brownstone",
+    "street lights"
+   ],
+   "car": [
+    "range rover",
+    "land rover",
+    "porsche",
+    "classic car"
+   ],
+   "flag": [
+    "american flag",
+    "usa flag",
+    "flag night"
+   ],
+   "friends": [
+    "women night",
+    "women city night",
+    "women walking night"
+   ],
+   "friends2": [
+    "women night",
+    "women city night",
+    "women walking night"
+   ],
+   "gear": [
+    "turntable",
+    "dj mixer",
+    "vinyl record",
+    "synthesizer"
+   ],
+   "skater": [
+    "skateboard night",
+    "skater night",
+    "skateboard street"
+   ],
+   "woman": [
+    "woman city night",
+    "woman neon",
+    "woman night"
+   ]
+  },
+  "search": [
+   "diner night",
+   "neon sign",
+   "blue hour",
+   "palm trees",
+   "light trails",
+   "freeway night",
+   "city lights",
+   "american flag",
+   "elevated train",
+   "brownstone",
+   "apartment windows",
+   "night street",
+   "starry sky",
+   "gas station",
+   "porsche",
+   "land rover",
+   "night drive",
+   "driving night",
+   "rearview mirror",
+   "street lights",
+   "parking garage",
+   "city view",
+   "drive in",
+   "motel",
+   "bridge night",
+   "main street",
+   "freeway",
+   "neon motel",
+   "dusk",
+   "corner store",
+   "highway",
+   "skyline",
+   "marquee",
+   "bridge",
+   "car wash",
+   "arcade",
+   "super 8",
+   "theater",
+   "cinema",
+   "bar",
+   "rain",
+   "piano bar",
+   "rooftop",
+   "train tracks",
+   "parking lot",
+   "billboard",
+   "subway",
+   "laundromat",
+   "vintage sign",
+   "jazz club",
+   "taxi",
+   "yellow cab",
+   "night sky",
+   "stars"
+  ],
+  "themes": {
+   "drive": {
+    "archive": 0,
+    "label": "993 Nachtfahrt",
+    "lines": [
+     "pov: 2 am, driving nowhere",
+     "the drive home you don't want to end",
+     "pov: empty freeway, full moon"
+    ],
+    "roles": [
+     "woman"
+    ],
+    "words": [
+     "porsche",
+     "night drive",
+     "tunnel",
+     "brooklyn bridge",
+     "light trails",
+     "east river",
+     "dashboard",
+     "rearview mirror",
+     "wet road",
+     "skyline night"
+    ]
+   },
+   "gilded": {
+    "archive": 0,
+    "label": "Old Money bei Nacht",
+    "lines": [
+     "pov: the last party at the mansion",
+     "for the nights you can't explain"
+    ],
+    "roles": [
+     "woman",
+     "friends"
+    ],
+    "words": [
+     "pool night",
+     "mansion night",
+     "chandelier",
+     "camera flash",
+     "pearls",
+     "velvet dress",
+     "black dress",
+     "limousine",
+     "city lights",
+     "rooftop"
+    ]
+   },
+   "projects": {
+    "archive": 0,
+    "label": "Brooklyn & Harlem bei Nacht",
+    "lines": [
+     "for the city at 3 am",
+     "pov: brooklyn, 1996, the block is quiet"
+    ],
+    "roles": [
+     "woman",
+     "americana"
+    ],
+    "words": [
+     "brooklyn",
+     "harlem",
+     "brick building",
+     "fire escape",
+     "steam street",
+     "street lamp",
+     "basketball court",
+     "chain fence",
+     "alley night",
+     "window lights"
+    ]
+   },
+   "stadium": {
+    "archive": 0,
+    "label": "Baseball unter Flutlicht",
+    "lines": [
+     "pov: the lights are still on at the ballpark",
+     "for the city at 3 am"
+    ],
+    "roles": [
+     "woman",
+     "americana"
+    ],
+    "words": [
+     "baseball field",
+     "stadium lights",
+     "floodlights",
+     "stadium night",
+     "baseball",
+     "bleachers",
+     "dugout",
+     "night fog",
+     "baseball bat",
+     "empty stadium"
+    ]
+   }
+  },
+  "wanted": [
+   "young friends together outdoors at golden hour",
+   "a neon motel or diner sign at dusk",
+   "an american flag waving",
+   "a classic air-cooled porsche 911 from the 1990s",
+   "a classic land rover defender",
+   "a road trip on an empty american highway",
+   "palm trees and a pale summer sky",
+   "a skateboarder on a street",
+   "a woman in natural light",
+   "a vintage color home movie",
+   "a city street at night with lights",
+   "a sunset over a calm landscape",
+   "a dj turntable with a vinyl record",
+   "a vintage dj mixer or drum machine",
+   "a woman on a sailboat on a sunny day",
+   "white sails against a blue sky and the sea",
+   "a 1960s kodachrome color photo of people on a boat",
+   "a woman with sunglasses and a headscarf",
+   "a convertible car in california sunshine",
+   "a swimming pool with palm trees",
+   "a black and white documentary photo of two women",
+   "a woman on a swing in golden backlight by a white picket fence",
+   "an american flag against a pale teal sky",
+   "a black and white street photo from the 1970s",
+   "a classic black sedan parked on a street",
+   "a backstage mirror with bulbs at night",
+   "an american flag on a pole above sand dunes and a beach fence",
+   "a weathered shingled beach house by the ocean",
+   "a white colonial house with a flag and a lawn",
+   "blue beach umbrellas under a clear blue sky",
+   "a preppy outfit with a sweater over the shoulders",
+   "a 1950s college group photo in black and white",
+   "a woman in a waxed jacket and wellington boots walking on a beach with a dog",
+   "a woman in a waxed field jacket and rubber boots at a muddy festival",
+   "a woman in a field jacket, turtleneck and tweed in the countryside",
+   "a woman on the deck of a classic sailboat by the sea",
+   "friends at a music festival in the mud",
+   "a woman in a white t-shirt and denim with gold jewelry and long wavy hair",
+   "a 1990s black and white portrait of a young woman with slicked-back hair",
+   "a young woman in a tank top and jeans, 1990s documentary photo",
+   "a woman swimming in a calm lake, black and white photo",
+   "bikers on motorcycles on an open desert highway at golden hour",
+   "black and white slow motion of waves on a beach",
+   "a 1960s super 8 home movie of a family on a lawn",
+   "a horse, a pickup truck and a wooden porch in the countryside at sunset",
+   "a woman on a porch swing in warm evening light",
+   "a family picnic on a lawn in a 1960s home movie",
+   "a garden party on a summer lawn with a flag",
+   "horses in a field at golden hour",
+   "a red barn and a farmhouse at sunset",
+   "a neon-lit american diner at blue hour",
+   "a lonely late-night diner seen through a window",
+   "palm trees against a deep blue evening sky",
+   "car light trails on a city freeway at night",
+   "an elevated train viaduct lit at night",
+   "brownstones and lit apartment windows at night",
+   "an american flag at night with city lights",
+   "a starry sky over a beach fence",
+   "the inside of a car driving at night with city lights outside",
+   "a driver's eyes in a rearview mirror at night",
+   "an empty road under sodium street lights",
+   "a night city skyline seen from an apartment window",
+   "a dim garage with a classic car",
+   "a woman in a warm-lit hallway at night",
+   "a woman in a white lace dress in hazy summer light, faded film photo",
+   "a woman in a flowing silk gown by a swimming pool at sunset",
+   "a woman with a 1960s beehive hairstyle and black winged eyeliner",
+   "a woman in cat-eye sunglasses and gold hoop earrings in a convertible",
+   "a woman in denim shorts and a vintage band t-shirt at a desert motel",
+   "a woman in a leather biker jacket by a motorcycle on a desert highway",
+   "a woman with soft hollywood waves and red lipstick, old hollywood glamour",
+   "pearls and a glass of champagne in an old mansion with a chandelier",
+   "an empty swimming pool at a desert motel",
+   "a neon motel sign in the desert at dusk",
+   "an abandoned gas station on a dusty highway",
+   "a palm-lined boulevard in los angeles at sunset",
+   "venice beach or malibu in faded summer light",
+   "a woman floating underwater in a swimming pool",
+   "slow motion of a woman throwing back her hair",
+   "big ocean waves in slow motion",
+   "a coney island amusement park at dusk",
+   "a suburban garden in a faded 1960s home movie",
+   "a classic american convertible on a desert road",
+   "a surfer walking into the sea at sunset",
+   "a grainy super 8 film of a summer day",
+   "a sun-bleached memory of a better summer",
+   "an old money hamptons estate with a manicured lawn and a white shingled house",
+   "a woman in a cable-knit sweater over the shoulders by the sea",
+   "a woman in tennis whites at a country club",
+   "a classic wooden sailboat on a calm bay",
+   "a woman in a linen dress on the porch of a beach house",
+   "a polo match on a summer lawn",
+   "dark brick housing towers in brooklyn at night with a few yellow lit windows",
+   "steam rising from a manhole on a new york street at night",
+   "a chain-link fence around a basketball court at night under a street lamp",
+   "a baseball field under bright stadium floodlights at night with fog and lens flare",
+   "a woman in an oversized vintage baseball jersey over a silk slip dress with pearls",
+   "a black porsche 911 993 driving over a bridge at night with the manhattan skyline",
+   "warm amber glow of round analog gauges in a dark car cockpit at night",
+   "golden light streaks of a tunnel ceiling reflected on a glossy black car",
+   "a woman in a black velvet dress and a pearl choker caught in paparazzi flash at night",
+   "a woman in dark oversized sunglasses and a long fur coat on a city street at night",
+   "a grainy black and white 16mm film of a new york street at night",
+   "a low-angle view up at brick towers against the night sky"
+  ],
+  "weights": {
+   "americana": 48,
+   "nature": 30,
+   "night": 40,
+   "skate": 30,
+   "studio": 25,
+   "y2k": 28
+  }
+ }
+}

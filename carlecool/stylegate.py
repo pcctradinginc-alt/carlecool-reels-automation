@@ -99,87 +99,6 @@ UNWANTED = (
     "a naked or nude person",
 )
 WANTED = {
-    "lana": ("young friends together outdoors at golden hour", "a neon motel or diner sign at dusk",
-             "an american flag waving", "a classic air-cooled porsche 911 from the 1990s",
-             "a classic land rover defender",
-             "a road trip on an empty american highway", "palm trees and a pale summer sky",
-             "a skateboarder on a street", "a woman in natural light", "a vintage color home movie",
-             "a city street at night with lights", "a sunset over a calm landscape",
-             "a dj turntable with a vinyl record", "a vintage dj mixer or drum machine",
-             # owner's references: 1960s New England sailing, Kodachrome summer, Hollywood glamour
-             "a woman on a sailboat on a sunny day", "white sails against a blue sky and the sea",
-             "a 1960s kodachrome color photo of people on a boat", "a woman with sunglasses and a headscarf",
-             "a convertible car in california sunshine", "a swimming pool with palm trees",
-             "a black and white documentary photo of two women",
-             "a woman on a swing in golden backlight by a white picket fence",
-             "an american flag against a pale teal sky", "a black and white street photo from the 1970s",
-             "a classic black sedan parked on a street", "a backstage mirror with bulbs at night",
-             # third set: Hamptons / Cape Cod summer, preppy East-Coast style
-             "an american flag on a pole above sand dunes and a beach fence",
-             "a weathered shingled beach house by the ocean", "a white colonial house with a flag and a lawn",
-             "blue beach umbrellas under a clear blue sky", "a preppy outfit with a sweater over the shoulders",
-             "a 1950s college group photo in black and white",
-             # owner's people examples: British country and festival style, 60s/70s glamour
-             "a woman in a waxed jacket and wellington boots walking on a beach with a dog",
-             "a woman in a waxed field jacket and rubber boots at a muddy festival",
-             "a woman in a field jacket, turtleneck and tweed in the countryside",
-             "a woman on the deck of a classic sailboat by the sea", "friends at a music festival in the mud",
-             "a woman in a white t-shirt and denim with gold jewelry and long wavy hair",
-             "a 1990s black and white portrait of a young woman with slicked-back hair",
-             "a young woman in a tank top and jeans, 1990s documentary photo",
-             "a woman swimming in a calm lake, black and white photo",
-             # owner's video references: Ride, West Coast, National Anthem, Tough, Video Games
-             "bikers on motorcycles on an open desert highway at golden hour",
-             "black and white slow motion of waves on a beach", "a 1960s super 8 home movie of a family on a lawn",
-             "a horse, a pickup truck and a wooden porch in the countryside at sunset",
-             "a woman on a porch swing in warm evening light",
-             "a family picnic on a lawn in a 1960s home movie", "a garden party on a summer lawn with a flag",
-             "horses in a field at golden hour", "a red barn and a farmhouse at sunset",
-             # owner's night references (night variant of either world)
-             "a neon-lit american diner at blue hour", "a lonely late-night diner seen through a window",
-             "palm trees against a deep blue evening sky", "car light trails on a city freeway at night",
-             "an elevated train viaduct lit at night", "brownstones and lit apartment windows at night",
-             "an american flag at night with city lights", "a starry sky over a beach fence",
-             # "Drive" (2011) stills
-             "the inside of a car driving at night with city lights outside",
-             "a driver's eyes in a rearview mirror at night", "an empty road under sodium street lights",
-             "a night city skyline seen from an apartment window", "a dim garage with a classic car",
-             "a woman in a warm-lit hallway at night",
-             # owner's video guide (27 Nov): melancholic decadence, glamour vs. motel Americana,
-             # hypnotic summer heat, analog home movies, California / desert / East Coast, water
-             "a woman in a white lace dress in hazy summer light, faded film photo",
-             "a woman in a flowing silk gown by a swimming pool at sunset",
-             "a woman with a 1960s beehive hairstyle and black winged eyeliner",
-             "a woman in cat-eye sunglasses and gold hoop earrings in a convertible",
-             "a woman in denim shorts and a vintage band t-shirt at a desert motel",
-             "a woman in a leather biker jacket by a motorcycle on a desert highway",
-             "a woman with soft hollywood waves and red lipstick, old hollywood glamour",
-             "pearls and a glass of champagne in an old mansion with a chandelier",
-             "an empty swimming pool at a desert motel", "a neon motel sign in the desert at dusk",
-             "an abandoned gas station on a dusty highway", "a palm-lined boulevard in los angeles at sunset",
-             "venice beach or malibu in faded summer light", "a woman floating underwater in a swimming pool",
-             "slow motion of a woman throwing back her hair", "big ocean waves in slow motion",
-             "a coney island amusement park at dusk", "a suburban garden in a faded 1960s home movie",
-             "a classic american convertible on a desert road", "a surfer walking into the sea at sunset",
-             "a grainy super 8 film of a summer day", "a sun-bleached memory of a better summer",
-             # Old Money Hamptons (owner, 27 Nov)
-             "an old money hamptons estate with a manicured lawn and a white shingled house",
-             "a woman in a cable-knit sweater over the shoulders by the sea",
-             "a woman in tennis whites at a country club", "a classic wooden sailboat on a calm bay",
-             "a woman in a linen dress on the porch of a beach house", "a polo match on a summer lawn",
-             # owner's night bible (27 Nov): 90s NYC at night, stadium floodlights, Porsche 993
-             "dark brick housing towers in brooklyn at night with a few yellow lit windows",
-             "steam rising from a manhole on a new york street at night",
-             "a chain-link fence around a basketball court at night under a street lamp",
-             "a baseball field under bright stadium floodlights at night with fog and lens flare",
-             "a woman in an oversized vintage baseball jersey over a silk slip dress with pearls",
-             "a black porsche 911 993 driving over a bridge at night with the manhattan skyline",
-             "warm amber glow of round analog gauges in a dark car cockpit at night",
-             "golden light streaks of a tunnel ceiling reflected on a glossy black car",
-             "a woman in a black velvet dress and a pearl choker caught in paparazzi flash at night",
-             "a woman in dark oversized sunglasses and a long fur coat on a city street at night",
-             "a grainy black and white 16mm film of a new york street at night",
-             "a low-angle view up at brick towers against the night sky"),
     "rubin": ("young friends sitting together in silence", "an empty parking lot at dusk",
               "an american flag on a fence", "a classic land rover defender",
               "a classic air-cooled porsche 911 from the 1990s", "a neon diner or motel sign at night",
@@ -206,6 +125,12 @@ WANTED = {
              "a night city skyline seen from an apartment window", "a dim garage with a classic car",
              "a woman in a warm-lit hallway at night"),
 }
+# Creative Directors (27 Nov): each director brings the image prompts it looks for.
+from . import directors as _directors  # noqa: E402
+for _n, _d in _directors.load_all().items():
+    WANTED[_n] = tuple(_d.get("wanted") or ())
+    if _d.get("variant") is None:
+        WANTED.setdefault(_d["world"], WANTED[_n])
 MARGIN = 0.0
 
 
@@ -280,7 +205,7 @@ def clip_verdicts(images, world: str | None, clip) -> list[tuple[float, str] | N
         import torch
         from PIL import Image
         model, preprocess, tokenizer = clip
-        wanted = WANTED.get(world or "", WANTED["lana"])
+        wanted = WANTED.get(_directors.key(world) or "") or WANTED.get(world or "", WANTED["lana"])
         prompts = [f"a photo of {p}" for p in wanted] + list(UNWANTED)
         with torch.no_grad():
             text = torch.nn.functional.normalize(model.encode_text(tokenizer(prompts)), dim=-1)

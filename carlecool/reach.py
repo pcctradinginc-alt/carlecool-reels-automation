@@ -19,12 +19,12 @@ from __future__ import annotations
 
 import os
 
-# per reference world (render's ref_world: lana / rubin / night)
-FX = {
-    "lana": {"push": 0.08, "drift": 0.04, "flash": 0.14, "flashes": 1},  # guide: slow, hypnotic → drop only
-    "rubin": {"push": 0.06, "drift": 0.035, "flash": 0.12, "flashes": 2},  # restrained
-    "night": {"push": 0.07, "drift": 0.04, "flash": 0.14, "flashes": 3},   # neon flashes
-}
+FX: dict[str, dict] = {}  # per director, filled from directors/*.json below
+# Creative Directors (27 Nov): every director brings its effect strengths ("fx").
+from . import directors as _directors  # noqa: E402
+for _n, _d in _directors.load_all().items():
+    if _d.get("fx"):
+        FX[_n] = dict(_d["fx"])
 DEFAULT = {"push": 0.07, "drift": 0.04, "flash": 0.14, "flashes": 2}
 PUSH_TAU = 0.45        # s: ease-out of the opening push (≈ 90 % reached after 1 s)
 FLASH_TAU = 0.07       # s: flash decay (3-4 frames visible)
@@ -45,7 +45,7 @@ def plan(style: str | None, features, starts: list[float], durations: list[float
     if n == 0 or not enabled():
         return out
     from .look import shot_energy
-    fx = FX.get(style or "", DEFAULT)
+    fx = FX.get(_directors.current() or "") or FX.get(style or "", DEFAULT)
     out[0]["zoom"] = ("push", fx["push"])
     direction = "in"
     for i in range(1, n - 1):

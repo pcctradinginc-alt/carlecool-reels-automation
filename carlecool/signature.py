@@ -39,45 +39,30 @@ STRICT_ROLES = ("gear", "car", "flag")
 REF_WEIGHT = 0.5  # reference similarity vs prompt score (owner: "people like in the example images")  # role negatives are specific → negative score = reject
 
 SKATER_QUERIES = {
-    "lana": ("skateboard sunset", "skater silhouette", "skateboard road"),
     "rubin": ("skateboard feet", "skateboard wheels", "skatepark"),
-    "night": ("skateboard night", "skater night", "skateboard street"),
     None: ("skateboard feet", "skater silhouette", "skateboarding"),
 }
 FRIENDS_QUERIES = {  # owner 27 Nov (Reel #62): women only, no romantic couples
-    "lana": ("women picnic", "women lawn", "women porch", "women sailing", "women countryside",
-             "women summer", "women walking beach"),
     "rubin": ("women walking", "women talking", "women sitting", "women beach"),
-    "night": ("women night", "women city night", "women walking night"),
     None: ("women walking", "women together"),
 }
 AMERICANA_QUERIES = {
-    "lana": ("porch", "horse", "pickup truck", "farm", "barn", "lawn", "wooden boat", "picket fence",
-             "beach house", "sand dunes"),
     "rubin": ("basketball court", "diner", "empty road", "gas station", "parking lot"),
-    "night": ("diner night", "neon sign", "palm trees night", "light trails", "driving night",
-              "night drive", "gas station", "brownstone", "street lights"),
     None: ("motel", "diner", "neon sign"),
 }
 FLAG_QUERIES = {
-    "lana": ("american flag", "usa flag", "flag waving"),
     "rubin": ("american flag", "usa flag", "flag"),
-    "night": ("american flag", "usa flag", "flag night"),
     None: ("american flag", "usa flag", "flag"),
 }
 # Owner: analog music gear in both worlds (Vestax mixer, Technics 1210 turntables, MPC 2000 …)
 # — Lana: warm, vinyl at golden hour / neon; Rubin: wooden studio, hands, stillness.
 GEAR_QUERIES = {
-    "lana": ("turntable", "vinyl record", "dj mixer", "drum machine", "record player"),
     "rubin": ("mixing console", "turntable", "recording studio", "piano", "synthesizer", "vinyl",
               "studio monitors", "drum machine"),
-    "night": ("turntable", "dj mixer", "vinyl record", "synthesizer"),
     None: ("turntable", "vinyl record", "dj mixer"),
 }
 CAR_QUERIES = {  # owner: Land Rover Defender, Range Rover (classic + modern), classic Porsche 993
-    "lana": ("land rover", "range rover", "porsche", "defender", "classic porsche", "porsche 911", "classic car"),
     "rubin": ("land rover", "range rover", "porsche", "defender", "classic porsche", "classic car"),
-    "night": ("range rover", "land rover", "porsche", "classic car"),
     None: ("land rover", "range rover", "porsche", "classic car"),
 }
 
@@ -90,19 +75,26 @@ def car_order(queries, run_key: str) -> list[str]:
         q = q[k:3] + q[:k] + q[3:]
     return q
 WOMAN_QUERIES = {
-    "lana": ("woman porch", "woman horse", "woman countryside", "woman sunglasses", "woman sailboat",
-             "woman hair wind", "woman field sunset", "woman rain boots"),
     "rubin": ("woman beach morning", "woman walking nature", "woman window"),
-    "night": ("woman city night", "woman neon", "woman night"),
     None: ("woman walking sunset", "woman nature", "woman walking"),
 }
+
+
+# Creative Directors (27 Nov): role queries of Lana / Night live in directors/*.json.
+from . import directors as _directors  # noqa: E402
+_ROLE_TABLES = {"skater": SKATER_QUERIES, "woman": WOMAN_QUERIES, "friends": FRIENDS_QUERIES,
+                "americana": AMERICANA_QUERIES, "flag": FLAG_QUERIES, "car": CAR_QUERIES, "gear": GEAR_QUERIES}
+for _n, _d in _directors.load_all().items():
+    for _role, _table in _ROLE_TABLES.items():
+        if (_d.get("roles") or {}).get(_role):
+            _table[_n] = tuple(_d["roles"][_role])
 
 
 def queries_for(role: str, style: str | None, variant: str | None = None) -> tuple[str, ...]:
     table = {"skater": SKATER_QUERIES, "woman": WOMAN_QUERIES, "friends": FRIENDS_QUERIES,
              "friends2": FRIENDS_QUERIES, "americana": AMERICANA_QUERIES, "flag": FLAG_QUERIES,
              "car": CAR_QUERIES, "gear": GEAR_QUERIES}[role]
-    key = "night" if variant == "night" else style
+    key = _directors.key(style, variant)
     return tuple(table.get(key, table.get(style, table[None])))
 PROMPTS = {
     "skater": (

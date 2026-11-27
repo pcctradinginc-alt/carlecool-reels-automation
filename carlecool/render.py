@@ -319,12 +319,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     files = []
     shot_start = 0.0
     starts = [sum(s.duration for s in storyboard[:i]) for i in range(len(storyboard))]
-    if look and ref_world == "night":
-        # Night bible (27 Nov): mostly colour (neon, floodlights, amber gauges); some Reels
-        # as grainy high-contrast 16mm B/W — always the whole Reel. Step-printing (12 fps
-        # held frames) on every third shot: the "shutter drag" of the tunnel drives.
-        look = dict(look, bw_share=0.2, bw_shots=0, bw_contrast=1.18, light_leaks=False,
-                    home_movie_flicker=False, gate_weave=False, step_print=True)
+    # The look (incl. the night director's 16mm B/W share and step-printing) comes from
+    # the Creative Director file (directors/*.json), see style.look().
     shot_look = look_mod.plan_look(look, features, starts, [s.duration for s in storyboard],
                                    seed=f"{features.excerpt_start}|{os.getenv('GITHUB_RUN_ID', '')}")
     for item in shot_look:  # frame-exact transitions keep the cuts on the beat grid

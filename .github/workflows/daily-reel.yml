@@ -32,14 +32,10 @@ on:
           - dry-run
           - review
       style:
-        description: 'Style: auto = rotation (Lana / Night); lana / night = force for this run (Rubin retired 27 Nov)'
-        type: choice
+        description: 'Creative Director: auto = rotation; or a name from directors/ (lana, night, …)'
+        type: string
         required: false
         default: auto
-        options:
-          - auto
-          - lana
-          - night
       song:
         description: 'Optional: one song for this run (part of the title or SoundCloud track id); empty = rotation'
         type: string
@@ -121,6 +117,8 @@ jobs:
       CARLECOOL_TRENDS: 'true'
       CARLECOOL_COVER_MATCH: 'true' # Creative v3: enable safe, local album-art palette ranking
       CARLECOOL_STYLE: ${{ inputs.style || vars.CARLECOOL_STYLE || 'auto' }}
+      # Which Creative Directors take turns (comma list of directors/*.json); empty = all active
+      CARLECOOL_DIRECTORS: ${{ vars.CARLECOOL_DIRECTORS || '' }}
       CARLECOOL_SONG: ${{ inputs.song || '' }}
       # Song pool override without a commit: repo variable CARLECOOL_SONG_POOL=all (see data/song-pool.json)
       CARLECOOL_SONG_POOL: ${{ vars.CARLECOOL_SONG_POOL || '' }}
