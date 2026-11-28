@@ -2462,6 +2462,137 @@
      "quality": 0.5546
     }
    ]
+  },
+  {
+   "at": "2026-11-28T14:54:21+00:00",
+   "run_id": 46155519976,
+   "song": "carl e cool - ducktales (da da da ddd)",
+   "sha256": "f1e39db11fffc79584d52d749cb5be8cfb129787c280b03637a057e596ee6d65",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co"
+   ],
+   "clips": [
+    {
+     "id": "cwzYWjOb3c",
+     "provider": "coverr",
+     "title": "Close-up shot of a car in the rain",
+     "page": "https://coverr.co/videos/close-up-shot-of-a-car-in-the-rain-cwzywjob3c",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "synthesizer",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.6723
+    },
+    {
+     "id": "urEkq8g1f3",
+     "provider": "coverr",
+     "title": "A woman driving a retro car in the rain",
+     "page": "https://coverr.co/videos/a-woman-driving-a-retro-car-in-the-rain-urekq8g1f3",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "synthesizer",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4689
+    },
+    {
+     "id": "YUUYfT9XZO",
+     "provider": "coverr",
+     "title": "Female photographer",
+     "page": "https://coverr.co/videos/female-photographer-yuuyft9xzo",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "cassette",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4706
+    },
+    {
+     "id": "ZLPv55zXTd",
+     "provider": "coverr",
+     "title": "DJ at a party",
+     "page": "https://coverr.co/videos/dj-at-a-party-zlpv55zxtd",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "dj mixer",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.7143
+    },
+    {
+     "id": "70N5BxZcLx",
+     "provider": "coverr",
+     "title": "Cybernetic Dreamscape Closeup",
+     "page": "https://coverr.co/videos/cybernetic-dreamscape-closeup",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "piano",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5007
+    },
+    {
+     "id": "SLm8g6opju",
+     "provider": "coverr",
+     "title": "Panning shot of mountains",
+     "page": "https://coverr.co/videos/panning-shot-of-mountains-slm8g6opju",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "piano",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5965
+    },
+    {
+     "id": "hV3xjiORHB",
+     "provider": "coverr",
+     "title": "American Flag Waving Proudly on a Bright, Sunny Day",
+     "page": "https://coverr.co/videos/american-flag-waving-proudly-on-a-bright-sunny-day",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "american flag",
+     "used": false,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5531
+    },
+    {
+     "id": "9RRnzBcluw",
+     "provider": "coverr",
+     "title": "Girl leaning on a table",
+     "page": "https://coverr.co/videos/girl-leaning-on-a-table-9rrnzbcluw",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "woman piano night",
+     "used": true,
+     "library": false,
+     "shot_size": "close",
+     "quality": 0.4874
+    }
+   ]
   }
  ]
 }
