@@ -245,7 +245,8 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
         ref_all = stylegate.reference_similarity(thumbs, ref_world or world, clip_model)
         keep_idx = []
         for i, verdict in enumerate(verdicts):
-            if stylegate.rejected(verdict):
+            if (stylegate.rejected(verdict)
+                    and not (verdict[1] in stylegate.MALE_PROMPTS and stylegate.is_skate(remote[i].title))):
                 print(f"Clip rejected (looks like {verdict[1]}): {remote[i].id} '{remote[i].title[:50]}'")
                 if thumbs[i] is not None:
                     thumbs[i].unlink(missing_ok=True)

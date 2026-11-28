@@ -114,6 +114,7 @@
     "curb"
    ],
    "roles": [
+    "skater",
     "woman",
     "friends"
    ],
@@ -293,11 +294,16 @@
    "women walking beach"
   ],
   "gear": [
-   "turntable",
-   "vinyl record",
-   "dj mixer",
+   "synthesizer",
    "drum machine",
-   "record player"
+   "mixing console",
+   "piano keys",
+   "rhodes",
+   "turntable",
+   "tape recorder",
+   "cassette",
+   "boombox",
+   "recording studio"
   ],
   "skater": [
    "skateboard sunset",

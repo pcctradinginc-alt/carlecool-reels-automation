@@ -188,12 +188,29 @@ def blocked_clips() -> dict[str, str]:
     return _BLOCKED_CLIPS
 
 
+# Owner, 28 Nov: "Skater dürfen männlich und weiblich sein, bei allen anderen nur Frauen".
+MALE_WORDS = ("man", "men", "guy", "guys", "boy", "boys", "gentleman", "his", "father", "dad",
+              "grandfather", "businessman", "husband", "boyfriend")
+MALE_PROMPTS = ("a man as the main subject of the picture",)
+SKATE_WORDS = ("skate", "skater", "skaters", "skateboard", "skateboarder", "skateboarding", "skatepark")
+
+
+def is_skate(title: str) -> bool:
+    t = _norm(title)
+    return any(f" {w} " in t for w in SKATE_WORDS)
+
+
 def blocked_words(video) -> str | None:
-    """The first block word in the title (any list) or in the tags (synthetic looks only)."""
+    """The first block word in the title (any list) or in the tags (synthetic looks only).
+    Skaters may be men or women; for every other picture the people rules stay."""
     if str(getattr(video, "id", "") or "") in blocked_clips():
         return "rejected by the owner"
-    title = _norm(getattr(video, "title", "") or "")
+    raw = getattr(video, "title", "") or ""
+    title = _norm(raw)
+    skate = is_skate(raw)
     for word in BLOCK_WORDS:
+        if skate and word in MALE_WORDS:
+            continue
         if _norm(word) in title:
             return word
     tags = _norm(" ".join(getattr(video, "tags", ()) or ()))

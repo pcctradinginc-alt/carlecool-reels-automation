@@ -144,6 +144,7 @@
     "woman skateboard"
    ],
    "roles": [
+    "skater",
     "woman"
    ],
    "archive": 0,
@@ -278,10 +279,16 @@
    "women walking night"
   ],
   "gear": [
+   "synthesizer",
+   "drum machine",
+   "mixing console",
+   "vu meter",
+   "piano keys",
    "turntable",
    "dj mixer",
-   "vinyl record",
-   "synthesizer"
+   "recording studio",
+   "cassette",
+   "boombox"
   ],
   "skater": [
    "skateboard night",

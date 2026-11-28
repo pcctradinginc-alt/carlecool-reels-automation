@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 
 FONT_CANDIDATES = (
+    str(Path(__file__).resolve().parent.parent / "assets" / "fonts" / "texgyreadventor-regular.otf"),  # Twin Peaks look
     "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",          # GitHub ubuntu runners
     "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
     "/System/Library/Fonts/Helvetica.ttc",                       # macOS
