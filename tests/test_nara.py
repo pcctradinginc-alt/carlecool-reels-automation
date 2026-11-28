@@ -94,3 +94,13 @@ def test_archive_titles_with_snow_or_children_are_skipped():
     t = "Clark Family Home Movies Kids in Snow R.B.'s First Communion"
     assert archives._blocked(archives._clean(t), archives.PRELINGER_EXCLUDE)
     assert not archives._blocked(archives._clean("Summer at the beach, 1956"), archives.PRELINGER_EXCLUDE)
+
+
+def test_reel_87_filters():
+    from carlecool import stylegate
+    from carlecool.video import Video
+    assert nara._blocked_title("CD ALERT IN TIMES SQUARE; ETC")
+    assert not nara._blocked_title("Scenes around New York City")
+    for t in ("Teenagers skateboarding", "Doctor wearing mask"):
+        assert stylegate.blocked_words(Video("x", "coverr", title=t)), t
+    assert stylegate.blocked_words(Video("x", "coverr", title="Woman skateboarding at night")) is None

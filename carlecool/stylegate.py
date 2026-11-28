@@ -73,6 +73,9 @@ BLOCK_WORDS = (
     "businessman", "his",
     # Reel #62: nudity (AI clip) — never
     "nude", "naked", "topless",
+    # Reel #87: minors and pandemic / medical looks are off-brief (women only, timeless)
+    "teen", "teens", "teenager", "teenagers", "kid", "kids", "child", "children",
+    "doctor", "nurse", "face mask", "wearing mask", "mask",
     # Reel #67 (owner: "die Frau auf dem Balkon passt nicht"): posed influencer / ad-copy
     # portraits ("Elegant Nightscape: A Woman on a Balcony", "Posing on the street",
     # "Stylish Night Portrait") and off-brief objects ("Set of bits in a toolbox")
