@@ -2331,6 +2331,137 @@
      "quality": 0.7365
     }
    ]
+  },
+  {
+   "at": "2026-11-28T13:46:54+00:00",
+   "run_id": 46150718841,
+   "song": "carl e cool - nastro azzuro",
+   "sha256": "b9bfcb416e05b84eee6cb03b3b6fe90190075765b0cfd1a87b8032caff8c73b8",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co"
+   ],
+   "clips": [
+    {
+     "id": "Qy4OkwkwSd",
+     "provider": "coverr",
+     "title": "Cooking outdoors",
+     "page": "https://coverr.co/videos/cooking-outdoors-qy4okwkwsd",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "steam street",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4255
+    },
+    {
+     "id": "agYtmAUZkh",
+     "provider": "coverr",
+     "title": "Woman jogging up some stairs",
+     "page": "https://coverr.co/videos/woman-jogging-up-some-stairs-agytmauzkh",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "brooklyn",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.7418
+    },
+    {
+     "id": "fwwKKUlRGF",
+     "provider": "coverr",
+     "title": "Night city from a moving car",
+     "page": "https://coverr.co/videos/night-city-from-a-moving-car-fwwkkulrgf",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "street lamp",
+     "used": false,
+     "library": false,
+     "shot_size": "wide",
+     "quality": 0.707
+    },
+    {
+     "id": "EkqQNpff93",
+     "provider": "coverr",
+     "title": "Subway entrance",
+     "page": "https://coverr.co/videos/subway-entrance-ekqqnpff93",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "brooklyn",
+     "used": false,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.6699
+    },
+    {
+     "id": "g12cIDKgiy",
+     "provider": "coverr",
+     "title": "Walking through orange grass",
+     "page": "https://coverr.co/videos/walking-through-orange-grass-g12cidkgiy",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "fire escape",
+     "used": false,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5076
+    },
+    {
+     "id": "IkrFuQUduH",
+     "provider": "coverr",
+     "title": "Timelapse of a house in the mountains ",
+     "page": "https://coverr.co/videos/timelapse-of-a-house-in-the-mountains-ikrfuquduh",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "fire escape",
+     "used": true,
+     "library": false,
+     "shot_size": "wide",
+     "quality": 0.5221
+    },
+    {
+     "id": "PZliPz6auZ",
+     "provider": "coverr",
+     "title": "Audio recording studio",
+     "page": "https://coverr.co/videos/audio-recording-studio-pzlipz6auz",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "recording studio",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5282
+    },
+    {
+     "id": "s2Ogofbcfi",
+     "provider": "coverr",
+     "title": "Young Woman Crossing Street at Evening Crosswalk",
+     "page": "https://coverr.co/videos/evening-crosswalk-contemplation",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "woman city night",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5546
+    }
+   ]
   }
  ]
 }
