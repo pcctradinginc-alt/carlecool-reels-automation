@@ -88,6 +88,10 @@ def record_preview_delivery(metadata: dict, *, run_id: int, kind: str = "daily",
         new_entry["style"] = "night" if facts.get("variant") == "night" else facts["style"]
     if new_entry.get("style") and facts.get("theme"):
         new_entry["theme"] = facts["theme"]  # theme rotation (owner, 26 Nov)
+    if facts.get("trend_bucket"):
+        new_entry["trend_bucket"] = str(facts["trend_bucket"])  # 70/20/10 rotation
+    if facts.get("trend_id"):
+        new_entry["trend_id"] = str(facts["trend_id"])
     if facts.get("excerpt"):
         new_entry["excerpt"] = str(facts["excerpt"])  # song-part A/B/C test (owner, 28 Nov)
     if metadata.get("length_bucket") in ("short", "long"):

@@ -663,6 +663,26 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     hook_strategy = ("push" if classic_pipeline()
                      else reach.hook_strategy(edition, (directors.get(director) or {}).get("hook_strategies")))
     print(f"Hook strategy: {hook_strategy}")
+    # Viral Intelligence (owner, 28 Nov): trend scout, not a director. Shadow mode by default:
+    # the decision is recorded and shown in the mail; only CARLECOOL_TREND_MODE=active applies
+    # it (at most one mechanism — here its text line). The classic (#73) pipeline is untouched.
+    trend_decision = {"mode": "off", "bucket": "signature", "chosen": None, "considered": []}
+    if not classic_pipeline():
+        from .trend_compatibility import decide
+        google_topics = []
+        if os.getenv("CARLECOOL_TRENDS", "false").lower() in ("true", "1", "on"):
+            from .trend_signals import fetch_signals
+            google_topics = list(fetch_signals().get("topics") or [])
+        trend_decision = decide(director=directors.current(), theme=theme,
+                                music_classes=themes.music_classes(features), previews=previews,
+                                run_key=edition, google_topics=google_topics)
+        chosen = trend_decision.get("chosen")
+        if trend_decision["mode"] == "active" and chosen and hook_line and (chosen.get("adaptation") or {}).get("text"):
+            hook_line = chosen["adaptation"]["text"]
+        best = next((c for c in trend_decision["considered"] if not c["veto"]), None)
+        print(f"Trend scout ({trend_decision['mode']}, bucket {trend_decision['bucket']}): "
+              + (f"{chosen['name']} ({chosen['score']})" if chosen else
+                 f"no trend — best idea: {best['name']} ({best['score']})" if best else "no suitable trend"))
     # Phase 1: one Creative Plan records every creative decision and its reason (reproducible).
     from .creative_director import build_plan
     creative_plan = build_plan(director=directors.current(), style_decision=style_decision, theme=theme,
@@ -670,6 +690,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                                roles=list(signature_slots), hook_line=hook_line, hook_strategy=hook_strategy,
                                pipeline="classic" if classic_pipeline() else "cinematic",
                                music_fit=theme_fit, length_reason=str(length_choice.get("reason")))
+    creative_plan.trend = trend_decision
     print(creative_plan.summary())
     left_out: set[int] = set()
     if not classic_pipeline() and any(shot_dna):
@@ -734,6 +755,9 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         "style": style_name, "variant": style_variant, "style_basis": style_decision.get("basis"),
         "director": directors.current(), "hook_strategy": hook_strategy,
         "excerpt": excerpt_choice["excerpt"], "excerpt_start": round(float(features.excerpt_start), 2),
+        "trend_mode": trend_decision.get("mode"), "trend_bucket": trend_decision.get("bucket"),
+        "trend_id": (trend_decision.get("chosen") or {}).get("id") if trend_decision.get("mode") == "active" else None,
+        "trend_idea": (next((c for c in trend_decision.get("considered") or [] if not c["veto"]), None) or {}).get("id"),
         "pipeline": "classic" if classic_pipeline() else "cinematic", "library_clips": len(library_ids),
         "coherence": details.get("coherence"),
         "critic": {k: details.get("critic", {}).get(k) for k in ("score", "technical", "aesthetic", "re_edited")},

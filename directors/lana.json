@@ -603,5 +603,16 @@
   "a modern car from the 2020s",
   "a modern glass office tower",
   "modern athleisure sportswear and sneakers"
- ]
+ ],
+ "trend_rules": {
+  "allowed_categories": [
+   "emotion",
+   "storytelling",
+   "aesthetic",
+   "editing",
+   "hook",
+   "culture"
+  ],
+  "rule": "Translate into warm, faded, natural-light Americana / Old Money / 90s street; never app effects, never neon glitch."
+ }
 }
