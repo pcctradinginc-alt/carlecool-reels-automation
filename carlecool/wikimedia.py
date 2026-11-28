@@ -308,3 +308,115 @@ def fetch_wikimedia(role: str, exclude: set[str], workdir: Path, *, run_key: str
                   + ("" if os.getenv("WIKIMEDIA_USER_AGENT") else
                      " (tip: set WIKIMEDIA_USER_AGENT with a contact; Wikimedia throttles anonymous clients)"))
     return found
+
+
+# ---------------------------------------------------------------- theme search (28 Nov)
+# Owner goal: maximally professional Reels without costs. Commons holds many freely
+# licensed videos (PD / CC0 / CC BY only — never SA / NC / ND). Searching with the
+# theme's own words ("skateboarding", "basketball", "sailing", "piano") adds on-brief
+# material for the library and for thin Reels.
+
+def search_files(query: str, *, session=None, limit: int = 30, pause: float = 1.5) -> list[dict]:
+    """Video files whose title / description matches `query` (same fields as category_files)."""
+    session = _session(session)
+    params = {"action": "query", "generator": "search", "gsrsearch": f"{query} filetype:video",
+              "gsrnamespace": 6, "gsrlimit": limit, "prop": "imageinfo",
+              "iiprop": "size|mime|extmetadata|url", "iiurlwidth": 1920,
+              "iiextmetadatafilter": "LicenseShortName|LicenseUrl|Restrictions|Artist",
+              "format": "json", "maxlag": 5}
+    time.sleep(pause)
+    r = session.get(API, params=params, timeout=30)
+    if r.status_code != 200:
+        print(f"Wikimedia search '{query}': HTTP {r.status_code}, skipped")
+        return []
+    try:
+        pages = r.json().get("query", {}).get("pages", {}).values()
+    except ValueError:
+        return []
+    from .archives import PRELINGER_EXCLUDE, _blocked
+    out = []
+    for page in pages:
+        info = (page.get("imageinfo") or [{}])[0]
+        meta = info.get("extmetadata") or {}
+        lic = _text((meta.get("LicenseShortName") or {}).get("value"))
+        restr = _text((meta.get("Restrictions") or {}).get("value"))
+        url = str(info.get("url") or "")
+        title = str(page.get("title", ""))
+        if not license_ok(lic, restr) or urlparse(url).hostname != MEDIA_HOST:
+            continue
+        if _blocked(title.lower(), PRELINGER_EXCLUDE + SENSITIVE):
+            continue
+        out.append({"id": "wm-" + hashlib.sha1(title.encode()).hexdigest()[:12], "title": title[5:120],
+                    "license": lic, "license_url": _text((meta.get("LicenseUrl") or {}).get("value"))[:200],
+                    "artist": _text((meta.get("Artist") or {}).get("value"))[:80],
+                    "page": str(info.get("descriptionurl") or ""), "url": url,
+                    "thumb": str(info.get("thumburl") or ""), "mime": str(info.get("mime") or ""),
+                    "width": int(info.get("width") or 0), "height": int(info.get("height") or 0),
+                    "bytes": int(info.get("size") or 0)})
+    return out
+
+
+def fetch_theme(words: list[str], exclude: set[str], workdir: Path, *, night: bool = False,
+                run_key: str = "", max_clips: int = 3, attempts: int = 6, session=None) -> list[Video]:
+    """Checked Commons video segments for a theme's words; never raises."""
+    if not enabled() or max_clips <= 0:
+        return []
+    from .archives import MIN_MARGIN, remote_info, frame_margin_custom, sample_best
+    from .stylegate import blocked_words
+    session = _session(session)
+    found: list[Video] = []
+    mood = ("at night with city lights", ) if night else ("in warm natural light", )
+    for word in words[:4]:
+        if len(found) >= max_clips or attempts <= 0:
+            break
+        try:
+            items = [i for i in search_files(word, session=session) if i["id"] not in exclude]
+        except (requests.RequestException, ValueError) as exc:
+            print(f"Wikimedia search unavailable: {type(exc).__name__}")
+            break
+        positive = (f"a photo of {word}", f"a photo of {word} {mood[0]}")
+        negative = NEGATIVE + ("a crowd at a public event", "a title card with text")
+        for item in items:
+            if len(found) >= max_clips or attempts <= 0:
+                break
+            if (not item["mime"].startswith("video/") or item["height"] < 720
+                    or not 0 < item.get("bytes", 0) <= MAX_VIDEO_BYTES
+                    or blocked_words(Video(item["id"], "wikimedia", title=item["title"]))):
+                continue
+            attempts -= 1
+            try:
+                suffix = Path(urlparse(item["url"]).path).suffix.lower()[:6] or ".webm"
+                local = download_video(item, workdir / f"wmt_src{suffix}", session=session)
+                target = workdir / f"wmt_{len(found):02d}.mp4"
+                try:
+                    duration, _w, _h = remote_info(str(local))
+                    if duration < SEGMENT_SECONDS + 2:
+                        continue
+                    start, margin = sample_best(str(local), duration, positive, negative,
+                                                f"{run_key}|{item['id']}", SEGMENT_SECONDS)
+                    if start is None:
+                        print(f"Wikimedia theme clip rejected: {item['title'][:50]} ({margin})")
+                        continue
+                    _cut_local(local, start, target, SEGMENT_SECONDS)
+                finally:
+                    local.unlink(missing_ok=True)
+                if night:
+                    from .shot_analysis import sample_frames
+                    _t, frames = sample_frames(target, SEGMENT_SECONDS, 4)
+                    if len(frames) and float(frames.mean()) / 255 > 0.42:
+                        print(f"Wikimedia theme clip rejected (daylight in a Night Reel): {item['title'][:50]}")
+                        target.unlink(missing_ok=True)
+                        continue
+                margins = [frame_margin_custom(target, at, positive, negative) for at in (0.4, 3.5, SEGMENT_SECONDS - 0.6)]
+                if not all(m == m and m > 0 for m in margins) or sum(margins) / len(margins) < MIN_MARGIN:
+                    target.unlink(missing_ok=True)
+                    continue
+                found.append(Video(item["id"], "wikimedia", path=str(target), title=item["title"],
+                                   creator_name=credit_line(item), creator_url=item["page"], page_url=item["page"],
+                                   licence=f"{item['license']} (Wikimedia Commons)",
+                                   licence_url=item.get("license_url") or item["page"], query=word,
+                                   width=item["width"], height=item["height"], duration=SEGMENT_SECONDS))
+                print(f"Wikimedia theme clip: {item['title'][:60]} ({item['license']})")
+            except (requests.RequestException, ValueError, KeyError, OSError, subprocess.SubprocessError) as exc:
+                print(f"Wikimedia theme clip skipped: {item.get('title', '')[:40]}: {type(exc).__name__}")
+    return found

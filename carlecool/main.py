@@ -459,6 +459,14 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     # U.S. National Archives Catalog (owner, 27 Nov): unrestricted public-domain films for
     # both directors, within the monthly API budget (nara.py).
     from . import nara
+    # Owner goal 28 Nov: thin stock (e.g. Coverr throttled) → freely licensed Commons videos
+    # found with the theme's own words (PD / CC0 / CC BY only), at most 3.
+    if theme and not classic_pipeline() and len(paths) < MIN_PORTRAIT_CLIPS + 2:
+        from .wikimedia import fetch_theme
+        theme_words = [w for w in (themes.get(style_name, style_variant, theme) or {}).get("words") or []]
+        archival += fetch_theme(theme_words, set(recent_video_ids(previews, limit=30)) | set(recent),
+                                output_dir / "wikimedia_theme", night=style_variant == "night",
+                                run_key=edition, max_clips=3)
     nara_max = NARA_CLIPS
     if theme:  # owner, 28 Nov (Reel #87): archive films only where the theme wants them
         nara_max = min(NARA_CLIPS, themes.archive_films(style_name, style_variant, theme, NARA_CLIPS))
