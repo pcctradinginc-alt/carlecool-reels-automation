@@ -248,6 +248,17 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     if (style_override in ("", "auto") and style_pkg.mode() == "auto" and style_pkg.rotation_enabled()):
         # Owner, 25 Nov: Lana / Rubin / Night in even rotation instead of cover detection.
         rotated = style_pkg.rotate_style(previews, edition)
+        # Owner, 28 Nov ("es muss besser werden"; #92: song fit 0.41): the music may overrule
+        # the rotation when the song clearly suits the other director far better.
+        if themes_enabled():
+            from . import directors as _dirs, themes as _themes
+            classes = _themes.music_classes(features)
+            fits = {n: max([_themes.music_fit(n, t, classes) or 0.0 for t in _themes.THEMES.get(n, {})] or [0.0])
+                    for n in _dirs.active()}
+            best = max(fits, key=fits.get) if fits else rotated
+            if fits.get(rotated, 0.0) < 0.5 and fits.get(best, 0.0) >= 0.7 and best != rotated:
+                print(f"Director by music: {best} (fit {fits[best]:.2f}) instead of {rotated} ({fits[rotated]:.2f})")
+                rotated = best
         style_override = rotated
     style_decision = style_pkg.analyze(cover, override=style_override, features=features)
     from . import directors
@@ -647,7 +658,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     left_out: set[int] = set()
     if not classic_pipeline() and any(shot_dna):
         from . import coherence
-        left_out = coherence.outliers(shot_dna, set(signature_slots.values()), keep_min=max(5, planned_shots // 2))
+        left_out = coherence.outliers(shot_dna, set(signature_slots.values()), keep_min=max(4, planned_shots // 3))
         for i in sorted(left_out):
             print(f"Coherence: left out {selected[i].id} '{selected[i].title[:50]}' (does not fit the other clips)")
 

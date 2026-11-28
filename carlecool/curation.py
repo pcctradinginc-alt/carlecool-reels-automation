@@ -243,8 +243,18 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
         clip_model = load_clip() if semantic_enabled() else None
         verdicts = stylegate.clip_verdicts(thumbs, world, clip_model)
         ref_all = stylegate.reference_similarity(thumbs, ref_world or world, clip_model)
+        rel = stylegate.relevance(thumbs, [c.query for c in remote], clip_model)
+        # worst first, and only while enough candidates remain (never starve the Reel)
+        off_motif = sorted((i for i in range(len(remote)) if rel[i] is not None and rel[i] < stylegate.RELEVANCE_MARGIN),
+                           key=lambda i: rel[i])
+        dropped = set(off_motif[:max(0, len(remote) - keep)])
         keep_idx = []
         for i, verdict in enumerate(verdicts):
+            if i in dropped:
+                print(f"Clip rejected (does not show '{remote[i].query}', {rel[i]}): {remote[i].id} '{remote[i].title[:50]}'")
+                if thumbs[i] is not None:
+                    thumbs[i].unlink(missing_ok=True)
+                continue
             if (stylegate.rejected(verdict)
                     and not (verdict[1] in stylegate.MALE_PROMPTS and stylegate.is_skate(remote[i].title))):
                 print(f"Clip rejected (looks like {verdict[1]}): {remote[i].id} '{remote[i].title[:50]}'")
