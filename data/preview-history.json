@@ -1090,6 +1090,25 @@
       "style": "night",
       "theme": "skate",
       "length_bucket": "long"
+    },
+    {
+      "at": "2026-11-28T08:59:36+00:00",
+      "kind": "daily",
+      "run_id": 46127126545,
+      "track_id": "2437525038",
+      "video_ids": [
+        "QuqR0i6QYr",
+        "dQxQaBiXjU",
+        "YDGCVTYIwp",
+        "9vamDDcnAf",
+        "BxLxwvKDDY",
+        "MLXh1amZaw",
+        "Ch5RArRbcM"
+      ],
+      "sha256": "b170d0c403561677c19201c109a546606743a6e48791bcfd5067e55a102b8448",
+      "style": "night",
+      "theme": "stadium",
+      "length_bucket": "short"
     }
   ]
 }
