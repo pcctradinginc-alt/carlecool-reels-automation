@@ -1,7 +1,7 @@
 {
  "version": 1,
  "coverr": {
-  "hourly_limit": 50,
+  "hourly_limit": 40,
   "events": [
    {
     "at": "2026-11-26T19:25:00+00:00",
@@ -87,6 +87,12 @@
     "at": "2026-11-28T10:54:11+00:00",
     "run": "46137117450",
     "requests": 22,
+    "blocked": null
+   },
+   {
+    "at": "2026-11-28T12:04:33+00:00",
+    "run": "46140265382",
+    "requests": 28,
     "blocked": null
    }
   ]
