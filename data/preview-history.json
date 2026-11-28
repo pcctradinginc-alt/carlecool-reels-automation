@@ -1069,6 +1069,27 @@
       "style": "lana",
       "theme": "hamptons",
       "length_bucket": "long"
+    },
+    {
+      "at": "2026-11-28T08:21:15+00:00",
+      "kind": "daily",
+      "run_id": 46124262903,
+      "track_id": "2437525035",
+      "video_ids": [
+        "ObawmzmnXB",
+        "E3OkwFTO3v",
+        "nara-28907",
+        "Y3puzpK5d3",
+        "nara-29791",
+        "Q60L2su7q3",
+        "0Pab3nR95c",
+        "kClC0C5BbS",
+        "rSkmslHfQM"
+      ],
+      "sha256": "f4d9d5af175ae7baf0356d02d5b610de6cdc47430618904abf63e6e5fb646e78",
+      "style": "night",
+      "theme": "skate",
+      "length_bucket": "long"
     }
   ]
 }
