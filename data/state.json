@@ -911,20 +911,76 @@
         "theme": "studio",
         "variant": "night"
       }
+    },
+    {
+      "track_id": "2437525041",
+      "at": "2026-11-28T16:17:00.756533+00:00",
+      "video_ids": [
+        "Qy4OkwkwSd",
+        "agYtmAUZkh",
+        "fwwKKUlRGF",
+        "EkqQNpff93",
+        "g12cIDKgiy",
+        "IkrFuQUduH",
+        "PZliPz6auZ",
+        "s2Ogofbcfi"
+      ],
+      "sha256": "b9bfcb416e05b84eee6cb03b3b6fe90190075765b0cfd1a87b8032caff8c73b8",
+      "approval_issue": 109,
+      "provider": "zernio",
+      "target": "tiktok",
+      "provider_post_id": "6b0afe80c4fad7ded057231a",
+      "platform_status": {
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 0,
+        "bpm": 123.0,
+        "coherence": 0.521,
+        "critic": {
+          "aesthetic": [],
+          "re_edited": null,
+          "score": 0.908,
+          "technical": []
+        },
+        "director": "night",
+        "excerpt": "hook",
+        "excerpt_start": 124.9,
+        "first_shot_s": 0.92,
+        "hashtags": [
+          "#carlecool",
+          "#nightdrive",
+          "#vinyl",
+          "#beatmaker",
+          "#instrumental"
+        ],
+        "hook_at": 0.0,
+        "hook_line": "",
+        "hook_strategy": "motion",
+        "length_bucket": "short",
+        "length_s": 15.6,
+        "library_clips": 0,
+        "opening_clip": "Qy4OkwkwSd",
+        "opening_motif": "steam street",
+        "opening_source": "coverr",
+        "pipeline": "cinematic",
+        "question": false,
+        "reach_fx": true,
+        "roles": [
+          "gear",
+          "woman"
+        ],
+        "scenes": 7,
+        "storyboard": 0,
+        "style": "lana",
+        "style_basis": "rotation (night)",
+        "text_hook": false,
+        "theme": "projects",
+        "variant": "night"
+      }
     }
   ],
-  "pending": {
-    "track_id": "2437525041",
-    "sha256": "b9bfcb416e05b84eee6cb03b3b6fe90190075765b0cfd1a87b8032caff8c73b8",
-    "at": "2026-11-28T16:17:00.756533+00:00",
-    "issue_number": 109,
-    "target": "tiktok",
-    "provider": "zernio",
-    "provider_post_id": "6b0afe80c4fad7ded057231a",
-    "platform_status": {
-      "tiktok": "uploading"
-    }
-  },
+  "pending": null,
   "reconciled": [
     {
       "track_id": "2373071753",
