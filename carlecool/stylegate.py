@@ -73,6 +73,8 @@ BLOCK_WORDS = (
     "businessman", "his",
     # Reel #62: nudity (AI clip) — never
     "nude", "naked", "topless",
+    # bibles (27 Nov): no smoking (Reel #92: "Brunette woman smoking outside in the rain")
+    "smoking", "smoke a cigarette", "cigarette", "cigarettes", "vaping", "vape",
     # Reel #87: minors and pandemic / medical looks are off-brief (women only, timeless)
     "teen", "teens", "teenager", "teenagers", "kid", "kids", "child", "children",
     "doctor", "nurse", "face mask", "wearing mask", "mask",
@@ -374,3 +376,43 @@ def too_bright_for_night(image) -> float | None:
         return None
     mean, median = float(px.mean()), float(np.median(px))
     return round(mean, 3) if mean > NIGHT_MAX_MEAN and median > NIGHT_MAX_MEDIAN else None
+
+
+# Owner, 28 Nov ("es muss besser werden"): Reel #92 showed basketball hoops for "baseball",
+# a river and paragliding for "land rover". A clip must SHOW its search motif: the CLIP
+# similarity to "a photo of <query>" must beat the best of a set of generic scenes /
+# typical confusions. Signature roles keep their own gates.
+GENERIC_SCENES = ("a landscape", "a river, lake or the sea", "a city street", "the sky and clouds",
+                  "a person", "a room interior", "a basketball court", "people doing sports",
+                  "a forest", "a beach", "a road", "a building")
+RELEVANCE_MARGIN = 0.0
+
+
+def relevance(images, queries: list[str], clip) -> list[float | None]:
+    """Per image: sim(query) − max sim(generic scenes); None if unscored."""
+    if clip is None or not images:
+        return [None] * len(images)
+    try:
+        import torch
+        from PIL import Image
+        model, preprocess, tokenizer = clip
+        uniq = sorted({q for q in queries if q})
+        prompts = [f"a photo of {q}" for q in uniq] + [f"a photo of {g}" for g in GENERIC_SCENES]
+        with torch.no_grad():
+            text = torch.nn.functional.normalize(model.encode_text(tokenizer(prompts)), dim=-1)
+            out = []
+            for image, q in zip(images, queries):
+                if image is None or not q:
+                    out.append(None)
+                    continue
+                with Image.open(image) as img:
+                    v = torch.nn.functional.normalize(
+                        model.encode_image(preprocess(img.convert("RGB")).unsqueeze(0)), dim=-1)
+                sims = (v @ text.T)[0].tolist()
+                own = sims[uniq.index(q)]
+                generic = max(sims[len(uniq):])
+                out.append(round(own - generic, 4))
+        return out
+    except Exception as exc:
+        print("Relevance check unavailable:", type(exc).__name__)
+        return [None] * len(images)

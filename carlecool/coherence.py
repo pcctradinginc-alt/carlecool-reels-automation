@@ -247,7 +247,7 @@ def reel_coherence(shots, dna: list[dict | None]) -> float | None:
     return round(sum(vals) / len(vals), 4) if vals else None
 
 
-OUTLIER_GAP = 0.10  # mean transition this far below the median → the clip does not belong
+OUTLIER_GAP = 0.06  # 28 Nov: stricter — fewer, better-matching clips (was 0.10)
 
 
 def outliers(dna: list[dict | None], protected: set[int], keep_min: int) -> set[int]:
