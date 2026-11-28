@@ -271,3 +271,14 @@ def outliers(dna: list[dict | None], protected: set[int], keep_min: int) -> set[
         if i not in protected and mean[i] < med - OUTLIER_GAP:
             out.add(i)
     return out
+
+
+def pool_coherence(dna: list[dict | None], used: set[int] | None = None) -> float | None:
+    """Mean transition score over all pairs of the available clips: what the material
+    itself allows (an edit cannot be more coherent than its clips fit together)."""
+    idx = [i for i, d in enumerate(dna) if d and (used is None or i in used)]
+    if len(idx) < 2:
+        return None
+    embs = {i: _emb(dna[i]) for i in idx}
+    vals = [transition(dna[a], dna[b], embs.get(a), embs.get(b))["total"] for a in idx for b in idx if a != b]
+    return round(sum(vals) / len(vals), 4) if vals else None

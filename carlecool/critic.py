@@ -167,10 +167,20 @@ def review(path: Path, details: dict, *, compression: bool = True) -> dict:
         if any(a == b for a, b in zip(srcs, srcs[1:])):
             issues.append("the same clip twice in a row")
     coh = details.get("coherence")
+    material = details.get("material_coherence")
+    material_limited = False
     if coh is not None:
         measures["coherence"] = coh
+        if material is not None:
+            measures["material_coherence"] = material
         if coh < 0.45:
-            issues.append("incoherent: scenes do not belong together")
+            if material is not None and coh >= material - 0.01:
+                # the order is already at least as good as the clips allow: re-editing cannot
+                # help — the MATERIAL does not fit together (a job for the library builder)
+                issues.append("material does not fit together (the edit is already the best order)")
+                material_limited = True
+            else:
+                issues.append("incoherent: scenes do not belong together")
     technical: list[str] = []
     audio = _audio_checks(Path(path))
     measures.update(audio)
@@ -195,4 +205,5 @@ def review(path: Path, details: dict, *, compression: bool = True) -> dict:
     serious = any(i.startswith(("incoherent", "monotonous", "over-processed", "the same clip")) for i in issues)
     from .calibration import retry_threshold
     return {"score": score, "technical": technical, "aesthetic": issues, "issues": technical + issues,
-            "retry": serious or score < retry_threshold(RETRY_BELOW), "measures": measures}
+            "retry": (serious or score < retry_threshold(RETRY_BELOW)) and not material_limited,
+            "material_limited": material_limited, "measures": measures}
