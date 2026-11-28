@@ -104,6 +104,16 @@ def _build(*, out_dir: Path, now: datetime | None) -> dict:
         providers.record(video_mod.COVERR_REQUESTS, video_mod.coverr_blocked(), os.getenv("GITHUB_RUN_ID"))
     else:
         print(f"Library build: Coverr {plan['action']} — skipped this run")
+    # Wikimedia Commons (PD / CC0 / CC BY videos) by the theme's own words — free, no budget issue
+    from . import wikimedia
+    wm = wikimedia.fetch_theme([w for w in words if w not in ("american flag",)], set(known), out_dir / "wm",
+                               night=variant == "night", run_key=os.getenv("GITHUB_RUN_ID", "lb"),
+                               max_clips=max(0, NEW_PER_RUN - added))
+    for v in wm:
+        dna = shot_analysis.analyze(Path(v.path), clip=clip, references=refs)
+        if float(dna.get("quality") or 0) >= MIN_QUALITY and library.add(
+                data, v, Path(v.path), dna, director=director, theme=theme, run_id=os.getenv("GITHUB_RUN_ID")):
+            added += 1
     archive = int(info.get("archive") or 0)
     if nara.api_key() and archive > 0:
         clips, calls = nara.fetch_nara(director, set(known), out_dir / "nara", run_key=os.getenv("GITHUB_RUN_ID", "lb"),
