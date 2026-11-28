@@ -1836,6 +1836,122 @@
      "quality": 0.4673
     }
    ]
+  },
+  {
+   "at": "2026-11-28T08:59:37+00:00",
+   "run_id": 46127126545,
+   "song": "carl e cool - voco babie",
+   "sha256": "b170d0c403561677c19201c109a546606743a6e48791bcfd5067e55a102b8448",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co"
+   ],
+   "clips": [
+    {
+     "id": "QuqR0i6QYr",
+     "provider": "coverr",
+     "title": "American flag in a town",
+     "page": "https://coverr.co/videos/american-flag-in-a-town",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "american flag",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.3881
+    },
+    {
+     "id": "dQxQaBiXjU",
+     "provider": "coverr",
+     "title": "Slow-mo basketball hoop",
+     "page": "https://coverr.co/videos/slow-mo-basketball-hoop-dqxqabixju",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "baseball",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5059
+    },
+    {
+     "id": "YDGCVTYIwp",
+     "provider": "coverr",
+     "title": "Basketball hoop",
+     "page": "https://coverr.co/videos/basketball-hoop-ydgcvtyiwp",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "baseball",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.3996
+    },
+    {
+     "id": "9vamDDcnAf",
+     "provider": "coverr",
+     "title": "Paragliding over Muriwai Beach",
+     "page": "https://coverr.co/videos/paragliding-over-muriwai-beach-9vamddcnaf",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "land rover",
+     "used": false,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.727
+    },
+    {
+     "id": "BxLxwvKDDY",
+     "provider": "coverr",
+     "title": "A view of a river",
+     "page": "https://coverr.co/videos/a-view-of-a-river-bxlxwvkddy",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "land rover",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5629
+    },
+    {
+     "id": "MLXh1amZaw",
+     "provider": "coverr",
+     "title": "Ford in a parking lot",
+     "page": "https://coverr.co/videos/ford-in-a-parking-lot-mlxh1amzaw",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "american flag",
+     "used": true,
+     "library": false,
+     "shot_size": "detail",
+     "quality": 0.4364
+    },
+    {
+     "id": "Ch5RArRbcM",
+     "provider": "coverr",
+     "title": "Brunette woman smoking outside in the rain",
+     "page": "https://coverr.co/videos/brunette-woman-smoking-outside-in-the-rain-ch5rarrbcm",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "woman night",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5546
+    }
+   ]
   }
  ]
 }
