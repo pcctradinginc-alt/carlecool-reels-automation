@@ -102,8 +102,12 @@ def _downbeat_offset(beat_frames: np.ndarray, bass_onset: np.ndarray) -> int:
     return int(np.argmax(scores))
 
 
+EXCERPTS = ("hook", "second", "start")  # owner, 28 Nov: test different parts of a song
+
+
 def _hook_start(beat_times: np.ndarray, downbeat_idx: list[int], beat_energy: np.ndarray,
-                length: float, track_seconds: float, *, lead_bars: int = 0) -> tuple[float, float]:
+                length: float, track_seconds: float, *, lead_bars: int = 0,
+                excerpt: str = "hook") -> tuple[float, float]:
     """Return (start, hook_time) in song seconds.
 
     The hook is the downbeat with the biggest energy lift (next 2 bars vs previous 2 bars,
@@ -112,6 +116,7 @@ def _hook_start(beat_times: np.ndarray, downbeat_idx: list[int], beat_energy: np
     of lead-in at ~100 BPM is exactly those 2.4 s (owner, 25 Nov: hook in the first second).
     """
     best = None
+    ranked = []
     for pos, beat_index in enumerate(downbeat_idx):
         start_index = downbeat_idx[pos - lead_bars] if pos >= lead_bars else None
         if start_index is None:
@@ -126,8 +131,14 @@ def _hook_start(beat_times: np.ndarray, downbeat_idx: list[int], beat_energy: np
         window = beat_energy[(beat_times >= start) & (beat_times < start + length)]
         lift = float(np.mean(after) - np.mean(before))
         score = 0.6 * lift + 0.4 * float(np.mean(window)) if window.size else lift
+        ranked.append((score, start, float(beat_times[beat_index])))
         if best is None or score > best[0]:
             best = (score, start, float(beat_times[beat_index]))
+    if excerpt == "second" and best is not None:
+        # the strongest lift in ANOTHER part of the song (at least ¾ of a Reel away)
+        other = [r for r in sorted(ranked, key=lambda r: -r[0]) if abs(r[1] - best[1]) >= 0.75 * length]
+        if other:
+            best = other[0]
     if best is None:
         # No lift found: loudest whole-length window starting on a downbeat.
         candidates = [float(beat_times[i]) for i in downbeat_idx
@@ -157,7 +168,7 @@ def _sound_character(clip: np.ndarray, sr: int) -> tuple[float, float, float]:
 
 
 def _librosa_features(y22: np.ndarray, sr: int, max_seconds: float, genre: str,
-                      fixed_start: float | None) -> AudioFeatures:
+                      fixed_start: float | None, excerpt: str = "hook") -> AudioFeatures:
     import librosa
 
     track_seconds = len(y22) / sr
@@ -198,7 +209,8 @@ def _librosa_features(y22: np.ndarray, sr: int, max_seconds: float, genre: str,
         start = later[0] if later and later[0] + length <= track_seconds else 0.0
         hook = start
     else:
-        start, hook = _hook_start(beat_times, downbeat_idx, beat_energy, length, track_seconds)
+        start, hook = _hook_start(beat_times, downbeat_idx, beat_energy, length, track_seconds,
+                                  excerpt=excerpt)
     end = start + length
     inside = (beat_times >= start - 1e-6) & (beat_times < end - 1e-6)
     rel_beats = tuple(round(float(t - start), 4) for t in beat_times[inside])
@@ -263,7 +275,7 @@ def _heuristic_features(y: np.ndarray, reel_seconds: float, genre: str) -> Audio
 
 
 def analyze_audio(path: str, reel_seconds: float, genre: str = "", *,
-                  fixed_start: float | None = None) -> AudioFeatures:
+                  fixed_start: float | None = None, excerpt: str = "hook") -> AudioFeatures:
     """Analyze a track; `reel_seconds` is the TARGET Reel length (whole phrases around it)."""
     try:
         import librosa  # noqa: F401
@@ -272,8 +284,10 @@ def analyze_audio(path: str, reel_seconds: float, genre: str = "", *,
     if librosa is not None:
         try:
             y22 = _decode(path, 22050)
+            if excerpt == "start" and fixed_start is None:
+                fixed_start = 0.0  # the song's own opening (first downbeat)
             return _librosa_features(y22, 22050, max(MIN_REEL, float(reel_seconds)),
-                                     genre, fixed_start)
+                                     genre, fixed_start, excerpt)
         except ValueError as exc:
             if "shorter" in str(exc):
                 raise

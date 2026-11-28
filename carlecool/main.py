@@ -224,7 +224,11 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         perf_model = {}  # observation only until a meaningful sample exists
     length_choice = performance.choose_length(track.id, previews, config.reel_seconds, edition, perf_model)
     print(f"Reel length: {length_choice['bucket']} (target {length_choice['target']:.0f}s; {length_choice['reason']})")
-    features = analyze_audio(str(audio), length_choice["target"], track.genre, fixed_start=fixed_start)
+    excerpt_choice = performance.choose_excerpt(track.id, previews, edition) if fixed_start is None \
+        else {"excerpt": "start", "reason": "profile: beginning"}
+    print(f"Song part: {excerpt_choice['excerpt']} ({excerpt_choice['reason']})")
+    features = analyze_audio(str(audio), length_choice["target"], track.genre, fixed_start=fixed_start,
+                             excerpt=excerpt_choice["excerpt"])
     reel_length = float(features.reel_length or length_choice["target"])
     print(f"Estimated musical features: BPM={features.bpm}, mood={features.mood}, "
           f"energy={features.energy}, analyzer={features.analyzer}, length={reel_length:.2f}s, "
@@ -729,6 +733,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     reel_facts = {
         "style": style_name, "variant": style_variant, "style_basis": style_decision.get("basis"),
         "director": directors.current(), "hook_strategy": hook_strategy,
+        "excerpt": excerpt_choice["excerpt"], "excerpt_start": round(float(features.excerpt_start), 2),
         "pipeline": "classic" if classic_pipeline() else "cinematic", "library_clips": len(library_ids),
         "coherence": details.get("coherence"),
         "critic": {k: details.get("critic", {}).get(k) for k in ("score", "technical", "aesthetic", "re_edited")},
