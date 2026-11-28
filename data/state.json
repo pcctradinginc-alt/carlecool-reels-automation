@@ -785,7 +785,11 @@
     "at": "2026-11-28T13:08:15.784456+00:00",
     "issue_number": 103,
     "target": "tiktok",
-    "provider": "zernio"
+    "provider": "zernio",
+    "provider_post_id": "6b0ad24493f9d536ae63e81c",
+    "platform_status": {
+      "tiktok": "uploading"
+    }
   },
   "reconciled": [
     {
