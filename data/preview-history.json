@@ -1189,6 +1189,27 @@
       "theme": "projects",
       "excerpt": "hook",
       "length_bucket": "short"
+    },
+    {
+      "at": "2026-11-28T14:54:20+00:00",
+      "kind": "daily",
+      "run_id": 46155519976,
+      "track_id": "2437525050",
+      "video_ids": [
+        "cwzYWjOb3c",
+        "urEkq8g1f3",
+        "YUUYfT9XZO",
+        "ZLPv55zXTd",
+        "70N5BxZcLx",
+        "SLm8g6opju",
+        "hV3xjiORHB",
+        "9RRnzBcluw"
+      ],
+      "sha256": "f1e39db11fffc79584d52d749cb5be8cfb129787c280b03637a057e596ee6d65",
+      "style": "night",
+      "theme": "studio",
+      "excerpt": "start",
+      "length_bucket": "long"
     }
   ]
 }
