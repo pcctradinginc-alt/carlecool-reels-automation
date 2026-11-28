@@ -66,6 +66,7 @@ def _publish_setup(monkeypatch, polled):
     monkeypatch.setattr(Zernio, "verify_connections", lambda self, accounts: {n: True for n in accounts})
     monkeypatch.setattr(Zernio, "preflight_tiktok", lambda self, account_id: None)
     monkeypatch.setattr(Zernio, "upload", lambda self, video: "https://media.zernio.com/temp/x.mp4")
+    monkeypatch.setattr("carlecool.zernio.check_upload_file", lambda video: 2048)
     monkeypatch.setattr(Zernio, "publish", lambda self, **kwargs: _post("uploading"))
     monkeypatch.setattr("carlecool.zernio.wait_for_result", lambda client, response, target: polled)
     monkeypatch.setenv("ZERNIO_API_KEY", "zrk_test_long_secret")

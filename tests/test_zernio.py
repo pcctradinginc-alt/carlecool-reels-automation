@@ -115,6 +115,7 @@ def test_pending_journal_stays_after_partial_provider_result(tmp_path, monkeypat
     monkeypatch.setenv("ZERNIO_INSTAGRAM_ACCOUNT_ID", "ig1")
     monkeypatch.setenv("ZERNIO_TIKTOK_ACCOUNT_ID", "tt1")
     monkeypatch.setattr(Zernio, "upload", lambda self, video: PRESIGN["publicUrl"])
+    monkeypatch.setattr("carlecool.zernio.check_upload_file", lambda video: 2048)
     monkeypatch.setattr(Zernio, "publish", lambda self, **kwargs: {"post": {
         "_id": "z123", "status": "partial",
         "platforms": [

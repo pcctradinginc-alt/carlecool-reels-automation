@@ -131,7 +131,7 @@ def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
     12 minutes. Published → journal + post URLs + issue closed automatically.
     Failed, partial or still processing → journal stays pending; never re-posted.
     """
-    from .zernio import Zernio, published_platforms
+    from .zernio import Zernio, check_upload_file, published_platforms
     if len(set(approval['video_ids'])) < 5:
         raise RuntimeError('Require 5 unique licensed clips for automatic posting')
     if state.get('pending'):
@@ -145,6 +145,9 @@ def publish_via_zernio(issue_number: int, approval: dict, metadata: dict,
     client.verify_connections({name: ids[name] for name in required})
     if 'tiktok' in required:
         client.preflight_tiktok(ids['tiktok'])
+    # Local checks must fail BEFORE the reservation; otherwise a file that never
+    # left the runner leaves a pending entry that blocks all later Reels.
+    check_upload_file(video)
     timestamp = datetime.now(timezone.utc).isoformat()
     state['pending'] = {
         'track_id': approval['track_id'],

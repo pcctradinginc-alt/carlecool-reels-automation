@@ -35,6 +35,23 @@ def _check_media_url(url: str, *, upload: bool) -> str:
     return url
 
 
+# The full-quality master (no Gmail limit) is often > 16 MB; Instagram Reels and
+# TikTok accept far larger files. 28 Nov: the old 16 MB cap rejected a reviewed
+# master AFTER the journal reservation and blocked every later publication.
+MAX_UPLOAD_BYTES = 250 * 1024 * 1024
+
+
+def check_upload_file(video: Path) -> int:
+    """Validate the MP4 locally; call before reserving a publication."""
+    video = Path(video)
+    if video.suffix.lower() != ".mp4" or not video.is_file():
+        raise ValueError("Original MP4 is missing")
+    size = video.stat().st_size
+    if not 1024 <= size <= MAX_UPLOAD_BYTES:
+        raise ValueError(f"Original MP4 size is unsafe ({size} bytes)")
+    return size
+
+
 class Zernio:
     def __init__(self, api_key: str, *, session=None):
         if not api_key or len(api_key) < 12:
@@ -123,12 +140,8 @@ class Zernio:
 
     def upload(self, video: Path) -> str:
         """Upload a reviewed MP4 via a time-limited signed URL."""
+        size = check_upload_file(video)
         video = Path(video)
-        if video.suffix.lower() != ".mp4" or not video.is_file():
-            raise ValueError("Original MP4 is missing")
-        size = video.stat().st_size
-        if not 1024 <= size <= 16_000_000:
-            raise ValueError("Original MP4 size is unsafe")
         result = self._post("/v1/media/presign", {
             "filename": "carlecool-approved.mp4",
             "contentType": "video/mp4",
