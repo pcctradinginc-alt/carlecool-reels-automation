@@ -90,7 +90,15 @@ for _n, _d in _directors.load_all().items():
             _table[_n] = tuple(_d["roles"][_role])
 
 
-def queries_for(role: str, style: str | None, variant: str | None = None) -> tuple[str, ...]:
+def queries_for(role: str, style: str | None, variant: str | None = None, theme: str | None = None) -> tuple[str, ...]:
+    """Search words of a signature role; a theme may bring its own (owner, 28 Nov: the woman
+    shot of an Analog-Music Reel must not be searched as "woman horse")."""
+    if theme:
+        from . import themes as _themes
+        info = _themes.get(style, variant, theme) or {}
+        own = (info.get("role_queries") or {}).get(role if role != "friends2" else "friends")
+        if own:
+            return tuple(own)
     table = {"skater": SKATER_QUERIES, "woman": WOMAN_QUERIES, "friends": FRIENDS_QUERIES,
              "friends2": FRIENDS_QUERIES, "americana": AMERICANA_QUERIES, "flag": FLAG_QUERIES,
              "car": CAR_QUERIES, "gear": GEAR_QUERIES}[role]
