@@ -1689,6 +1689,153 @@
      "quality": null
     }
    ]
+  },
+  {
+   "at": "2026-11-28T08:21:16+00:00",
+   "run_id": 46124262903,
+   "song": "carl e cool - mishabu",
+   "sha256": "f4d9d5af175ae7baf0356d02d5b610de6cdc47430618904abf63e6e5fb646e78",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co",
+    "🎬 Archive footage: U.S. National Archives (catalog.archives.gov), public domain"
+   ],
+   "clips": [
+    {
+     "id": "ObawmzmnXB",
+     "provider": "coverr",
+     "title": "Underground skate park",
+     "page": "https://coverr.co/videos/underground-skate-park-obawmzmnxb",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "skatepark",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5292
+    },
+    {
+     "id": "E3OkwFTO3v",
+     "provider": "coverr",
+     "title": "Sneakers near a car",
+     "page": "https://coverr.co/videos/sneakers-near-a-car-e3okwfto3v",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "tunnel",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.652
+    },
+    {
+     "id": "nara-28907",
+     "provider": "nara",
+     "title": "Scenes around New York City",
+     "page": "https://catalog.archives.gov/id/28907",
+     "creator": "U.S. National Archives",
+     "licence": "Public domain – U.S. National Archives (use restriction: Unrestricted). This product uses the National Archives Catalog API but is not endorsed or certified by the National Archives and Records Administration.",
+     "licence_url": "https://catalog.archives.gov/id/28907",
+     "used_at": "2026-11-28",
+     "motif": "times square",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4937
+    },
+    {
+     "id": "Y3puzpK5d3",
+     "provider": "coverr",
+     "title": "Doctor wearing mask",
+     "page": "https://coverr.co/videos/doctor-wearing-mask-y3puzpk5d3",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "curb",
+     "used": false,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.6874
+    },
+    {
+     "id": "nara-29791",
+     "provider": "nara",
+     "title": "CD ALERT IN TIMES SQUARE; ETC",
+     "page": "https://catalog.archives.gov/id/29791",
+     "creator": "U.S. National Archives",
+     "licence": "Public domain – U.S. National Archives (use restriction: Unrestricted). This product uses the National Archives Catalog API but is not endorsed or certified by the National Archives and Records Administration.",
+     "licence_url": "https://catalog.archives.gov/id/29791",
+     "used_at": "2026-11-28",
+     "motif": "times square",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4509
+    },
+    {
+     "id": "Q60L2su7q3",
+     "provider": "coverr",
+     "title": "Teenagers skateboarding",
+     "page": "https://coverr.co/videos/teenagers-skateboarding-q60l2su7q3",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "night skate",
+     "used": false,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4984
+    },
+    {
+     "id": "0Pab3nR95c",
+     "provider": "coverr",
+     "title": "Underground subway arrival",
+     "page": "https://coverr.co/videos/underground-subway-arrival-0pab3nr95c",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "tunnel",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4322
+    },
+    {
+     "id": "kClC0C5BbS",
+     "provider": "coverr",
+     "title": "Hands leafing through vinyl disc cases",
+     "page": "https://coverr.co/videos/hands-leafing-through-vinyl-disc-cases-kclc0c5bbs",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "turntable",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.3074
+    },
+    {
+     "id": "rSkmslHfQM",
+     "provider": "coverr",
+     "title": "A woman reading a book and giving a shy smile. ",
+     "page": "https://coverr.co/videos/a-woman-reading-a-book-and-giving-a-shy-smile-rskmslhfqm",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "woman neon",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4673
+    }
+   ]
   }
  ]
 }
