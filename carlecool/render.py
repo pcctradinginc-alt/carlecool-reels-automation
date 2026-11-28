@@ -347,9 +347,11 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         locked_now = {0, len(storyboard) - 1} | {i for i, sh in enumerate(storyboard) if sh.source_index in reserved}
         storyboard = look_mod.align_motion(storyboard, kicks, timelines, source_durations, locked_now)
     final_coherence = None
+    material_coherence = None
     if dna and len(dna) == len(videos):
         from . import coherence
         final_coherence = coherence.reel_coherence(storyboard, dna)
+        material_coherence = coherence.pool_coherence(dna, {s.source_index for s in storyboard})
     storyboard, loop_sealed = look_mod.seal_loop(storyboard, source_durations)
     from .grading import cover_luts
     from .grading import reference_stats
@@ -663,7 +665,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             "smart_cropped_shots": reframed,
             "dissolves": sum(1 for d in dissolves if d > 0), "slowmo_shots": slowed,
             "light_leaks": leaks, "punch_ins": punched, "moving_shots": zoomed, "hook_strategy": hook_strategy,
-            "coherence": final_coherence, "storyboards": storyboard_scores, "variant_rank": variant_rank,
+            "coherence": final_coherence, "material_coherence": material_coherence,
+            "storyboards": storyboard_scores, "variant_rank": variant_rank,
             "slot_functions": list(slot_plan), "flash_cuts": flashes, "bw_shots": bw_shots,
             "hook_text": hook_text if hook_png is not None else "",
             "first_shot_s": round(storyboard[0].duration, 2) if storyboard else None,
