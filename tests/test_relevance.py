@@ -11,3 +11,12 @@ def test_smoking_is_blocked_and_relevance_without_model_is_neutral():
 
 def test_outlier_selection_is_stricter_now():
     assert coherence.OUTLIER_GAP <= 0.06
+
+
+def test_basketball_streetball_night_and_tennis_hamptons():
+    from carlecool import directors
+    night = directors.get("night")["themes"]
+    assert {"basketball", "streetball"} <= set(night["stadium"]["words"]) and "streetball" in night["projects"]["words"]
+    assert {"tennis", "tennis court"} <= set(directors.get("lana")["themes"]["hamptons"]["words"])
+    for w in ("basketball", "streetball", "tennis court"):
+        assert stylegate.blocked_words(Video("x", "coverr", title=w)) is None

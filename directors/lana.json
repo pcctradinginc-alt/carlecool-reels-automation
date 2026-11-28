@@ -164,12 +164,12 @@
     "beach house",
     "classic sailboat",
     "tennis",
+    "tennis court",
     "country club",
     "white dress",
     "lighthouse",
     "sand dunes",
     "estate lawn",
-    "cable knit",
     "polo"
    ],
    "roles": [
@@ -440,7 +440,9 @@
   "a close-up of a roland drum machine with colored buttons",
   "hands on a rhodes electric piano in sunlight",
   "a reel-to-reel tape recorder in a warm studio",
-  "a vinyl record spinning on a turntable in summer light"
+  "a vinyl record spinning on a turntable in summer light",
+  "a woman in tennis whites on a grass tennis court in golden afternoon light",
+  "a tennis court by the sea in the hamptons"
  ],
  "look": {
   "archive_films": 4,
