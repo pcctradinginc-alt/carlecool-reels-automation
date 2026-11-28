@@ -88,6 +88,8 @@ def record_preview_delivery(metadata: dict, *, run_id: int, kind: str = "daily",
         new_entry["style"] = "night" if facts.get("variant") == "night" else facts["style"]
     if new_entry.get("style") and facts.get("theme"):
         new_entry["theme"] = facts["theme"]  # theme rotation (owner, 26 Nov)
+    if facts.get("excerpt"):
+        new_entry["excerpt"] = str(facts["excerpt"])  # song-part A/B/C test (owner, 28 Nov)
     if metadata.get("length_bucket") in ("short", "long"):
         new_entry["length_bucket"] = metadata["length_bucket"]  # length A/B test per song
     # Only the canonical repository-relative path is used; no user-controlled URL.

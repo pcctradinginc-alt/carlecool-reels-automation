@@ -328,7 +328,7 @@ def _model_for(rows: list[dict]) -> dict:
     # Phase 5: factors of the new pipeline — REPORTED only (no automatic weight change below
     # MIN_POSTS per side; too few posts give spurious correlations).
     report = {}
-    for factor in ("pipeline", "director", "theme", "hook_strategy"):
+    for factor in ("pipeline", "director", "theme", "hook_strategy", "excerpt"):
         groups: dict = {}
         for r in rows:
             v = r["facts"].get(factor)
@@ -390,6 +390,22 @@ def choose_length(track_id: str, previews: list[dict], long_target: float, run_k
         reason = f"A/B test (this song so far: {shorts}× short, {longs}× long)"
     return {"bucket": chosen, "target": SHORT_TARGET if chosen == "short" else float(long_target),
             "reason": reason}
+
+
+def choose_excerpt(track_id: str, previews: list[dict], run_key: str) -> dict:
+    """Owner, 28 Nov: try different parts of each song and compare the numbers. Every song
+    gets the hook (drop), another strong part and its opening in turn (fair A/B/C per song);
+    CARLECOOL_EXCERPT=hook|second|start forces one."""
+    from .analysis import EXCERPTS
+    forced = os.getenv("CARLECOOL_EXCERPT", "").strip().lower()
+    if forced in EXCERPTS:
+        return {"excerpt": forced, "reason": "manual"}
+    used = [p.get("excerpt") for p in previews if str(p.get("track_id")) == str(track_id) and p.get("excerpt")]
+    counts = {e: used.count(e) for e in EXCERPTS}
+    low = min(counts.values())
+    tied = [e for e in EXCERPTS if counts[e] == low]
+    pick = tied[int(_share(f"{run_key}|excerpt") * len(tied)) % len(tied)]
+    return {"excerpt": pick, "reason": f"A/B/C test (this song so far: {counts})"}
 
 
 def role_priority(default: tuple[str, ...], model: dict | None) -> tuple[str, ...]:
