@@ -47,7 +47,9 @@ EXCLUDE = ("president", "kennedy", "jfk", "onassis", "nixon", "eisenhower", "tru
            "war", "army", "navy", "air force", "marine", "military", "combat", "bomb", "atomic",
            "nuclear", "weapon", "missile", "soldier", "veteran", "vietnam", "korea", "nazi",
            "propaganda", "crime", "police", "prison", "accident", "disaster", "fire", "riot",
-           "funeral", "hospital", "surgery", "disease", "drug", "training film", "lecture")
+           "funeral", "hospital", "surgery", "disease", "drug", "training film", "lecture",
+           # Reel #87: "CD ALERT IN TIMES SQUARE" (Cold-War civil-defence drill)
+           "alert", "civil defense", "civil defence", "cd", "air raid", "drill", "emergency", "shelter")
 DEFAULT_QUERIES = {
     "lana": ("summer beach", "sailing", "regatta", "boardwalk", "amusement park", "cape cod",
              "tennis", "horse show", "parade", "picnic", "swimming", "yacht"),
