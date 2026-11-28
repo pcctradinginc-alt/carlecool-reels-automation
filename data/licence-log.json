@@ -1952,6 +1952,137 @@
      "quality": 0.5546
     }
    ]
+  },
+  {
+   "at": "2026-11-28T09:27:21+00:00",
+   "run_id": 46128161602,
+   "song": "carl e cool - voco babie",
+   "sha256": "a9c6563035a6ac1446bf7a073a536007ea63ac846efcf73fa6abf2f66032b339",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co"
+   ],
+   "clips": [
+    {
+     "id": "Ch5RArRbcM",
+     "provider": "coverr",
+     "title": "Brunette woman smoking outside in the rain",
+     "page": "https://coverr.co/videos/brunette-woman-smoking-outside-in-the-rain-ch5rarrbcm",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "woman night",
+     "used": false,
+     "library": true,
+     "shot_size": "medium",
+     "quality": 0.5077
+    },
+    {
+     "id": "dQxQaBiXjU",
+     "provider": "coverr",
+     "title": "Slow-mo basketball hoop",
+     "page": "https://coverr.co/videos/slow-mo-basketball-hoop-dqxqabixju",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "baseball",
+     "used": true,
+     "library": true,
+     "shot_size": "medium",
+     "quality": 0.5047
+    },
+    {
+     "id": "A4PqMvgf6i",
+     "provider": "coverr",
+     "title": "Ornate Coffin in Moonlit Cemetery with Eerie Fog Scene",
+     "page": "https://coverr.co/videos/ornate-coffin-in-moonlit-cemetery-with-eerie-fog-scene",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "night fog",
+     "used": true,
+     "library": false,
+     "shot_size": "detail",
+     "quality": 0.4777
+    },
+    {
+     "id": "zVmPMjzytC",
+     "provider": "coverr",
+     "title": "An exhibition of a Dodge Magnum 383",
+     "page": "https://coverr.co/videos/an-exhibition-of-a-dodge-magnum-383-zvmpmjzytc",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "classic car",
+     "used": true,
+     "library": false,
+     "shot_size": "detail",
+     "quality": 0.6261
+    },
+    {
+     "id": "YDGCVTYIwp",
+     "provider": "coverr",
+     "title": "Basketball hoop",
+     "page": "https://coverr.co/videos/basketball-hoop-ydgcvtyiwp",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "baseball",
+     "used": false,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.3996
+    },
+    {
+     "id": "ny3vPmHX3Z",
+     "provider": "coverr",
+     "title": "Pressing on piano keys ",
+     "page": "https://coverr.co/videos/pressing-on-piano-keys-ny3vpmhx3z",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "piano keys",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5273
+    },
+    {
+     "id": "PfrJjupOEd",
+     "provider": "coverr",
+     "title": "Wiping mud off shoes",
+     "page": "https://coverr.co/videos/wiping-mud-off-shoes-pfrjjupoed",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "woman neon",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4523
+    },
+    {
+     "id": "189C3zJH1g",
+     "provider": "coverr",
+     "title": "Walking and driving in the city",
+     "page": "https://coverr.co/videos/walking-and-driving-in-the-city-189c3zjh1g",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "driving night",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4343
+    }
+   ]
   }
  ]
 }
