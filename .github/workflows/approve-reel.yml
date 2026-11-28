@@ -2,6 +2,19 @@ name: CarleCool — approve or reject Reel
 on:
   issue_comment:
     types: [created]
+  # Manual owner-only start (same gates; the code re-checks label, open state and
+  # SHA-256). Needed because comments written by tools get a footer appended.
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: 'Review issue number'
+        required: true
+        type: number
+      command:
+        description: 'Publication command'
+        required: true
+        type: choice
+        options: ['/publish tiktok', '/publish instagram', '/publish both']
 concurrency:
   group: carlecool-publish
   cancel-in-progress: false
@@ -13,6 +26,9 @@ jobs:
   publish:
     # Requires the authenticated owner, exact command, approved issue and publish gate.
     if: >-
+      (github.event_name == 'workflow_dispatch' &&
+       github.actor == github.repository_owner) ||
+      (github.event_name == 'issue_comment' &&
       github.event.issue.pull_request == null &&
       github.event.comment.user.login == github.repository_owner &&
       (github.event.comment.body == '/publish' ||
@@ -20,13 +36,13 @@ jobs:
        github.event.comment.body == '/publish instagram' ||
        github.event.comment.body == '/publish tiktok' ||
        github.event.comment.body == '/publish both') &&
-      contains(github.event.issue.labels.*.name, 'carlecool-review')
+      contains(github.event.issue.labels.*.name, 'carlecool-review'))
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     # Secrets are given ONLY to the steps whose code reads them, never to
     # dependency installation (a compromised package could read the environment).
     env:
-      REVIEW_ISSUE: ${{ github.event.issue.number }}
+      REVIEW_ISSUE: ${{ github.event.issue.number || inputs.issue }}
       MASTER_S3_BUCKET: ${{ vars.MASTER_S3_BUCKET }}
       S3_ENDPOINT_URL: ${{ vars.S3_ENDPOINT_URL }}
       AWS_DEFAULT_REGION: ${{ vars.S3_REGION || 'auto' }}
@@ -45,7 +61,7 @@ jobs:
       - name: Confirm publication target before any Instagram or TikTok operation
         id: preflight
         env:
-          PUBLISH_COMMAND: ${{ github.event.comment.body }}
+          PUBLISH_COMMAND: ${{ github.event.comment.body || inputs.command }}
           ZERNIO_PUBLISH_ENABLED: ${{ secrets.ZERNIO_PUBLISH_ENABLED }}
           ZERNIO_API_KEY: ${{ secrets.ZERNIO_API_KEY }}
           ZERNIO_INSTAGRAM_ACCOUNT_ID: ${{ secrets.ZERNIO_INSTAGRAM_ACCOUNT_ID }}
@@ -68,7 +84,7 @@ jobs:
         id: restore
         env:
           RUN_ID: ${{ steps.source.outputs.run_id }}
-          PUBLISH_COMMAND: ${{ github.event.comment.body }}
+          PUBLISH_COMMAND: ${{ github.event.comment.body || inputs.command }}
           GH_TOKEN: ${{ github.token }}
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
@@ -80,7 +96,7 @@ jobs:
         id: rights
         env:
           RUN_ID: ${{ steps.source.outputs.run_id }}
-          PUBLISH_COMMAND: ${{ github.event.comment.body }}
+          PUBLISH_COMMAND: ${{ github.event.comment.body || inputs.command }}
           GH_TOKEN: ${{ github.token }}
           COVERR_PUBLISH_PERMISSION_CONFIRMED: ${{ secrets.COVERR_PUBLISH_PERMISSION_CONFIRMED }}
           AI_VIDEO_PUBLISH_LICENSE_CONFIRMED: ${{ secrets.AI_VIDEO_PUBLISH_LICENSE_CONFIRMED }}
@@ -89,7 +105,7 @@ jobs:
         id: publish_media
         env:
           RUN_ID: ${{ steps.source.outputs.run_id }}
-          PUBLISH_COMMAND: ${{ github.event.comment.body }}
+          PUBLISH_COMMAND: ${{ github.event.comment.body || inputs.command }}
           GH_TOKEN: ${{ github.token }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
@@ -108,7 +124,7 @@ jobs:
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
-          PUBLISH_COMMAND: ${{ github.event.comment.body }}
+          PUBLISH_COMMAND: ${{ github.event.comment.body || inputs.command }}
           PREFLIGHT_OUTCOME: ${{ steps.preflight.outcome }}
           SOURCE_OUTCOME: ${{ steps.source.outcome }}
           RESTORE_OUTCOME: ${{ steps.restore.outcome }}
