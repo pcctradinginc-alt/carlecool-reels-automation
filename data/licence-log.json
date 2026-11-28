@@ -2083,6 +2083,122 @@
      "quality": 0.4343
     }
    ]
+  },
+  {
+   "at": "2026-11-28T10:14:45+00:00",
+   "run_id": 46129973498,
+   "song": "carl e cool - do ya",
+   "sha256": "c426e818b8ef5468f4ebf47d9c189de29a86579b57bd76f610029ae48b3d6307",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co"
+   ],
+   "clips": [
+    {
+     "id": "r09mPjfXPn",
+     "provider": "coverr",
+     "title": "Skate park by the beach ",
+     "page": "https://coverr.co/videos/skate-park-by-the-beach-r09mpjfxpn",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "skate",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4836
+    },
+    {
+     "id": "F7kfBWDOIv",
+     "provider": "coverr",
+     "title": "Slow-motion bubbles ",
+     "page": "https://coverr.co/videos/slow-motion-bubbles-f7kfbwdoiv",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "plaza",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5991
+    },
+    {
+     "id": "AMlndjF2M6",
+     "provider": "coverr",
+     "title": "Skating near the mountains",
+     "page": "https://coverr.co/videos/skating-near-the-mountains-amlndjf2m6",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "skate",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.402
+    },
+    {
+     "id": "vmmrJoXVtR",
+     "provider": "coverr",
+     "title": "Water fountain in Lviv",
+     "page": "https://coverr.co/videos/water-fountain-in-lviv-vmmrjoxvtr",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "plaza",
+     "used": true,
+     "library": false,
+     "shot_size": "wide",
+     "quality": 0.6727
+    },
+    {
+     "id": "esEZh8SE8X",
+     "provider": "coverr",
+     "title": "Man skateboarding down the road ",
+     "page": "https://coverr.co/videos/man-skateboarding-down-the-road-esezh8se8x",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "skateboard road",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4741
+    },
+    {
+     "id": "1XqzHUOHf3",
+     "provider": "coverr",
+     "title": "Picnic near the ocean",
+     "page": "https://coverr.co/videos/picnic-near-the-ocean-1xqzhuohf3",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "women summer",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4234
+    },
+    {
+     "id": "eQQP2yYhtp",
+     "provider": "coverr",
+     "title": "A finger moving over piano keys",
+     "page": "https://coverr.co/videos/a-finger-moving-over-piano-keys-eqqp2yyhtp",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "piano keys",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.3405
+    }
+   ]
   }
  ]
 }
