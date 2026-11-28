@@ -193,12 +193,30 @@ def loop_audio_graph(audio: Path, start: float, length: float) -> str:
             f"[head][seam]concat=n=2:v=0:a=1,{norm},aresample=48000,apad=whole_len={samples},atrim=end_sample={samples}[a]")
 
 
+def shot_match(dna: list, prev_src: int, src: int) -> list[str]:
+    """Owner, 28 Nov: neighbouring shots matched in exposure and warmth (half way towards
+    the previous shot's last frame, from the Shot DNA), BEFORE the creative grade."""
+    a = ((dna[prev_src] or {}).get("edge_out") or {}) if prev_src < len(dna) else {}
+    b = ((dna[src] or {}).get("edge_in") or {}) if src < len(dna) else {}
+    if not a.get("lab") or not b.get("lab") or prev_src == src:
+        return []
+    d_l = (a["lab"][0] - b["lab"][0]) / 100.0
+    d_b = a["lab"][2] - b["lab"][2]  # + = previous shot warmer (more yellow)
+    bright = max(-0.06, min(0.06, 0.5 * d_l))
+    bm = max(-0.05, min(0.05, -0.5 * d_b / 120.0))
+    rm = max(-0.03, min(0.03, 0.5 * d_b / 240.0))
+    if abs(bright) < 0.005 and abs(bm) < 0.004:
+        return []
+    return [f"eq=brightness={bright:.4f}", f"colorbalance=rm={rm:.4f}:bm={bm:.4f}"]
+
+
 def plan_intervals(features: AudioFeatures, length: float, pace: str) -> list[float]:
     beats = getattr(features, "beats", ())
     if beats and getattr(features, "beat_energy", ()):
         intervals = plan_cuts_from_beats(length, beats, features.downbeats, features.beat_energy,
                                          pace=pace, hook_at=getattr(features, "hook_at", 0.0),
-                                         kicks=getattr(features, "kicks", ()))
+                                         kicks=getattr(features, "kicks", ()),
+                                         sections=os.getenv("CARLECOOL_PIPELINE", "").strip().lower() == "cinematic")
     else:
         intervals = plan_cuts(float(length), float(features.bpm), pace=pace,
                               beat_phase=getattr(features, "beat_phase", 0.0))
@@ -264,6 +282,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     from .cinematic import Shot
     motion_on = os.getenv("CARLECOOL_MOTION_MATCH", "true").lower() in ("true", "1", "yes", "on")
     slot_plan: list[str] = []  # Phase 3: dramaturgic function of each slot (for the Creative Plan)
+    cinematic = os.getenv("CARLECOOL_PIPELINE", "").strip().lower() == "cinematic"
 
     def make_board(seed: str, emphasis: dict | None = None):
         board = build_storyboard(intervals, [source_durations[i] for i in base], seed=seed,
@@ -321,6 +340,12 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     else:
         storyboard, motion_matched = make_board(seed0)
     storyboard = look_mod.frame_exact(storyboard, total_frames, FPS)
+    if dna and os.getenv("CARLECOOL_PIPELINE", "").strip().lower() == "cinematic":
+        # Owner, 28 Nov: movement impulses in the picture land on the kicks
+        timelines = {i: look_mod.motion_timeline(p) for i, p in enumerate(videos)}
+        kicks = [float(k) for k in (getattr(features, "kicks", ()) or ())]
+        locked_now = {0, len(storyboard) - 1} | {i for i, sh in enumerate(storyboard) if sh.source_index in reserved}
+        storyboard = look_mod.align_motion(storyboard, kicks, timelines, source_durations, locked_now)
     final_coherence = None
     if dna and len(dna) == len(videos):
         from . import coherence
@@ -389,6 +414,12 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         reach_fx[-1].update(zoom=None, flash=0.0)  # loop seam: last frame = first frame
     from . import hooktext
     hook_png = hooktext.make_png(hook_text, width, height, work / "hook_text.png") if hook_text else None
+    # Owner, 28 Nov: the text line leaves on a musical "one" (the first downbeat after 2 s)
+    hook_until = hooktext.HOOK_SECONDS
+    if cinematic:
+        downs = [float(d) for d in (getattr(features, "downbeats", ()) or ()) if 2.0 <= float(d) <= 3.4]
+        if downs:
+            hook_until = downs[0]
     leak = None
     if any(item["leak"] for item in shot_look):
         leak = look_mod.make_light_leak(width, height, work / "light_leak.png")
@@ -456,6 +487,14 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             if speed > 1.0:
                 chain.append(f"setpts={speed}*PTS")
                 slowed += 1
+        elif cinematic and len(slot_plan) == len(storyboard) and slot_plan[index] in ("climax", "accent"):
+            # Owner, 28 Nov: speed ramp on the accent — the first 0.4 s at half speed, then
+            # real time; only real high-frame-rate footage (no duplicated frames).
+            if shot.source_index not in fps_cache:
+                fps_cache[shot.source_index] = look_mod.probe_fps(source)
+            if fps_cache[shot.source_index] >= 47:
+                chain.append("setpts='if(lt(PTS*TB,0.2),2*PTS,PTS+0.2/TB)'")
+                slowed += 1
         if look and look.get("step_print") and index % 3 == 2 and 0 < index < len(storyboard) - 1:
             chain.append("fps=12")  # step-printing: every frame held twice
         chain.append(f"fps={FPS}")
@@ -466,6 +505,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
         lut = luts[shot.source_index]
         if lut is not None:
             chain.append(f"lut3d=file={_filter_path(lut)}:interp=tetrahedral")
+        if cinematic and dna and index > 0:
+            chain += shot_match(dna, storyboard[index - 1].source_index, shot.source_index)
         chain.append(f"eq=saturation={saturation:.3f}:contrast={contrast:.3f}:gamma=1.015"
                      + (f":brightness={styling['brightness']:.4f}" if styling["brightness"] else ""))
         chain.extend(style_grade or [])
@@ -522,9 +563,9 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
             overlays.append((["-loop", "1", "-framerate", str(FPS), "-i", str(card)],
                              f"format=rgba,fade=t=out:st=0.04:d={LOOP_BRIDGE_SECONDS:.2f}:alpha=1",
                              "overlay=0:0"))
-        if hook_png is not None and shot_start < hooktext.HOOK_SECONDS - 0.05:
+        if hook_png is not None and shot_start < hook_until - 0.05:
             # Text hook over the first ~2.6 s (A/B test, 25 Nov), across the first shots.
-            local_end = hooktext.HOOK_SECONDS - shot_start
+            local_end = hook_until - shot_start
             fade_in = ",fade=t=in:st=0.08:d=0.3:alpha=1" if index == 0 else ""
             overlays.append((["-loop", "1", "-framerate", str(FPS), "-i", str(hook_png)],
                              f"format=rgba{fade_in},fade=t=out:st={max(0.0, local_end - 0.4):.3f}:d=0.4:alpha=1",
