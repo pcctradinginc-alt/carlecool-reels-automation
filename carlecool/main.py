@@ -288,7 +288,8 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
               f" percussive {getattr(features, 'percussive', 0):.2f}, dynamics {getattr(features, 'dynamics', 0):.2f}")
     # Phase 1 (audit A1): with a theme the search words come from the theme alone; the
     # profile / cover / trend phrases were computed and then thrown away — now skipped.
-    style_words = (themes.words(style_name, style_variant, theme, edition, style_pkg.SEARCH_LANES)
+    style_words = (themes.words(style_name, style_variant, theme, edition, style_pkg.SEARCH_LANES,
+                                theme_only=not classic_pipeline())
                    if theme else style_pkg.search_queries(style_decision, run_key=edition))
     cover_choice = {"method": "theme" if theme else "disabled", "queries": [], "lanes": []}
     trend_signals = {"status": "not used (theme-led search)" if theme else "disabled", "topics": []}
@@ -298,7 +299,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
             # Phase 2: the film idea leads — the theme's dominant motifs are searched first
             from .creative_director import search_order
             dominant = list((themes.get(style_name, style_variant, theme) or {}).get("words") or [])[:4]
-            keywords = search_order(dominant, keywords)
+            keywords = search_order(dominant, keywords, fixed=0)
     else:
         # Without a theme (theme rotation off): profile lanes + cover phrases as before.
         style_profile = validate_profile(dict(profile, weights=style_pkg.blended_weights(

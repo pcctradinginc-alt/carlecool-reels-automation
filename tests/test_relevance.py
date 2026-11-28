@@ -20,3 +20,11 @@ def test_basketball_streetball_night_and_tennis_hamptons():
     assert {"tennis", "tennis court"} <= set(directors.get("lana")["themes"]["hamptons"]["words"])
     for w in ("basketball", "streetball", "tennis court"):
         assert stylegate.blocked_words(Video("x", "coverr", title=w)) is None
+
+
+def test_cinematic_search_lanes_are_all_theme_words():
+    from carlecool import themes
+    w = themes.words("lana", None, "hamptons", "r1", 7, theme_only=True)
+    assert len(w) == 7 and "american flag" not in w and all(x in themes.THEMES["lana"]["hamptons"]["words"] for x in w)
+    classic = themes.words("lana", None, "hamptons", "r1", 7)
+    assert classic[1] == "american flag"
