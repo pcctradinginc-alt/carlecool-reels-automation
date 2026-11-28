@@ -15,9 +15,20 @@ on:
     # early (02:17 and 05:47 Berlin, odd minutes — GitHub advises against the full hour):
     # with the usual delay the mail arrives during the day. The `guard` job allows up to TWO
     # Reels per Berlin day (owner, 27 Nov). Always REVIEW, never auto-publish.
+    # Owner, 28 Nov: "sicherstellen, dass pro Tag 2 Läufe durchkommen" — six slots spread
+    # over the day; GitHub may delay or drop any of them, the guard stops every slot after
+    # the second delivered Reel (a skipped slot costs ~15 s of free runner time).
     - cron: '17 2 * * *'
       timezone: 'Europe/Berlin'
     - cron: '47 5 * * *'
+      timezone: 'Europe/Berlin'
+    - cron: '23 9 * * *'
+      timezone: 'Europe/Berlin'
+    - cron: '53 12 * * *'
+      timezone: 'Europe/Berlin'
+    - cron: '29 16 * * *'
+      timezone: 'Europe/Berlin'
+    - cron: '41 19 * * *'
       timezone: 'Europe/Berlin'
   # One-off, opt-in test run: editing this workflow starts a REAL approval email,
   # never a social publication. The rendered video still needs owner approval.
@@ -102,7 +113,7 @@ jobs:
             # Include push-triggered review runs and exclude manual dry runs.
             # Inspect the actual delivery step rather than the aggregate conclusion.
             ids=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/workflows/daily-reel.yml/runs?status=completed&created=%3E%3D${since}&per_page=100" \
-              --jq ".workflow_runs[] | select(.id != ${GITHUB_RUN_ID}) | .id")
+              --jq ".workflow_runs[] | select(.id != ${GITHUB_RUN_ID} and .event == \"schedule\") | .id")
             count=0
             for id in $ids; do
               delivered=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/runs/${id}/jobs?per_page=100" \
