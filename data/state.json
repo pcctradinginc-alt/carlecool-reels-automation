@@ -710,20 +710,76 @@
         "instagram": "https://www.instagram.com/reel/DgQRPwVhPig/",
         "tiktok": "https://www.tiktok.com/@carl_e_cool/video/7712912070001298727"
       }
+    },
+    {
+      "track_id": "2437525047",
+      "at": "2026-11-28T10:57:23.514721+00:00",
+      "video_ids": [
+        "r09mPjfXPn",
+        "F7kfBWDOIv",
+        "AMlndjF2M6",
+        "vmmrJoXVtR",
+        "esEZh8SE8X",
+        "1XqzHUOHf3",
+        "eQQP2yYhtp"
+      ],
+      "sha256": "c426e818b8ef5468f4ebf47d9c189de29a86579b57bd76f610029ae48b3d6307",
+      "approval_issue": 97,
+      "provider": "zernio",
+      "target": "tiktok",
+      "provider_post_id": "6b0ab395c21cd7a8a4e1a28b",
+      "platform_status": {
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 0,
+        "bpm": 143.6,
+        "coherence": 0.4351,
+        "critic": {
+          "aesthetic": [
+            "incoherent: scenes do not belong together"
+          ],
+          "re_edited": 2,
+          "score": 0.748,
+          "technical": []
+        },
+        "director": "lana",
+        "first_shot_s": 1.67,
+        "hashtags": [
+          "#carlecool",
+          "#vinyl",
+          "#beatmaker",
+          "#instrumental",
+          "#producerlife"
+        ],
+        "hook_at": 0.0,
+        "hook_line": "for the summers you can't get back",
+        "hook_strategy": "push",
+        "length_bucket": "long",
+        "length_s": 20.06,
+        "library_clips": 0,
+        "opening_clip": "r09mPjfXPn",
+        "opening_motif": "skate",
+        "opening_source": "coverr",
+        "pipeline": "cinematic",
+        "question": false,
+        "reach_fx": true,
+        "roles": [
+          "friends",
+          "gear",
+          "skater"
+        ],
+        "scenes": 9,
+        "storyboard": 0,
+        "style": "lana",
+        "style_basis": "rotation (lana)",
+        "text_hook": true,
+        "theme": "street",
+        "variant": null
+      }
     }
   ],
-  "pending": {
-    "track_id": "2437525047",
-    "sha256": "c426e818b8ef5468f4ebf47d9c189de29a86579b57bd76f610029ae48b3d6307",
-    "at": "2026-11-28T10:57:23.514721+00:00",
-    "issue_number": 97,
-    "target": "tiktok",
-    "provider": "zernio",
-    "provider_post_id": "6b0ab395c21cd7a8a4e1a28b",
-    "platform_status": {
-      "tiktok": "uploading"
-    }
-  },
+  "pending": null,
   "reconciled": [
     {
       "track_id": "2373071753",
