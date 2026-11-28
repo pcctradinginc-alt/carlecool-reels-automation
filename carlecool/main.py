@@ -666,9 +666,16 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     left_out: set[int] = set()
     if not classic_pipeline() and any(shot_dna):
         from . import coherence
-        left_out = coherence.outliers(shot_dna, set(signature_slots.values()), keep_min=max(4, planned_shots // 3))
+        # Owner, 28 Nov ("passen nur teilweise zusammen"): signature shots (flag, car, woman,
+        # skater …) must fit the film too — only the analog-instrument close-up is protected.
+        protected = {i for role, i in signature_slots.items() if role == "gear"}
+        left_out = coherence.outliers(shot_dna, protected, keep_min=max(4, planned_shots // 3))
         for i in sorted(left_out):
             print(f"Coherence: left out {selected[i].id} '{selected[i].title[:50]}' (does not fit the other clips)")
+        dropped_roles = [role for role, i in signature_slots.items() if i in left_out]
+        signature_slots = {role: i for role, i in signature_slots.items() if i not in left_out}
+        if dropped_roles:
+            print(f"Coherence: signature roles left out: {', '.join(dropped_roles)}")
 
     def render_variant(rank: int) -> dict:
         return render_reel(audio, paths, features, out, reel_length,
