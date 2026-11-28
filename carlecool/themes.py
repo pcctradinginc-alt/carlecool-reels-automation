@@ -142,8 +142,11 @@ def get(style: str | None, variant: str | None, theme: str | None) -> dict | Non
     return THEMES.get(key or "", {}).get(theme or "")
 
 
-def words(style, variant, theme, run_key: str, lanes: int) -> list[str]:
-    """`lanes` search words: one classic car + the US flag, the rest from the theme."""
+def words(style, variant, theme, run_key: str, lanes: int, theme_only: bool = False) -> list[str]:
+    """`lanes` search words: one classic car + the US flag, the rest from the theme.
+    `theme_only` (cinematic, 28 Nov): every lane searches the theme — car and flag come
+    through their own, stricter signature roles (search lanes brought a river for
+    "land rover" and a Ford for "american flag" in Reel #92)."""
     info = get(style, variant, theme)
     if info is None:
         return []
@@ -152,6 +155,8 @@ def words(style, variant, theme, run_key: str, lanes: int) -> list[str]:
     pool = pool[start:] + pool[:start]
     cars = ("porsche", "land rover", "range rover", "classic car")
     car = cars[int.from_bytes(hashlib.sha256(f"{run_key}|themecar".encode()).digest()[:1], "big") % len(cars)]
+    if theme_only:
+        return pool[:lanes]
     return [car, "american flag"] + pool[:max(0, lanes - 2)]
 
 
