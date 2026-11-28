@@ -375,11 +375,14 @@ def fetch_theme(words: list[str], exclude: set[str], workdir: Path, *, night: bo
             print(f"Wikimedia search unavailable: {type(exc).__name__}")
             break
         positive = (f"a photo of {word}", f"a photo of {word} {mood[0]}")
-        negative = NEGATIVE + ("a crowd at a public event", "a title card with text")
+        negative = NEGATIVE + ("a crowd at a public event", "a title card with text",
+                               # 28 Nov e2e test: a NASA night-lights world map passed as "city lights"
+                               "a world map or a satellite image", "an infographic or a chart with labels",
+                               "shaky amateur phone footage")
         for item in items:
             if len(found) >= max_clips or attempts <= 0:
                 break
-            if (not item["mime"].startswith("video/") or item["height"] < 720
+            if (not item["mime"].startswith("video/") or min(item["height"], item["width"]) < 1080
                     or not 0 < item.get("bytes", 0) <= MAX_VIDEO_BYTES
                     or blocked_words(Video(item["id"], "wikimedia", title=item["title"]))):
                 continue

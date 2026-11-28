@@ -73,6 +73,8 @@ BLOCK_WORDS = (
     "businessman", "his",
     # Reel #62: nudity (AI clip) — never
     "nude", "naked", "topless",
+    # 28 Nov e2e test: data visualisations / maps are not film footage
+    "visualization", "visualisation", "satellite", "svs", "infographic", "animation of", "map of",
     # bibles (27 Nov): no smoking (Reel #92: "Brunette woman smoking outside in the rain")
     "smoking", "smoke a cigarette", "cigarette", "cigarettes", "vaping", "vape",
     # Reel #87: minors and pandemic / medical looks are off-brief (women only, timeless)
@@ -102,6 +104,7 @@ UNWANTED = (
     # owner 27 Nov (Reel #62): women only, no romantic couples, never nudity
     "a romantic couple kissing or embracing", "a man as the main subject of the picture",
     "a naked or nude person",
+    "a world map or a satellite image", "an infographic or a chart with labels",
 )
 WANTED = {
     "rubin": ("young friends sitting together in silence", "an empty parking lot at dusk",

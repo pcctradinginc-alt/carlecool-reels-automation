@@ -422,8 +422,8 @@
   "bw_share": 0.2,
   "bw_shots": 0,
   "chroma_shift": 2,
-  "dissolve": 0.7,
-  "dissolve_below": 0.75,
+  "dissolve": 0.35,
+  "dissolve_below": 0.2,
   "exposure_jitter": 0.0,
   "gate_weave": false,
   "grain_boost": 2,
@@ -431,7 +431,7 @@
   "light_leaks": false,
   "punch_in_above": null,
   "slowmo": 1.3,
-  "slowmo_below": 0.65,
+  "slowmo_below": 0.4,
   "step_print": true
  },
  "grade": [
