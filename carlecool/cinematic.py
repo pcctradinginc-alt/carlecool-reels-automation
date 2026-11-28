@@ -271,3 +271,17 @@ def build_storyboard(durations: list[float], source_durations: list[float],
             offsets[choice] = 0.0
         last = choice
     return shots
+
+
+def merge_to_count(intervals: list[float], count: int, max_len: float = 4.5) -> list[float]:
+    """Owner, 28 Nov ("nur 1 Bild doppelt"): with fewer clips than planned shots, merge the
+    shortest neighbouring shots (cuts stay on the beat grid) instead of showing a clip twice.
+    Never longer than `max_len` per shot; the first cut (hook) is kept."""
+    out = list(intervals)
+    while len(out) > max(1, count):
+        pairs = [(out[i] + out[i + 1], i) for i in range(1, len(out) - 1) if out[i] + out[i + 1] <= max_len]
+        if not pairs:
+            break
+        _, i = min(pairs)
+        out[i:i + 2] = [round(out[i] + out[i + 1], 4)]
+    return out
