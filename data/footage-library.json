@@ -414,6 +414,132 @@
    "title": "Photographer in mountains",
    "width": 3840
   },
+  "70N5BxZcLx": {
+   "added": "2026-11-28T14:49:28+00:00",
+   "director": "night",
+   "dna": {
+    "blockiness": 0.952,
+    "camera_direction": -90.3,
+    "camera_motion": 1.422,
+    "contrast": 0.2483,
+    "edge_in": {
+     "embedding": "q6iWm1yoJKuun4wPESdSKXIcDCtMoHsZLhJeKR2p2CkLnZslXyQOpCSpZR/UJJyl5ps2pwmnuJwdJy+g0SPwJzKciSxknokjnCMSpo0oFajdH1Sp0iqyJyuc5ZtTn5mkhCS8pBkmEi3fqJCk461OpCmqtqj2rGEoLLFgoh4Wi6cxpMkmZ6HNrQ0kRKjKq44WfSt9KvYk6CxuK5egYamfGjYnCqgakWUmCiI+J2moGCdxJA2sOCNeqPMiRJ/ZKoqgDCiFpPKo/SGwJhcptCqXIwioKhv2K2ito6pIKYEsqp1mqPcq3x4QI68kEB3VJDUuEamRoR4pWY2sqDQpaxhXGDul1yNcq6ofXKtqK+AjwSnypR+lu6d4KB8mLCltHQ+kqSsGoyqsPKk/KJkl+plept41JaTiqSmnkCYmKGwlMiHDKOoiLKSeKM8gEa7iIMivnCZ7GO8ksiSUqOygvJ9JLvOivCkHMFWmZiyxkjmmNqukpTIqqabVIbMm6yc6qLGmeinZncYNiijhIb2Q2qWrKDga9iuPnH+jzCjxH1mn3qStH6AnOaYCKcumqSnGK/ykBiyTpNqrTTDUHxwkCaZgnB4iTiOzHFakAqcAIYgowiSRqzoo/BgopDGcj6AMKNMcZKq0qPYpMSLZn0giCab5LzgkWyYvpbOaCp/Kqy6mGKYDH+WlDCvPKCIhTqrZj/kYZSgtK02XhCbyJN+oBDAIKQcojSZ0IewgyiIGGoMjdasnpMaOPycAKxIg0Ju8HFAibSq0KHcqe6NLHLckxKSpJqooqqgIJMIhMKwEq1OgoCcnqUSrfqzgtXEfBCEcp46vB6ZRIJqXoSrmoxOkuiTeKuCbq516I+mu9SJKp0YnuywcqNYnbqAfn4WqvSp3lpyoA61jj7amcimupmQpLiVJJA4ooanpKfclAqsRLdisZSpXoTIW8qifJ1iWSST4qpAjLKiNpbkp2aUpHVISoCYbFNMpfCWlJjMjYyUXJNYhMC16LDggAyaBo9Ii3yEppSukT6quLFSaLSSIngQn7pssrDcdtyRHKtkki618nLMSyJ5OJCoh0yGfHmmeJ6wvInOqMRQWJ/egSKUIrBgfI6e0k8oidCGcLLcp+iCiJX+mIKiVp4MguaZ8pIGlnaDLJ1swzaOzmvEhgKmxqC0nnqbdnFknMispqCOezCpSJveoO6E5pqMXYCmWIWmqViU0Kk0oMyazpm2ggyCEJxYoZSEQobgcY6ZuGyioq6Z4pTuokKjPoQcqcKREqbWdEp3WJt8mZS1jJ+2hvyh+JZ8pq5gaoSqiaRwwrleglK42KFgc+iywoHkk9CgapLuiNSjzK9qmTJijoFCp2xwzo/2nO6lvKA==",
+     "lab": [
+      25.17,
+      38.39,
+      -23.66
+     ],
+     "luma": 0.220631405711174
+    },
+    "edge_out": {
+     "embedding": "VacTo1WoRKlbpSmlFihaK+2QtyhGqSIc7pn9KMel6ClPI/kk5Cl2pWGqoiJQHnmlzwY9rAqjUyHWKFEnUah/KBmmAC5pHCUmXSr8qY8psKXXIeaqZSY8JWki8COvJE+dvyUdnTAhKCspqcKdB67zqDeqIKKqqmQj/bG6pkIdp6m6pBgpYp8HrPEoyasTrGadoSkjKMkmwS0wLRMcg6ZKpuMjYqSVnPkpayJmHs+p5yGTJ/2jNImnpxGXIaHyKW+RNybMm2qpDyIpLGsmiig3HwSnqSA2KnionKpwIRYuYhico3koXYJtqjYhcSSuHGAu1agDp6kkIySFqUcktqEVJ+ug9CMJqUEhnqzBKqYgJyn8pmOgGamOI3EkICb1n/Kk/CohIyGr9ac8KDakOZoTqhM236XAqnimsCZuIAMl9qSaJkWgXqRvJY8pCKxAKfeuOyVvJIufsiFnqIqixJyKMHGi0yj+LsimESRWGrqkPas3qnAo2qmTKNkl0icrpgWqQh/UH3QkJyLgIeql4qZlJoGhSCveGFQcCSkEJOQg7xBdIe0mUKUXJVepviiAKzmhCCqYqwWp4S6WHDIkTJuZmr0kKJtGKFCe/aj4nWecwJSMql0iSKX5qWYjwSWdIesiXaktrAooTKgPoiIm7JhZMDQpOxcVqQ6czaATrFupoqsuHG2lOy52K4wgv6mpI6UZtCTfK4miHBCSn92lxTDEJrgngCOSJA+kNyYuIaQmnqmqJYagbSZTJy4l2Z1QJYakTCt3IO4qYZ49pT+iVZ+Rm6wo9KY/IhokYKJ/qUKmWCWFobCo+KwXtkIloictpJquLiPvHh8eHCzdpmIZK5mpKuOgs5uVJmmv7SLdp9Gg9ikCqE8gJKTwGMCpQiXkpFyfxqw/Hkyq+SqAqDsr7iAUJU4hSKsOJ6UnaZ17KaWrFyoupSsfQJ8DKc2ovp4gpVwj3agkovYiMqbDkSMYI5H9oVokFyguK12XbRN8JogUrDDiKnYiliAwpFsmEidGnrWk8KmJLFKg0Ri3pH0cSSQSq4IoBiDHKoIoeauIod+cIp5aJm0iEyjaniqirKrOoYKm2JlInaql+SSlqQUceZFZnQoiQZTsLF4nCptoKKeoFakUGwUl0amIqQqg5qKsJWEw0Y7WIqqdAaiQoronvaS8njUksyclqEyZ9CtvnhWsM6d9pr+iHCqIoIeq1CEjKO8pmSb/o7YhhRp9JO4hZSA2q4ujp6Z7lR2ohqIdqS+rQqjBnw8nHh0Qp/cgEaDQIfUi6SkcoFOaFSl1KGgmkqDxqNugzybfJzYdpq7LJPIgTS69jkAmsSjAnDKkKSnvJ9yqFqA6IRamRCJhGImeb6Q/Jw==",
+     "lab": [
+      25.15,
+      38.64,
+      -25.58
+     ],
+     "luma": 0.21736903488636017
+    },
+    "embedding": "ZqipHTioL6rzo5GiUSZrKiqTUCocpnQcbpUuKX6lISoTIugkoyifpEWqOiCoIVKlMhlQq5+lnR1PKHUj16FvKPekUS3aGXslMijGqDEp+6VlIWmquiimJusgYx73IhyiUiX6o0QktiyoqBuhO65XpmaqbabYqxAljLF+pYYYvqgjpQcpLqC/rCYn5akXrEufpCoAKfgliy0RLYOXa6gWpG4l4qTUnb4oliLjJNWo0iXUJ8eo6B3Sp14fYp1GKgiZQCZXn3apGSLnKbwnFin/H3+mdB36KpOqcKqDJYYtJxzwpikpNRn+o38jMSJ2I3cu6aj1pd8nsR7/qF4n3pmGJFejySQ4qtchHKyzKhMjsSknpkGjb6j5JpIkryd1hMuiTCvAhqmrHKnKJ30WOJyNqEU2GKa1qfym0CbNJDclZZs+KEYd9KKcJsAn7azCJpmvaSXSIA8aJyQlqJKhv6CDLzWjyylAL4+mNShAllml7Kr+qIQpa6m9JvcmVCezpz6ngSaPEfwhdyXtIZOjlKUiJ9mdrSucG8abUileIl2fGqDXIegmE6VKKMOn0ShoK1WhHSssqeep4S9cHTsjDqBSna4l/iESJTGh86eMGY8eSyA0q+Ek+6HjqEYTjxtpJOgiJKqzqjEoYKQ2oHIke6JVMHcogSSrpzqd+5wXrBCpsakvH9ql6Sx9KbMgOKpaI+ocIybaK9Kc6iAKIKqnizDMJ1YomyRCIqydGCXEHbYk4KrKHBmXWSf9KMEkiZtXIySeiSpqJdkqeKBBnxOY5qGuIQwpWqjAJB0kq6gYqWWl5iXopmeqCK1ItvIihiZlpY+vdpmrIc0auCsLpe6cJRv3KgediptOJYSvwSUGqCEg/SrvqLQikqJ5mGCqWCg+ovelwaxbHNeoVSpcqAIqfiL2JGgln6rjKNQn/6XhK3msFSo4pFseAKV8KBem5hr1qPcjHKkdor0mAKUNGjuWjyF+owooBSZfKQ4c4CDXJIkZhS8CLGMiDyVOo54kNCago+KjnaptLCqdvSAvoosj6h/1q0gk3B/8KXEnEq3InJiFs6BCJdEj5iVWlUKg0avUkPenpJhoItCjTBelqwQeY6QqmXAjRhv2LKIpSh9yJ2Ko/6f4oMskJKlRqLah7KLNJVIw1ZrBHGGPCalHprEng6W0nN0lwymOqJiW0CvIHD2r5KO/poaXnSobl2aqZSQ+Kb0pQCbypHIUCh7EJFIkWyETqKKctqZml1WoQKSGqE2pvKi7oEcoQJlqqPYc05xiJEIlHSwJHw2fHSlnJ0snHJ87pl+gGCQLqEOVgq7rJ04d5S1em80jmyjLoX+hQymEKTWqyaBCHYenQSQ1mSikUqenKA==",
+    "hdr": false,
+    "height": 1080,
+    "lab": [
+     25.16,
+     38.32,
+     -24.86
+    ],
+    "luma": 0.2192,
+    "motion": 10.3361,
+    "noise": 6.134,
+    "quality": 0.5007,
+    "ref_score": 0.4088,
+    "samples": 3,
+    "sharpness": 849.2011,
+    "shot_size": "medium",
+    "subject_motion": 1.204,
+    "subject_x": 0.457,
+    "subject_y": 0.443,
+    "version": 2,
+    "warmth": -32.52,
+    "width": 2160
+   },
+   "height": 512,
+   "id": "70N5BxZcLx",
+   "last_used": "2026-11-28T14:49:28+00:00",
+   "page_url": "https://coverr.co/videos/cybernetic-dreamscape-closeup",
+   "query": "piano",
+   "runs": [
+    "46155519976"
+   ],
+   "seconds": 3.23,
+   "source": "coverr",
+   "theme": "studio",
+   "title": "Cybernetic Dreamscape Closeup",
+   "width": 1024
+  },
+  "9RRnzBcluw": {
+   "added": "2026-11-28T14:49:52+00:00",
+   "director": "night",
+   "dna": {
+    "blockiness": 0.992,
+    "camera_direction": 13.8,
+    "camera_motion": 3.041,
+    "contrast": 0.5295,
+    "edge_in": {
+     "embedding": "kiy7LgktN6o4qQSoRqeoKWciGaCeJgMnNKCYKZaoSZ8logClHp0bnoSqISEoqQ2jV6Q6JgKe/hkOpmApZaYcHGKZpCr8H7kqdqgjJ48iiKp+E/eoI5erIHoo4qmIKNqaiyC8GgUkWiZDqp6iVa5bJGiicp2rqdIoEa3MJKIfHpsNq6UnO6B1K7Kkl6f/qG4f8x76KR8lRy0mKLMoJ6xDqXUpWyDnoBkhWyX+J2AnNCXHLASl0iB8pnoYUaOQnnosyqZIJ3ygqxQ6K5YiVKRqnACh+SEDGkSqoB2gIfCgjCRboDkpY6IcKt+gwSbaKHcprRMSqF8n9ypnptskuJxnJ4Cn7CmVqKmkiqnPHN6pU6JVp/KsKxrSIu4oBSWsoI8jPyinpkeleqoTI5seXqUMJ8s1XCdPH8WmPx3fKCEggBqylfqlnqWdJVkpqaahJl8oCJ20nbko6ZACpiMpvqcHKCWrHSxKqbikLCMsnEyqPKksqTcewiwfHw2gzCkuq/ItJSd9olkjyiVxGLeSGCC7GJ0nAi7CKCaggCcDp/qbn6MBJ6Amh6lGoOCj4xrvJLmh3iqKKB+n7x+pJeukgqomJsEkmx0mJzCmChdHItkoVqWjqW4d0hxRKdSmXSNupVql/iHmqD4sZ6BlIRGl2gk+LdSo6SltsGKqRwz/qKCiD4wIEpCrmySkLJ4nYxnRIBAjVyNPkVaYKKIxHbajsizhIV+iepXWprWmLylRH1wa36nbIasp2CjFKfKrnZMYIFIh7yfNF9YooaThKDGkGCbuKGClI6wZFwGd97Lvqs6nYSj4MJioq6zPtfwjKi37qfio9qzIJVAo/Sc3pT6p9iWZnbIoqiF8pHAduK3EHwIp1yNJqX8rcqsAoVepCSluJXwdhKSRKkAkeydnJiYkLKLEH9AoPqUIJEgiJKkkE/msYCVEIIsoChcZJKSgkh9EnzMkoadKJIimTqmTH7iVoyRKoZMpciGHIkunzxzpKAyqPi/jI3GPRx5+ppUmuyx9qbmj+qafLiOgbSRApFsatCB8INcjAygLHmibl7BaJ84g0yjxIeMmEihJojilJq5TmSYoDqjBKHajyqWcqLSm4KCyEMUo4xffKmei4pd5KR0maahaqUkkX6UGrAogAo+TqJkyihYJqO4er6xpEXgh1KRBowEqgiCGHPgZiSIVpeqm15z2rbGS/yUvHFGs+SnoJm2rZCoMJVYkzShmJoaXPqhpJ0Ka7aE+F2CnQKCiJLulQpVRqmEamqcXpOGisKf5KOKoTiSmKLakeSAKLAylpqWOJgujDyiEMOOdIqtEKHyVIi1uI+SgWaVMJUOjM6n8KlSgg6evoqWgLiqbJRcocqeCqQ==",
+     "lab": [
+      37.23,
+      18.78,
+      18.16
+     ],
+     "luma": 0.3495836555957794
+    },
+    "edge_out": {
+     "embedding": "uixgLc4rMKuVp8+oCqY+J7kfDKjlJYgoHyKIKnylx6Rjo7OjgKOxoSOqshHUqXClo6HQpAimBKUTogYpIqg5IbEXpyzsnuYqTqigKpUnhqx7p6GpSCFQKIoosqmAHLCkNqUxpcEm2BjbqiulsqzGJROiHSV6qBMsxatnKgOj06Sso44cU6VdLJWkzKI1qXikLCRrKeocdiz4KPEqS6scq84nOCl/IZkj+yczKDcfuSGGK+ukJZ18l/0f16SEn8QpqqdRJ28f/yiKK6YpwqQApW6ogCaWIDasMhNXpSMjRihrHWApWyVTKYig+ioYKdAhVaAGpcYlAyxgpB8eGqdiKkSlMSb+nDusCaZnJder56YHol6qNaS9IQ8ozyQ9G4siIyVnqayoXakSJgUhXKd5Joo1YChUncujZ6E6LOQiMRTiJTioBKVpJWkqJSXcI7YqKyfmpCsrfiLQJBoqR6b9Lz+sMypdKOGitCTGCw+sXJxIo2udcS/1HcsZ3inXrCUpZSBjpNGhkiIgpWynZ4g+JU+PVy8fKjGcNipgpdabZaPbJnooj6wLmEObGJT2I8ColCqUKMShGajdJX+cIqtEIVQhWCLcJjOm/J+Mp+wqQaRlqnQmsp2qK7inxZxKomSl4SNEp6ss/px/Hu2V1yAmLEqlBxiQsGSquKA2qfWkLKf7I9etbZ7bKtkojqUiIRGgPSHrI6+lvRnCjHal7yyspYigvqTwqs+n3iQ+oBYXx6RLJlYoQSPTJWusN6LYm/8iayBlFrcmOiPqKUgmICUTJbQgI6j9kQGfhK/KrNOnlxxiMFqpB6yRtYMngywDrNqle6siJmIprSTip+6qHiajI5coi5V7IBoZMaxxn4yROifsqccqkakBpFGkiyc2LM0cDiVRKGGZnyrWJSckeKJDnp0ed6iyJJ+e1KcFoU6rmCeLJW8jFgVqJMqlyaL7qAwl9qTUJyun6KmJHpMhHSgRoakpUieeKkGmRiekJdOobi1KptiVqaKYqIIn3y0UqiOkkaTTL7KZZCeJGGOgVyQwoncpEie9o4wiL7CuKNQotCiZG9ahMhXsp+2nfK2XHvMmRaHOJIOkc6TWndaiYKX3oEQnyqONJ5EdKSPpIggeeqjSqMokGKEWqB8iKCidpvAxi6XSpvYkuKmqGbajyqYRoaEobImeGBuZo6Q0plOoIxxArKGZniK/IWmsOSmPJDGbyCvHHyMhGyVwKdknTB3sKYSleJ0Bmt+mwaDFIg2q25GRqw6g9ahHKFOnTCBLKomlcKNeqfaiRaAYKiKnzKQ0JVWgHJsDNA8oAa1JInSeRi/HJ6ukPqKQI4+kAazvKIKexKJmnjekWikwHXAnSaYypw==",
+     "lab": [
+      41.38,
+      18.67,
+      19.69
+     ],
+     "luma": 0.38899344205856323
+    },
+    "embedding": "zyvCLEcsOqnvqIqmMKa9KI4kHqT9JtUjcxYWK72oYx4EGqGlz59CmwqqriLLqLekG6TeJFKlAh+ToLIpTqkfGQseAyroFrEqoqj0JxEk6qsEoAuq5CBXIbknFqylIqQenBm7o50o5CDTqZOdb60MJ2SmKhwjqjspDK3sJ5kf0J+RqREm+KOYKlgcQqWAqaMg1yP8KUclHyxdKSQo2axFqbopux9jnggcHCaKJt8esJdMLHakZyECpZMfuaHFlMIs0qZ7KBAZshwILJAl8qKXpLukPyfyII+qcR9CFEQjrScaHYsq9B5xKQmdViafKE4oV6A5pnwnAisdpEIgJ6gsKGKmvyjbpWmlz6koJKyqCqAxpg6tWh4mJQgoayZ8F18fyCXqqdCi2KZoIGsgNKe4IAo2HSfqnAilzKOSKWAjUaF+m7KlDqeaJ+0pXKS1KUcphSQtn3wpKhmQo84pE6gkLCmstSq5oC2o7B9eHFeoXajvpjwkvC21H4adtyoprHAt2iHPnDkfyieppB6mgCYqHFAiKy6CJ26a9icBplEVKIxdKWYny6o+ptSlYyAmIcWlVyvZKJGnsabpJU6k26m7JE8imCEiJDWlQyB+owkrXqjUqMUWYqQaKj2pzR6al3mlm5vkq3Mtyp0eHlei0iCtLBWpjyUasGWr4qKAqZCNhaOeIR2snyVcK/onAqXOJCgkhCVgIsCkbKBJJHuiNyyVIzuerKE7qEapbihEISWclqdEIRYn8SR3KIWrKZy3owEjVCisHOcpQaS2KbgkwCZUJ1ijTqx0HzyekrH0qsSoJSO9MG2ofKoOtt0hRiyvqVynDqzCJosqJiiypLWp9SMHmOMo4SCLo+IYrq17nRApJSJWqEUraak4mymn6SMBKVwcB6IOKiQlSihbJhcnoJe+oO8l7qUBIrUh26ekpmWs7ifKImUpIR7EIh6iwhoPo2sfSqigILenS6mvmgKi/SYCIaYrgyJ6KO2o+iOBKHapAi6uH0girRR4pVcogixvp4qngKXQLhmgMCS0nqAbWBmAGxokWSkcpqwkjbCMG8Eh7ClVIEgmbiSRpECl962IHBcoIqbIKN6mn6BsnJCkSZSBErMozQVBKlef4h44KgecX6iNqegcoqAwqj+hV5wXpeAyOZ2TpqQkXKwNIRkeW6XaoiYqliDXGTqdFx4oqDKpk5zFreqIvyO2DRmsByvpJqSpHCqRJhKLLCgSJygUWaWlJsuiT6VuGguoy6EIJNyoyxbSqX6Y9KN2HX+lYaLRKd2nqKBPIcaep6MpLHemkqIoI4KgHSH9MZMk6KlxKGibLy41KAwg7KLyHw2kyakyKkqW76XAHfKgzipPIHAoE6iwqQ==",
+    "hdr": false,
+    "height": 1080,
+    "lab": [
+     38.02,
+     18.37,
+     18.27
+    ],
+    "luma": 0.3573,
+    "motion": 18.1033,
+    "noise": 4.266,
+    "quality": 0.4874,
+    "ref_score": 0.3244,
+    "samples": 15,
+    "sharpness": 347.4758,
+    "shot_size": "close",
+    "subject_motion": 1.892,
+    "subject_x": 0.515,
+    "subject_y": 0.448,
+    "version": 2,
+    "warmth": 14.6,
+    "width": 1920
+   },
+   "height": 0,
+   "id": "9RRnzBcluw",
+   "last_used": "2026-11-28T14:49:52+00:00",
+   "page_url": "https://coverr.co/videos/girl-leaning-on-a-table-9rrnzbcluw",
+   "query": "woman piano night",
+   "runs": [
+    "46155519976"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "studio",
+   "title": "Girl leaning on a table",
+   "width": 0
+  },
   "9vamDDcnAf": {
    "added": "2026-11-28T08:48:27+00:00",
    "director": "night",
@@ -1620,6 +1746,69 @@
    "title": "Record player",
    "width": 1920
   },
+  "SLm8g6opju": {
+   "added": "2026-11-28T14:49:34+00:00",
+   "director": "night",
+   "dna": {
+    "blockiness": 1.004,
+    "camera_direction": -6.7,
+    "camera_motion": 0.764,
+    "contrast": 0.4757,
+    "edge_in": {
+     "embedding": "26cykykhniVwpaymHSYGK3As9qGtpzonByMao3Sih5iXrDWZ0yjGKn8rYRXwqbioBaTenO4iGan6Lr4uVqYTFQukRy3TJwglZqybHRAkEyvip3Kt7SnBKUkWgqc4JLMiOyDRkHGiMCbVHQssNKpcnHymWqWKpeWmy7AoJ3yYp6xtpf+RSqXoLG8mwyCZqYmlgiroodMjDStiKhEl1ayAqCgulqj9mT4mFigUoyamyKB2pbyT1RjAJcmojqWnJvMoyai0p8+qM5AvKc0rwSW+KQgtVy5AITang6mJJAOl5ij8qXqS0ag6pBsctSg1Ha4tUiL1HtUkQRtGJ4YfQCH0HMcmdZcqpoAUiKelHqwo2yyzGwOgthvqKvIpCinUIf0cjSrIkIegbqNVKGWl9qQ6JYg0VJ0XqEGodCkVpjEoASPaHp8eJyLpIJeOzS45INOkcCGjqP8o/6SWKJkmz6JxK4SUnSfPMCykWKonpCAd+ipdrYAeuauNqsUktKrkqVacs6otKGUqHBhTq9SqZSbEFaulPCzdJLApyZMTKUkoKKadIfIlJaRKrN+pE6nQp1CogKCBsB6rUC2ZH26diKJSqGWmQqAgKGGaHigdI54pi51fra+hvx8vKK6mpCo4JRcguwlcIAIu2Crgps2mrh86KDQfPKAnrkwbaqiYqQetfai1IbkhQCSRoV8kOC2fKD2l7KBTJeOgWiYXLPai9Sx8qSsR0yYSJtagEiafJsyk4i2NmZyn15NwpnqqKygGoKcnaiSiquYbaajcK+iVYCtoIAetFK3HJownz6WdGHImlSohpNaYf62KtAcoq6JEKnOqUiFFo7CcAKYvqBCotyoHnZ8f7B6CIv6lwbBGq1MnNCGTqA+qIKCAqGslDiTcKISqf6g6IpSqqCrkoVOoIiirJxwrNKh5ogwAFKTbLAitqqgCqN8pP6bfFz8qxSkEoTqhhyjGJz6rKKzNGEejTal9p2QbeizkpLYsiSQrFEwk1y9/KiUqM6TopSKitysqI7IibKUpMb6oCh2Yo6chRx3yKdaoTCkArVAoZR1vpUcgnqhpFp+qzJtXKBmqYqyKLHcoDRmKIbQkyipirgMt2yQVJWoiLqf5KRsnOyXYIyktbJ4hHPcPaSW1rCkeBKCmoXCrpQ0UJGAeVae7qYgqgp7ynCgrXRj6JlEmzSYDqUAmqCS/LEQc7iwDp6ipgZYEKA+lqaccqbEl96g7nBmi0KiwK24sJx51o5CkH6sDI3ImuCbloSYqM6zpqDGjPqUKIXqbHCw2KuIg8ySFKh2dPalHoUigpiJ8qKerMa7eJLQlaihnmlInB6LEJserKynKKCuq6w0+KEmoPSdWJIOl0pmopA==",
+     "lab": [
+      39.83,
+      5.52,
+      -2.33
+     ],
+     "luma": 0.3819432258605957
+    },
+    "edge_out": {
+     "embedding": "R6aAJpwjqRkipNMaqSSJKk4sCyGxqDAqvSDvmQ+eASLKriGUkiUkKhQpNZspqgan/qm5qI0iT5szLhwusqd7Jcyl1S1iJ10lhKo8Hd0mTSwGpv+tuCkcKzOfDKmzIsci5qN0J6SkoyeMJUcu7KkEol6pcZg/pxKkVrFeKJcjVqtNogYlEacPLg4oUB8fqIKm4C1Nqc0S/iw9LKQn96xYq/ot66Qlpi8odRy4piejiKcsp/SlAB54GUSoxaAdISonZKiWqEKs7J6rKWEsxSYiKTsthCxqIsyo66ebJmYhvSVfqMkYfKlXqc6dqygxo00siSeokK4liKHsJOQkBiCdIBUoF5w+p24dlaglnW8huyyBHriin5sfKjsrWin3JVGhLyd5pYcVX6KiKcWjP6SkG68zcp0vqDqpyyY3pRIpziUmKA4ncCToJeglTC8PKLMdjSPNqV0p16n3KDInEabgK/8gXychMK6pIqrooq0bhywDrb+j9quAqi8jgqmfqbGlQKo/JtcgiqBTq2mouZgbHkaoxir+oLkptSDjJXYlzqR1KLImxB/OqxOqa6zWpC6p/RrksWuqbSoyJaCh46Jpqbgl16ZxKi0dTCiEHJws16SWrJuUuiZtKAGshCq/Fd+gMaRJJ8wvjiuPp2eo8p3LJksiiJh3rq2ogaUfqACtRaXZJAAmuyffoZOdfC0LKHGoDqFTJyOprykWK2Wczy1hqIccuSihIWqnVxwxJ24cbixtIeOmsZ+VIzepwZFNpEIkkyYOqH4hwaiwKcsbGiz5I7usoKyVH8oncqEKnXwkMSq9of6oTq64s1Mr+CB3KPGodCPEobSiEJMSqKCmZilboJEkrZqYjFyhBLGCrAMozyIaqYum0iTHpHyYXY8EKg+dbKaiJsmrUysKqAGsIim0KP0pAKqunVGWPqhvLMesuanXpYIoGaQAIu0oGiU5I8akdiYkKCCr56tlpUyjEKiwqSycqimuonks0SNJHoGgBDDIJqUqXqnDp82jZiY+JOMl36SDMCOp2CS3pAsaN6OaJnOnUiWrr0okvxvtoBQgAKadISis/5+zKeKpD6xPK3kpaKR+IhggWSuHrsYuoycDJigeiajHJVAlGic6I1gtwKIxJecgBikkrnoWfqJXonqrz6IgnViSYamuqX8iThgfno0nuJ5IKRoo+CgsqOwl7J4qKced3SzBnySlwZSVK6qlUKZvq08kvqb5oYEd2qPXLAorYiOhpfWnI6pkIKspySmqpw8mdaw6qtgh2qL/oo+jXCysJWqUfSTOK5Qj3amVpvIWkBsIpVKl2a62JB4VGijtGdEhiRzIInWpUCIGJzeqZaR9JECkSCfkJXGkfKTSpQ==",
+     "lab": [
+      38.33,
+      6.24,
+      -1.47
+     ],
+     "luma": 0.36847954988479614
+    },
+    "embedding": "maaxKpMjISTYpOihTyY3K9srBxIoqQApXCJnobueQiDPruCebSeMKQopjpVLqgGoA6mVp7ENvqEHLzwuXKeHJK2lPC50KFElNqtNIUgnsCxOpy+uFSqjKioMRaiTJVskRqFSJC+lXyYYJXMtB6krpE6pjqFLp0CkrbEmKLYjYqwCpVQhyKV1LrsnBiTvp22nVi3ZqFUWcy1fLG8oq6zAqq8tTqTlo4UnEiPupjekpqWSpQemgCHfGGOoHaVTJHwot6lbpxmsHBzDKe0rMydtKXst/CwKHqSp6aXkJPKdQiYaqW6bUqjPqA+YqSlooE0rmCcriBInNZTQJ0Mkxh4DISMohZsyp06gGqhjDGgmBi27HuCe4p7sKrUrdCkvJcKbhihOo8edXKRNKnSis6RlIM4zbZ9FqNaoQScypXkoCSbTJ5YjRiQbJWYmoi4XJdIavSO5qYooZKlPKcklj6U7LMEV7SeGL1Op2qphpL6VECw0rf6iOqy6qkghUKlJqQWnOKqaJqAmU5shq4uoHByPAWCoiiqomiAqNh5yJ0Yno6UJJ6YmuJuIq7KpNqunprepLZePsfCqvyp8JO6fN6SnqRYjJqVMKg2VKyaUITcs7aEIrUSZSieVJrKr7ioqGuueOqTKJiQvsysJpUmomwc3Je4jnxc4rqinXaXvp6OsFaRbJLUk2iY+pGGcKi01KE6ozaCYJy2oJConKxqiTS0LqPUd/CfLJBWlXSC7Ja2UgyylHaWoW55kGReqFCI5pAQlDyVjp6shBqk1KiUdBSuqJCOtd6yjJYMnqKnNEnUk4inTn5uoma7Ys94qHyA2KaioQiQEoy+h8qHqp4GlMyoqpGckhBtMG9qcKLEIrHon8RspqfWm/iEMp40aCRYsKyqhcKVlJBWscCogpq+qCSnZKGcqRaohntiWQKvzLJ+sNKkppigpF6RmHospPShNILajACbTJ6yq16uqoiqjSqgHqv2TMSsnpOErwiRJH7CcVS+/KdwqBqi6p8Wj8yjUHcUnkaZLMJuokCRGodoZkKBuJhumsiWhroMmvBgSpGkhrKaXIqer15zyKUapV6wbLMAoQ6GZJHQjuypZrmYusSjFJ9EIJ6bOJr8kqyaIJD0uUKO1I9UhcigurpQczqIZpLyrmqIBmsYj7Kj9qGIn6huToKkowJsLKYQmgyeDqHMmwhyLKXuiySxGowGoBZvdK9Sl7Kddq0AmYaVToLcWEaW7LAgsGCTqph2msasLIAMpZikSqAcocazHqpkjvKPrmOefMyzOJD2c1xylKwAg3agpptUSIiHcn2Kov64xJnEfQCi8HDcjKJzhJJerASO8J7mq8aMzIoKiZiZPKMmmH6KzpQ==",
+    "hdr": false,
+    "height": 1080,
+    "lab": [
+     38.98,
+     5.89,
+     -1.81
+    ],
+    "luma": 0.3744,
+    "motion": 4.9073,
+    "noise": 3.408,
+    "quality": 0.5965,
+    "ref_score": 0.323,
+    "samples": 16,
+    "sharpness": 265.3613,
+    "shot_size": "medium",
+    "subject_motion": 1.565,
+    "subject_x": 0.527,
+    "subject_y": 0.56,
+    "version": 2,
+    "warmth": -2.99,
+    "width": 1920
+   },
+   "height": 1080,
+   "id": "SLm8g6opju",
+   "last_used": "2026-11-28T14:49:34+00:00",
+   "page_url": "https://coverr.co/videos/panning-shot-of-mountains-slm8g6opju",
+   "query": "piano",
+   "runs": [
+    "46155519976"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "studio",
+   "title": "Panning shot of mountains",
+   "width": 1920
+  },
   "VdAurjR7rF": {
    "added": "2026-11-27T20:18:51+00:00",
    "director": "lana",
@@ -1783,6 +1972,132 @@
    "title": "Basketball hoop",
    "width": 1920
   },
+  "YUUYfT9XZO": {
+   "added": "2026-11-28T14:49:06+00:00",
+   "director": "night",
+   "dna": {
+    "blockiness": 1.013,
+    "camera_direction": -179.5,
+    "camera_motion": 1.258,
+    "contrast": 0.8602,
+    "edge_in": {
+     "embedding": "uirdLTYvvaxYqrKrUaaHIriiCywHp8EoAqgoHPAnryfspqqmeyjJJdqopxWaHFuqSKLgpmSoGihBLEEoFaQQJaujyiu5jjqfc6wOLOUjgiy+I4yhYiQqLEIkcqHfKTqd3idFnsalFi8oKCEmN66rpDaox53vJ0YpHrA8JP0l36BLpTEVoSgQK4apfqkPqyYpr6Den4ag6i0eJvwsLqvhpe0qZqiRqBkmfSV5KfYg76O3LtWl4R/zJpKGehkxKAAhx6mJJQaS2CocLvirf6NoIiggiqGDq7iwY56XIE2rsaDNpJQlnaJ2pP8h353AJlsokyJTlAsoOp0rD6UdfSdoIa+giBu1pQOo8aezIXshe6JZI7iohaWCIs6rhSdvIz4kLCd2qMynoqnXpCAlTSgWJCc1FaaVnZgkgiwiogoqsCTjJVEhPCdOouUrGSmSJ/0vkBwYqNyhsKIoKNcZLaudn2WoCyuoMF2mE6FaoSmpR6depkmVeS+oJfQnNihwqD0oRxh0qVod0ZG5nzykkqYfomooiitCqAubUiSXqH+k1yZKpTupmh+tqi2pF5mWLM6Z2inTJW6hcSrNKFWo3ZngJKUofCWKKUAsaqVspGIoYqBaok0l7hoHJgSkJqW1oi6ZDCitqQYrIqg/JDkoISF/psueFS6Bq4qgFKQOq8cmyqjUKF6nJK/8KoYoraQ4KCyqWqZCH3YoOqFWH7Yf8SrBqVgmkiWUpuOlCYU/E02gwKlvJyIXcScMLTCebSR5K5SioCYvKpWpGaBxIwOkWJt6KyOrPqV1JzYV7qsFGhOph6DKKFSsjKcptR8l/Cgyp4ghSxl+m1cgu6h+pgmjW6SkIkImuiFCIjqlQCxKpPUbaShBqyAibyg2I3yoMiTwmUulvRhtpvCnkCW2pkSoARzOI9YlWq0uJP8l0a3VIUCkj6SMpkokCR9nKJ+lxihjgYggcipSJ0mmzpyqomSo7pY1JaemBCd9EUklFKI6IbyiTS+npRefbqTln0ChNyI4q46kiKIbMHOmk6HlprIq2yRdJVajJCGMI3EdB6yVKQAopCWNJTMkBK0lpDeZEKtfIlgmJKWPIvAq7x0jpeyh7aLdGSOlNSB4LSAkuKaHKswmhav3oxYmf6m0qD+ndyvin3cwSqTxqFyWpKz8nO8q3Sr1KTORiCCXKIAgxZrsmhGsaJdHrmonXCwmIdCoGSD/JaKpHSW0ptkpQCizJU4mNqgDLGEgtaSnqsio2aCsH56rP6yeovYcFymirgIrs6SJGGGd+SR7o1iRAKF+J2+oo60oEYWpL54Zr88geqxSotkiOi8EKMsgCySzmYYrAiWqLGatAiFpI7AheC1PJHQm7RAWqA==",
+     "lab": [
+      41.6,
+      0.91,
+      4.25
+     ],
+     "luma": 0.40460628271102905
+    },
+    "edge_out": {
+     "embedding": "sC0PsKwwsat8qMyts59sIYQqbizEqk4mdyehn24lWqS3r5yphqj1LDam8aZ4pp2mJaxlKTaq+yeeJjsodKEUKCSoJyt1H32qZqhzKT4qw6FPIq6k2ilboFERRKZRI94gZSoBFhcniS/opUspCaW9mrWqcyR9LNMsXrDkJmQdMqhdIBuk66eAKUWkw6mHqkQpAhuHofujuCyonVUnKKwzmmErQhywpXYldhcHKhKnYaX1KsCoXqS1JVQEciQXG0IkzB+MpOOoCh6iJsKn1ag3HfomzqG/oW+ykCg0JFAkRZnJoSMpFSh3qhuk2CPzI1AqgKkvpZckwqHeqLwquSJZKJ2n4CPEJ2eek6jGIiclmKd3HeSfNqN7JHqofCsmH1YkwSz7nnGkF6wyoyQh9aRnGXMya6j2qLwpHyExKlWliJKQJhclL5sNJlMr+qtJGhcrCKFxmq4rTqUlLGooMaCoJgiThKHAMzQQPyTfkaopYqiPHj0iZ6mJpUUq6iNmJW4uRCZnqJcmCCX9J7WgJqqgIkqbupxLqnGq/6CFqQAmTCG0HLqkoajDl06ndSJTKV6ncigHHR2sJyETmzmk7iFCp/WlSKTcJuYkiqSTousuliTgrAuddSLAISSp/hikKOyaVixiqjUpeJlFKEch7aLWl+8l8iZnpyGg+6CFqgut7Q3nni+swq2WK38f86QwLG+o9KkjGt8mShOOppynOCeWpXkqliTtm3YMECJinDygbSFjp8IWehOnJe+py6eYHhOjtCT+I+aRkKb8ImuqJii5LJeu/p63KhEkEqzIJ0ylLqLYMOOmjiB0stUgTyVBrDGlq6KSqEUUya3OqKynJyoSoTUlApjCmespKieVoqMp+SaTqZ0e4ypVpQqhi6WCJb8ThCUAJG0fMCgdIbom4ihnLOwqIK0fJj0pTymBKpWswBxzqrMk/SUSJGWgxKWuI/6jkSoyKMSkixlbpCKpLimvJrGmACQrqguqspxvK+MQRTHzKkIpaRqaphks9CmVqNanGqXsMCGlaRAtqC+agSAInv4o7yV1IjojfqzmKYsp/B1TJ4mVvKrHJE0b1KYKIM4kWyJwnR4gbpo8HQKhkKTAIqIbfKFNI2meAqVrKL0qPqY2HX0iNKAyp92imSkNpt0sCSqkqGQqB6xDq7EsKCglnngpiaQsqd2iPpv6JmuhIqg9pXapSywCoJyqgaqsLOWq2o0XIbQkRyk7IZEOkiGNBJMnsaHIqkkkDKbHKXGoOZ8Qq0mRlqKBr0soTiAnp4mgDKpco2UikCOIIbYonqtMmwOk9qhls5ms561OIUOgiy05HnckLx3noA0r0ilNHQOp+aIAGiad+SnWm4OiOajUIA==",
+     "lab": [
+      40.19,
+      1.25,
+      4.52
+     ],
+     "luma": 0.3931635916233063
+    },
+    "embedding": "lywrICUwgKwLqzmsXKBbJGEk/CtTqVQlraUCiu0owyR+rVGoACRHKZ2oAxlOnGGpVqnfm3+oxCibK4Uo8qRQKPympizFIISoDqz+K+IoyClqIrSleCtBKIgjLqayKWMcECvnnisjCjDdIm0qsq3UpTupZhgsKYErcLDqJt0dXKUwnkehFyWRJ++oU6nlq3oqaaJoobalQS7opBIscKskH1Uq2Kjfp5QnYSYwKEukL6eALDaoiBfPJnILPB59JMYjw6gFFE+m7CRGLICsLKU5KD4k1aRBpkaxYCZcJVyoaKabovMnBQ52qdqdIpS0JUMsL6YLok8kOZ3Fp2AoUCl8JtKlIiUzoJelfKjVIiMlF6XXI8mgZKIFHb6qYCpGI7IZ3CxYpqymBK1sqK0mzxjxGUU0DKjoqLIoRCnsobsmACGuJ6QlgxyyDTksuxK9JR0uPhwco8IkYaMcKlEi56itImmnIikIMnynPxGioeGavaYVo70UPC15mHcpSigbnLMs8CeUp7IkIqDzGjeksKhYlYGXjyiGqQupfyI2qIiZbicLonGnLJtGqVupLpgPLI2iBSienOCooyYWJ7Cm5pvCpDQck6OqKAYrwaWWmwQtVaDQqPcfDRcAIbKiuaQEJHQZ6iaYqjgr1qOsIrIoco90qbecsiw7qSuUc6Tkq06oDaiZJW+qdK97LGYnG6RVK5KpHqcDI+YodaDmJaGkcCxoqIMonSdNpPqhuiJQoaabKqc0mVqaZSQqLBCoBJRoKZql0yV4KmKmzaLyJnOo9R4xLV6tmJ76KekjhazFHlipnJx2LhqsLaFHtMcgWyhAqqghiR+oo+omIa2cpImm0x8uJaokZSIUkYUlFiiQnesn2CcdqpEg4inTnAijnR6vo1akwh/Tnl2hgSjCoVif5SMEKEAqUq5EJnYlg6hRKXKqxaHRqskmdCMYJs6g8yaSIh6fWCtsKG2mpqIWoT6nAiaPKUanPiRdpYekToRiKDWbMjF1HSIk+6KDpoglSiVFrCekp6WFMe6oIZ21pwUpmidOH20dtyd4J34hiKsAKCIqZycKKF8lTq2OHAuf3qpuJcMl96GaHDsmcaDmpUKkC6NeISgg4iH+KQ0bW6lyKXUqEqtdlhonWKkyqOWnkCvGps4tqCSZqMkjtawIqIstZSt7KLki548HG+MfJ6LOHt+q3qY3rQSgRCwXmVOq8J6FKmCsZp68k9sqjygfJiwgOKamKFUkE6UIrMiiIKOsIKarRKlNqSwhEB0ZsAkroJUEow+fA6EEHHkgPCS1J8ilJa33lL+oBqUKsZGl1a4Rl0KdAzAgIicmxRn0FZgrICgpKlCshSCbIiWZ6iuPITcg954/ng==",
+    "hdr": false,
+    "height": 1012,
+    "lab": [
+     40.86,
+     1.3,
+     4.6
+    ],
+    "luma": 0.3989,
+    "motion": 18.3009,
+    "noise": 5.681,
+    "quality": 0.4706,
+    "ref_score": 0.405,
+    "samples": 6,
+    "sharpness": 693.7316,
+    "shot_size": "medium",
+    "subject_motion": 3.568,
+    "subject_x": 0.525,
+    "subject_y": 0.488,
+    "version": 2,
+    "warmth": 4.34,
+    "width": 1920
+   },
+   "height": 2160,
+   "id": "YUUYfT9XZO",
+   "last_used": "2026-11-28T14:49:06+00:00",
+   "page_url": "https://coverr.co/videos/female-photographer-yuuyft9xzo",
+   "query": "cassette",
+   "runs": [
+    "46155519976"
+   ],
+   "seconds": 6.84,
+   "source": "coverr",
+   "theme": "studio",
+   "title": "Female photographer",
+   "width": 4096
+  },
+  "ZLPv55zXTd": {
+   "added": "2026-11-28T14:49:13+00:00",
+   "director": "night",
+   "dna": {
+    "blockiness": 1.185,
+    "camera_direction": -71.2,
+    "camera_motion": 0.868,
+    "contrast": 0.3269,
+    "edge_in": {
+     "embedding": "ZCb2LLMhWqzXpIydviS5JY6dvSBBJ7mgCZ9rpd4lp6bKLASoXB64oeQhZSgtoNwd+BtFrROo4yj3p6spKyhyKaCp1iiRohAg8RLLqLMm06XTn5Cf0asxJIMou6jcLOAkJyEGFD6lzSgWpaclsbAPJKyfNBdEqGYkp6iJq38JXycbmYqciBfIF2glB6BfrccnSSoyHy4fySkwK8UkxRvpKd4Z06QzIpqjrB6DoommLicjL5kkLKSfKIOnpJenpN4r3qMbpDWk3xQvHbUogx9uoyqoQ6AkJ2Ksmyi5pN8qN6ieJDkXyCHhmzmpr6ZRpcsw5KQbqVAbaSqBn0KoECPzKJOpm6F8Gr4dbKdtJlwZRiduIZ2WOqlYIb8HkB7PovUopKR0I82mIaCQJFsoBSr4K6c2+KhSnYgor51Oqekpdh9NncOnVSF+rAciMicQJOyrBagxn5mrARLlo7Qd/Bs1KP2nzidjLwqsD63VpaCn/iG9JWIm0Bt1qLOnqiAzKMwq/KxHoBofYKZ/qMGozin6oW2sKyzgIeWhIZ2pHmElUyrSJ9CjyqWkIeilnSZqIJelRxwEp9odAC8rnyEo6iS9qS8o5Kj6npkm7inPpEgrnqLiomelRapYp9yoBCqFoMIdZK1nsPIdOiLeIhcgU6fIK3Ok+CpopmueiSZerbsezpcuqNCoOK4hKM2hGCGAKcwnTyu9JWun8yguKQekT60xHZWYVRRMqByhUCLCCNQhYap6mJugthAFIBOk1qQCHlamuiThKFQq0aH9HZqWVacZKA4pBCuqKAUorqvbENoivR0FrOKkgKKttsQotp25nL+g3qIaJS2kQ6F1o5aoxqXUKKgiRihpnS+uSSYgojqiFKe0pbunGBs3ptqn7aBll0WisKoQIL8odCjHpNklAim7prCYTqtiJx4pJahTK0mqVKSnpHsksaxxJhwndp0ZoMsnByDIooYqLRxtpbemzhkAlQ+rjx4yIZYqT5+nInWWyyPdJoYcMyniKhslPS1lJ4snRgzzLDeknhxsHzOlXii6qQuoKx0/rlkluKRsJ2olEKooIwMp8SnOKwQgrBEbKMOkiqRnFWglWyTDrTQiIJWupy0Y16uvJ+OlkCC1IhyrA6W/lCelGpoyrZulaaojHf6sqSB9JkkmmqsvFpQqByk9JeAgHB9Kn0UqAyTzqKGqwKEVLFipdSrloSWnKJNlKLktACiRJlqSw5TqLFobDyfAofCnZ55rodCp06F0KUmgvqYwHDsk5aRsJpGg7iZdJU8ZkKR6pEAi3p8UJakoHaSDijge6qDDqHykLawjIAQe+C3kICsrQCyHpYIrxCdCKEOZ662lnFClciglKiMkex+7IA==",
+     "lab": [
+      19.18,
+      18.65,
+      23.99
+     ],
+     "luma": 0.16998951137065887
+    },
+    "edge_out": {
+     "embedding": "ypvLEYujzqz7pUaiApL0Ix+l252NKMakp5w/p0Uj1htcLX6mJaAqpw0fkB1LILMjy4SUrNmnAyWMoV8r9iYqLC2ojCnXoe0g8B8IqiYkeqRNlCIgzamJIlQfS6rOLX4gAihADjSnbCr+o/MgebB2JZmmK6Q9pBIouanrqZSZYxmam/EYtpUZrXEfMR9zrSIpzih6JEQW8SkoK4AmlCUjKm8kc6Y7osGlLSCBp6WgryfRLU+dBqN6JqioQxufoLYqA6Nlo7wdRqSPIXsgXyMrpPul1qGkImOpkyY8pI0obp/WJHcexaWkIDuqMqZ/n1QvO6nhp5QjzCpko6il1qTXJYGrgaMCILkg06cTKDYXVit0Htslz6eJI5yO4SHnpLkpTqajHw+qexGmHXkmJCtMKJU2CaeQnosoj6DAqHYqiyaSpO+kGyGErHElVChDKJCsmalZFFasJqAolG8coR1lKxepzyYzMZyrhaxhpfWnhSCUI6YkFCRcpAeoHxzrJ0gjFKwIpVko+6KqqNKpDCnGnnCrMSZ0H/ikjSVwHVomZCswJGmlJKYApdKpOCl+IaeoCqBmp3iEMy+qI1MmbiZBqrgmQqmUoxwnMypzpuMpyx/eFHqliajQpZGptCgkonaWgqx/sbEky5YhKH0mvqcLKHmcgSk4qHyeDiVyrWgjyqYuosiijq7GKuultoh2KqYpoyoVIyGmzSZYKuGgIK3XqBAiIZ1OpRGkoCChI/cmpKwOnPGguSfbIQChqhJAJuqmpSXDJnkrBRspmZ+YzKRjJ9UnyikXKRsol6YiIh4jZyRwqGCgmimbtkkkFaCvoDmoFKf/HO+oQSJMpG6of6Z1KPcgtig5poutzCiVmHydNKl0qKuq4STFpPKoEamnpeOhxqoKoLAp3h0boXQjTCkTp38iC6tDJuQqgCSMK8uq7qTLpRwnc619IFsbZhQmnIYpVR9ioDwpbSE1ppSmEKfIIlSr76IyDrgrb6S2j30c3h3+I+CgQCpzKFwlyiwOKXEmqaETK7ukKRwQJyCmWCiBpwKn1Jv6rqMnX6FpKBclF6xxm6QoZiqRKKWjXB6uITKmKqD7nFgncSaPrXcdRSjAqBMhkqqDJq6kyRoBIl6rYqc7HKWlKaaOq/OhK6w3IzSZFiXII5wghKsnIIgp2ieiKbklPyYeptsmrBlIqFur06D4KsSlLSz/oFKpixubKBou+yigJw6ftBzfKQwmGiP6Jlimp5i+GK6sWJ2EJBEk7qQLJrglG6hukdMijiW3HCkc8qIHpIiTcozdJpUoUKZVHzUkh6mppBKnO662IgIi5i0tIcAmVSqKqEQrsyjVJpCg/6x3KIukzCRFLI8fjSKnIA==",
+     "lab": [
+      18.32,
+      18.55,
+      22.85
+     ],
+     "luma": 0.1623472273349762
+    },
+    "embedding": "aSVWKmEkeqw3pMSYmCNVJ2GU1xeXJqKd0KMFpWwl7KJSLPGmsRaDpGugnSiNn3ccxZ1WrZinNiaDpV4prycIKmepVCr8pAglkBZ+ptkjBKUEn4GbB6v7JWwkI6hgLDIjxiPkmkWndCw0pEEmobBUIvei1qAZqeAn+KmAqyUYFCKjIHebp5vxoUIllpSFrekn3CjbJDkXyyoyLP8mcSF5KVaBcKQlmuilJhrjpvylRSXyLvYYyqThJreorqFrpZMqrqVepOyfP50/JS4lASG+oQSoR6HWJMasESk3pQkqUKVPJS8hTaGNo6eob6b9pC4xSaejqRocniqpn0CnviFKKOypP6ACn6cc/qeqKBYdqyj5JOUUvqgzJDAeMh2Oo8ko6KRZIpuoABlkI5wmPysZLJw2QqZZnNEnRqL8qJgqvSEmocWnmyOXrNMh5SgAGz2rt6hYoTGrMZMflgccEx3pJzGphigtMDKrxKyzpqioHCS9JOEniR3vqF6o9h9bKewmDa0zobMki6YGqOmoEinfoMiraiqNJEulQyKHIiQjjSmkJ+6kwKXqCNOlXCdjIbinKh2fp5UbEC/cG8smJCXjqUkoP6iImJQm3ygApD4qoZ7ko3ymQ6tEplWpzyhOoLEgh625sO4ishv8JmsguaeUKxaiKys9qJChtSKErd8WaKLQphiox63BKVCgzyCrKi0o9yvgJg2oYSgxKfKd0K3NkJgfEx3BpkyaqCQHnYAhBanPobSgLhv2JEOkQqHWJK6mhSPkKO0qBp9dHAahOqVhJxEn8ShUKXgnKapDmkghOCPjqieiRJiitpko7Rlnmk6br6XKJDykpKJApdKo76UaKh4EXyfZoBCu7iaFEeyjIqbip2KoXJuBqMqpWaFJoCOhVKt6mbwoBycKpIAlByoJqAsWZas/KQoqr6azKqaqCqSdpoImaa24JngkCKBvoYIodyDoED8reCDGpVmnNp+0G/arGR+3IbMrWJ4THaSMpCQlJYgbRSkDKtchqiy+JQInK50ALdukHR9MIKGmkiiJqiemoB1TrlonIqUPJqkl4anpIKIpvikFKg2gEB0UJRaiaKEzHo4lZyVErcYjfSLVpzIfcKo4Jvun9B0AICKsDKixHtOkeaJPrT2mvqpFF/usFiRrJfMlT6v4HUcokCm8J9clDiWfHTMpUyUUqCSrM6J7K62o5ysKnjim7hrFJx0teygIJUyU8h1rLCGaUybIkOGloZ2snhKrGhQ6KEQZmag/I1Ij6qc7Dj6gxyXhJcggrqJ1oMIfJqEoJcwnF6e+F08kNaRop9Ojjax4HUwhzS5EFk0rGSyPpUsrOygvJpudNK5BIEKiNyZ7KoohJSNqJA==",
+    "hdr": false,
+    "height": 1080,
+    "lab": [
+     18.19,
+     18.25,
+     22.74
+    ],
+    "luma": 0.1613,
+    "motion": 7.4487,
+    "noise": 4.117,
+    "quality": 0.7143,
+    "ref_score": 0.5003,
+    "samples": 13,
+    "sharpness": 300.6705,
+    "shot_size": "medium",
+    "subject_motion": 0.525,
+    "subject_x": 0.475,
+    "subject_y": 0.397,
+    "version": 2,
+    "warmth": 19.09,
+    "width": 1920
+   },
+   "height": 1080,
+   "id": "ZLPv55zXTd",
+   "last_used": "2026-11-28T14:49:13+00:00",
+   "page_url": "https://coverr.co/videos/dj-at-a-party-zlpv55zxtd",
+   "query": "dj mixer",
+   "runs": [
+    "46155519976"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "studio",
+   "title": "DJ at a party",
+   "width": 1920
+  },
   "agYtmAUZkh": {
    "added": "2026-11-28T13:43:34+00:00",
    "director": "night",
@@ -1845,6 +2160,69 @@
    "theme": "projects",
    "title": "Woman jogging up some stairs",
    "width": 1920
+  },
+  "cwzYWjOb3c": {
+   "added": "2026-11-28T14:48:32+00:00",
+   "director": "night",
+   "dna": {
+    "blockiness": 0.983,
+    "camera_direction": -50.7,
+    "camera_motion": 1.54,
+    "contrast": 0.1836,
+    "edge_in": {
+     "embedding": "zaPyIVKgUKJvob0gxRjQKRuO/ywRJHimAygMolIoByg8LC2gfCp+qaYY36axqqanXynbrG+pZiENKfgiVygnoWWoqCSippWc0iloqzgp+yVpKVWlDSjyKEQnDKJKK20k/ClOIkGgPy8woJAgXaqNrBWpSihIo2kl/6+Pq3AmQ6brprcjJBRQrTAgVCFerHWo1yrCJPekLil+K7gYYKHDowIlOCdjJvAcjSdQpRisKCacKIaoRKCrpquc7yb/JGEiYRQ2KQ0k5ZUUHvgrd5lUpKyjuZrsJ5Ao26hMIkkptSeQpTkmqqjdJPegs6BhmFYquZtzIY8eTx91HhAmSaeXpO+mm6JtqochrKR7GBgXri2cp7Mk0yKKonqkCaMNo/coMiHrpOap36l8JnInwaR0l7o2vqQspDGTjpWCJHYawSVOJfChpSc9o/glECihKGGrcakJKcypDyLzq3ApGx3iKAkkoaXWJ+GqX6hFJJCknaT8n/gkbq2oqSQg0x4tJ8uouaC3o9MmvSMOqH6pOB1nnIKjey4OqDyieCd2JAkcUSyLH9+gBiV8J8yg5STMIVmpE51urCYlGiycoFAnuSG/n4omvCiXpV+nvpxQm/ePEaiVrOsZEaaFpHSddyZCIZmi8KczsPIrcKhtJRwo3KoKK56kRR3PIgmjfyherLmbjqProR4kRqgno8YhyKwXKlwnYKd4J7EeQ5v4H8ClgC4QqlOiFyXDoXCjFp5+F0Ak7aptqeSkSaS4Jwuq3KnQHbMox5/DJiAoSqERIFeqmZ29GkQg2aUZIBQdfapiqJilgyG2r4gjraG9tk2fmSfbIBGq852ZIRgl4iRSJn+lURT0JcIYCKeYIrGpqSnjIuErJyGRpN6luSN2JNukwCfBJpcmZqylIIoPHCgzKFgoYiJZpXak7qktK5GeXiLdpj+vBqCKnYQgWq0bF2ooL6VPqFUeHaYjm1ojfSLfphEaa6TrJPCmoKS0IZqpa6e0JQ6fQjIIGyGd6yIhHM8oQirnlv4Wk6HIJHwiQaIdo5UlTyCvpmIjbSTnr0cnA6+7oRogC6ojphgoQSnNH6ol1aWioIola6TjoJscy4FGr3ojQSQmqD0kA6UUKvAonZ86JOKmyKh+K7CkJSP9pBMnlBhzLLoxYA3kGReq3qKNp2ihQR/jIUShpSaSIEKj/CmrIhCpFKh4qgMdcCfjoUseMqGyJRkqPiY4pYOgkSRQIccq9SUdJlqbcKwNFC6ezyF5px2o8qpGKYekUqcSqLKl7qBnKswn4Sq0KdIi2ylPiDqZAyhLpO+c/py6IWMgVKwoIgAclSw2J3Kl+SijJe2cwydUmTilRarqGoWpqKhrJsAZ0aFaIw==",
+     "lab": [
+      14.1,
+      6.01,
+      -20.21
+     ],
+     "luma": 0.12981636822223663
+    },
+    "edge_out": {
+     "embedding": "651OLrUkFh/NqAygPygiKIOlbSobovggyygooggoVifWKFikASm/qMwg4RNYqMKpISoQrvWrHSUoLc2WOCcsmEaogCeIpHol7iU9rIspYBVxJJiobph0I8wmlZ78KFge+yqbFgCmKCzyFBakx5wUraSsBaNvqJ4k2LFlqfwkTqOnpawmtRi5qnsn/Z9irFyAcCiKJp+koSrgLPUhsZpbE1wj5yHtnUcbTSmupMCqJh/4K0Cp6p1JpiikZyBOJAOlqxkKKe4YGKZ2KHsoUqa9pC+mZ524J4ucg6mJKP4oKyQ8pbAfQ6dVqAGhpyQOpJ4r3KQPodQauZ0/qAYoGCUinmedviOHpNWWRKUuIvwaty1YpvMZ6aG9mrqj8SQNqS8oFyUqoGSqf6vMKl0kKaBfpDw2EKYdpk8b3KJaHQQbbRNNE9GeKShQn9omTipcJXapiqbdJzmpTRY4n4YoxpTlLFyi9KfbLjSta6ScpLChPqJKpq+XSa1fpikgB6D4IHWqqaYaqKwoBCL8phCqQZa7I20RAzAep4qYQSZMGRCg1ysxiFygdiJ8JA4e8ChdKamoOh7CrbSkgi1dHUUlQSEVp28noyfxHMWkKqOYHr2fkKbkrdQhB6hSmyKoJyi1HqYiyp7Sr7Qp2xkiHRyY0qiNKhkjLqbEoAqoeyJhrEoc2qInqdOcsabKoikmdq0rLIIk5pmBJ+4gC6Igo/6ndy+Rp4moTSWVo/mbJStfn6MfEaaGovimLqRLKBarXqeRJSIjnJ3cnN4r7qdDGcOovKShHAWcPajKIbwmTKwNqQ+p2x1pr1KNka5CtiKIFChhHi6pnqWXIJAm+CRBJqqh16d/JfWje6fjHcaoI5ScIRUoqif+qQmhBCPsnTSkoymGJbAoHKwGmbuo3iZLJsAnsx3XoEIYxKqHKJIjWqXNKOWtXaMhqQcd9azHnDYj16QpqikavaR0n3MZQ6AVpqshhpq4JlKskJqeHSKpb5kOJvSmKzNjIPkj/aNbJCko0yfQp8uknaCzJxQICR0ekMQk8Byfpbkm3SV2rV4oV63ZqIccbqlenConoSZcJfIm/adsIMwiVqN3pqonICbCrsknHiaFpn0k5KYbKAwjMaGWJQuof6WXIreieCb5qfUkFaJcLWIwcaULpAOjIKXBGG4bciY8IgGlFCJpK1mdRyxZpiGptaKCob6d1Cj9JQWhEqbrJ0IsKpT/p+yh3SfIHfcqPCJfJ2AZz6jMoEWeBZkDqqao06ogmFyiJKgvIXmjYqhTKCSd5Cr1JxgZgChioHWYziI9qVSmLKKypvCkmq+iJiEgJi33JhMgIilHKQGZ+CMtJsMWCKosJTOmHKegKZWmn6AaJA==",
+     "lab": [
+      16.53,
+      9.44,
+      -23.95
+     ],
+     "luma": 0.1509418785572052
+    },
+    "embedding": "G549n34e8aUYpiihaCDQKC+k6yp1FW2ipCWaol0lCybDLDSlyynzpjkcdaAyqSKozifrrEqq1yQ8KlsjRiKkIjupFSjsoSIk/ifKqVEo6x8oJQKpqyJjJ7clyqS0KLAiHijNF32jvy2Eousi/501q/CpmJw0pvEeCLGvqZAkgqbAp8wmCBZIrGAohqJ2rRycQSlGJSqdDilRLesV06E0nTAkaSEAIBYemijqoSyswCMrKTuoiBlbpzmlwCARKKyGbh7lJ+gXQ5xlJLkqWZq/odqjsqEcKC+i6KeCIygsiCM3occk5qdzo0mdPR9tnj4rMZ5UGmEecY8lnWUmwKCCndqlkhcLqO0dfaLFJGsUrCtRpHEc36FIGAekpyHXpKwnRCXap2SqBKbEKbUlK6CcmBQ3IqEpp+UfvyCBJekgXB9OnQujDinVoAIotSDZKM+s5KV1JxqniiGFplYnwp+AKQmgaZ93LvapSqAMIIamQqUtpUIfXK2/p4ElrB3OIMaqKKWcpS8nwCHXpieoGJ7JG4aefi+qqA+huiaKlCsVIyocFBibAiECJXuicCYKJKOnvg9mrHagHy1wmwgoriE2pVwluiekH8GnV6EqHEUeWKjmre8hM6g9oa+lEidkmzQga6klsSErhqilImsiHqaALZKN6aVLH8ekXyN1rR6fj6QppV0g4qSdmS0enay5K6MfWKOeKEYgTpv+mh6mHy9lpsekeSMNoFqhviVnGc4ksqhVpBKmJKIuKeOnwaWvJpAlBSMdIPQoyKMyHICpOKOXHboeQKRDITQdg61Fp6OloRWErysdhKwZt9OYpCU+GCapEaLZH54ksSYSJE2khaTnKLmdnKQRFbertSAfFaIo8iMAqDudmxq6k2KkCil4JDEoY6oio0OilSktJZUp9CBiE7+Vg6uuKuYgOqXXkROvjx0RqIIfhKwdHownQKR0pekhBqMCHsUaQaJ2psog951UJIOpRZ0eJUapHaE1IH2iqzIuIHCfZRbAICkomydQpO+g+6RfKBggjZ3CmIMkqR6zqIcfrCSprFgnLLBupY4a/6hDo/EnuCg8HQIghqgloNIhNaHBowgj9CHdrNEiABuCqNAW/KIFK9AmiqCQJtypZKmtJPWlBZyXqAkghBQ4LG4x+pNIlXCitaRAocMkmCSBI3cA8CRsJxikuim0nsqpiqiTpBGa9ybUmW+lKRicJngmWiM7pXiiEyYbJF8o/RqdJFmZGqkEGbmlk5xppsWq2qlMH1CWGqk+pVCjpKNJJdck7SgrKLcg6SdxGy8hoyGyp06aKRwQo+Ghya5nJryVHC05KLGe3yjoJPoUmCTlIa0X7alxJH2lzqSXJzyeuaAhJg==",
+    "hdr": false,
+    "height": 1012,
+    "lab": [
+     15.81,
+     7.73,
+     -22.4
+    ],
+    "luma": 0.1442,
+    "motion": 7.0418,
+    "noise": 4.129,
+    "quality": 0.6723,
+    "ref_score": 0.4929,
+    "samples": 20,
+    "sharpness": 373.8333,
+    "shot_size": "medium",
+    "subject_motion": 1.272,
+    "subject_x": 0.351,
+    "subject_y": 0.518,
+    "version": 2,
+    "warmth": -23.95,
+    "width": 1920
+   },
+   "height": 1080,
+   "id": "cwzYWjOb3c",
+   "last_used": "2026-11-28T14:48:32+00:00",
+   "page_url": "https://coverr.co/videos/close-up-shot-of-a-car-in-the-rain-cwzywjob3c",
+   "query": "synthesizer",
+   "runs": [
+    "46155519976"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "studio",
+   "title": "Close-up shot of a car in the rain",
+   "width": 2048
   },
   "dQxQaBiXjU": {
    "added": "2026-11-28T08:48:06+00:00",
@@ -2097,6 +2475,69 @@
    "theme": "projects",
    "title": "Walking through orange grass",
    "width": 1920
+  },
+  "hV3xjiORHB": {
+   "added": "2026-11-28T14:49:43+00:00",
+   "director": "night",
+   "dna": {
+    "blockiness": 1.005,
+    "camera_direction": 89.4,
+    "camera_motion": 0.564,
+    "contrast": 0.4268,
+    "edge_in": {
+     "embedding": "sqKCK1SlSaODrjcm1CkSKsARxyd7HGuhdah2oYgj0qTkq9OnO5x5HC4iOJwApYQg+auOrFuqKKSEG1Ypya0CJIaoLiaVJ8Ona6vbpuagpSo8KDyqFi2lFJYndKiCKu4kDaXLmmqXHyoUq0qhfaoRIkislKd2qlYnarFkqcKni6K1qbEotSM3qS4lXqimp0ejxCBooHsoEC4EKgAs8SD3HRikpZwVpG0qABw+oDSoYyr+KYomQxomqYYlVahtqH8nvx7kFkomtBkRqRkscaE2IDylPRomMGAqBarOoPyoGicIqF4YoyAEJTUjKp88qQCl+SminrwpPSK2IBcosSjlobqnRRmNoIqYmavtmKEhQy4cqWuU45/DJdUmxiAspK0ocyi+l4+ZtKz+ICAnDqqOoUQ1fycMqLUj3hkoqAsmZiZaJUAiw6bepDkgrShOKIqkyqkoqJskhKRlJSEldSZoLDgl3CLsKgGn1aYaEP+ojSHSqs2b4yWJnFAkxSKXHJoh7KARqX0lvCYCpsIZmqRzqLmn2i5oqHGhAyh2oUMUkagHoRehfxwSrcYlRCTNH3IgySsDqmelwqzxKDyoYBTRpucna5hNIpcm7KE/pNgsEKP4nQIkKyXTpbOrvZxbqMumYiVtLQYmAKSjJ5WjMY5mMZgq5iBloaIhnammp2mo+ic3qvkluKgNLdERwB8vLlGuiiEuHTUf+aXzKIStnSzhGp0irCvlpyIklyG0qLqSZynuKe+gv6TLH8we76X5lqChPCt1qo0mRSO8qceo76QspvqmmSgNoygp7CDfpEMl6BdwI5el5a9NtegkryqGJvIbuivSJOEqN6qPq1oa4KR7Jo6mESoHpJGoU7C0KQWkuSJ4qQmkQxe/JkQnbB9XIJSqxKcYoSGtMynxlDqlYCJenwukA6VFKK8m/zGjK68mgSHLIaAkc6vNKSgYoSO4oMukQqrMJaokOSROp9EhdCfpHvWlRybOKv+gC6bQKOkgvy6ypDEqNKCwqH8pqpDnJA0huaNALfUnqyehpG2m/6dRpHKSAyVBpK4ssaarIoQeuyWQnoYdUSamJIUkOSlPJDiK0CSWJfWPfqA+q9wszqcRpWegFBuOLJIq/CUBKUkp1Kleok8giKGBqgWh5Ki6qZitvSYwq7SVHqVDqYUsGqeNFKgrOidELG+mCqtAqmqsPKP4JtOgzSzwJFmbAh1ZKKuesydhqpYgaKBHpSMuxCehobWksKrmp1uil6GOJVCn7iiJqdKiNaiGpdEm5KSVJbCnih0SqOue+ihSLFQoEahRrX2nRpR+L6IbJ6dTp5aeIi78lLgmbiXgpHkp/SKMK7Wo1B96JD+sjCxkJXAhIqJZqw==",
+     "lab": [
+      44.02,
+      7.27,
+      -12.14
+     ],
+     "luma": 0.405956506729126
+    },
+    "edge_out": {
+     "embedding": "Vh7CK5SnsqfCrawgACiYKO2itiLyJsWgTKgbly0ggCMfprqp7Z5oHlAiQJygo3yW0qv9qH6qQqElpMIpsayfJXOoRh9OJb6p/6j1HF0hFygBKiSrhCagIqsoXKhfKjokQKFBH7Ga2SdNqamZIaxRJFCrlKkJqNEfQK4AqBKqsJ0cqUMmPp+WqgAYWZfzqEmkYiQQlCQhMi0tJzUsqCHFJe6m2p+fphMpGiQslj2oRiwlK1kkDyD/ojEgpAQspOglDh5zHy4fexUgpqoq6qFcIbejtiA3Lm8rxajXmNys3CikquggIyERLhoZAKS4qUSosyiKoVMqZyJcGxwosicjohqqYqR4pAQiRqn1H/co/iyXpkok46Y2Kb0m65JdpQwrzihVpOCiZ6zpKEkr2aglC9g1SSbnpNokgh/vpDglSCTZJ78lAKQpnYKf+yorKQqk3qk0p0ilaKilI9smHB/kItAjLiMALO6lcqi7oF+p2B+GqL4ZDB66nZ2Z9pRzHPAq1iSUp64lbScio4IcmaRvm2SlsC2lqWgUACeRo/imS6L2oUka1aFNq08SmyMJIoGdGi21qmingq0SJ2qlfSS+pV4r6SefGY4hUKFnBxctiKH2o4IoPyYkp4GsWpcVpjmlySftKkgga51+IKEYKaB4MGcpsifoExYnnqXzqHym3ylEq3cmyqe6LdCdlSAQLU2szSE2ImkjBaP7KiKsEy1TnwUoZysap9EoG6CFqZyhSSmHKIWbaZtIKSsmqai+JfmXXyrWq0YnICOLqT6nAah1olKlZSkjneImaSf2p4skpaTypiqnnK7ftcEmZinMJ6Ki+yjOJy8rfaqxqnOZK6RLJYufACtFp7Kp2q1wKuGglR4Gpbiodx2tJrEk+xg4nhirbKTbp6arXitklQCiPij3oeikUqjLJQIpNjM5K8SVV5kGJB8dv6xmJT+k/iB/IGmlEKvOm42jWidyqHohuClloOeoBCWkK7Cg96aLKesfjilipeYqGiR5qZAo1CEnJ7maZp3RKagkvyRWoWenCKncndUghyZZpdEs9p/HKxwoAiSKm/UgFiczJNkOFCmgIZwh8JRpJGagoyDLq+AssZ7fpVmmWCHoLaQp2SXAKWgpl6ZMpY8myqEurGaqQ6hSqmatRSakq7Smd6Z9qIssxKjaHPks0CZ/KOee+auzqPesPiKiHFOZNiv3JFkYhqQeKXYipiVSqEcj7qDjoOMtpCQwH2KnuaqoouOjWx3bJxMeMCYNqQelCqW5qlQjTqEuKm6oySY+p6Cj1CFeLPskuKQirdCpSqFWMU4jv6PVpVSgLS0NoYAmTiQPqIEr7CbHKuuojKKGIjusAizIJH4m6qAJqQ==",
+     "lab": [
+      44.8,
+      6.22,
+      -12.97
+     ],
+     "luma": 0.41369473934173584
+    },
+    "embedding": "7x10K9SZHqU4rq4kpSk2Ke0UZSebgSaYFKlipMsfkxi9q6+q9KNKkekfjxnopSshyaxNqxmrWqNJoZ0p7KxrJXup3yc2KEmoX6ujoYQI3inJKJerairHFkYnZKZOKYomTpguoD+c2CnnqpCaS6uyHvKraKb6qT0m7bEPqDaoSp9dqVsoWh2QpzQlD6daqK2fyyV2nK4l+iynKngsyyDfIwGnZqSnpn8rKSM6oi2ofCrEKYwmnpoPqjAjuKYnqCkm5RyYlXUmyB5WqGAsNaBMJACjuB3eL1EoKKuvCaGqHScdqUWfnCHLKnQhqQ3/qX2jNCg0o+Yp0yNyFSYoFSkJmp6oHZg2oY0d5atxCxwmui14qGYg+6PDJvckPh5gpY4o/yb7n5KbXqyYJSInmamKpG01QihHqQYkbJcvpx8mTiG1JZYlpKUwousahylTKGqfl6ePpr8egab6JG0mdSEXKWQlciB3JxSoQ6hwoQGqnRyZqsCfxB/hohogsCJoIKsl2aETqggnnSaappohvqT8pZOnoC7nqXmXWSYGouig2aeJoHed1yBJrBMjvCWXI3IRoCxzq4qoQa2CJsaoShsJp4kn5BvwH+YjAabyogotNKBFnncn0iZKpTyseJ0yp5ulsSchLM4iH6GXJPKezaDIMHQpEiHmF8cjy6laqCGlgSlxqhMlp6ToLaCZVJ9lLjStRSLTHKohsaVoKPKsYiu7kwAnEixiplAm5SIgqIGWtilgKqCkU518IVkiL6i1GBWhTSv0qr0kBB6TqbeoA6ZEpEymvSaZlKopEqdZpgkkHhDYHMil2bB1tZQozCrJJggd7SnxJjgqx6qTqhMaz6ZpJQ+ouilapzKphq9UKieUpSR8qQGjuSDjJQUlyRsHEdOpo6aGoiWt1CochwCjjSWmpOegl6YLKJgowjEBLNkgiJyfIeYiBqu7J1mdCySwmkWl2KmiINEafCaUpwEhIykHH/umPyRFK8KjO6dmKQEiGC08puwpL5xmqdModJw4JXofW6DeLWol9Sj+pUSniacJog0e0iRmofsslaQCKN4i7CNokewcfSctJL0XhiZuJFYgBxnRJKCeFh0crG0te6RQpbSkEB7MLOIoYybKKa4ojqgfpTEgx6ESrDelvaY2qTGvPCgurPKdHqaXqNMscaiwnUYrRCjyKtOkV6ttqnes8qHiI0ikcyxDKI6dc5ZBKRsazyd5qUIkL4DCpT8uaibfoBKmsKjwph6iEaGiJK2iYSa+qmelR6Y/p34luKNOJbSnryILqeCinyVhLEgoB6YordqpV6EFMBQeOarkpk2gbi6yFkQorCNbpMwoMiVcK5CoAZydINOqqywkJAIc96Ojqw==",
+    "hdr": false,
+    "height": 1080,
+    "lab": [
+     43.84,
+     7.26,
+     -12.04
+    ],
+    "luma": 0.4042,
+    "motion": 29.0411,
+    "noise": 8.621,
+    "quality": 0.5531,
+    "ref_score": 0.608,
+    "samples": 16,
+    "sharpness": 1720.6821,
+    "shot_size": "medium",
+    "subject_motion": 4.311,
+    "subject_x": 0.536,
+    "subject_y": 0.463,
+    "version": 2,
+    "warmth": -13.49,
+    "width": 1920
+   },
+   "height": 0,
+   "id": "hV3xjiORHB",
+   "last_used": "2026-11-28T14:49:43+00:00",
+   "page_url": "https://coverr.co/videos/american-flag-waving-proudly-on-a-bright-sunny-day",
+   "query": "american flag",
+   "runs": [
+    "46155519976"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "studio",
+   "title": "American Flag Waving Proudly on a Bright, Sunny Day",
+   "width": 0
   },
   "iYPyDjkeQV": {
    "added": "2026-11-27T20:18:44+00:00",
@@ -2774,6 +3215,69 @@
    "theme": "projects",
    "title": "Young Woman Crossing Street at Evening Crosswalk",
    "width": 0
+  },
+  "urEkq8g1f3": {
+   "added": "2026-11-28T14:48:47+00:00",
+   "director": "night",
+   "dna": {
+    "blockiness": 1.061,
+    "camera_direction": 71.1,
+    "camera_motion": 0.272,
+    "contrast": 0.1601,
+    "edge_in": {
+     "embedding": "qiVGrxAwZ53qqIms/KZIKnubhSndo80pMaC3lAYoDCC3q82eGiI4JXqhF6d7qSygvKY8qIipFiKwJSId7KCPKJGilCufIvslrCSXLMMrYCZXqPemOShlLaenaypnpzGkvSf5IX2j9i71plqqBya2qQ2sFyq+IfwnkrDcHYeaPqEIpU8dYKBDmvAlU6WtqjUgIiNoKAiiAjD1KsKm8KabnFIlCKlGqOSjqCRXmBysmSReHwqkYh/mqvyg4KCxKGqqpCLDnq4kc6MLKGAp+iTjHlQnKB+fI8quCxwRIo8mx6cgp9spFKpeqLylqyTDFtgup5w3os8bppLmqtIpEaJeqL+YfxDyqBWcC6n8J12kviAhobKrCx9im54m/SZoKYsk5h7pq4CpIawhKu8fR6IWjFQ0P6iIogAhIyUcKHmY0yFMKO6mXiS/IGEmHSepqJgfm633mhkmMyqrJeckEKHdKtATeh/XMoqnRCgNpJeso6L/pvipdayWn6CZ6yBrJlksECRYGMwddJnvGG2kNqS+pSUo1ykupSEZMRxVqY6hNhzOnLsivh/PpQ2k/ypMKhifJSnsqXOm1y84nI8obB3Lpfsl5aFKIB4gmCA4KmccByS2p8YkpqNZH9UeeRzfjEemsaxYq24tV6mBCMQku6V0LBOm5CWEqNCoPCWsqsahsqh6mbefuqg/JdGfjKzXKZkcHSsAKUYlfxakGo2gUC/IH4yflCGfJgaZE6elpUwiNauMpFObbyddJYWjUqAlKjwk1iJzIzwsp6brqqGgbClCKPygQZjUK/AcjKyTpBYcfZUmKM+omKpVtKCeGx2GI4uudKDEGp4oaR2mqW+gvRj8K8WcWKAOIksioiU1oe4q0SLdq3yfE557qh6lVS3oJTOnvR1SKE2coSp9oDMt1xYEKG0lU6xRLBQpayRiJvGqgKNQrAkkDa0ooH+kHqhRqTchlSdjKy0dLRVBosOnciQbpeSmq6jlJSGl+CGLnhOjeTFVKVukYiC7qEMbYaRJpN0iFKgwMOupQqDEotIqaiccpaYhlimDKnwiwbE/JqAkGKLmJM4XNqQ8J8gkKqwmne+hmCTpJTspwqIkrFGc5iTZovYkMChoKtSkACCMJRck4aYhqCCYZ6lnqCYkqKM1KwUzs6IhmBOmjKwuqUgpICLeoy0r9yffKp0fGSH/qMWnUyAOrMUh+yx3HD+nNhgpKRUi/B8RJfKkhCigoT0kTJhMJ+scyqsjG1SloSHLlTesOqnapDMp+SUgrP4jsqbbJPKqTCCZpZUWb5qdGE4rLadBptwm+SKusC4lm7DfJdMkwy3ai9IiLCrjJRMd9CdYoNesORUVKCWoWyKwI7amaaofIw==",
+     "lab": [
+      15.83,
+      9.1,
+      -24.51
+     ],
+     "luma": 0.14970460534095764
+    },
+    "edge_out": {
+     "embedding": "WCWLraAukZshqhes7KgpKuYfpCiaqKQq+hzNII4gtRrlq0mnZSWMJVGlyqeHqGqosaaRqO+owBRjJmEnjyS5KbKi3SyFHjQn5yGxK5cr5iKaqMCo0B1SLYilgyllpzcSMSoVIpmjpi5NptuplyhJqqOs1ykcInwoA7NdoFYgMAZaBEKZ96FfJL0l3KCWqiEecCXhJN+lUTCULo+gP6fHoa8iGKljpN6gQiZJIQyqAiRrKJKk+p03qscYGqeAJ76quidvJE+cOJ9NKBEqDCfVGh8bjSBQKGmusiR4KEAeoqjOqZEmF6pCqnGo0yVwIQcscyJPpXklEaHrqR8lYqOBqOymYSMvqZGcMau+J4ap2aUaoPyoziQNGuUneiVSKRIeJCZwrTmp66n1Ky4ffaQjHjk0/6TGpNUeziIQKqKlpaXyHBKkvSREInIpAyiBJDOWK6zgFS0qLynIJYEknyDeKbueH5eTM46r8iedHX2rfaWVpPenwqyHpm4dNxiCILgpayOGouCgfZb+o5Co26R4HXkQKCl+p5cjOycApsinX5sbJI6PlCCqpgWoCikSLfqhTyzoqQyosy1rGPgpQxb/otQnvaaoJ6SlJqGOKVwi1CTXqLUfPqItmtAltqMwn5WnuatcrP4sAqejmASdb6oVJx2n3SVQqCyrnSSVqoIefKkZowimfqR3JbEdEa49KoshVyoaKIgpXhpspKik3S23HOgjIRgpHj2gvqPcpAYhOawGHDuf/yiqKHAcRKhKJ+4oECbrI8Moaqbyq+qX1ia9JXqkPZqkKBwloq7joEOWZIkRKYmpYKw6tNAXXiYioHit4KNLHuslyBxzqGmkJp5yKqKcT6KQJMwl0SHioSUrQiVFqhKdzCDsqfGkQyx1Jg6mD6IDK2SlkyuWpPcryyKXI/cgiaxWLGEpciBsJ2+pJKURrBEl1aw7H5+lbadtqKYTUCbMKp2a7xI4poCjkiM9noul76n7JAqY/g5SokOlsTAmKUWfxwkJoyWbBRFGo2Kew6RnMKCpkSFMpKoqaCmJpO0jkiq3Kw8n5bCSKFMlfqQ1JRoY+55el04kxqzSIQSaFyUaI3glGKatqWAneCVvofOlxCVEKrqo3xjmIWmoyKqPphySvquUprud/BCXJnwzYSLOoM2pRauQqUIo8xllkIootijxJeodvp9Qqkaozh1orTkasywYIwCnsaHFKKAoqpHtJPeikyM1ptglxBQyIUQjJqwdmNmnNCVDpFyqtae5p1koqJZDqvQmf6genYKpciXro9ijCiW8kBIrL6iNpwkm1aESrhwiILAeKbYkai+qJFOgZChyI06eOClDnfCtBCNannynsCOvGu+lNqvMHw==",
+     "lab": [
+      16.97,
+      8.16,
+      -24.85
+     ],
+     "luma": 0.15750154852867126
+    },
+    "embedding": "NySor6MtzqWQpT2rYqoGKW4j1CnPpeIoPRpyI2MnkySsqhKkBCbNHhWncKk8qkGgiKQJqo2owh3cKJwkSibQKYeiWSyIItcl0yDWJzYpuycwpnmn0SrHLKCkxSY6qLkg5ilXImmlKC7Hp1WoRieVqMyskinQIjkeIbKXpDMlCaJupWAZs6NqG9QkCaUkq9chFij5H8mfNTBELYyb2ahHmsclEKj5FkekGicHHnqrMigjJ3anu5wMqHac9aQ/KQqq0yO9HH6gvKZQJ0IpLSE2Hygm8ozXJw2ucRhhJkol7aeCpp4o2aq1qBajlCKiEAAspJF3peUkE5kQq5smNaMNqHmeVKTZqOMfGao6JsOo+p+9pbqqRyHLmTwlriYOKNIilCiErQep3anJKaMe86TGn+Q0E6WjoIYYNSUQKfSWTZf8IvCimRv+JS4pFhgSJCSqxayiIHUmdSkpIgMkQZxtK7gdgSXgM32qLSgOJduq36Qzpv2lYqq0qEkagiJqH6ElgiEvoQog3SMVp/akFaaoIsAj0Sian5ceWyhtoialiJ7HjCsdVSKBoCqoOykkK+ajyiuBq/SlHy61G/MqACNcor0pAaQtIyCjhZWtKTcoyyXZqFYdbqS/oLIj7hTmnU+op62ereEs/ai8lAMhSqmRKRijYCI7qhqpfigjqwyfWqnynGeleaHlIF8b8KyuKiIleymTI4woa6BOnrSj3C2aIG0gTheNIbQgxaHApHggw6r5oXCf4ChMKKUhhaS+KKUociRmI/4mHafMqpahwCUFJwamjho/KqwiYa2rmuyg2p0tJTupFajltF2jjSOAJWCuAqjuH2wl6KWxqJCUdhzbK82eKZ2UIt0lBhWFpw8seJ+TqxKkv6AVqfQcfyxUJ9enQCAbKkSnRSt/nZkphBBpJgUoVKxGLOgpXCYgLDKsr5/PqIAllK2CHuykCKjCpxodByYnK9Kg8KAaqZilFybNos6jKaYDJumXe5xeoMiiKDANKWeinhxNpsGdnhndBmKhK6FTLzunFiQEomwowSiFpFoleSqpKdQmcrFjJI8i06TzJkQa9ptipK4l16qNkaaXniW0HqQlCapmqaQSjyT2pBEcByVwKSmkbBcAIoGjzagPqNKkDKo5qNAe06NnJb8z/SRMn+um26rnq3Aqj6AHGbYoJySSHEUc0R8GqDqpUhZErAsjkSvuoFqnwyByJsAj2CFQJTSgBSWKlFsjoqRHJSocY6oDES6kQyUHI7uspKlvp6gk1aT0rNEgi6ainvuolxz0pEqkAiScJCUpgqbtp1MoOp6Sr9KiRa9xKDMhVy97HYkgZSpwIu+iQykvIJ+twiHdH0mpzJlYn+ui3KtwJQ==",
+    "hdr": false,
+    "height": 1012,
+    "lab": [
+     17.57,
+     7.67,
+     -23.95
+    ],
+    "luma": 0.1621,
+    "motion": 9.6439,
+    "noise": 2.803,
+    "quality": 0.4689,
+    "ref_score": 0.5581,
+    "samples": 21,
+    "sharpness": 157.8852,
+    "shot_size": "medium",
+    "subject_motion": 1.571,
+    "subject_x": 0.491,
+    "subject_y": 0.441,
+    "version": 2,
+    "warmth": -25.48,
+    "width": 1920
+   },
+   "height": 1080,
+   "id": "urEkq8g1f3",
+   "last_used": "2026-11-28T14:48:47+00:00",
+   "page_url": "https://coverr.co/videos/a-woman-driving-a-retro-car-in-the-rain-urekq8g1f3",
+   "query": "synthesizer",
+   "runs": [
+    "46155519976"
+   ],
+   "seconds": 8.0,
+   "source": "coverr",
+   "theme": "studio",
+   "title": "A woman driving a retro car in the rain",
+   "width": 2048
   },
   "vmmrJoXVtR": {
    "added": "2026-11-28T10:02:05+00:00",
