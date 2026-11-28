@@ -37,7 +37,20 @@
     "tempo": "mid",
     "sound": "warm"
    },
-   "weight": 15
+   "weight": 15,
+   "role_queries": {
+    "woman": [
+     "woman sailboat",
+     "woman beach house",
+     "woman sunglasses",
+     "woman white dress"
+    ],
+    "friends": [
+     "women sailing",
+     "women beach",
+     "women lawn"
+    ]
+   }
   },
   "royals": {
    "label": "Royals & Highlands",
@@ -67,7 +80,15 @@
     "sound": "dark",
     "space": "spacious"
    },
-   "weight": 10
+   "weight": 10,
+   "role_queries": {
+    "woman": [
+     "woman countryside",
+     "woman horse",
+     "woman rain boots",
+     "woman manor"
+    ]
+   }
   },
   "minimal": {
    "label": "90s Minimalism",
@@ -97,7 +118,19 @@
     "sound": "warm",
     "drive": "sparse"
    },
-   "weight": 15
+   "weight": 15,
+   "role_queries": {
+    "woman": [
+     "woman window",
+     "woman hotel",
+     "woman mirror",
+     "woman city morning"
+    ],
+    "friends": [
+     "women walking",
+     "women talking"
+    ]
+   }
   },
   "street": {
    "label": "Street Skate",
@@ -127,7 +160,18 @@
     "tempo": "fast",
     "drive": "groove"
    },
-   "weight": 20
+   "weight": 20,
+   "role_queries": {
+    "woman": [
+     "woman skateboard",
+     "woman street",
+     "woman concrete"
+    ],
+    "friends": [
+     "women skateboarding",
+     "women walking"
+    ]
+   }
   },
   "studio": {
    "label": "Analog Music",
@@ -156,7 +200,16 @@
     "tempo": "mid",
     "drive": "groove"
    },
-   "weight": 25
+   "weight": 25,
+   "role_queries": {
+    "woman": [
+     "woman piano",
+     "woman headphones",
+     "woman vinyl",
+     "woman synthesizer",
+     "woman studio"
+    ]
+   }
   },
   "hamptons": {
    "label": "Old Money Hamptons (Referenz #73)",
@@ -192,7 +245,19 @@
    },
    "weight": 30,
    "length": "short",
-   "reference": "Owner's favourite Reel #73 (27 Nov): calm coastal light, women outdoors in nature, few motifs, 15.6 s"
+   "reference": "Owner's favourite Reel #73 (27 Nov): calm coastal light, women outdoors in nature, few motifs, 15.6 s",
+   "role_queries": {
+    "woman": [
+     "woman white dress",
+     "woman beach",
+     "woman tennis",
+     "woman dog"
+    ],
+    "friends": [
+     "women beach",
+     "women tennis"
+    ]
+   }
   }
  },
  "search": [

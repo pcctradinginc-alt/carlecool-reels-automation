@@ -37,7 +37,13 @@
     "drive": "groove",
     "tempo": "fast"
    },
-   "weight": 15
+   "weight": 15,
+   "role_queries": {
+    "woman": [
+     "woman car night",
+     "woman driving night"
+    ]
+   }
   },
   "gilded": {
    "archive": 0,
@@ -67,7 +73,18 @@
     "space": "spacious",
     "tempo": "slow"
    },
-   "weight": 15
+   "weight": 15,
+   "role_queries": {
+    "woman": [
+     "woman black dress",
+     "woman pool night",
+     "woman pearls"
+    ],
+    "friends": [
+     "women night",
+     "women party"
+    ]
+   }
   },
   "projects": {
    "archive": 0,
@@ -97,7 +114,13 @@
     "sound": "dark",
     "tempo": "mid"
    },
-   "weight": 20
+   "weight": 20,
+   "role_queries": {
+    "woman": [
+     "woman city night",
+     "woman street night"
+    ]
+   }
   },
   "stadium": {
    "archive": 0,
@@ -127,7 +150,13 @@
     "space": "spacious",
     "tempo": "mid"
    },
-   "weight": 10
+   "weight": 10,
+   "role_queries": {
+    "woman": [
+     "woman basketball",
+     "woman night street"
+    ]
+   }
   },
   "skate": {
    "label": "Nocturnal Street Skate",
@@ -156,7 +185,13 @@
     "tempo": "fast",
     "drive": "groove"
    },
-   "weight": 15
+   "weight": 15,
+   "role_queries": {
+    "woman": [
+     "woman skateboard night",
+     "woman parking garage"
+    ]
+   }
   },
   "studio": {
    "label": "Underground Analog Studio",
@@ -186,7 +221,14 @@
     "sound": "dark",
     "drive": "groove"
    },
-   "weight": 25
+   "weight": 25,
+   "role_queries": {
+    "woman": [
+     "woman headphones",
+     "woman piano night",
+     "woman studio night"
+    ]
+   }
   }
  },
  "search": [

@@ -28,3 +28,11 @@ def test_cinematic_search_lanes_are_all_theme_words():
     assert len(w) == 7 and "american flag" not in w and all(x in themes.THEMES["lana"]["hamptons"]["words"] for x in w)
     classic = themes.words("lana", None, "hamptons", "r1", 7)
     assert classic[1] == "american flag"
+
+
+def test_people_shots_are_searched_inside_the_theme():
+    from carlecool import signature
+    q = signature.queries_for("woman", "lana", None, "studio")
+    assert "woman piano" in q and "woman horse" not in q
+    assert "woman horse" in signature.queries_for("woman", "lana", None, "royals")
+    assert signature.queries_for("car", "lana", None, "studio") == signature.queries_for("car", "lana", None)

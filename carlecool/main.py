@@ -570,7 +570,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
         # ~40 % placement cap), roles that clearly hurt come last.
         signature.PRIORITY = performance.role_priority(signature.DEFAULT_PRIORITY, perf_model)
         theme_roles = themes.roles(style_name, style_variant, theme) if theme else None
-        roles = [(role, signature.queries_for(role, style_name, style_variant))
+        roles = [(role, signature.queries_for(role, style_name, style_variant, theme))
                  for role in signature.PRIORITY if role != "motif"
                  and (theme_roles is None or role in theme_roles)]
         if theme_roles is None:
