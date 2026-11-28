@@ -195,10 +195,27 @@ def review_plain_text(issue_url: str, metadata: dict, *, direct_links: dict | No
         f"ANALOG: {profile.get('analog', 65)}%\n\n"
         "Das MP4 ist nur dieser privaten Mail beigefügt. "
         "Ein Link allein löst niemals eine Veröffentlichung aus.\n\n"
+        + _trend_line(metadata) +
         f"Musik: {metadata.get('permalink', '')}\n"
         + (f"Spotify (für die Bio): {_spotify()}\n" if _spotify() else "") + "\n"
         f"Caption:\n{metadata.get('caption', '')}\n"
     )
+
+
+def _trend_line(metadata: dict) -> str:
+    """Trend scout in the review mail (owner, 28 Nov: shadow mode — suggestions only)."""
+    facts = metadata.get("reel_facts") or {}
+    mode = facts.get("trend_mode")
+    if not mode or mode == "off":
+        return ""
+    idea = facts.get("trend_idea")
+    applied = facts.get("trend_id")
+    head = "TREND-SCOUT (nur Vorschlag)" if mode == "shadow" else "TREND"
+    if applied:
+        return f"{head}: angewendet – {applied} (Gruppe {facts.get('trend_bucket')})\n"
+    if idea:
+        return f"{head}: Idee – {idea} (Gruppe {facts.get('trend_bucket')}; nicht angewendet)\n"
+    return f"{head}: kein passender Trend – das ist ein gültiges Ergebnis\n"
 
 
 def _spotify() -> str:
@@ -209,6 +226,7 @@ def _spotify() -> str:
 def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = None) -> str:
     """Responsive Gmail-safe, Apple-clean email; all text escaped, no tracking."""
     h = lambda v: html_escape(str(v), quote=True)
+    trend_html = (f'<br><b>TREND</b> {h(_trend_line(metadata).strip())}' if _trend_line(metadata) else '')
     title = h(metadata.get("song_label") or metadata.get("title", "Neuer Track"))
     profile = metadata.get("creative_profile") or {}
     pace = {"slow": "Ruhig", "medium": "Musikalisch", "fast": "Dynamisch"}.get(
@@ -299,6 +317,7 @@ def review_html(issue_url: str, metadata: dict, *, direct_links: dict | None = N
         f'<b style="color:#202b36">SCHNITT</b> &nbsp;{h(pace)}'
         f' &nbsp;&nbsp;<b style="color:#202b36">ANALOG</b> &nbsp;{analog}%'
         f'<br><b>QUALITÄT</b> {h(quality_summary(metadata))}'
+        f'{trend_html}'
         '</td></tr></table>'
         '<p style="font-size:13px;color:#79818e;margin:22px 0 20px">'
         '▶ Dein Video liegt als <b>CarleCool-Original.mp4</b> im Anhang.</p>'

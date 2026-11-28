@@ -328,7 +328,7 @@ def _model_for(rows: list[dict]) -> dict:
     # Phase 5: factors of the new pipeline — REPORTED only (no automatic weight change below
     # MIN_POSTS per side; too few posts give spurious correlations).
     report = {}
-    for factor in ("pipeline", "director", "theme", "hook_strategy", "excerpt"):
+    for factor in ("pipeline", "director", "theme", "hook_strategy", "excerpt", "trend_bucket", "trend_id"):
         groups: dict = {}
         for r in rows:
             v = r["facts"].get(factor)

@@ -552,5 +552,16 @@
   "a modern car from the 2020s",
   "a sunny daytime street",
   "an LED video billboard"
- ]
+ ],
+ "trend_rules": {
+  "allowed_categories": [
+   "emotion",
+   "storytelling",
+   "aesthetic",
+   "editing",
+   "hook",
+   "culture"
+  ],
+  "rule": "Translate into dark, high-contrast, mechanical night: sodium light, floodlights, 993 cockpit; never daylight, never pastel."
+ }
 }

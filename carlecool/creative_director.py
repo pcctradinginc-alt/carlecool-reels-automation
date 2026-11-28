@@ -43,6 +43,7 @@ class CreativePlan:
     exclusions: list[str]
     pipeline: str
     reasons: dict = field(default_factory=dict)
+    trend: dict = field(default_factory=dict)  # Viral Integration Protocol (trend_compatibility.py)
 
     def as_dict(self) -> dict:
         return asdict(self)
