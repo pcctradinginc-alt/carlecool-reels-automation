@@ -94,7 +94,10 @@ def check_quality(paths, planned_shots: int, signature_slots: dict) -> None:
     import math
     from .video import coverr_blocked
     distinct = len({str(p) for p in paths})
-    needed = max(6, math.ceil(0.75 * planned_shots))
+    # cinematic (28 Nov): the section-led cut has more short peak shots; a professional edit
+    # reuses its best clips in other windows, so 60 % distinct clips are enough there.
+    share = 0.75 if classic_pipeline() else 0.6
+    needed = max(6, math.ceil(share * planned_shots))
     if distinct >= needed:
         return
     reason = (f"Coverr refused requests (HTTP {coverr_blocked()}, hourly limit) — try again in about an hour"
@@ -462,7 +465,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     from . import nara
     # Owner goal 28 Nov: thin stock (e.g. Coverr throttled) → freely licensed Commons videos
     # found with the theme's own words (PD / CC0 / CC BY only), at most 3.
-    if theme and not classic_pipeline() and len(paths) < MIN_PORTRAIT_CLIPS + 2:
+    if theme and not classic_pipeline() and len(paths) + len(archival) < max(8, int(0.75 * planned_shots)):
         from .wikimedia import fetch_theme
         theme_words = [w for w in (themes.get(style_name, style_variant, theme) or {}).get("words") or []]
         archival += fetch_theme(theme_words, set(recent_video_ids(previews, limit=30)) | set(recent),

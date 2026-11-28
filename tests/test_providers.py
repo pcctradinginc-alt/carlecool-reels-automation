@@ -13,9 +13,10 @@ def _data(*events):
 
 def test_fresh_hour_goes_with_capped_budget():
     plan = providers.coverr_plan(_data((90, 35, None)), NOW)          # older than an hour
-    assert plan["action"] == "go" and plan["budget"] == 48
-    plan = providers.coverr_plan(_data((20, 25, None)), NOW)
-    assert plan["action"] == "go" and plan["budget"] == 23
+    L = providers.HOURLY_LIMIT
+    assert plan["action"] == "go" and plan["budget"] == L - 2
+    plan = providers.coverr_plan(_data((20, 15, None)), NOW)
+    assert plan["action"] == "go" and plan["budget"] == L - 15 - 2
 
 
 def test_recent_block_or_spent_hour_waits_then_skips():
@@ -54,6 +55,7 @@ def test_main_applies_the_plan(monkeypatch):
 def test_budget_after_waiting_counts_what_is_still_in_the_hour():
     # 30 requests 50 min ago and 30 requests 20 min ago: waiting 10 min frees only the first 30
     plan = providers.coverr_plan(_data((50, 30, None), (20, 30, None)), NOW)
-    assert plan["action"] == "wait" and plan["budget"] == 48           # waits until both are out
+    L = providers.HOURLY_LIMIT
+    assert plan["action"] == "wait" and plan["budget"] == L - 2         # waits until both are out
     plan = providers.coverr_plan(_data((50, 30, None), (40, 10, None)), NOW)
-    assert plan["action"] == "wait" and plan["budget"] == 38
+    assert plan["action"] == "wait" and plan["budget"] == L - 10 - 2
