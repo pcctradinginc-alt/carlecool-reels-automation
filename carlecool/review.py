@@ -63,6 +63,21 @@ def make_preview(video: Path, destination: Path) -> Path | None:
     return destination if destination.stat().st_size <= MAX_ATTACHMENT_BYTES else None
 
 
+def make_full_hd_copy(video: Path, destination: Path) -> Path | None:
+    """1080×1920 copy that fits a Gmail attachment (bitrate from the length) — the same
+    quality the Reels were published in before the cached master existed."""
+    p = subprocess.run(['ffmpeg', '-hide_banner', '-i', str(video)], capture_output=True, text=True)
+    import re as _re
+    m = _re.search(r'Duration: (\d+):(\d+):([\d.]+)', p.stderr)
+    seconds = (int(m.group(1)) * 3600 + int(m.group(2)) * 60 + float(m.group(3))) if m else 30.0
+    kbps = max(1500, int(MAX_ATTACHMENT_BYTES * 8 / max(1.0, seconds) / 1000 * 0.9) - 192)
+    subprocess.run(['ffmpeg', '-y', '-hide_banner', '-loglevel', 'error', '-i', str(video),
+                    '-c:v', 'libx264', '-preset', 'slow', '-b:v', f'{kbps}k', '-maxrate', f'{int(kbps * 1.15)}k',
+                    '-bufsize', f'{kbps * 2}k', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k',
+                    '-movflags', '+faststart', str(destination)], check=True, stdout=subprocess.DEVNULL)
+    return destination if destination.stat().st_size <= MAX_ATTACHMENT_BYTES else None
+
+
 def prepare_delivery(metadata: dict, run_id: int, metadata_path: Path | None = None) -> dict:
     """Upload the full-quality master privately when MASTER_S3_BUCKET is configured.
 
@@ -314,7 +329,10 @@ def send_review_email(issue_url: str, metadata: dict, original_path: Path | None
     if hashlib.sha256(original_path.read_bytes()).hexdigest() != metadata.get('sha256'):
         raise RuntimeError('Original video differs from approved review metadata')
     if metadata.get('master_storage'):
-        preview = make_preview(original_path, original_path.with_name('email_preview.mp4'))
+        if (metadata['master_storage'] or {}).get('provider') == 'actions-cache':
+            preview = make_full_hd_copy(original_path, original_path.with_name('email_copy.mp4'))
+        else:
+            preview = make_preview(original_path, original_path.with_name('email_preview.mp4'))
         if preview is None:
             raise RuntimeError('Email preview too large for Gmail')
         video_bytes, video_name = preview.read_bytes(), 'CarleCool-Preview.mp4'

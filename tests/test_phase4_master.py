@@ -60,3 +60,23 @@ def test_critic_separates_technical_and_aesthetic(tmp_path):
                           "coherence": 0.8, "loop_sealed": True, "duration": 3.0})
     assert set(r) >= {"technical", "aesthetic", "issues", "measures"}
     assert "platform_ssim" in r["measures"] and "true_peak_dbtp" in r["measures"]
+
+
+def test_verify_accepts_the_mailed_copy_only_when_the_cached_master_is_gone(tmp_path):
+    import hashlib
+    import pytest
+    from carlecool import approve
+    from carlecool.review import encode_issue_data
+    master_sha = "ab" * 32
+    copy = tmp_path / "copy.mp4"
+    copy.write_bytes(b"mailed full-hd copy")
+    copy_sha = hashlib.sha256(copy.read_bytes()).hexdigest()
+    approval = {"run_id": 7, "sha256": master_sha, "track_id": "t", "video_ids": ["a"], "caption": "c"}
+    issue = {"state": "open", "labels": [{"name": "carlecool-review"}], "body": encode_issue_data(approval)}
+    meta = {"sha256": master_sha, "track_id": "t", "video_ids": ["a"], "caption": "c",
+            "master_storage": {"provider": "actions-cache"}, "preview_sha256": copy_sha}
+    assert approve.verify_artifact(issue, meta, copy, run_id=7)["sha256"] == master_sha
+    with pytest.raises(ValueError):  # without the cache provider the old strict rule holds
+        approve.verify_artifact(issue, dict(meta, master_storage=None), copy, run_id=7)
+    with pytest.raises(ValueError):  # a different file never passes
+        approve.verify_artifact(issue, dict(meta, preview_sha256="cd" * 32), copy, run_id=7)

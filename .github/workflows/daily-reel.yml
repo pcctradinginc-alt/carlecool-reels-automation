@@ -250,12 +250,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python -m carlecool.providers
-      - name: Keep the full-quality master for publication
-        if: ${{ success() && vars.CARLECOOL_MASTER_STORE == 'actions-cache' }}
-        uses: actions/cache/save@v4
-        with:
-          path: masters
-          key: carlecool-master-${{ github.run_id }}
       - name: Catalogue the footage library
         if: ${{ always() }}
         env:
@@ -290,3 +284,10 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: python -m carlecool.review --dry-run-email
+      # 28 Nov: AFTER the delivery step — that step writes masters/ (it ran before: nothing saved)
+      - name: Keep the full-quality master for publication
+        if: ${{ always() && vars.CARLECOOL_MASTER_STORE == 'actions-cache' }}
+        uses: actions/cache/save@v4
+        with:
+          path: masters
+          key: carlecool-master-${{ github.run_id }}
