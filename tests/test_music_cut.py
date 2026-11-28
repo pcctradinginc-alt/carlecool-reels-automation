@@ -37,3 +37,12 @@ def test_shot_match_and_direction_continuity():
     left = dict(right, camera_direction=180)
     same = dict(right, camera_direction=10)
     assert coherence.transition(right, same)["motion"] > coherence.transition(right, left)["motion"]
+
+
+def test_thin_material_merges_shots_instead_of_repeating():
+    from carlecool.cinematic import merge_to_count
+    iv = [0.96, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 3.0, 2.0, 2.0, 2.04]
+    out = merge_to_count(iv, 8)
+    assert len(out) == 8 and abs(sum(out) - sum(iv)) < 1e-6 and out[0] == 0.96
+    assert max(out) <= 4.5
+    assert merge_to_count([1.0, 4.0, 4.0, 1.0], 2) == [1.0, 4.0, 4.0, 1.0]  # never beyond 4.5 s

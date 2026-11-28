@@ -261,6 +261,14 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     reserved = set((signature_slots or {}).values())
     base = ([i for i in range(len(videos)) if i not in reserved and i not in exclude_sources]
             or [i for i in range(len(videos)) if i not in reserved] or list(range(len(videos))))
+    if os.getenv("CARLECOOL_PIPELINE", "").strip().lower() == "cinematic":
+        # fewer, longer shots instead of repeated clips (the loop seam may reuse the opener)
+        from .cinematic import merge_to_count
+        available = len(base) + len(reserved) + 1
+        if len(intervals) > available:
+            merged = merge_to_count(intervals, available)
+            print(f"Shots: {len(intervals)} planned, {len(merged)} after merging (only {available - 1} clips)")
+            intervals = merged
     from . import look as look_mod
     motion: list[float] | None = None
     opening = None
