@@ -1168,6 +1168,27 @@
       "style": "lana",
       "theme": "studio",
       "length_bucket": "long"
+    },
+    {
+      "at": "2026-11-28T13:46:53+00:00",
+      "kind": "daily",
+      "run_id": 46150718841,
+      "track_id": "2437525041",
+      "video_ids": [
+        "Qy4OkwkwSd",
+        "agYtmAUZkh",
+        "fwwKKUlRGF",
+        "EkqQNpff93",
+        "g12cIDKgiy",
+        "IkrFuQUduH",
+        "PZliPz6auZ",
+        "s2Ogofbcfi"
+      ],
+      "sha256": "b9bfcb416e05b84eee6cb03b3b6fe90190075765b0cfd1a87b8032caff8c73b8",
+      "style": "night",
+      "theme": "projects",
+      "excerpt": "hook",
+      "length_bucket": "short"
     }
   ]
 }
