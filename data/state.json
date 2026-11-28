@@ -843,20 +843,77 @@
         "theme": "studio",
         "variant": null
       }
+    },
+    {
+      "track_id": "2437525050",
+      "at": "2026-11-28T16:11:39.093413+00:00",
+      "video_ids": [
+        "cwzYWjOb3c",
+        "urEkq8g1f3",
+        "YUUYfT9XZO",
+        "ZLPv55zXTd",
+        "70N5BxZcLx",
+        "SLm8g6opju",
+        "hV3xjiORHB",
+        "9RRnzBcluw"
+      ],
+      "sha256": "f1e39db11fffc79584d52d749cb5be8cfb129787c280b03637a057e596ee6d65",
+      "approval_issue": 110,
+      "provider": "zernio",
+      "target": "tiktok",
+      "provider_post_id": "6b0afd403c0400ed206c18db",
+      "platform_status": {
+        "tiktok": "published"
+      },
+      "reel_facts": {
+        "archival": 0,
+        "bpm": 92.3,
+        "coherence": 0.4133,
+        "critic": {
+          "aesthetic": [
+            "material does not fit together (the edit is already the best order)"
+          ],
+          "re_edited": null,
+          "score": 0.739,
+          "technical": []
+        },
+        "director": "night",
+        "excerpt": "start",
+        "excerpt_start": 0.09,
+        "first_shot_s": 1.25,
+        "hashtags": [
+          "#carlecool",
+          "#vinyl",
+          "#beatmaker",
+          "#instrumental",
+          "#producerlife"
+        ],
+        "hook_at": 0.0,
+        "hook_line": "pov: the sample that started it",
+        "hook_strategy": "motion",
+        "length_bucket": "long",
+        "length_s": 20.8,
+        "library_clips": 0,
+        "opening_clip": "urEkq8g1f3",
+        "opening_motif": "synthesizer",
+        "opening_source": "coverr",
+        "pipeline": "cinematic",
+        "question": false,
+        "reach_fx": true,
+        "roles": [
+          "woman"
+        ],
+        "scenes": 8,
+        "storyboard": 0,
+        "style": "lana",
+        "style_basis": "rotation (night)",
+        "text_hook": true,
+        "theme": "studio",
+        "variant": "night"
+      }
     }
   ],
-  "pending": {
-    "track_id": "2437525050",
-    "sha256": "f1e39db11fffc79584d52d749cb5be8cfb129787c280b03637a057e596ee6d65",
-    "at": "2026-11-28T16:11:39.093413+00:00",
-    "issue_number": 110,
-    "target": "tiktok",
-    "provider": "zernio",
-    "provider_post_id": "6b0afd403c0400ed206c18db",
-    "platform_status": {
-      "tiktok": "uploading"
-    }
-  },
+  "pending": null,
   "reconciled": [
     {
       "track_id": "2373071753",
