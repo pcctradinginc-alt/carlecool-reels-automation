@@ -83,14 +83,14 @@
    "words": [
     "brooklyn",
     "harlem",
+    "basketball",
+    "streetball",
     "brick building",
     "fire escape",
     "steam street",
     "street lamp",
     "basketball court",
-    "chain fence",
-    "alley night",
-    "window lights"
+    "chain fence"
    ],
    "music": {
     "drive": "groove",
@@ -101,7 +101,7 @@
   },
   "stadium": {
    "archive": 0,
-   "label": "Baseball unter Flutlicht",
+   "label": "Baseball & Basketball unter Flutlicht",
    "lines": [
     "pov: the lights are still on at the ballpark",
     "for the city at 3 am"
@@ -112,14 +112,14 @@
    ],
    "words": [
     "baseball field",
+    "basketball",
+    "streetball",
     "stadium lights",
     "floodlights",
-    "stadium night",
+    "basketball court",
     "baseball",
     "bleachers",
-    "dugout",
     "night fog",
-    "baseball bat",
     "empty stadium"
    ],
    "music": {
@@ -412,7 +412,9 @@
   "a lone piano lit by a single lamp, black and white",
   "a skateboarder in a dark parking garage under flickering neon, fisheye",
   "a vinyl record and a sampler in a dark room, sample culture",
-  "a silver boombox on a basketball court at night"
+  "a silver boombox on a basketball court at night",
+  "a streetball game on a chain-link fenced court at night under floodlights",
+  "a basketball hoop on an outdoor court at night, city lights behind"
  ],
  "look": {
   "archive_films": 4,

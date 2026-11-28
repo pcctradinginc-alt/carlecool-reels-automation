@@ -398,6 +398,7 @@ def relevance(images, queries: list[str], clip) -> list[float | None]:
         model, preprocess, tokenizer = clip
         uniq = sorted({q for q in queries if q})
         prompts = [f"a photo of {q}" for q in uniq] + [f"a photo of {g}" for g in GENERIC_SCENES]
+        gen_words = [set(g.replace(",", " ").split()) for g in GENERIC_SCENES]
         with torch.no_grad():
             text = torch.nn.functional.normalize(model.encode_text(tokenizer(prompts)), dim=-1)
             out = []
@@ -410,7 +411,14 @@ def relevance(images, queries: list[str], clip) -> list[float | None]:
                         model.encode_image(preprocess(img.convert("RGB")).unsqueeze(0)), dim=-1)
                 sims = (v @ text.T)[0].tolist()
                 own = sims[uniq.index(q)]
-                generic = max(sims[len(uniq):])
+                # a generic scene that names the motif itself (basketball → "a basketball court")
+                # is not a confusion: owner, 28 Nov — basketball / streetball belong to Night
+                words = set(q.split())
+                sport = bool(words & {"basketball", "streetball", "tennis", "baseball", "polo", "skate",
+                                      "skateboard", "skatepark", "surfer", "sailing", "regatta"})
+                others = [s for s, g, gw in zip(sims[len(uniq):], GENERIC_SCENES, gen_words)
+                          if not (words & gw - {"a", "or", "the"}) and not (sport and "sports" in g)]
+                generic = max(others) if others else 0.0
                 out.append(round(own - generic, 4))
         return out
     except Exception as exc:
