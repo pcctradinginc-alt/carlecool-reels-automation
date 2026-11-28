@@ -919,7 +919,11 @@
     "at": "2026-11-28T16:17:00.756533+00:00",
     "issue_number": 109,
     "target": "tiktok",
-    "provider": "zernio"
+    "provider": "zernio",
+    "provider_post_id": "6b0afe80c4fad7ded057231a",
+    "platform_status": {
+      "tiktok": "uploading"
+    }
   },
   "reconciled": [
     {
