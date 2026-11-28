@@ -88,6 +88,13 @@ def transition(a: dict | None, b: dict | None, ea=None, eb=None, weights: dict |
     else:
         parts["colour"] = 0.5
     parts["motion"] = _closeness(a.get("motion"), b.get("motion"), 10.0)
+    # owner, 28 Nov: keep the direction of movement — a pan to the right should not be
+    # followed by a pan to the left (only when both clips really move)
+    if (a.get("camera_motion") or 0) > 0.8 and (b.get("camera_motion") or 0) > 0.8 \
+            and a.get("camera_direction") is not None and b.get("camera_direction") is not None:
+        diff = abs((float(a["camera_direction"]) - float(b["camera_direction"]) + 180) % 360 - 180)
+        parts["motion"] *= 0.6 if diff > 120 else (1.0 if diff > 45 else 1.1)
+        parts["motion"] = min(1.0, parts["motion"])
     parts["light"] = 0.6 * _closeness(a.get("luma"), b.get("luma"), 0.35) + \
         0.4 * _closeness(a.get("contrast"), b.get("contrast"), 0.35)
     sa, sb = SIZE_ORDER.get(a.get("shot_size") or ""), SIZE_ORDER.get(b.get("shot_size") or "")
@@ -130,7 +137,7 @@ def slot_functions(energies: list[float], starts: list[float], accents: set[int]
 
 # what a function wants from a clip (shot size, motion rank)
 FUNCTION_WANTS = {"establishing": ({"wide"}, None), "accent": ({"close", "detail"}, None),
-                  "climax": (None, 1.0), "atmosphere": (None, 0.0), "contrast": (None, 0.2),
+                  "climax": (None, 1.0), "atmosphere": ({"detail", "close"}, 0.0), "contrast": (None, 0.2),
                   "resolution": ({"wide", "medium"}, 0.3)}
 
 
@@ -148,7 +155,8 @@ def function_fit(function: str, dna: dict | None, motion_rank: float | None) -> 
     return score / parts if parts else 0.5
 
 
-MATCH_CUT_BONUS = 0.08  # a strong visual link (form / colour / subject) on a musical accent
+MATCH_CUT_BONUS = 0.12  # a strong visual link (form / colour / subject) on a musical accent
+MATCH_CUT_LINK = 0.62   # owner, 28 Nov: more match cuts
 
 
 def _music_fit(dna, energy_rank: float, motion_ranks: dict[int, float], src: int) -> float:
@@ -205,7 +213,7 @@ def sequence(shots, energies: list[float], dna: list[dict | None], source_durati
                 if prev is not None:
                     link = pair(prev, src)
                     s += link
-                    if accents and i in accents and prev != src and link > 0.7:
+                    if accents and i in accents and prev != src and link > MATCH_CUT_LINK:
                         s += MATCH_CUT_BONUS  # match cut: strong visual link exactly on the beat accent
                 nxt = i + 1
                 if nxt < n and nxt in locked:

@@ -275,3 +275,52 @@ def strongest_opening(pool: list[int], motion: list[float], dims: list[tuple[int
         return max(usable, key=lambda i: (w[0] * fit[i] + w[1] * move[i] + w[2] * cover[i] + w[3] * sharp[i],
                                           -usable.index(i)))
     return max(usable, key=lambda i: (0.45 * move[i] + 0.35 * cover[i] + 0.2 * sharp[i], -usable.index(i)))
+
+
+TIMELINE_FPS = 6
+
+
+def motion_timeline(path: Path, *, size: tuple[int, int] = (48, 84)):
+    """Grey-level change per frame step at 6 fps over the whole clip (numpy array)."""
+    import numpy as np
+    w, h = size
+    try:
+        p = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-vf",
+                            f"fps={TIMELINE_FPS},scale={w}:{h},format=gray", "-f", "rawvideo", "-pix_fmt", "gray", "-"],
+                           capture_output=True, timeout=120)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    count = len(p.stdout) // (w * h)
+    if count < 3:
+        return None
+    frames = np.frombuffer(p.stdout[:count * w * h], dtype=np.uint8).reshape(count, h, w).astype(np.float32)
+    return np.abs(np.diff(frames, axis=0)).mean(axis=(1, 2))
+
+
+def align_motion(shots, kicks: list[float], timelines: dict, source_durations: list[float],
+                 locked: set[int], *, gain: float = 1.5):
+    """Owner, 28 Nov: a movement impulse in the picture (a landing, a turn, a wave) lands on a
+    kick. For each free shot with a kick inside, the source offset is moved so the strongest
+    movement peak of the clip falls on that kick — only when the peak clearly stands out."""
+    import numpy as np
+    from .cinematic import Shot
+    out, t = list(shots), 0.0
+    for i, sh in enumerate(shots):
+        start, end = t, t + sh.duration
+        t = end
+        tl = timelines.get(sh.source_index)
+        inside = [k - start for k in kicks if start + 0.15 < k < end - 0.1]
+        if i in locked or tl is None or not inside or len(tl) < 4:
+            continue
+        rel = inside[0]
+        room = source_durations[sh.source_index] - sh.duration
+        if room <= 0.2:
+            continue
+        peak_idx = int(np.argmax(tl))
+        if tl[peak_idx] < gain * float(np.median(tl) + 1e-6):
+            continue
+        peak_t = peak_idx / TIMELINE_FPS
+        offset = min(max(0.0, peak_t - rel), room)
+        if abs((offset + rel) - peak_t) < 0.2:
+            out[i] = Shot(sh.source_index, round(offset, 3), sh.duration)
+    return out

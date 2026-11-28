@@ -301,7 +301,11 @@ def rank_candidates(candidates: list[Video], cover: Path | None, workdir: Path, 
     portrait_bonus = 0.0 if landscape_equal() else 1.0  # owner 25 Nov: landscape is fine
     from . import decisions  # owner's publish / discard decisions: weak, gradual (26 Nov)
     clip_s, motif_s = decisions.scores()
+    from collections import Counter
+    series = Counter(r.creator_name for r in remote if r.creator_name)
     rank = [scores[i] + (portrait_bonus if remote[i].vertical else 0.0)
+            # owner, 28 Nov: a recurring motif — clips of the same producer / series fit together
+            + (0.05 if remote[i].creator_name and series[remote[i].creator_name] >= 2 else 0.0)
             + (stylegate.REF_WEIGHT * (ref_sims[i] - ref_mid) if ref_sims[i] is not None else 0.0)
             + decisions.adjustment(remote[i], clip_s, motif_s)
             for i in range(len(remote))]

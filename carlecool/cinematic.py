@@ -90,7 +90,8 @@ def plan_cuts_from_beats(duration: float, beats: tuple[float, ...] | list[float]
                          downbeats: tuple[float, ...] | list[float],
                          beat_energy: tuple[float, ...] | list[float], *,
                          pace: str = "medium", hook_at: float = 0.0,
-                         min_shot: float = 0.9, kicks: tuple[float, ...] | list[float] = ()) -> list[float]:
+                         min_shot: float = 0.9, kicks: tuple[float, ...] | list[float] = (),
+                         sections: bool = False) -> list[float]:
     """Bar-based, energy-aware cut plan.
 
     * Cuts land on bar starts (downbeats); a half-bar only in `fast` pace at peaks.
@@ -141,10 +142,40 @@ def plan_cuts_from_beats(duration: float, beats: tuple[float, ...] | list[float]
         early = [g for g in half if min_shot * 0.95 - 1e-6 <= g <= FIRST_SHOT_MAX]
         if early:
             t = max(early)
+    # Owner, 28 Nov ("besserer Zuschnitt auf den Sound"): with `sections`, the cut density
+    # follows the song's own sections inside the excerpt — calm passages 2 units, normal
+    # 1, peaks half units, a rising build gets shorter towards its peak, and the final unit
+    # is held (one shot) so the loop restarts on the drop with a hard cut.
+    unit_levels = []
+    if sections:
+        g = 0.0
+        while g < duration:
+            unit_levels.append(level_at(g, g + unit))
+            g += unit
+        order = sorted(range(len(unit_levels)), key=lambda k: unit_levels[k])
+        rank = {k: pos / max(1, len(order) - 1) for pos, k in enumerate(order)}
+
+    def section_units(t0: float) -> float:
+        k = min(len(unit_levels) - 1, int(round(t0 / unit))) if unit_levels else 0
+        r = rank.get(k, 0.5)
+        if r < 0.3:
+            u = 2.0                      # calm / break: let it breathe
+        elif r > 0.75:
+            u = 0.5                      # peak: quick accents
+        else:
+            u = 1.0
+        rising = k + 1 < len(unit_levels) and unit_levels[k + 1] > unit_levels[k] * 1.08 and \
+            k > 0 and unit_levels[k] > unit_levels[k - 1]
+        if rising:
+            u = min(u, 1.0) / (2.0 if rank.get(k + 1, 0) > 0.75 else 1.0)  # the build accelerates
+        if t0 + u * unit >= duration - unit + 1e-3:
+            u = max(u, (duration - t0) / unit)  # hold the last unit into the loop / drop
+        return u
+
     while t < duration - min_shot * 0.6:
         if t - boundaries[-1] >= min(min_shot, 0.5) - 1e-6:
             boundaries.append(t)
-        units = _bars_for_energy(level_at(t, t + unit), pace)
+        units = section_units(t) if sections else _bars_for_energy(level_at(t, t + unit), pace)
         if units * unit > 3.3:
             units = max(1.0, units / 2)  # never longer than ~3 s per shot
         if units < 1 and units * unit < 0.9:
