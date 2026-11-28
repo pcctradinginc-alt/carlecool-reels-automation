@@ -2199,6 +2199,138 @@
      "quality": 0.3405
     }
    ]
+  },
+  {
+   "at": "2026-11-28T12:04:59+00:00",
+   "run_id": 46140265382,
+   "song": "carl e cool - mishabu",
+   "sha256": "885ce4879c81ac6d5db2842a339630f7ad610286dcc88736cba67ab107097a8c",
+   "caption_credits": [
+    "🎬 Footage by Coverr: https://coverr.co",
+    "🎬 Cinematic Mind / Wikimedia Commons (CC BY 3.0)"
+   ],
+   "clips": [
+    {
+     "id": "wm-da24b2cd8b4f",
+     "provider": "wikimedia",
+     "title": "Making EPIC music with Behringer Synths.webm",
+     "page": "https://commons.wikimedia.org/wiki/File:Making_EPIC_music_with_Behringer_Synths.webm",
+     "creator": "Cinematic Mind / Wikimedia Commons (CC BY 3.0)",
+     "licence": "CC BY 3.0 (Wikimedia Commons)",
+     "licence_url": "https://creativecommons.org/licenses/by/3.0",
+     "used_at": "2026-11-28",
+     "motif": "synthesizer",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4011
+    },
+    {
+     "id": "RbKzTZs4zg",
+     "provider": "coverr",
+     "title": "Record player",
+     "page": "https://coverr.co/videos/record-player-rbkztzs4zg",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "vinyl record",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5372
+    },
+    {
+     "id": "0noZ9EcY2Q",
+     "provider": "coverr",
+     "title": "Picking up suitcase from luggage carousel",
+     "page": "https://coverr.co/videos/picking-up-suitcase-from-luggage-carousel-0noz9ecy2q",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "tape recorder",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4597
+    },
+    {
+     "id": "Hb9abJCVol",
+     "provider": "coverr",
+     "title": "Hands opening a record player",
+     "page": "https://coverr.co/videos/hands-opening-a-record-player-hb9abjcvol",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "turntable",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.408
+    },
+    {
+     "id": "0VypHWhwSY",
+     "provider": "coverr",
+     "title": "Fiery Glance: Intense Red Portrait",
+     "page": "https://coverr.co/videos/fiery-glance-intense-red-portrait",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "piano",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5104
+    },
+    {
+     "id": "phRDH4Nsiv",
+     "provider": "coverr",
+     "title": "Cosmic Blue Glitter Makeup Close-up",
+     "page": "https://coverr.co/videos/cosmic-blue-glitter-makeup-close-up",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "piano",
+     "used": false,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.4266
+    },
+    {
+     "id": "2Fq1pFdPP8",
+     "provider": "coverr",
+     "title": "Photographer in mountains",
+     "page": "https://coverr.co/videos/photographer-in-mountains-2fq1pfdpp8",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "cassette",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.5625
+    },
+    {
+     "id": "w1YUHX62Qd",
+     "provider": "coverr",
+     "title": "Woman watching the waves ",
+     "page": "https://coverr.co/videos/woman-watching-the-waves-w1yuhx62qd",
+     "creator": "",
+     "licence": "Coverr License (free for commercial use)",
+     "licence_url": "https://coverr.co/license",
+     "used_at": "2026-11-28",
+     "motif": "woman horse",
+     "used": true,
+     "library": false,
+     "shot_size": "medium",
+     "quality": 0.7365
+    }
+   ]
   }
  ]
 }
