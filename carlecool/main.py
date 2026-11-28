@@ -448,10 +448,13 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
     # U.S. National Archives Catalog (owner, 27 Nov): unrestricted public-domain films for
     # both directors, within the monthly API budget (nara.py).
     from . import nara
-    if nara.api_key() and style_name:
+    nara_max = NARA_CLIPS
+    if theme:  # owner, 28 Nov (Reel #87): archive films only where the theme wants them
+        nara_max = min(NARA_CLIPS, themes.archive_films(style_name, style_variant, theme, NARA_CLIPS))
+    if nara.api_key() and style_name and nara_max > 0:
         nara_clips, _calls = nara.fetch_nara(directors.current(),
                                              set(recent_video_ids(previews, limit=30)) | set(recent),
-                                             output_dir / "nara", run_key=edition, max_clips=NARA_CLIPS)
+                                             output_dir / "nara", run_key=edition, max_clips=nara_max)
         archival += nara_clips
     portrait_count = len(paths)
     portrait_paths = set(paths)
@@ -641,6 +644,13 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                                pipeline="classic" if classic_pipeline() else "cinematic",
                                music_fit=theme_fit, length_reason=str(length_choice.get("reason")))
     print(creative_plan.summary())
+    left_out: set[int] = set()
+    if not classic_pipeline() and any(shot_dna):
+        from . import coherence
+        left_out = coherence.outliers(shot_dna, set(signature_slots.values()), keep_min=max(5, planned_shots // 2))
+        for i in sorted(left_out):
+            print(f"Coherence: left out {selected[i].id} '{selected[i].title[:50]}' (does not fit the other clips)")
+
     def render_variant(rank: int) -> dict:
         return render_reel(audio, paths, features, out, reel_length,
                            pace=style_pkg.pace_for(profile["pace"], style_name), analog=profile["analog"], cover=cover,
@@ -651,6 +661,7 @@ def process(publish: bool, *, track_id: str | None = None, creative_profile: dic
                            opening_pool=opening_pool, opening_fit=opening_fit, hook_text=hook_line,
                            ref_world=ref_world, hook_strategy=hook_strategy, dna=shot_dna, variant_rank=rank,
                            hdr_sources={i: d["hdr"] for i, d in enumerate(shot_dna) if d and d.get("hdr")},
+                           exclude_sources=left_out,
                            soft_sources={i for i, v in enumerate(selected) if v.source in ("coverr", "pexels")})
     from . import critic
     try:

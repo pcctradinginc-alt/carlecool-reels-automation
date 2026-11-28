@@ -217,6 +217,7 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
                 ref_world: str | None = None, soft_sources: set[int] | frozenset[int] = frozenset(),
                 hook_strategy: str = "push", dna: list[dict | None] | None = None,
                 hdr_sources: dict[int, str] | None = None,
+                exclude_sources: set[int] | frozenset[int] = frozenset(),
                 variant_rank: int = 0) -> dict:
     if not videos:
         raise ValueError("No licensed videos available")
@@ -240,7 +241,8 @@ def render_reel(audio: Path, videos: list[Path], features: AudioFeatures, output
     # Signature clips (cover motif, skater, woman) are accents: excluded from the normal
     # rotation and placed exactly once in an interior shot.
     reserved = set((signature_slots or {}).values())
-    base = [i for i in range(len(videos)) if i not in reserved] or list(range(len(videos)))
+    base = ([i for i in range(len(videos)) if i not in reserved and i not in exclude_sources]
+            or [i for i in range(len(videos)) if i not in reserved] or list(range(len(videos))))
     from . import look as look_mod
     motion: list[float] | None = None
     opening = None

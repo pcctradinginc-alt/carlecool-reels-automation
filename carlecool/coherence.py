@@ -237,3 +237,29 @@ def reel_coherence(shots, dna: list[dict | None]) -> float | None:
                        embs.get(b.source_index))["total"] for a, b in zip(shots, shots[1:])
             if a.source_index != b.source_index]
     return round(sum(vals) / len(vals), 4) if vals else None
+
+
+OUTLIER_GAP = 0.10  # mean transition this far below the median → the clip does not belong
+
+
+def outliers(dna: list[dict | None], protected: set[int], keep_min: int) -> set[int]:
+    """Owner, 28 Nov: "Die Bilder passen nur teilweise zusammen". Clips whose mean
+    transition to all other clips is clearly below the median do not belong to this film
+    and are left out — never protected ones (signature shots), never below keep_min clips."""
+    idx = [i for i, d in enumerate(dna) if d]
+    if len(idx) <= keep_min:
+        return set()
+    embs = {i: _emb(dna[i]) for i in idx}
+    mean = {}
+    for i in idx:
+        vals = [transition(dna[i], dna[j], embs.get(i), embs.get(j))["total"] for j in idx if j != i]
+        mean[i] = sum(vals) / len(vals) if vals else 0.5
+    import statistics
+    med = statistics.median(mean.values())
+    out = set()
+    for i in sorted(idx, key=lambda k: mean[k]):
+        if len(dna) - len(out) <= keep_min:
+            break
+        if i not in protected and mean[i] < med - OUTLIER_GAP:
+            out.add(i)
+    return out

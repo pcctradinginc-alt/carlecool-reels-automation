@@ -30,7 +30,15 @@ from . import directors as _directors  # noqa: E402
 for _n, _d in _directors.load_all().items():
     if _d.get("hook_lines"):
         LINES[_n] = tuple(_d["hook_lines"])
+_ASSETS = Path(__file__).resolve().parent.parent / "assets" / "fonts"
+# Owner, 28 Nov: the font of the Twin Peaks opening credits — ITC Avant Garde Gothic
+# Condensed in green. TeX Gyre Adventor is its free clone (GUST licence, assets/fonts);
+# the condensed cut is made by narrowing the rendered line (CONDENSE).
+TWIN_PEAKS_GREEN = (118, 196, 96, 245)
+GLOW = (14, 46, 20, 200)
+CONDENSE = 0.82
 FONTS = (
+    str(_ASSETS / "texgyreadventor-regular.otf"),
     "/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf",   # GitHub ubuntu runners
     "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf",
     "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
@@ -85,7 +93,7 @@ def make_png(text: str, width: int, height: int, path: Path) -> Path | None:
     if not text:
         return None
     from PIL import Image, ImageDraw, ImageFilter
-    font = _font(max(18, int(width * 0.047)))
+    font = _font(max(18, int(width * 0.055)))
     if font is None:
         print("Text hook skipped: no font available")
         return None
@@ -107,14 +115,28 @@ def make_png(text: str, width: int, height: int, path: Path) -> Path | None:
     y0 = int(height * 0.2)
     if y0 + len(lines) * line_h > height * (1 - SAFE_BOTTOM):
         y0 = max(int(height * SAFE_TOP), int(height * (1 - SAFE_BOTTOM)) - len(lines) * line_h)
+    twin_peaks = Path(getattr(font, "path", "")).name.startswith("texgyreadventor")
+    fill = TWIN_PEAKS_GREEN if twin_peaks else (255, 250, 240, 235)
+    halo = GLOW if twin_peaks else (0, 0, 0, 170)
     shadow = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     sdraw = ImageDraw.Draw(shadow)
     for i, ln in enumerate(lines):
-        x = (width - draw.textlength(ln, font=font)) / 2
+        x = (width - draw.textlength(ln, font=font) * (CONDENSE if twin_peaks else 1.0)) / 2
         y = y0 + i * line_h
-        sdraw.text((x + 2, y + 2), ln, font=font, fill=(0, 0, 0, 170))
-        draw.text((x, y), ln, font=font, fill=(255, 250, 240, 235))
-    shadow = shadow.filter(ImageFilter.GaussianBlur(radius=max(2, width // 270)))
+        if twin_peaks:
+            # render the line wide, then narrow it horizontally (Avant Garde *Condensed* look)
+            w_line = int(draw.textlength(ln, font=font)) + 8
+            line = Image.new("RGBA", (w_line, line_h), (0, 0, 0, 0))
+            ImageDraw.Draw(line).text((0, 0), ln, font=font, fill=fill)
+            line = line.resize((max(1, int(w_line * CONDENSE)), line_h), Image.LANCZOS)
+            glow = Image.new("RGBA", line.size, halo)
+            glow.putalpha(line.getchannel("A").point(lambda a: int(a * halo[3] / 255)))
+            shadow.alpha_composite(glow, (int(x), int(y)))
+            layer.alpha_composite(line, (int(x), int(y)))
+        else:
+            sdraw.text((x + 2, y + 2), ln, font=font, fill=halo)
+            draw.text((x, y), ln, font=font, fill=fill)
+    shadow = shadow.filter(ImageFilter.GaussianBlur(radius=max(2, width // (180 if twin_peaks else 270))))
     out = Image.alpha_composite(shadow, layer)
     path.parent.mkdir(parents=True, exist_ok=True)
     out.save(path)

@@ -160,7 +160,10 @@ PROMPTS = {
          "a record player needle on vinyl in warm light"),
         ("a laptop with dj software on the screen", "a kitchen mixer or blender",
          "a crowded nightclub with stage lights", "a mixing console in a large concert hall",
-         "a toy or a cartoon"),
+         "a toy or a cartoon",
+         # owner, 28 Nov: instrument close-ups — not record shops, sleeves or crates
+         "hands flipping through record sleeves in a record store", "crates of vinyl records in a shop",
+         "a wide shot of a room"),
     ),
     "motif": None,
 }
@@ -251,7 +254,9 @@ def rank(role: str, candidates: list[Video], workdir: Path, world: str | None = 
         from PIL import Image
         model, preprocess, tokenizer = clip
         positive, negative = prompts
-        from .stylegate import UNWANTED, load_neighbors, load_references, neighbor_score
+        from .stylegate import MALE_PROMPTS, UNWANTED, load_neighbors, load_references, neighbor_score
+        # skaters may be men or women (owner, 28 Nov); every other role keeps the people rules
+        UNWANTED = tuple(u for u in UNWANTED if not (role == "skater" and u in MALE_PROMPTS))
         # Cars: best match to any owner car profile (Land/Range Rover, Porsche 993);
         # other roles: the style world's references.
         people_roles = ("woman", "friends", "friends2", "skater")
